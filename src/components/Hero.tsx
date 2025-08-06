@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 import heroImage from "@/assets/hero-ministerial.jpg";
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="relative bg-gradient-to-br from-jw-navy via-jw-blue to-jw-blue-dark min-h-[600px] flex items-center">
       <div className="absolute inset-0 bg-black/40"></div>
@@ -23,10 +26,20 @@ const Hero = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Button variant="hero" size="lg" className="text-lg px-8 py-4">
+            <Button
+              variant="hero"
+              size="lg"
+              className="text-lg px-8 py-4"
+              onClick={() => navigate('/auth')}
+            >
               Começar Agora
             </Button>
-            <Button variant="outline" size="lg" className="text-lg px-8 py-4 bg-white/10 border-white/30 text-white hover:bg-white/20">
+            <Button
+              variant="outline"
+              size="lg"
+              className="text-lg px-8 py-4 bg-white/10 border-white/30 text-white hover:bg-white/20"
+              onClick={() => navigate('/demo')}
+            >
               Ver Demonstração
             </Button>
           </div>

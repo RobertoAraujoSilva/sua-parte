@@ -3,9 +3,12 @@ import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 import { MapPin, Users, Calendar, Star } from "lucide-react";
 
 const Congregacoes = () => {
+  const navigate = useNavigate();
+
   const testimonials = [
     {
       congregation: "Congregação Central",
@@ -190,7 +193,12 @@ const Congregacoes = () => {
               Junte-se às congregações que já descobriram como a tecnologia pode 
               auxiliar na organização ministerial de forma simples e eficiente.
             </p>
-            <Button variant="hero" size="lg" className="text-lg px-8 py-4 bg-white text-jw-blue hover:bg-white/90">
+            <Button
+              variant="hero"
+              size="lg"
+              className="text-lg px-8 py-4 bg-white text-jw-blue hover:bg-white/90"
+              onClick={() => navigate('/auth')}
+            >
               Começar Gratuitamente
             </Button>
           </div>

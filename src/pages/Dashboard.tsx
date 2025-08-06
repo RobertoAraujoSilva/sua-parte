@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Calendar, FileText, Settings, Plus } from 'lucide-react';
+import { Users, Calendar, FileText, Settings, Plus, CalendarDays } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
@@ -60,6 +60,13 @@ const Dashboard = () => {
       action: "Ver Designações"
     },
     {
+      title: "Reuniões",
+      description: "Gerenciar reuniões, eventos especiais e designações administrativas",
+      icon: CalendarDays,
+      href: "/reunioes",
+      action: "Gerenciar Reuniões"
+    },
+    {
       title: "Relatórios",
       description: "Relatórios de participação e engajamento",
       icon: Settings,
@@ -113,15 +120,30 @@ const Dashboard = () => {
         <div className="mb-8">
           <h3 className="text-lg font-semibold text-jw-navy mb-4">Ações Rápidas</h3>
           <div className="flex flex-wrap gap-4">
-            <Button variant="hero" size="sm" className="flex items-center gap-2">
+            <Button
+              variant="hero"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={() => navigate('/estudantes')}
+            >
               <Plus className="w-4 h-4" />
               Novo Estudante
             </Button>
-            <Button variant="ministerial" size="sm" className="flex items-center gap-2">
+            <Button
+              variant="ministerial"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={() => navigate('/programas')}
+            >
               <Calendar className="w-4 h-4" />
               Importar Programa
             </Button>
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={() => navigate('/designacoes')}
+            >
               <FileText className="w-4 h-4" />
               Gerar Designações
             </Button>
