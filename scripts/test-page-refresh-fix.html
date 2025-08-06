@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page Refresh Fix - Sistema Ministerial</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .error { background: #ffe6e6; border-left: 4px solid #ff0000; }
+        .success { background: #e6ffe6; border-left: 4px solid #00aa00; }
+        .info { background: #e6f3ff; border-left: 4px solid #0066cc; }
+        .warning { background: #fff3cd; border-left: 4px solid #ffc107; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        .test-section { border: 1px solid #ddd; padding: 15px; margin: 15px 0; border-radius: 5px; }
+        .status { font-weight: bold; padding: 5px 10px; border-radius: 3px; }
+        .status.fixed { background: #d4edda; color: #155724; }
+        .status.broken { background: #f8d7da; color: #721c24; }
+        .status.testing { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🔄 Test Page Refresh Fix - Sistema Ministerial</h1>
+    <p>This tool tests the fix for the page refresh loading issue.</p>
+    
+    <div class="test-section">
+        <h3>🎯 Issue Being Fixed</h3>
+        <ul>
+            <li><strong>Problem</strong>: Page refresh (F5) causes blank screen with infinite loading</li>
+            <li><strong>Root Cause</strong>: ProtectedRoute waits for profile loading during auth state changes</li>
+            <li><strong>Solution</strong>: Allow ProtectedRoute to proceed with metadata while profile loads in background</li>
+        </ul>
+    </div>
+    
+    <div class="test-section">
+        <h3>🧪 Test Steps</h3>
+        <ol>
+            <li><strong>Login</strong>: First login with Franklin's credentials</li>
+            <li><strong>Navigate</strong>: Go to student portal</li>
+            <li><strong>Refresh</strong>: Press F5 to refresh the page</li>
+            <li><strong>Verify</strong>: Should see loading spinner briefly, then portal loads</li>
+            <li><strong>Check Console</strong>: Should see metadata role being used during refresh</li>
+        </ol>
+        
+        <div>
+            <button onclick="testLogin()">1. Test Login</button>
+            <button onclick="testRefresh()">2. Test Page Refresh</button>
+            <button onclick="monitorConsole()">3. Monitor Console Logs</button>
+            <button onclick="clearLogs()">Clear Logs</button>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h3>🔗 Quick Navigation</h3>
+        <div>
+            <button onclick="goToAuth()">Go to Auth Page</button>
+            <button onclick="goToFranklinPortal()">Go to Franklin's Portal</button>
+            <button onclick="refreshCurrentPage()">Refresh Current Page</button>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h3>📊 Expected Console Logs (After Fix)</h3>
+        <div class="log success">
+            <strong>Good Pattern:</strong><br>
+            🔄 Auth state changed: SIGNED_IN franklinmarceloferreiradelima@gmail.com<br>
+            👤 Setting user and session immediately...<br>
+            🔄 Fetching profile in background...<br>
+            ⚠️ ProtectedRoute: Using metadata role: estudante (profile not loaded yet)<br>
+            ✅ ProtectedRoute: Access granted for role: estudante<br>
+            📋 Profile loaded: [profile data]
+        </div>
+        
+        <div class="log error">
+            <strong>Bad Pattern (Before Fix):</strong><br>
+            🔄 Auth state changed: SIGNED_IN franklinmarceloferreiradelima@gmail.com<br>
+            👤 Setting user and fetching profile...<br>
+            ⏳ ProtectedRoute waiting for auth to load...<br>
+            [STUCK HERE - infinite loading]
+        </div>
+    </div>
+    
+    <div id="logs"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
+        
+        const SUPABASE_URL = 'https://nwpuurgwnnuejqinkvrh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjIwNjUsImV4cCI6MjA3MDAzODA2NX0.UHjSvXYY_c-_ydAIfELRUs4CMEBLKiztpBGQBNPHfak';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            logsDiv.appendChild(logDiv);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+        
+        async function testLogin() {
+            clearLogs();
+            log('🔐 Testing login with Franklin\'s credentials...', 'info');
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: 'franklinmarceloferreiradelima@gmail.com',
+                    password: '13a21r15'
+                });
+                
+                if (error) {
+                    log(`❌ Login failed: ${error.message}`, 'error');
+                    return;
+                }
+                
+                log('✅ Login successful!', 'success');
+                log(`👤 User ID: ${data.user.id}`, 'success');
+                log(`📧 Email: ${data.user.email}`, 'success');
+                log(`🎭 Metadata Role: ${data.user.user_metadata?.role || 'Not set'}`, 'info');
+                
+                log('🎯 Now navigate to the portal and test page refresh!', 'warning');
+                
+            } catch (error) {
+                log(`❌ Login error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testRefresh() {
+            log('🔄 Testing page refresh behavior...', 'info');
+            
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (!user) {
+                log('❌ No user logged in. Please login first.', 'error');
+                return;
+            }
+            
+            log('👤 Current user before refresh test:', 'info');
+            log(`   ID: ${user.id}`, 'info');
+            log(`   Email: ${user.email}`, 'info');
+            log(`   Metadata Role: ${user.user_metadata?.role || 'Not set'}`, 'info');
+            
+            log('🔄 Simulating page refresh...', 'warning');
+            log('💡 Watch the console for the expected log pattern!', 'info');
+            
+            // Simulate what happens during page refresh
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        }
+        
+        function monitorConsole() {
+            clearLogs();
+            log('👀 Monitoring console logs for page refresh patterns...', 'info');
+            
+            // Override console.log to capture relevant messages
+            const originalLog = console.log;
+            console.log = function(...args) {
+                const message = args.join(' ');
+                
+                // Check for key patterns
+                if (message.includes('Auth state changed')) {
+                    log(`📡 ${message}`, 'info');
+                } else if (message.includes('Setting user and session immediately')) {
+                    log(`✅ ${message}`, 'success');
+                } else if (message.includes('Fetching profile in background')) {
+                    log(`🔄 ${message}`, 'info');
+                } else if (message.includes('Using metadata role')) {
+                    log(`⚠️ ${message}`, 'warning');
+                } else if (message.includes('Access granted for role')) {
+                    log(`✅ ${message}`, 'success');
+                } else if (message.includes('waiting for auth to load')) {
+                    log(`❌ ${message} (This should NOT appear after fix!)`, 'error');
+                } else if (message.includes('Profile loaded')) {
+                    log(`📋 ${message}`, 'success');
+                }
+                
+                originalLog.apply(console, args);
+            };
+            
+            log('✅ Console monitoring active. Perform page refresh now!', 'success');
+            
+            // Restore original console.log after 30 seconds
+            setTimeout(() => {
+                console.log = originalLog;
+                log('⏹️ Console monitoring stopped.', 'info');
+            }, 30000);
+        }
+        
+        function goToAuth() {
+            window.open('http://localhost:5173/auth', '_blank');
+            log('📍 Opened auth page in new tab', 'info');
+        }
+        
+        function goToFranklinPortal() {
+            window.open('http://localhost:5173/estudante/77c99e53-500b-4140-b7fc-a69f96b216e1', '_blank');
+            log('📍 Opened Franklin\'s portal in new tab', 'info');
+        }
+        
+        function refreshCurrentPage() {
+            log('🔄 Refreshing current page...', 'warning');
+            window.location.reload();
+        }
+        
+        // Make functions available globally
+        window.testLogin = testLogin;
+        window.testRefresh = testRefresh;
+        window.monitorConsole = monitorConsole;
+        window.goToAuth = goToAuth;
+        window.goToFranklinPortal = goToFranklinPortal;
+        window.refreshCurrentPage = refreshCurrentPage;
+        window.clearLogs = clearLogs;
+        
+        // Initial log
+        log('🔧 Page refresh fix test tool loaded.', 'info');
+        log('🎯 This tool helps verify that page refresh no longer causes infinite loading.', 'info');
+        log('📋 Follow the test steps above to verify the fix.', 'info');
+    </script>
+</body>
+</html>

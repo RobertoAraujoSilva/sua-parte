@@ -1,6 +1,7 @@
 # Cypress Troubleshooting Guide - Sistema Ministerial
+## ES Module Compatibility & Windows 11 Solutions
 
-## 🚨 Common Issues and Solutions
+## 🚨 ES Module Specific Issues and Solutions
 
 ### Issue 1: "cypress is not recognized as an internal or external command"
 
@@ -10,34 +11,72 @@
 ```
 
 #### **Root Cause**
-- Cypress is installed but not in the system PATH
-- npm scripts not using npx prefix
+- Windows PATH issues with ES module projects
+- npm scripts not finding Cypress binary
+- Node.js v22+ ES module compatibility
 
-#### **✅ Solution**
+#### **✅ Solutions (Multiple Options)**
+
+**Option 1: Use Direct Binary Path**
+```cmd
+# Use the direct path to Cypress binary
+node_modules\.bin\cypress.cmd open
+node_modules\.bin\cypress.cmd run --spec "cypress/e2e/sarah-student-registration.cy.ts"
+```
+
+**Option 2: Use Setup Script**
+```cmd
+# Run comprehensive setup and test script
+scripts\setup-and-test-cypress.bat
+```
+
+**Option 3: Use npm scripts (Updated)**
 ```bash
-# Use npx prefix for all Cypress commands
-npx cypress open
-npx cypress run
-
-# Or use the updated npm scripts
-npm run cypress:open
+# Updated npm scripts that work with ES modules
 npm run test:sarah
-npm run test:birth-date
+npm run cypress:open
+npm run test:setup
+```
+
+**Option 4: PowerShell Script**
+```powershell
+# ES module compatible PowerShell script
+.\scripts\test-sarah-cypress.ps1 -Open
 ```
 
 #### **Verification**
-```bash
-# Check if Cypress is installed
-npx cypress --version
-
-# Should output something like:
-# Cypress package version: 13.6.2
-# Cypress binary version: 13.6.2
+```cmd
+# Check if Cypress is installed and working
+scripts\diagnose-cypress.bat
 ```
 
 ---
 
-### Issue 2: "ReferenceError: require is not defined in ES module scope"
+### Issue 2: "ReferenceError: exports is not defined in ES module scope"
+
+#### **Problem**
+```
+ReferenceError: exports is not defined in ES module scope at cypress.config.ts:2:23
+```
+
+#### **Root Cause**
+- cypress.config.ts not compatible with ES modules
+- Incorrect export syntax for Node.js v22+ with ES modules
+
+#### **✅ Solution**
+The cypress.config.ts has been updated to use proper ES module syntax:
+
+```typescript
+import { defineConfig } from 'cypress'
+
+const config = defineConfig({
+  // ... configuration
+})
+
+export default config  // ES module export
+```
+
+### Issue 3: "ReferenceError: require is not defined in ES module scope"
 
 #### **Problem**
 ```
@@ -46,21 +85,19 @@ ReferenceError: require is not defined in ES module scope
 
 #### **Root Cause**
 - Project is configured as ES module (type: "module" in package.json)
-- Script uses CommonJS syntax (require/module.exports)
+- Scripts use CommonJS syntax (require/module.exports)
 
 #### **✅ Solution**
-Use the Windows-specific scripts instead:
+Use the ES module compatible scripts:
 
-```powershell
+```cmd
+# Windows batch script (recommended)
+scripts\setup-and-test-cypress.bat
+
 # PowerShell script
-.\scripts\test-sarah-cypress.ps1 --open
+.\scripts\test-sarah-cypress.ps1 -Open
 
-# Batch script
-scripts\test-sarah-cypress.bat --open
-```
-
-Or use npm scripts directly:
-```bash
+# Direct npm scripts
 npm run test:sarah
 npm run cypress:open
 ```

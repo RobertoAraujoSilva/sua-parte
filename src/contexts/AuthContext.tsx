@@ -48,6 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   // Helper function to create a timeout promise
   const createTimeout = (ms: number) => {
@@ -220,15 +221,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         if (session?.user) {
+          console.log('🔄 Initial session found, setting user immediately');
           setSession(session);
           setUser(session.user);
-          const userProfile = await fetchProfile(session.user.id);
-          setProfile(userProfile);
+
+          // Fetch profile in background without blocking initial load
+          fetchProfile(session.user.id).then(userProfile => {
+            console.log('📋 Initial profile loaded:', userProfile);
+            setProfile(userProfile);
+          }).catch(error => {
+            console.error('❌ Initial profile fetch failed:', error);
+            // Don't block, let ProtectedRoute use metadata
+          });
         }
       } catch (error) {
         console.error('Error in getInitialSession:', error);
       } finally {
         setLoading(false);
+        setInitialLoadComplete(true);
       }
     };
 
@@ -239,29 +249,45 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async (event, session) => {
         console.log('🔄 Auth state changed:', event, session?.user?.email);
 
+        // Skip processing during initial load to prevent race conditions
+        if (!initialLoadComplete && event === 'INITIAL_SESSION') {
+          console.log('⏭️ Skipping INITIAL_SESSION event (already handled by getInitialSession)');
+          return;
+        }
+
         // Set loading to true when processing auth changes
         setLoading(true);
 
         if (session?.user) {
-          console.log('👤 Setting user and fetching profile...');
+          console.log('👤 Setting user and session immediately...');
           setSession(session);
           setUser(session.user);
-          const userProfile = await fetchProfile(session.user.id);
-          console.log('📋 Profile set:', userProfile);
-          setProfile(userProfile);
+
+          // Set loading to false immediately so ProtectedRoute can proceed with metadata
+          setLoading(false);
+
+          // Fetch profile in background without blocking loading state
+          console.log('🔄 Fetching profile in background...');
+          try {
+            const userProfile = await fetchProfile(session.user.id);
+            console.log('📋 Profile loaded:', userProfile);
+            setProfile(userProfile);
+          } catch (error) {
+            console.error('❌ Profile fetch failed:', error);
+            // Don't set loading back to true, let ProtectedRoute use metadata
+          }
         } else {
           console.log('🚪 User signed out, clearing data...');
           setSession(null);
           setUser(null);
           setProfile(null);
+          setLoading(false);
         }
-
-        setLoading(false);
       }
     );
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [initialLoadComplete]);
 
   const signUp = async (data: SignUpData) => {
     try {
