@@ -16,5 +16,39 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
     storage: localStorage,
     persistSession: true,
     autoRefreshToken: true,
-  }
+    detectSessionInUrl: true,
+  },
+  db: {
+    schema: 'public',
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'supabase-js-web',
+    },
+  },
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
+    },
+  },
+  // Add connection timeout and retry configuration
+  fetch: (url, options = {}) => {
+    // Set a reasonable timeout for fetch requests
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
+    const fetchOptions = {
+      ...options,
+      signal: controller.signal,
+    };
+
+    return fetch(url, fetchOptions)
+      .finally(() => clearTimeout(timeoutId))
+      .catch((error) => {
+        if (error.name === 'AbortError') {
+          throw new Error('Request timed out after 15 seconds');
+        }
+        throw error;
+      });
+  },
 });

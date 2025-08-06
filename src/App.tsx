@@ -14,13 +14,18 @@ import Designacoes from "./pages/Designacoes";
 import Relatorios from "./pages/Relatorios";
 import Reunioes from "./pages/Reunioes";
 import EstudantePortal from "./pages/EstudantePortal";
+import FamiliaPage from "./pages/estudante/[id]/familia";
 import Funcionalidades from "./pages/Funcionalidades";
 import Congregacoes from "./pages/Congregacoes";
 import Suporte from "./pages/Suporte";
 import Sobre from "./pages/Sobre";
 import NotFound from "./pages/NotFound";
+import ConviteAceitar from "./pages/convite/aceitar";
+import PortalFamiliar from "./pages/PortalFamiliar";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ErrorBoundary from "./components/ErrorBoundary";
+// Import debug utilities for development
+import '@/utils/familyMemberDebug';
 
 const queryClient = new QueryClient();
 
@@ -101,6 +106,26 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/estudante/:id/familia"
+              element={
+                <ProtectedRoute allowedRoles={['estudante', 'instrutor']}>
+                  <FamiliaPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Family Invitation Routes */}
+            <Route path="/convite/aceitar" element={<ConviteAceitar />} />
+            <Route
+              path="/portal-familiar"
+              element={
+                <ProtectedRoute allowedRoles={['family_member']}>
+                  <PortalFamiliar />
+                </ProtectedRoute>
+              }
+            />
+
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
             </Routes>

@@ -253,7 +253,7 @@ const EstudantePortal = () => {
         </div>
 
         {/* Additional Features Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Assignment History */}
           <Card className="bg-white/95 backdrop-blur-sm">
             <CardHeader>
@@ -286,6 +286,31 @@ const EstudantePortal = () => {
                 <p className="text-gray-500 text-sm">
                   Acompanhe seu progresso na escola ministerial
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Family Management */}
+          <Card className="bg-white/95 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center text-jw-navy">
+                <Users className="h-5 w-5 mr-2" />
+                Gerenciar Família
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-6">
+                <Users className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-500 text-sm mb-4">
+                  Cadastre seus familiares para melhorar as designações
+                </p>
+                <Button
+                  onClick={() => navigate(`/estudante/${id}/familia`)}
+                  className="bg-jw-blue hover:bg-jw-blue/90 text-white"
+                  size="sm"
+                >
+                  Gerenciar Família
+                </Button>
               </div>
             </CardContent>
           </Card>

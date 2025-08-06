@@ -512,6 +512,101 @@ export type Database = {
         }
         Relationships: []
       }
+      family_members: {
+        Row: {
+          id: string
+          student_id: string
+          name: string
+          email: string | null
+          phone: string | null
+          gender: "M" | "F"
+          relation: "Pai" | "Mãe" | "Cônjuge" | "Filho" | "Filha" | "Irmão" | "Irmã"
+          invitation_status: "PENDING" | "SENT" | "ACCEPTED" | "EXPIRED"
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          student_id: string
+          name: string
+          email?: string | null
+          phone?: string | null
+          gender: "M" | "F"
+          relation: "Pai" | "Mãe" | "Cônjuge" | "Filho" | "Filha" | "Irmão" | "Irmã"
+          invitation_status?: "PENDING" | "SENT" | "ACCEPTED" | "EXPIRED"
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          student_id?: string
+          name?: string
+          email?: string | null
+          phone?: string | null
+          gender?: "M" | "F"
+          relation?: "Pai" | "Mãe" | "Cônjuge" | "Filho" | "Filha" | "Irmão" | "Irmã"
+          invitation_status?: "PENDING" | "SENT" | "ACCEPTED" | "EXPIRED"
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "family_members_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      invitations_log: {
+        Row: {
+          id: string
+          family_member_id: string
+          sent_by_student_id: string
+          invite_method: "EMAIL" | "WHATSAPP"
+          invite_status: "SENT" | "ACCEPTED" | "EXPIRED"
+          invitation_token: string
+          expires_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          family_member_id: string
+          sent_by_student_id: string
+          invite_method: "EMAIL" | "WHATSAPP"
+          invite_status?: "SENT" | "ACCEPTED" | "EXPIRED"
+          invitation_token?: string
+          expires_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          family_member_id?: string
+          sent_by_student_id?: string
+          invite_method?: "EMAIL" | "WHATSAPP"
+          invite_status?: "SENT" | "ACCEPTED" | "EXPIRED"
+          invitation_token?: string
+          expires_at?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_log_family_member_id_fkey"
+            columns: ["family_member_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_log_sent_by_student_id_fkey"
+            columns: ["sent_by_student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -546,7 +641,7 @@ export type Database = {
         | "cancelled"
       room_type: "main_hall" | "auxiliary_room_1" | "auxiliary_room_2" | "auxiliary_room_3"
       status_programa: "ativo" | "inativo" | "arquivado"
-      user_role: "instrutor" | "estudante"
+      user_role: "instrutor" | "estudante" | "family_member"
     }
     CompositeTypes: {
       [_ in never]: never

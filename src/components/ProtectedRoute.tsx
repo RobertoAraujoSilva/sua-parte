@@ -87,6 +87,8 @@ const ProtectedRoute = ({
             navigate('/dashboard');
           } else if (userRole === 'estudante') {
             navigate(`/estudante/${user.id}`);
+          } else if (userRole === 'family_member') {
+            navigate('/portal-familiar');
           } else {
             navigate('/auth');
           }
