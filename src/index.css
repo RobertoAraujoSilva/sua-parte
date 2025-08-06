@@ -17,8 +17,8 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 208 100% 23%;
+    --primary-foreground: 0 0% 98%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -26,17 +26,32 @@ All colors MUST be HSL.
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 217 33% 17%;
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 208 100% 23%;
 
-    --radius: 0.5rem;
+    /* Custom tokens for JW-inspired design */
+    --jw-blue: 208 100% 23%;
+    --jw-blue-light: 208 100% 35%;
+    --jw-blue-dark: 208 100% 15%;
+    --jw-gold: 43 100% 50%;
+    --jw-navy: 217 33% 17%;
+    
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(var(--jw-blue)), hsl(var(--jw-blue-dark)));
+    --gradient-card: linear-gradient(180deg, hsl(var(--background)), hsl(var(--muted)));
+    
+    /* Shadows */
+    --shadow-soft: 0 4px 20px hsla(var(--jw-blue), 0.15);
+    --shadow-strong: 0 8px 30px hsla(var(--jw-blue), 0.25);
+
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
