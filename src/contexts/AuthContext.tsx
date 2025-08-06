@@ -49,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // Fetch user profile from database
   const fetchProfile = async (userId: string) => {
+    console.log('🔍 Fetching profile for user ID:', userId);
     try {
       const { data, error } = await supabase
         .from('user_profiles')
@@ -57,20 +58,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (error) {
-        console.error('Error fetching profile:', error);
+        console.error('❌ Error fetching profile:', error);
 
         // If profile doesn't exist, try to create it from auth metadata
         if (error.code === 'PGRST116') {
-          console.log('Profile not found, attempting to create from auth metadata...');
+          console.log('⚠️ Profile not found, attempting to create from auth metadata...');
           return await createProfileFromAuth(userId);
         }
 
         return null;
       }
 
+      console.log('✅ Profile fetched successfully:', data);
       return data as UserProfile;
     } catch (error) {
-      console.error('Error fetching profile:', error);
+      console.error('❌ Error fetching profile:', error);
       return null;
     }
   };
@@ -145,14 +147,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
+        console.log('🔄 Auth state changed:', event, session?.user?.email);
+
+        // Set loading to true when processing auth changes
+        setLoading(true);
 
         if (session?.user) {
+          console.log('👤 Setting user and fetching profile...');
           setSession(session);
           setUser(session.user);
           const userProfile = await fetchProfile(session.user.id);
+          console.log('📋 Profile set:', userProfile);
           setProfile(userProfile);
         } else {
+          console.log('🚪 User signed out, clearing data...');
           setSession(null);
           setUser(null);
           setProfile(null);

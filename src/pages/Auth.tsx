@@ -38,12 +38,28 @@ const Auth = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
+    console.log('🔀 Auth redirect check:', {
+      hasUser: !!user,
+      hasProfile: !!profile,
+      profileRole: profile?.role,
+      isInstrutor,
+      isEstudante,
+      userId: user?.id
+    });
+
     if (user && profile) {
+      console.log('✅ Both user and profile exist, checking role...');
       if (isInstrutor) {
+        console.log('👨‍🏫 Redirecting instructor to dashboard');
         navigate('/dashboard');
       } else if (isEstudante) {
+        console.log('👨‍🎓 Redirecting student to portal:', `/estudante/${user.id}`);
         navigate(`/estudante/${user.id}`);
+      } else {
+        console.log('⚠️ User has unknown role:', profile.role);
       }
+    } else {
+      console.log('⏳ Waiting for user and profile data...');
     }
   }, [user, profile, isInstrutor, isEstudante, navigate]);
 

@@ -22,23 +22,43 @@ const ProtectedRoute = ({
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (loading) return; // Wait for auth to load
+    console.log('🛡️ ProtectedRoute check:', {
+      loading,
+      hasUser: !!user,
+      hasProfile: !!profile,
+      userRole: profile?.role,
+      allowedRoles,
+      requireAuth,
+      redirectTo
+    });
+
+    if (loading) {
+      console.log('⏳ ProtectedRoute waiting for auth to load...');
+      return; // Wait for auth to load
+    }
 
     // If authentication is required but user is not logged in
     if (requireAuth && !user) {
+      console.log('🚫 ProtectedRoute: No user, redirecting to auth');
       navigate('/auth');
       return;
     }
 
     // If user is logged in but profile is not loaded yet
     if (user && !profile) {
+      console.log('⏳ ProtectedRoute: User exists but profile not loaded, waiting...');
       return; // Wait for profile to load
     }
 
     // If user is logged in and profile is loaded
     if (user && profile) {
+      console.log('✅ ProtectedRoute: User and profile loaded, checking role access...');
       // Check if user's role is allowed
       if (!allowedRoles.includes(profile.role)) {
+        console.log('🚫 ProtectedRoute: Role not allowed, redirecting...', {
+          userRole: profile.role,
+          allowedRoles
+        });
         // Redirect based on user role
         if (redirectTo) {
           navigate(redirectTo);
@@ -50,6 +70,8 @@ const ProtectedRoute = ({
           navigate('/auth');
         }
         return;
+      } else {
+        console.log('✅ ProtectedRoute: Access granted for role:', profile.role);
       }
     }
   }, [user, profile, loading, allowedRoles, requireAuth, redirectTo, navigate]);
