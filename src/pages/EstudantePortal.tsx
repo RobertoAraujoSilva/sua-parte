@@ -16,14 +16,21 @@ const EstudantePortal = () => {
   useEffect(() => {
     if (loading) return;
 
-    // Check if user is logged in and is a student
-    if (!user || !profile || !isEstudante) {
+    // Check if user is logged in
+    if (!user) {
       navigate('/auth');
       return;
     }
 
     // Check if the user is accessing their own portal
     if (user.id !== id) {
+      navigate('/auth');
+      return;
+    }
+
+    // Check if user is a student (use profile if available, otherwise metadata)
+    const userRole = profile?.role || user.user_metadata?.role;
+    if (userRole !== 'estudante') {
       navigate('/auth');
       return;
     }
@@ -42,9 +49,17 @@ const EstudantePortal = () => {
     );
   }
 
-  if (!isAuthorized || !profile) {
+  if (!isAuthorized) {
     return null;
   }
+
+  // Get profile data or fallback to user metadata
+  const displayProfile = profile || {
+    nome_completo: user?.user_metadata?.nome_completo || 'Estudante',
+    congregacao: user?.user_metadata?.congregacao || 'Congregação',
+    cargo: user?.user_metadata?.cargo || 'publicador_nao_batizado',
+    role: 'estudante' as const
+  };
 
   const getRoleDisplayName = (cargo: string | null) => {
     const roleMap: { [key: string]: string } = {
@@ -97,10 +112,10 @@ const EstudantePortal = () => {
                 </div>
                 <div>
                   <CardTitle className="text-2xl text-jw-navy">
-                    Bem-vindo, {profile.nome_completo}!
+                    Bem-vindo, {displayProfile.nome_completo}!
                   </CardTitle>
                   <CardDescription className="text-lg">
-                    {profile.congregacao} • {getRoleDisplayName(profile.cargo)}
+                    {displayProfile.congregacao} • {getRoleDisplayName(displayProfile.cargo)}
                   </CardDescription>
                 </div>
               </div>

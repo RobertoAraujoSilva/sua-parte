@@ -42,24 +42,46 @@ const Auth = () => {
       hasUser: !!user,
       hasProfile: !!profile,
       profileRole: profile?.role,
+      userMetadataRole: user?.user_metadata?.role,
       isInstrutor,
       isEstudante,
       userId: user?.id
     });
 
-    if (user && profile) {
-      console.log('✅ Both user and profile exist, checking role...');
-      if (isInstrutor) {
-        console.log('👨‍🏫 Redirecting instructor to dashboard');
-        navigate('/dashboard');
-      } else if (isEstudante) {
-        console.log('👨‍🎓 Redirecting student to portal:', `/estudante/${user.id}`);
-        navigate(`/estudante/${user.id}`);
+    if (user) {
+      // Primary redirect: Use profile data if available
+      if (profile) {
+        console.log('✅ Both user and profile exist, checking role...');
+        if (isInstrutor) {
+          console.log('👨‍🏫 Redirecting instructor to dashboard');
+          navigate('/dashboard');
+          return;
+        } else if (isEstudante) {
+          console.log('👨‍🎓 Redirecting student to portal:', `/estudante/${user.id}`);
+          navigate(`/estudante/${user.id}`);
+          return;
+        } else {
+          console.log('⚠️ User has unknown role:', profile.role);
+        }
       } else {
-        console.log('⚠️ User has unknown role:', profile.role);
+        // Fallback redirect: Use user metadata if profile is not loaded
+        console.log('⚠️ Profile not loaded, checking user metadata for role...');
+        const metadataRole = user.user_metadata?.role;
+
+        if (metadataRole === 'instrutor') {
+          console.log('👨‍🏫 Redirecting instructor to dashboard (via metadata)');
+          navigate('/dashboard');
+          return;
+        } else if (metadataRole === 'estudante') {
+          console.log('👨‍🎓 Redirecting student to portal (via metadata):', `/estudante/${user.id}`);
+          navigate(`/estudante/${user.id}`);
+          return;
+        } else {
+          console.log('⏳ Waiting for profile data to load... (metadata role:', metadataRole, ')');
+        }
       }
     } else {
-      console.log('⏳ Waiting for user and profile data...');
+      console.log('⏳ Waiting for user authentication...');
     }
   }, [user, profile, isInstrutor, isEstudante, navigate]);
 

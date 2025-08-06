@@ -44,34 +44,43 @@ const ProtectedRoute = ({
       return;
     }
 
-    // If user is logged in but profile is not loaded yet
-    if (user && !profile) {
-      console.log('⏳ ProtectedRoute: User exists but profile not loaded, waiting...');
-      return; // Wait for profile to load
-    }
+    // If user is logged in, check access
+    if (user) {
+      let userRole: UserRole | undefined;
 
-    // If user is logged in and profile is loaded
-    if (user && profile) {
-      console.log('✅ ProtectedRoute: User and profile loaded, checking role access...');
-      // Check if user's role is allowed
-      if (!allowedRoles.includes(profile.role)) {
-        console.log('🚫 ProtectedRoute: Role not allowed, redirecting...', {
-          userRole: profile.role,
-          allowedRoles
-        });
-        // Redirect based on user role
-        if (redirectTo) {
-          navigate(redirectTo);
-        } else if (profile.role === 'instrutor') {
-          navigate('/dashboard');
-        } else if (profile.role === 'estudante') {
-          navigate(`/estudante/${user.id}`);
-        } else {
-          navigate('/auth');
-        }
-        return;
+      // Get role from profile if available, otherwise from user metadata
+      if (profile) {
+        userRole = profile.role;
+        console.log('✅ ProtectedRoute: Using profile role:', userRole);
       } else {
-        console.log('✅ ProtectedRoute: Access granted for role:', profile.role);
+        userRole = user.user_metadata?.role as UserRole;
+        console.log('⚠️ ProtectedRoute: Using metadata role:', userRole, '(profile not loaded)');
+      }
+
+      if (userRole) {
+        // Check if user's role is allowed
+        if (!allowedRoles.includes(userRole)) {
+          console.log('🚫 ProtectedRoute: Role not allowed, redirecting...', {
+            userRole,
+            allowedRoles
+          });
+          // Redirect based on user role
+          if (redirectTo) {
+            navigate(redirectTo);
+          } else if (userRole === 'instrutor') {
+            navigate('/dashboard');
+          } else if (userRole === 'estudante') {
+            navigate(`/estudante/${user.id}`);
+          } else {
+            navigate('/auth');
+          }
+          return;
+        } else {
+          console.log('✅ ProtectedRoute: Access granted for role:', userRole);
+        }
+      } else {
+        console.log('⏳ ProtectedRoute: No role found, waiting for profile...');
+        return; // Wait for profile to load
       }
     }
   }, [user, profile, loading, allowedRoles, requireAuth, redirectTo, navigate]);
@@ -93,22 +102,31 @@ const ProtectedRoute = ({
     return null; // Will redirect in useEffect
   }
 
-  // If user is logged in but profile is not loaded yet
-  if (user && !profile) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jw-blue mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando perfil...</p>
-        </div>
-      </div>
-    );
-  }
+  // If user is logged in, check access based on available data
+  if (user) {
+    let userRole: UserRole | undefined;
 
-  // If user is logged in and profile is loaded
-  if (user && profile) {
+    // Get role from profile if available, otherwise from user metadata
+    if (profile) {
+      userRole = profile.role;
+    } else {
+      userRole = user.user_metadata?.role as UserRole;
+    }
+
+    if (!userRole) {
+      // No role available, show loading
+      return (
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jw-blue mx-auto mb-4"></div>
+            <p className="text-gray-600">Carregando perfil...</p>
+          </div>
+        </div>
+      );
+    }
+
     // Check if user's role is allowed
-    if (!allowedRoles.includes(profile.role)) {
+    if (!allowedRoles.includes(userRole)) {
       return null; // Will redirect in useEffect
     }
   }
