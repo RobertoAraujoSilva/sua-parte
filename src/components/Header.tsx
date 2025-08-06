@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 const Header = () => {
   const { user } = useAuth();
@@ -19,21 +19,21 @@ const Header = () => {
             </div>
             
             <nav className="hidden md:flex items-center space-x-6">
-              <a href="#inicio" className="hover:text-jw-gold transition-colors">
+              <Link to="/" className="hover:text-jw-gold transition-colors">
                 INÍCIO
-              </a>
-              <a href="#funcionalidades" className="hover:text-jw-gold transition-colors">
+              </Link>
+              <Link to="/funcionalidades" className="hover:text-jw-gold transition-colors">
                 FUNCIONALIDADES
-              </a>
-              <a href="#congregacoes" className="hover:text-jw-gold transition-colors">
+              </Link>
+              <Link to="/congregacoes" className="hover:text-jw-gold transition-colors">
                 CONGREGAÇÕES
-              </a>
-              <a href="#suporte" className="hover:text-jw-gold transition-colors">
+              </Link>
+              <Link to="/suporte" className="hover:text-jw-gold transition-colors">
                 SUPORTE
-              </a>
-              <a href="#sobre" className="hover:text-jw-gold transition-colors">
+              </Link>
+              <Link to="/sobre" className="hover:text-jw-gold transition-colors">
                 SOBRE
-              </a>
+              </Link>
             </nav>
           </div>
           
