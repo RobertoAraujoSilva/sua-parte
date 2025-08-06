@@ -14,7 +14,246 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      designacoes: {
+        Row: {
+          cena: string | null
+          confirmado: boolean | null
+          created_at: string | null
+          id: string
+          id_ajudante: string | null
+          id_estudante: string | null
+          id_programa: string | null
+          numero_parte: number | null
+          observacoes: string | null
+          tempo_minutos: number | null
+          tipo_parte: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cena?: string | null
+          confirmado?: boolean | null
+          created_at?: string | null
+          id?: string
+          id_ajudante?: string | null
+          id_estudante?: string | null
+          id_programa?: string | null
+          numero_parte?: number | null
+          observacoes?: string | null
+          tempo_minutos?: number | null
+          tipo_parte: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cena?: string | null
+          confirmado?: boolean | null
+          created_at?: string | null
+          id?: string
+          id_ajudante?: string | null
+          id_estudante?: string | null
+          id_programa?: string | null
+          numero_parte?: number | null
+          observacoes?: string | null
+          tempo_minutos?: number | null
+          tipo_parte?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "designacoes_id_ajudante_fkey"
+            columns: ["id_ajudante"]
+            isOneToOne: false
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "designacoes_id_estudante_fkey"
+            columns: ["id_estudante"]
+            isOneToOne: false
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "designacoes_id_programa_fkey"
+            columns: ["id_programa"]
+            isOneToOne: false
+            referencedRelation: "programas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      estudantes: {
+        Row: {
+          ativo: boolean | null
+          cargo: Database["public"]["Enums"]["app_cargo"]
+          created_at: string | null
+          data_batismo: string | null
+          email: string | null
+          genero: Database["public"]["Enums"]["app_genero"]
+          id: string
+          id_pai_mae: string | null
+          idade: number | null
+          nome: string
+          observacoes: string | null
+          telefone: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          cargo: Database["public"]["Enums"]["app_cargo"]
+          created_at?: string | null
+          data_batismo?: string | null
+          email?: string | null
+          genero: Database["public"]["Enums"]["app_genero"]
+          id?: string
+          id_pai_mae?: string | null
+          idade?: number | null
+          nome: string
+          observacoes?: string | null
+          telefone?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean | null
+          cargo?: Database["public"]["Enums"]["app_cargo"]
+          created_at?: string | null
+          data_batismo?: string | null
+          email?: string | null
+          genero?: Database["public"]["Enums"]["app_genero"]
+          id?: string
+          id_pai_mae?: string | null
+          idade?: number | null
+          nome?: string
+          observacoes?: string | null
+          telefone?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estudantes_id_pai_mae_fkey"
+            columns: ["id_pai_mae"]
+            isOneToOne: false
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notificacoes: {
+        Row: {
+          created_at: string | null
+          data_envio: string | null
+          erro_detalhes: string | null
+          id: string
+          id_designacao: string | null
+          id_estudante: string | null
+          status_envio: string | null
+          tipo_envio: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          data_envio?: string | null
+          erro_detalhes?: string | null
+          id?: string
+          id_designacao?: string | null
+          id_estudante?: string | null
+          status_envio?: string | null
+          tipo_envio?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          data_envio?: string | null
+          erro_detalhes?: string | null
+          id?: string
+          id_designacao?: string | null
+          id_estudante?: string | null
+          status_envio?: string | null
+          tipo_envio?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificacoes_id_designacao_fkey"
+            columns: ["id_designacao"]
+            isOneToOne: false
+            referencedRelation: "designacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notificacoes_id_estudante_fkey"
+            columns: ["id_estudante"]
+            isOneToOne: false
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          cargo: string | null
+          congregacao: string | null
+          created_at: string | null
+          id: string
+          nome_completo: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cargo?: string | null
+          congregacao?: string | null
+          created_at?: string | null
+          id: string
+          nome_completo?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cargo?: string | null
+          congregacao?: string | null
+          created_at?: string | null
+          id?: string
+          nome_completo?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      programas: {
+        Row: {
+          created_at: string | null
+          data_inicio_semana: string
+          id: string
+          mes_apostila: string | null
+          partes: Json
+          status: Database["public"]["Enums"]["status_programa"] | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          data_inicio_semana: string
+          id?: string
+          mes_apostila?: string | null
+          partes: Json
+          status?: Database["public"]["Enums"]["status_programa"] | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          data_inicio_semana?: string
+          id?: string
+          mes_apostila?: string | null
+          partes?: Json
+          status?: Database["public"]["Enums"]["status_programa"] | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +262,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      app_cargo:
+        | "anciao"
+        | "servo_ministerial"
+        | "pioneiro_regular"
+        | "publicador_batizado"
+        | "publicador_nao_batizado"
+        | "estudante_novo"
+      app_genero: "masculino" | "feminino"
+      status_programa: "ativo" | "inativo" | "arquivado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +397,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_cargo: [
+        "anciao",
+        "servo_ministerial",
+        "pioneiro_regular",
+        "publicador_batizado",
+        "publicador_nao_batizado",
+        "estudante_novo",
+      ],
+      app_genero: ["masculino", "feminino"],
+      status_programa: ["ativo", "inativo", "arquivado"],
+    },
   },
 } as const
