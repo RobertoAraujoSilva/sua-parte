@@ -9,10 +9,11 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useFamilyMembers } from '@/hooks/useFamilyMembers';
 import { FamilyMemberForm } from '@/components/FamilyMemberForm';
 import { FamilyMembersList } from '@/components/FamilyMembersList';
-import { 
-  FamilyMemberFormData, 
+import { FamilyInvitationDebugPanel } from '@/components/FamilyInvitationDebugPanel';
+import {
+  FamilyMemberFormData,
   FamilyMemberWithInvitations,
-  InviteMethod 
+  InviteMethod
 } from '@/types/family';
 
 const FamiliaPage: React.FC = () => {
@@ -181,6 +182,9 @@ const FamiliaPage: React.FC = () => {
             </ul>
           </AlertDescription>
         </Alert>
+
+        {/* Debug Panel (only visible to instructors) */}
+        <FamilyInvitationDebugPanel studentId={studentId} />
 
         {/* Main Content */}
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)}>

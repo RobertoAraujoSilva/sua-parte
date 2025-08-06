@@ -18,6 +18,9 @@ serve(async (req) => {
   }
 
   try {
+    console.log('🚀 Family invitation Edge Function called');
+    console.log('📝 Request method:', req.method);
+    console.log('🌐 Request origin:', req.headers.get('origin'));
     // Create Supabase client with service role key for admin operations
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -45,13 +48,36 @@ serve(async (req) => {
     }
 
     // Parse request body
-    const { familyMemberId, method }: InvitationRequest = await req.json()
+    const requestBody = await req.json();
+    console.log('📦 Request body:', requestBody);
 
-    if (!familyMemberId || !method) {
-      throw new Error('Missing required fields: familyMemberId, method')
+    // Handle test requests
+    if (requestBody.test) {
+      console.log('🧪 Test request received');
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'Edge Function is available and responding',
+          test: true,
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
     }
 
+    const { familyMemberId, method }: InvitationRequest = requestBody;
+
+    if (!familyMemberId || !method) {
+      console.error('❌ Missing required fields:', { familyMemberId, method });
+      throw new Error('Missing required fields: familyMemberId, method');
+    }
+
+    console.log('✅ Request validated:', { familyMemberId, method });
+
     // Get family member details
+    console.log('👥 Fetching family member details...');
     const { data: familyMember, error: familyError } = await supabaseAdmin
       .from('family_members')
       .select('*')
@@ -60,8 +86,11 @@ serve(async (req) => {
       .single()
 
     if (familyError || !familyMember) {
-      throw new Error('Family member not found or access denied')
+      console.error('❌ Family member not found:', familyError);
+      throw new Error('Family member not found or access denied');
     }
+
+    console.log('✅ Family member found:', familyMember.name);
 
     // Validate contact information
     if (method === 'EMAIL' && !familyMember.email) {
@@ -72,6 +101,7 @@ serve(async (req) => {
     }
 
     // Create invitation log entry
+    console.log('📝 Creating invitation log entry...');
     const { data: invitation, error: invitationError } = await supabaseAdmin
       .from('invitations_log')
       .insert({
@@ -83,8 +113,11 @@ serve(async (req) => {
       .single()
 
     if (invitationError) {
-      throw new Error(`Failed to create invitation log: ${invitationError.message}`)
+      console.error('❌ Failed to create invitation log:', invitationError);
+      throw new Error(`Failed to create invitation log: ${invitationError.message}`);
     }
+
+    console.log('✅ Invitation log created:', invitation.id);
 
     // Send invitation based on method
     if (method === 'EMAIL') {
