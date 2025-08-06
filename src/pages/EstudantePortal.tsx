@@ -58,7 +58,36 @@ const EstudantePortal = () => {
     nome_completo: user?.user_metadata?.nome_completo || 'Estudante',
     congregacao: user?.user_metadata?.congregacao || 'Congregação',
     cargo: user?.user_metadata?.cargo || 'publicador_nao_batizado',
-    role: 'estudante' as const
+    role: 'estudante' as const,
+    date_of_birth: user?.user_metadata?.date_of_birth || null
+  };
+
+  // Function to calculate age from birth date
+  const calculateAge = (birthDate: string | null): number | null => {
+    if (!birthDate) return null;
+
+    const today = new Date();
+    const birth = new Date(birthDate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+
+    return age;
+  };
+
+  // Function to format birth date for display
+  const formatBirthDate = (birthDate: string | null): string => {
+    if (!birthDate) return 'Não informado';
+
+    const date = new Date(birthDate);
+    return date.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   };
 
   const getRoleDisplayName = (cargo: string | null) => {
@@ -121,15 +150,42 @@ const EstudantePortal = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="secondary" className="bg-jw-blue/10 text-jw-blue">
-                  <BookOpen className="h-3 w-3 mr-1" />
-                  Escola do Ministério Teocrático
-                </Badge>
-                <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  <Award className="h-3 w-3 mr-1" />
-                  Estudante Ativo
-                </Badge>
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="secondary" className="bg-jw-blue/10 text-jw-blue">
+                    <BookOpen className="h-3 w-3 mr-1" />
+                    Escola do Ministério Teocrático
+                  </Badge>
+                  <Badge variant="secondary" className="bg-green-100 text-green-800">
+                    <Award className="h-3 w-3 mr-1" />
+                    Estudante Ativo
+                  </Badge>
+                </div>
+
+                {/* Personal Information */}
+                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                  <h4 className="font-semibold text-gray-700 mb-2">Informações Pessoais</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="text-gray-600">Data de Nascimento:</span>
+                      <span className="ml-2 font-medium">{formatBirthDate(displayProfile.date_of_birth)}</span>
+                    </div>
+                    {displayProfile.date_of_birth && (
+                      <div>
+                        <span className="text-gray-600">Idade:</span>
+                        <span className="ml-2 font-medium">{calculateAge(displayProfile.date_of_birth)} anos</span>
+                      </div>
+                    )}
+                    <div>
+                      <span className="text-gray-600">Congregação:</span>
+                      <span className="ml-2 font-medium">{displayProfile.congregacao}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Cargo:</span>
+                      <span className="ml-2 font-medium">{getRoleDisplayName(displayProfile.cargo)}</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

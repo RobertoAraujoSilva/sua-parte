@@ -29,12 +29,44 @@ const Auth = () => {
   const [signUpPassword, setSignUpPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [nomeCompleto, setNomeCompleto] = useState('');
+  const [dateOfBirth, setDateOfBirth] = useState('');
   const [congregacao, setCongregacao] = useState('');
   const [cargo, setCargo] = useState('');
   const [role, setRole] = useState<UserRole>('instrutor');
 
   const { signUp, signIn, user, profile, isInstrutor, isEstudante } = useAuth();
   const navigate = useNavigate();
+
+  // Age validation function
+  const validateAge = (birthDate: string): { isValid: boolean; age: number; message?: string } => {
+    if (!birthDate) {
+      return { isValid: false, age: 0, message: "Data de nascimento é obrigatória." };
+    }
+
+    const today = new Date();
+    const birth = new Date(birthDate);
+
+    if (birth > today) {
+      return { isValid: false, age: 0, message: "Data de nascimento não pode ser no futuro." };
+    }
+
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+
+    if (age < 6) {
+      return { isValid: false, age, message: "Idade mínima para participar da Escola do Ministério é 6 anos." };
+    }
+
+    if (age > 100) {
+      return { isValid: false, age, message: "Por favor, verifique a data de nascimento informada." };
+    }
+
+    return { isValid: true, age };
+  };
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -142,10 +174,21 @@ const Auth = () => {
     e.preventDefault();
 
     // Validation
-    if (!signUpEmail || !signUpPassword || !nomeCompleto || !congregacao) {
+    if (!signUpEmail || !signUpPassword || !nomeCompleto || !dateOfBirth || !congregacao) {
       toast({
         title: "Erro",
         description: "Por favor, preencha todos os campos obrigatórios.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate birth date and age
+    const ageValidation = validateAge(dateOfBirth);
+    if (!ageValidation.isValid) {
+      toast({
+        title: "Erro",
+        description: ageValidation.message,
         variant: "destructive"
       });
       return;
@@ -189,6 +232,7 @@ const Auth = () => {
         congregacao: congregacao,
         cargo: cargo,
         role: role,
+        date_of_birth: dateOfBirth,
       });
 
       if (error) {
@@ -388,6 +432,30 @@ const Auth = () => {
                       placeholder="Seu nome completo"
                       required
                     />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-birth-date">Data de Nascimento *</Label>
+                    <Input
+                      id="signup-birth-date"
+                      type="date"
+                      value={dateOfBirth}
+                      onChange={(e) => setDateOfBirth(e.target.value)}
+                      required
+                      max={new Date().toISOString().split('T')[0]} // Prevent future dates
+                      min={new Date(new Date().getFullYear() - 100, 0, 1).toISOString().split('T')[0]} // 100 years ago
+                    />
+                    {dateOfBirth && (() => {
+                      const ageValidation = validateAge(dateOfBirth);
+                      return (
+                        <p className={`text-sm ${ageValidation.isValid ? 'text-green-600' : 'text-red-600'}`}>
+                          {ageValidation.isValid
+                            ? `Idade: ${ageValidation.age} anos`
+                            : ageValidation.message
+                          }
+                        </p>
+                      );
+                    })()}
                   </div>
 
                   <div className="space-y-2">

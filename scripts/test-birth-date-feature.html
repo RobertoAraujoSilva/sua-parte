@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Birth Date Feature - Sistema Ministerial</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .error { background: #ffe6e6; border-left: 4px solid #ff0000; }
+        .success { background: #e6ffe6; border-left: 4px solid #00aa00; }
+        .info { background: #e6f3ff; border-left: 4px solid #0066cc; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input, select { padding: 8px; margin: 5px; width: 300px; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .test-section { border: 1px solid #ddd; padding: 15px; margin: 15px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Birth Date Feature - Sistema Ministerial</h1>
+    <p>This tool tests the new date of birth functionality in the registration form.</p>
+    
+    <div class="test-section">
+        <h3>📋 Test Registration with Birth Date</h3>
+        
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" value="test.birthdate@example.com">
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" value="test123456">
+        </div>
+        
+        <div class="form-group">
+            <label for="nome">Nome Completo:</label>
+            <input type="text" id="nome" value="João Silva Santos">
+        </div>
+        
+        <div class="form-group">
+            <label for="birthDate">Data de Nascimento:</label>
+            <input type="date" id="birthDate" value="1995-05-15">
+            <div id="ageDisplay" style="margin-top: 5px; font-size: 14px;"></div>
+        </div>
+        
+        <div class="form-group">
+            <label for="congregacao">Congregação:</label>
+            <input type="text" id="congregacao" value="Market Harborough">
+        </div>
+        
+        <div class="form-group">
+            <label for="cargo">Cargo Ministerial:</label>
+            <select id="cargo">
+                <option value="publicador_nao_batizado">Publicador Não Batizado</option>
+                <option value="publicador_batizado" selected>Publicador Batizado</option>
+                <option value="pioneiro_regular">Pioneiro Regular</option>
+                <option value="servo_ministerial">Servo Ministerial</option>
+                <option value="anciao">Ancião</option>
+                <option value="estudante_novo">Estudante Novo</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="role">Tipo de Usuário:</label>
+            <select id="role">
+                <option value="estudante" selected>Estudante</option>
+                <option value="instrutor">Instrutor</option>
+            </select>
+        </div>
+        
+        <div>
+            <button onclick="testSignupWithBirthDate()">Test Signup with Birth Date</button>
+            <button onclick="testAgeValidation()">Test Age Validation</button>
+            <button onclick="clearLogs()">Clear Logs</button>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h3>🎂 Age Validation Tests</h3>
+        <button onclick="testValidAge()">Test Valid Age (25 years)</button>
+        <button onclick="testTooYoung()">Test Too Young (3 years)</button>
+        <button onclick="testTooOld()">Test Too Old (120 years)</button>
+        <button onclick="testFutureDate()">Test Future Date</button>
+    </div>
+    
+    <div id="logs"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
+        
+        const SUPABASE_URL = 'https://nwpuurgwnnuejqinkvrh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjIwNjUsImV4cCI6MjA3MDAzODA2NX0.UHjSvXYY_c-_ydAIfELRUs4CMEBLKiztpBGQBNPHfak';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            logsDiv.appendChild(logDiv);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+        
+        // Age validation function (same as in the app)
+        function validateAge(birthDate) {
+            if (!birthDate) {
+                return { isValid: false, age: 0, message: "Data de nascimento é obrigatória." };
+            }
+
+            const today = new Date();
+            const birth = new Date(birthDate);
+            
+            if (birth > today) {
+                return { isValid: false, age: 0, message: "Data de nascimento não pode ser no futuro." };
+            }
+
+            let age = today.getFullYear() - birth.getFullYear();
+            const monthDiff = today.getMonth() - birth.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+                age--;
+            }
+
+            if (age < 6) {
+                return { isValid: false, age, message: "Idade mínima para participar da Escola do Ministério é 6 anos." };
+            }
+
+            if (age > 100) {
+                return { isValid: false, age, message: "Por favor, verifique a data de nascimento informada." };
+            }
+
+            return { isValid: true, age };
+        }
+        
+        // Update age display when birth date changes
+        function updateAgeDisplay() {
+            const birthDate = document.getElementById('birthDate').value;
+            const ageDisplay = document.getElementById('ageDisplay');
+            
+            if (birthDate) {
+                const validation = validateAge(birthDate);
+                ageDisplay.innerHTML = validation.isValid 
+                    ? `<span style="color: green;">✅ Idade: ${validation.age} anos</span>`
+                    : `<span style="color: red;">❌ ${validation.message}</span>`;
+            } else {
+                ageDisplay.innerHTML = '';
+            }
+        }
+        
+        // Add event listener for birth date changes
+        document.getElementById('birthDate').addEventListener('change', updateAgeDisplay);
+        
+        async function testSignupWithBirthDate() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const nome = document.getElementById('nome').value;
+            const birthDate = document.getElementById('birthDate').value;
+            const congregacao = document.getElementById('congregacao').value;
+            const cargo = document.getElementById('cargo').value;
+            const role = document.getElementById('role').value;
+            
+            clearLogs();
+            log('🚀 Testing signup with birth date...', 'info');
+            
+            // Validate age first
+            const ageValidation = validateAge(birthDate);
+            log(`🎂 Birth Date: ${birthDate}`, 'info');
+            log(`📊 Age Validation: ${ageValidation.isValid ? 'Valid' : 'Invalid'}`, ageValidation.isValid ? 'success' : 'error');
+            if (ageValidation.isValid) {
+                log(`👤 Calculated Age: ${ageValidation.age} years`, 'success');
+            } else {
+                log(`❌ Validation Error: ${ageValidation.message}`, 'error');
+                return;
+            }
+            
+            try {
+                // Use unique email for testing
+                const timestamp = Date.now();
+                const testEmail = `test.birthdate.${timestamp}@example.com`;
+                
+                log('1️⃣ Attempting signup with birth date...', 'info');
+                
+                const { data, error } = await supabase.auth.signUp({
+                    email: testEmail,
+                    password: password,
+                    options: {
+                        data: {
+                            nome_completo: nome,
+                            congregacao: congregacao,
+                            cargo: cargo,
+                            role: role,
+                            date_of_birth: birthDate
+                        }
+                    }
+                });
+                
+                if (error) {
+                    log(`❌ Signup failed: ${error.message}`, 'error');
+                    return;
+                }
+                
+                log('✅ Signup successful!', 'success');
+                log(`👤 User ID: ${data.user?.id}`, 'success');
+                
+                // Check profile creation with birth date
+                if (data.user?.id) {
+                    log('2️⃣ Checking profile creation with birth date...', 'info');
+                    
+                    // Wait for trigger to complete
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    
+                    const { data: profile, error: profileError } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', data.user.id)
+                        .single();
+                    
+                    if (profileError) {
+                        log(`❌ Profile not found: ${profileError.message}`, 'error');
+                    } else {
+                        log('✅ Profile created successfully with birth date!', 'success');
+                        log(`📋 Name: ${profile.nome_completo}`, 'success');
+                        log(`🎂 Birth Date: ${profile.date_of_birth || 'Not set'}`, profile.date_of_birth ? 'success' : 'error');
+                        log(`👤 Age: ${profile.date_of_birth ? validateAge(profile.date_of_birth).age : 'Unknown'} years`, 'success');
+                        log(`⛪ Congregation: ${profile.congregacao}`, 'success');
+                        log(`📋 Role: ${profile.cargo}`, 'success');
+                    }
+                }
+                
+                log('🎉 Birth date feature test completed!', 'success');
+                
+            } catch (error) {
+                log(`❌ Test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testAgeValidation() {
+            clearLogs();
+            log('🧪 Testing age validation logic...', 'info');
+            
+            const testCases = [
+                { date: '1995-05-15', expected: true, description: 'Valid adult age (28-29 years)' },
+                { date: '2010-01-01', expected: true, description: 'Valid child age (13-14 years)' },
+                { date: '2020-01-01', expected: false, description: 'Too young (3-4 years)' },
+                { date: '1900-01-01', expected: false, description: 'Too old (123-124 years)' },
+                { date: '2025-01-01', expected: false, description: 'Future date' },
+                { date: '', expected: false, description: 'Empty date' }
+            ];
+            
+            testCases.forEach((testCase, index) => {
+                const validation = validateAge(testCase.date);
+                const passed = validation.isValid === testCase.expected;
+                
+                log(`Test ${index + 1}: ${testCase.description}`, 'info');
+                log(`   Date: ${testCase.date || 'Empty'}`, 'info');
+                log(`   Expected: ${testCase.expected ? 'Valid' : 'Invalid'}`, 'info');
+                log(`   Result: ${validation.isValid ? 'Valid' : 'Invalid'}`, validation.isValid ? 'success' : 'error');
+                if (validation.age > 0) {
+                    log(`   Age: ${validation.age} years`, 'info');
+                }
+                if (validation.message) {
+                    log(`   Message: ${validation.message}`, 'info');
+                }
+                log(`   Test: ${passed ? '✅ PASSED' : '❌ FAILED'}`, passed ? 'success' : 'error');
+                log('', 'info');
+            });
+        }
+        
+        function testValidAge() {
+            document.getElementById('birthDate').value = '1995-05-15';
+            updateAgeDisplay();
+            log('📅 Set birth date to 1995-05-15 (valid adult age)', 'info');
+        }
+        
+        function testTooYoung() {
+            document.getElementById('birthDate').value = '2020-01-01';
+            updateAgeDisplay();
+            log('📅 Set birth date to 2020-01-01 (too young)', 'info');
+        }
+        
+        function testTooOld() {
+            document.getElementById('birthDate').value = '1900-01-01';
+            updateAgeDisplay();
+            log('📅 Set birth date to 1900-01-01 (too old)', 'info');
+        }
+        
+        function testFutureDate() {
+            const futureDate = new Date();
+            futureDate.setFullYear(futureDate.getFullYear() + 1);
+            const futureDateStr = futureDate.toISOString().split('T')[0];
+            document.getElementById('birthDate').value = futureDateStr;
+            updateAgeDisplay();
+            log(`📅 Set birth date to ${futureDateStr} (future date)`, 'info');
+        }
+        
+        // Make functions available globally
+        window.testSignupWithBirthDate = testSignupWithBirthDate;
+        window.testAgeValidation = testAgeValidation;
+        window.testValidAge = testValidAge;
+        window.testTooYoung = testTooYoung;
+        window.testTooOld = testTooOld;
+        window.testFutureDate = testFutureDate;
+        window.clearLogs = clearLogs;
+        
+        // Initial setup
+        updateAgeDisplay();
+        log('🔧 Birth date feature test tool loaded.', 'info');
+        log('📋 Use the buttons above to test different scenarios.', 'info');
+    </script>
+</body>
+</html>

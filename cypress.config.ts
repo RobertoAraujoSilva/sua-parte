@@ -1,6 +1,6 @@
 import { defineConfig } from 'cypress'
 
-export default defineConfig({
+const config = defineConfig({
   e2e: {
     baseUrl: 'https://sua-parte.lovable.app',
     viewportWidth: 1280,
@@ -22,6 +22,14 @@ export default defineConfig({
       FRANKLIN_EMAIL: 'franklinmarceloferreiradelima@gmail.com',
       FRANKLIN_PASSWORD: '13a21r15',
       FRANKLIN_USER_ID: '77c99e53-500b-4140-b7fc-a69f96b216e1',
+
+      // Credenciais de teste (Sarah)
+      SARAH_EMAIL: 'franklima.flm@gmail.com',
+      SARAH_PASSWORD: 'test@123',
+      SARAH_FULL_NAME: 'Sarah Rackel Ferreira Lima',
+      SARAH_DATE_OF_BIRTH: '2009-09-25',
+      SARAH_CONGREGATION: 'Market Harborough',
+      SARAH_CARGO: 'publicador_nao_batizado',
       
       // URLs específicas
       AUTH_URL: '/auth',
@@ -63,3 +71,5 @@ export default defineConfig({
     supportFile: 'cypress/support/component.ts'
   }
 })
+
+export default config

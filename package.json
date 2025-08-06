@@ -11,9 +11,15 @@
     "preview": "vite preview",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
+    "cypress:install": "cypress install",
+    "cypress:verify": "cypress verify",
     "test:e2e": "cypress run",
     "test:e2e:open": "cypress open",
-    "test:franklin": "cypress run --spec 'cypress/e2e/franklin-login.cy.ts'"
+    "test:franklin": "cypress run --spec \"cypress/e2e/franklin-login.cy.ts\"",
+    "test:sarah": "cypress run --spec \"cypress/e2e/sarah-student-registration.cy.ts\"",
+    "test:birth-date": "cypress run --spec \"cypress/e2e/sarah-student-registration.cy.ts\"",
+    "test:sarah:open": "cypress open --e2e --browser chrome",
+    "test:setup": "cypress install && cypress verify"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

@@ -12,6 +12,7 @@ interface UserProfile {
   congregacao: string | null;
   cargo: string | null;
   role: UserRole;
+  date_of_birth: string | null;
   email: string;
   created_at: string | null;
   updated_at: string | null;
@@ -24,6 +25,7 @@ interface SignUpData {
   congregacao: string;
   cargo?: string;
   role: UserRole;
+  date_of_birth?: string;
 }
 
 interface AuthContextType {
@@ -272,6 +274,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             congregacao: data.congregacao,
             cargo: data.cargo || '',
             role: data.role,
+            date_of_birth: data.date_of_birth || null,
           },
         },
       });
