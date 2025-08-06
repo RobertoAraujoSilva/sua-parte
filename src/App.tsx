@@ -13,7 +13,7 @@ import Programas from "./pages/Programas";
 import Designacoes from "./pages/Designacoes";
 import Relatorios from "./pages/Relatorios";
 import Reunioes from "./pages/Reunioes";
-import StudentDashboard from "./pages/StudentDashboard";
+import EstudantePortal from "./pages/EstudantePortal";
 import Funcionalidades from "./pages/Funcionalidades";
 import Congregacoes from "./pages/Congregacoes";
 import Suporte from "./pages/Suporte";
@@ -95,7 +95,7 @@ const App = () => (
               path="/estudante/:id"
               element={
                 <ProtectedRoute allowedRoles={['estudante']}>
-                  <StudentDashboard />
+                  <EstudantePortal />
                 </ProtectedRoute>
               }
             />

@@ -58,12 +58,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) {
         console.error('Error fetching profile:', error);
+
+        // If profile doesn't exist, try to create it from auth metadata
+        if (error.code === 'PGRST116') {
+          console.log('Profile not found, attempting to create from auth metadata...');
+          return await createProfileFromAuth(userId);
+        }
+
         return null;
       }
 
       return data as UserProfile;
     } catch (error) {
       console.error('Error fetching profile:', error);
+      return null;
+    }
+  };
+
+  // Create profile from auth metadata if it doesn't exist
+  const createProfileFromAuth = async (userId: string) => {
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        console.error('Error getting user for profile creation:', userError);
+        return null;
+      }
+
+      const metadata = user.user_metadata || {};
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert({
+          id: userId,
+          nome_completo: metadata.nome_completo || '',
+          congregacao: metadata.congregacao || '',
+          cargo: metadata.cargo || '',
+          role: (metadata.role as UserRole) || 'instrutor'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating profile:', error);
+        return null;
+      }
+
+      // Return the profile with email from auth
+      return {
+        ...data,
+        email: user.email || ''
+      } as UserProfile;
+    } catch (error) {
+      console.error('Error creating profile from auth:', error);
       return null;
     }
   };
