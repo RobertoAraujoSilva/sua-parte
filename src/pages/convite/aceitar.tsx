@@ -64,7 +64,18 @@ const ConviteAceitar: React.FC = () => {
 
       if (invitationError || !invitation) {
         console.error('❌ Invalid or expired invitation:', invitationError);
-        setError('Convite inválido ou expirado. Solicite um novo convite.');
+        console.error('❌ Invitation error details:', {
+          message: invitationError?.message,
+          details: invitationError?.details,
+          hint: invitationError?.hint,
+          code: invitationError?.code
+        });
+
+        if (invitationError?.code === '42501') {
+          setError('Acesso negado. Este convite pode ter expirado ou não existe.');
+        } else {
+          setError('Convite inválido ou expirado. Solicite um novo convite.');
+        }
         setLoading(false);
         return;
       }
@@ -127,6 +138,8 @@ const ConviteAceitar: React.FC = () => {
         }
 
         // Create new user account
+        console.log('👤 Creating new user account for:', familyMember.email);
+
         const { data: newUser, error: signUpError } = await supabase.auth.signUp({
           email: familyMember.email,
           password: generateTemporaryPassword(),
@@ -143,12 +156,21 @@ const ConviteAceitar: React.FC = () => {
 
         if (signUpError) {
           console.error('❌ Error creating user account:', signUpError);
-          setError(`Erro ao criar conta: ${signUpError.message}`);
+          console.error('❌ SignUp error details:', {
+            message: signUpError.message,
+            status: signUpError.status
+          });
+
+          if (signUpError.message.includes('already registered')) {
+            setError('Este email já possui uma conta. Faça login para aceitar o convite.');
+          } else {
+            setError(`Erro ao criar conta: ${signUpError.message}`);
+          }
           setLoading(false);
           return;
         }
 
-        console.log('✅ User account created:', newUser.user?.id);
+        console.log('✅ User account created successfully:', newUser.user?.id);
 
         // Complete invitation acceptance
         await completeInvitationAcceptance(invitation.id, familyMember.id);
@@ -162,7 +184,10 @@ const ConviteAceitar: React.FC = () => {
 
   const completeInvitationAcceptance = async (invitationId: string, familyMemberId: string) => {
     try {
+      console.log('✅ Completing invitation acceptance...');
+
       // Update invitation status to ACCEPTED
+      console.log('📝 Updating invitation status to ACCEPTED...');
       const { error: updateInvitationError } = await supabase
         .from('invitations_log')
         .update({ invite_status: 'ACCEPTED' })
@@ -170,10 +195,17 @@ const ConviteAceitar: React.FC = () => {
 
       if (updateInvitationError) {
         console.error('❌ Error updating invitation status:', updateInvitationError);
-        throw updateInvitationError;
+        console.error('❌ Invitation update error details:', {
+          message: updateInvitationError.message,
+          details: updateInvitationError.details,
+          hint: updateInvitationError.hint,
+          code: updateInvitationError.code
+        });
+        throw new Error(`Erro ao atualizar status do convite: ${updateInvitationError.message}`);
       }
 
       // Update family member status to ACCEPTED
+      console.log('📝 Updating family member status to ACCEPTED...');
       const { error: updateFamilyError } = await supabase
         .from('family_members')
         .update({ invitation_status: 'ACCEPTED' })
@@ -181,10 +213,16 @@ const ConviteAceitar: React.FC = () => {
 
       if (updateFamilyError) {
         console.error('❌ Error updating family member status:', updateFamilyError);
-        throw updateFamilyError;
+        console.error('❌ Family update error details:', {
+          message: updateFamilyError.message,
+          details: updateFamilyError.details,
+          hint: updateFamilyError.hint,
+          code: updateFamilyError.code
+        });
+        throw new Error(`Erro ao atualizar status do familiar: ${updateFamilyError.message}`);
       }
 
-      console.log('✅ Invitation acceptance completed');
+      console.log('✅ Invitation acceptance completed successfully');
       setSuccess(true);
       setLoading(false);
 
@@ -194,7 +232,12 @@ const ConviteAceitar: React.FC = () => {
       }, 3000);
     } catch (error) {
       console.error('❌ Error completing invitation acceptance:', error);
-      setError('Erro ao finalizar aceitação do convite.');
+
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError('Erro inesperado ao finalizar aceitação do convite.');
+      }
       setLoading(false);
     }
   };

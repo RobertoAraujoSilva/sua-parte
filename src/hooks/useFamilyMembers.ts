@@ -88,6 +88,31 @@ export const useFamilyMembers = (studentId?: string) => {
   const addFamilyMemberMutation = useMutation({
     mutationFn: async (familyMemberData: FamilyMemberInsert): Promise<FamilyMember> => {
       console.log('➕ Adding family member:', familyMemberData.name);
+      console.log('🔍 Current auth state:', {
+        user: user ? { id: user.id, email: user.email } : null,
+        targetStudentId,
+        familyMemberData
+      });
+
+      // Verify authentication state
+      if (!user) {
+        console.error('❌ No authenticated user found');
+        throw new Error('Você precisa estar logado para adicionar familiares');
+      }
+
+      if (!targetStudentId) {
+        console.error('❌ No target student ID available');
+        throw new Error('ID do estudante não encontrado');
+      }
+
+      // Verify current session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        console.error('❌ No valid session found:', sessionError);
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
+
+      console.log('✅ Authentication verified, proceeding with insertion...');
 
       try {
         const { data, error } = await supabase
@@ -104,7 +129,15 @@ export const useFamilyMembers = (studentId?: string) => {
             hint: error.hint,
             code: error.code
           });
-          throw error;
+
+          // Provide more user-friendly error messages
+          if (error.code === '42501') {
+            throw new Error('Permissão negada. Verifique se você está logado corretamente.');
+          } else if (error.code === '23505') {
+            throw new Error('Este familiar já foi cadastrado.');
+          } else {
+            throw new Error(`Erro ao adicionar familiar: ${error.message}`);
+          }
         }
 
         console.log('✅ Family member added successfully:', data.name);
@@ -179,9 +212,27 @@ export const useFamilyMembers = (studentId?: string) => {
       familyMemberId: string;
       method: InviteMethod;
     }): Promise<InvitationLog> => {
-      if (!targetStudentId) throw new Error('No student ID available');
+      console.log('📧 Starting invitation process:', { familyMemberId, method });
 
-      console.log('📧 Sending invitation:', { familyMemberId, method });
+      // Verify authentication state
+      if (!user) {
+        console.error('❌ No authenticated user found');
+        throw new Error('Você precisa estar logado para enviar convites');
+      }
+
+      if (!targetStudentId) {
+        console.error('❌ No target student ID available');
+        throw new Error('ID do estudante não encontrado');
+      }
+
+      // Verify current session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !session) {
+        console.error('❌ No valid session found:', sessionError);
+        throw new Error('Sessão expirada. Faça login novamente.');
+      }
+
+      console.log('✅ Authentication verified for invitation sending');
 
       // Get family member details
       const { data: familyMember, error: fetchError } = await supabase
@@ -192,18 +243,22 @@ export const useFamilyMembers = (studentId?: string) => {
 
       if (fetchError || !familyMember) {
         console.error('❌ Error fetching family member:', fetchError);
-        throw new Error('Family member not found');
+        throw new Error('Familiar não encontrado ou acesso negado');
       }
+
+      console.log('✅ Family member found:', familyMember.name);
 
       // Validate contact information based on method
       if (method === 'EMAIL' && !familyMember.email) {
-        throw new Error('Email address is required for email invitations');
+        throw new Error('Email é obrigatório para convites por email');
       }
       if (method === 'WHATSAPP' && !familyMember.phone) {
-        throw new Error('Phone number is required for WhatsApp invitations');
+        throw new Error('Telefone é obrigatório para convites por WhatsApp');
       }
 
       try {
+        console.log('📝 Creating invitation log entry...');
+
         // Create invitation log entry first
         const { data: invitation, error: invitationError } = await supabase
           .from('invitations_log')
@@ -217,8 +272,22 @@ export const useFamilyMembers = (studentId?: string) => {
 
         if (invitationError) {
           console.error('❌ Error creating invitation log:', invitationError);
-          throw invitationError;
+          console.error('❌ Invitation error details:', {
+            message: invitationError.message,
+            details: invitationError.details,
+            hint: invitationError.hint,
+            code: invitationError.code
+          });
+
+          // Provide user-friendly error messages
+          if (invitationError.code === '42501') {
+            throw new Error('Permissão negada para criar convite. Verifique se você está logado corretamente.');
+          } else {
+            throw new Error(`Erro ao criar convite: ${invitationError.message}`);
+          }
         }
+
+        console.log('✅ Invitation log created successfully:', invitation.id);
 
         // Try to send invitation using Supabase Edge Function (production)
         // Fall back to development mode if Edge Function is not available
@@ -238,19 +307,22 @@ export const useFamilyMembers = (studentId?: string) => {
           );
 
           if (functionError) {
-            console.warn('⚠️ Edge Function not available, using development mode:', functionError.message);
+            console.warn('⚠️ Edge Function error:', functionError);
+            console.warn('⚠️ Falling back to development mode');
             throw functionError;
           }
 
           if (!functionResponse?.success) {
-            console.warn('⚠️ Edge Function returned error, using development mode:', functionResponse?.error);
-            throw new Error(functionResponse?.error || 'Unknown error');
+            console.warn('⚠️ Edge Function returned error:', functionResponse?.error);
+            console.warn('⚠️ Falling back to development mode');
+            throw new Error(functionResponse?.error || 'Edge Function returned unsuccessful response');
           }
 
           console.log('✅ Invitation sent successfully via Edge Function:', functionResponse);
           invitationSent = true;
         } catch (edgeFunctionError) {
-          console.log('🔄 Falling back to development mode invitation...');
+          console.log('🔄 Edge Function failed, using development mode...');
+          console.log('🔄 Edge Function error details:', edgeFunctionError);
 
           // Development mode: Create invitation link and show to user
           const invitationLink = `${window.location.origin}/convite/aceitar?token=${invitation.invitation_token}`;
@@ -266,22 +338,30 @@ export const useFamilyMembers = (studentId?: string) => {
             });
 
             // Show invitation link to user for manual sending
-            const message = `Convite criado para ${familyMember.name}!\n\n` +
+            const message = `✅ Convite criado com sucesso para ${familyMember.name}!\n\n` +
               `📧 Email: ${familyMember.email}\n` +
               `🔗 Link de convite: ${invitationLink}\n\n` +
-              `Em desenvolvimento: Copie este link e envie manualmente por email.\n` +
-              `Em produção: O email será enviado automaticamente.`;
+              `⚠️ MODO DESENVOLVIMENTO:\n` +
+              `Copie este link e envie manualmente por email.\n` +
+              `O link foi copiado automaticamente para a área de transferência.\n\n` +
+              `Em produção, o email será enviado automaticamente.`;
 
             alert(message);
 
             // Copy link to clipboard
-            if (navigator.clipboard) {
-              navigator.clipboard.writeText(invitationLink);
-              console.log('📋 Invitation link copied to clipboard');
+            try {
+              if (navigator.clipboard) {
+                await navigator.clipboard.writeText(invitationLink);
+                console.log('📋 Invitation link copied to clipboard');
+              }
+            } catch (clipboardError) {
+              console.warn('⚠️ Failed to copy to clipboard:', clipboardError);
             }
           }
 
           // Update family member status manually in development mode
+          console.log('📝 Updating family member status to SENT...');
+
           const { error: updateError } = await supabase
             .from('family_members')
             .update({ invitation_status: 'SENT' })
@@ -289,7 +369,13 @@ export const useFamilyMembers = (studentId?: string) => {
 
           if (updateError) {
             console.error('❌ Error updating family member status:', updateError);
-            throw updateError;
+            console.error('❌ Update error details:', {
+              message: updateError.message,
+              details: updateError.details,
+              hint: updateError.hint,
+              code: updateError.code
+            });
+            throw new Error(`Erro ao atualizar status do familiar: ${updateError.message}`);
           }
 
           invitationSent = true;
@@ -314,16 +400,23 @@ export const useFamilyMembers = (studentId?: string) => {
         }
 
         if (!invitationSent) {
-          throw new Error('Failed to send invitation - please try again');
+          console.error('❌ Invitation was not sent successfully');
+          throw new Error('Falha ao enviar convite. Tente novamente.');
         }
 
         console.log('✅ Invitation process completed successfully');
+        console.log('✅ Final invitation data:', invitation);
 
-        console.log('✅ Invitation process completed:', invitation);
         return invitation;
       } catch (error) {
         console.error('❌ Exception during invitation sending:', error);
-        throw error;
+
+        // Provide user-friendly error messages
+        if (error instanceof Error) {
+          throw error; // Re-throw if it's already a user-friendly error
+        } else {
+          throw new Error('Erro inesperado ao enviar convite. Tente novamente.');
+        }
       }
     },
     onSuccess: () => {
@@ -337,19 +430,37 @@ export const useFamilyMembers = (studentId?: string) => {
 
   // Convenience methods
   const addFamilyMember = useCallback(async (familyMemberData: Omit<FamilyMemberInsert, 'student_id'>) => {
-    if (!targetStudentId) {
-      console.error('❌ No student ID available for adding family member');
-      throw new Error('No student ID available');
+    console.log('🔄 Starting family member addition process...');
+
+    if (!user) {
+      console.error('❌ No authenticated user for adding family member');
+      throw new Error('Você precisa estar logado para adicionar familiares');
     }
 
-    console.log('🔄 Preparing to add family member with student_id:', targetStudentId);
-    console.log('🔄 Family member data:', familyMemberData);
+    if (!targetStudentId) {
+      console.error('❌ No student ID available for adding family member');
+      throw new Error('ID do estudante não encontrado');
+    }
 
-    return addFamilyMemberMutation.mutateAsync({
-      ...familyMemberData,
-      student_id: targetStudentId,
+    console.log('🔄 Preparing to add family member:', {
+      studentId: targetStudentId,
+      familyMemberName: familyMemberData.name,
+      relation: familyMemberData.relation
     });
-  }, [targetStudentId, addFamilyMemberMutation]);
+
+    try {
+      const result = await addFamilyMemberMutation.mutateAsync({
+        ...familyMemberData,
+        student_id: targetStudentId,
+      });
+
+      console.log('✅ Family member addition completed successfully');
+      return result;
+    } catch (error) {
+      console.error('❌ Family member addition failed:', error);
+      throw error;
+    }
+  }, [user, targetStudentId, addFamilyMemberMutation]);
 
   const updateFamilyMember = useCallback(async (id: string, updates: FamilyMemberUpdate) => {
     return updateFamilyMemberMutation.mutateAsync({ id, updates });
