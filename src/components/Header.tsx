@@ -1,6 +1,11 @@
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <header className="bg-jw-navy text-white shadow-lg">
       <div className="container mx-auto px-4">
@@ -33,12 +38,33 @@ const Header = () => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="text-white hover:text-jw-gold">
-              Entrar
-            </Button>
-            <Button variant="hero" size="sm">
-              Começar
-            </Button>
+            {user ? (
+              <Button 
+                variant="hero" 
+                size="sm"
+                onClick={() => navigate('/dashboard')}
+              >
+                Dashboard
+              </Button>
+            ) : (
+              <>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-white hover:text-jw-gold"
+                  onClick={() => navigate('/auth')}
+                >
+                  Entrar
+                </Button>
+                <Button 
+                  variant="hero" 
+                  size="sm"
+                  onClick={() => navigate('/auth')}
+                >
+                  Começar
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>
