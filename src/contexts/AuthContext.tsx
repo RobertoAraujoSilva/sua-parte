@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
@@ -33,10 +33,10 @@ interface AuthContextType {
   session: Session | null;
   profile: UserProfile | null;
   loading: boolean;
-  signUp: (data: SignUpData) => Promise<{ error: any }>;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signOut: () => Promise<{ error: any }>;
-  updateProfile: (updates: Partial<UserProfile>) => Promise<{ data: any; error: any }>;
+  signUp: (data: SignUpData) => Promise<{ error: Error | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signOut: () => Promise<{ error: Error | null }>;
+  updateProfile: (updates: Partial<UserProfile>) => Promise<{ data: UserProfile | null; error: Error | null }>;
   isInstrutor: boolean;
   isEstudante: boolean;
 }
@@ -58,7 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Fetch user profile from database with multiple fallback strategies
-  const fetchProfile = async (userId: string): Promise<UserProfile | null> => {
+  const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
     console.log('🔍 Fetching profile for user ID:', userId);
 
     // First, let's check the current session to ensure we're authenticated
@@ -93,10 +93,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('id', userId)
         .single();
 
-      const { data, error } = await Promise.race([
+      const result = await Promise.race([
         viewQuery,
         createTimeout(10000) // 10 second timeout
-      ]) as any;
+      ]);
+
+      if (result === 'timeout') {
+        console.error('❌ Strategy 1 timeout - user_profiles view took too long');
+        throw new Error('Profile fetch timeout');
+      }
+
+      const { data, error } = result;
 
       if (error) {
         console.error('❌ Strategy 1 failed - user_profiles view error:', {
@@ -109,17 +116,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('✅ Strategy 1 success - Profile fetched from view:', data);
         return data as UserProfile;
       }
-    } catch (error: any) {
-      console.error('❌ Strategy 1 exception:', error.message);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('❌ Strategy 1 exception:', errorMessage);
     }
 
     // Strategy 2: Try secure function
     try {
       console.log('🔄 Strategy 2: Trying secure function...');
-      const { data: functionData, error: functionError } = await Promise.race([
+      const result = await Promise.race([
         supabase.rpc('get_user_profile', { user_id: userId }),
         createTimeout(10000)
-      ]) as any;
+      ]);
+
+      if (result === 'timeout') {
+        console.error('❌ Strategy 2 timeout - Secure function took too long');
+        throw new Error('Secure function timeout');
+      }
+
+      const { data: functionData, error: functionError } = result;
 
       if (functionError) {
         console.error('❌ Strategy 2 failed - Secure function error:', functionError);
@@ -127,17 +142,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('✅ Strategy 2 success - Profile fetched via secure function:', functionData[0]);
         return functionData[0] as UserProfile;
       }
-    } catch (funcError: any) {
-      console.error('❌ Strategy 2 exception:', funcError.message);
+    } catch (funcError: unknown) {
+      const errorMessage = funcError instanceof Error ? funcError.message : 'Unknown error';
+      console.error('❌ Strategy 2 exception:', errorMessage);
     }
 
     // Strategy 3: Try direct profiles table access
     try {
       console.log('🔄 Strategy 3: Trying direct profiles table access...');
-      const { data: profileData, error: profileError } = await Promise.race([
+      const result = await Promise.race([
         supabase.from('profiles').select('*').eq('id', userId).single(),
         createTimeout(10000)
-      ]) as any;
+      ]);
+
+      if (result === 'timeout') {
+        console.error('❌ Strategy 3 timeout - Direct profiles access took too long');
+        throw new Error('Direct profiles timeout');
+      }
+
+      const { data: profileData, error: profileError } = result;
 
       if (profileError) {
         console.error('❌ Strategy 3 failed - Direct profiles error:', profileError);
@@ -151,25 +174,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.log('✅ Strategy 3 success - Profile fetched from profiles table:', profileWithEmail);
         return profileWithEmail as UserProfile;
       }
-    } catch (directError: any) {
-      console.error('❌ Strategy 3 exception:', directError.message);
+    } catch (directError: unknown) {
+      const errorMessage = directError instanceof Error ? directError.message : 'Unknown error';
+      console.error('❌ Strategy 3 exception:', errorMessage);
     }
 
     // Strategy 4: Create profile from auth metadata if none exists
     console.log('🔄 Strategy 4: Attempting to create profile from auth metadata...');
     try {
       return await createProfileFromAuth(userId);
-    } catch (createError: any) {
-      console.error('❌ Strategy 4 failed:', createError.message);
+    } catch (createError: unknown) {
+      const errorMessage = createError instanceof Error ? createError.message : 'Unknown error';
+      console.error('❌ Strategy 4 failed:', errorMessage);
     }
 
     console.error('❌ All strategies failed - unable to fetch profile');
     return null;
-
-  };
+  }, []); // useCallback dependency array
 
   // Create profile from auth metadata if it doesn't exist
-  const createProfileFromAuth = async (userId: string) => {
+  const createProfileFromAuth = useCallback(async (userId: string) => {
     try {
       const { data: { user }, error: userError } = await supabase.auth.getUser();
 
@@ -206,7 +230,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       console.error('Error creating profile from auth:', error);
       return null;
     }
-  };
+  }, []); // Empty dependency array since createProfileFromAuth doesn't depend on any props or state
 
   useEffect(() => {
     // Get initial session
@@ -287,7 +311,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     );
 
     return () => subscription.unsubscribe();
-  }, [initialLoadComplete]);
+  }, [initialLoadComplete, fetchProfile]);
 
   const signUp = async (data: SignUpData) => {
     try {

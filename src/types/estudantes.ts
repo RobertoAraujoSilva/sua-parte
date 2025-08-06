@@ -54,7 +54,7 @@ export const VALIDATION_RULES = {
     pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
   },
   telefone: {
-    pattern: /^[\d\s\-\(\)\+]+$/,
+    pattern: /^[\d\s\-()]+$/,
     minLength: 8,
     maxLength: 20,
   },
