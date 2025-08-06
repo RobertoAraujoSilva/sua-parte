@@ -1,73 +1,90 @@
-# Welcome to your Lovable project
+# Student and Meeting Management System
 
-## Project info
+This is a web application designed to help educational and religious organizations manage students, meetings, and assignments. It provides separate portals for instructors and students with role-based access control.
 
-**URL**: https://lovable.dev/projects/1f603510-088b-48b6-84e2-6c4dadb2fe65
+## Features
 
-## How can I edit this code?
+- **Role-Based Access:** Separate views and permissions for instructors and students.
+- **Instructor Dashboard:** A central hub for instructors to manage all aspects of the system.
+- **Student Management:** Instructors can add, view, and manage student information.
+- **Meeting and Assignment Scheduling:** Tools for creating and organizing meetings and assigning tasks.
+- **Student Portal:** A dedicated portal for students to view their assignments and track their progress.
+- **Reporting:** Generate reports on student progress and meeting attendance.
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- **Frontend:** React, Vite, TypeScript
+- **UI:** shadcn-ui, Tailwind CSS
+- **Routing:** React Router
+- **Data Fetching & State Management:** TanStack Query
+- **Backend:** Supabase (Authentication and Database)
+- **Testing:** Cypress
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/1f603510-088b-48b6-84e2-6c4dadb2fe65) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+Follow these instructions to set up the project for local development.
 
-**Use your preferred IDE**
+### Prerequisites
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- [npm](https://www.npmjs.com/)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Installation
 
-Follow these steps:
+1.  **Clone the repository:**
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+    ```bash
+    git clone <YOUR_GIT_URL>
+    cd <YOUR_PROJECT_NAME>
+    ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+2.  **Install dependencies:**
 
-# Step 3: Install the necessary dependencies.
-npm i
+    ```bash
+    npm install
+    ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+3.  **Set up environment variables:**
+
+    Create a `.env` file in the root of the project and add the following environment variables. You can get these values from your Supabase project dashboard.
+
+    ```env
+    VITE_SUPABASE_URL=YOUR_SUPABASE_URL
+    VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+    ```
+
+### Running the Application
+
+To start the development server, run the following command:
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will be available at `http://localhost:5173`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Testing
 
-**Use GitHub Codespaces**
+This project uses Cypress for end-to-end testing. To run the tests, use the following commands:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+-   **Run tests in headless mode:**
 
-## What technologies are used for this project?
+    ```bash
+    npm run test:e2e
+    ```
 
-This project is built with:
+-   **Open the Cypress Test Runner:**
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+    ```bash
+    npm run test:e2e:open
+    ```
 
-## How can I deploy this project?
+## Deployment
 
-Simply open [Lovable](https://lovable.dev/projects/1f603510-088b-48b6-84e2-6c4dadb2fe65) and click on Share -> Publish.
+This project is ready to be deployed to any static site hosting service like Vercel, Netlify, or GitHub Pages. Run the following command to build the production-ready assets:
 
-## Can I connect a custom domain to my Lovable project?
+```bash
+npm run build
+```
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Then, deploy the `dist` directory to your hosting provider of choice.
