@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -6,11 +6,51 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
-import { Zap, Calendar, FileText, ArrowLeft, Download, Eye, Send, RefreshCw } from "lucide-react";
+import { Zap, Calendar, FileText, ArrowLeft, Download, Eye, Send, RefreshCw, AlertTriangle } from "lucide-react";
+
+// Importar componentes e utilitários do sistema de designações
+import { ModalSelecaoSemana, type DadosSelecaoSemana } from "@/components/ModalSelecaoSemana";
+import { ModalPreviaDesignacoes } from "@/components/ModalPreviaDesignacoes";
+import { GeradorDesignacoes, salvarDesignacoes } from "@/utils/assignmentGenerator";
+import { carregarDadosCompletos, carregarProgramaPorData, removerDesignacoesPrograma } from "@/utils/dataLoaders";
+import { BalanceadorHistorico } from "@/utils/balanceamentoHistorico";
+import { RegrasS38T } from "@/utils/regrasS38T";
+import { TratadorErros } from "@/utils/tratamentoErros";
+import type {
+  DesignacaoGerada,
+  EstatisticasDesignacao,
+  ConflitosDesignacao,
+  ParteProgramaS38T
+} from "@/types/designacoes";
+import type { EstudanteRow } from "@/types/estudantes";
+import { supabase } from "@/integrations/supabase/client";
 
 const Designacoes = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Estados para o sistema de designações automáticas
+  const [modalSelecaoAberto, setModalSelecaoAberto] = useState(false);
+  const [modalPreviaAberto, setModalPreviaAberto] = useState(false);
+  const [carregandoGeracao, setCarregandoGeracao] = useState(false);
+  const [carregandoSalvamento, setCarregandoSalvamento] = useState(false);
+
+  // Dados da geração atual
+  const [dadosSelecao, setDadosSelecao] = useState<DadosSelecaoSemana | null>(null);
+  const [designacoesGeradas, setDesignacoesGeradas] = useState<DesignacaoGerada[]>([]);
+  const [estudantesCarregados, setEstudantesCarregados] = useState<EstudanteRow[]>([]);
+  const [estatisticas, setEstatisticas] = useState<EstatisticasDesignacao>({
+    totalDesignacoes: 0,
+    distribuicaoPorGenero: { masculino: 0, feminino: 0 },
+    distribuicaoPorCargo: {},
+    estudantesComAjudante: 0,
+    paresFormados: 0,
+    paresFamiliares: 0
+  });
+  const [conflitos, setConflitos] = useState<ConflitosDesignacao[]>([]);
+  const [recomendacoes, setRecomendacoes] = useState<string[]>([]);
 
   // Mock data for demonstration
   const designacoes = [
@@ -79,6 +119,178 @@ const Designacoes = () => {
     }
   ];
 
+  // Função para abrir modal de seleção de semana
+  const handleAbrirModalSelecao = () => {
+    setModalSelecaoAberto(true);
+  };
+
+  // Função para processar seleção de semana e gerar designações
+  const handleConfirmarSelecao = async (dados: DadosSelecaoSemana) => {
+    setDadosSelecao(dados);
+    setModalSelecaoAberto(false);
+    setCarregandoGeracao(true);
+
+    try {
+      // Se é regeneração, remover designações existentes primeiro
+      if (dados.modoRegeneracao) {
+        const resultadoRemocao = await removerDesignacoesPrograma(dados.idPrograma);
+        if (!resultadoRemocao.sucesso) {
+          throw new Error(`Erro ao remover designações existentes: ${resultadoRemocao.erro}`);
+        }
+
+        toast({
+          title: "Designações removidas",
+          description: `${resultadoRemocao.quantidadeRemovida} designação(ões) removida(s) para regeneração.`,
+        });
+      }
+
+      // Carregar dados necessários
+      const dadosCompletos = await carregarDadosCompletos();
+
+      if (!dadosCompletos.todosCarregados) {
+        throw new Error("Erro ao carregar dados necessários para geração");
+      }
+
+      // Criar gerador de designações
+      const gerador = new GeradorDesignacoes(dadosCompletos.estudantes.estudantes);
+
+      // Extrair partes do programa (simulado para demonstração)
+      const partesPrograma: ParteProgramaS38T[] = [
+        {
+          numero_parte: 3,
+          titulo_parte: "Leitura da Bíblia",
+          tipo_parte: 'leitura_biblica',
+          tempo_minutos: 4,
+          requer_ajudante: false
+        },
+        {
+          numero_parte: 4,
+          titulo_parte: "Primeira Conversa",
+          tipo_parte: 'demonstracao',
+          tempo_minutos: 3,
+          requer_ajudante: true
+        },
+        {
+          numero_parte: 5,
+          titulo_parte: "Revisita",
+          tipo_parte: 'demonstracao',
+          tempo_minutos: 4,
+          requer_ajudante: true
+        }
+      ];
+
+      // Gerar designações
+      const opcoes = {
+        data_inicio_semana: dados.dataInicioSemana,
+        id_programa: dados.idPrograma,
+        partes: partesPrograma
+      };
+
+      const designacoesGeradas = await gerador.gerarDesignacoes(opcoes);
+
+      // Validar designações
+      const errosValidacao = await gerador.validarDesignacoes(designacoesGeradas);
+
+      // Gerar estatísticas
+      const stats = gerador.gerarEstatisticas(designacoesGeradas);
+
+      // Preparar dados para prévia
+      setDesignacoesGeradas(designacoesGeradas);
+      setEstudantesCarregados(dadosCompletos.estudantes.estudantes);
+      setEstatisticas(stats);
+      setConflitos(errosValidacao.map(erro => ({
+        tipo: 'inelegibilidade' as const,
+        estudante_id: '',
+        numero_parte: 0,
+        descricao: erro
+      })));
+      setRecomendacoes([
+        "Verifique se todos os estudantes estão ativos",
+        "Confirme os relacionamentos familiares para pares de gêneros diferentes",
+        "Considere o balanceamento das últimas 8 semanas"
+      ]);
+
+      // Abrir modal de prévia
+      setModalPreviaAberto(true);
+
+      toast({
+        title: "Designações geradas com sucesso!",
+        description: `${designacoesGeradas.length} designação(ões) gerada(s) para revisão.`,
+      });
+
+    } catch (error) {
+      console.error('Erro ao gerar designações:', error);
+
+      // Usar sistema de tratamento de erros
+      const erroProcessado = TratadorErros.processarErro(error, 'Geração de designações');
+      TratadorErros.logErro(erroProcessado, 'handleConfirmarSelecao');
+      TratadorErros.exibirErro(erroProcessado);
+
+      // Exibir ações sugeridas após um delay
+      setTimeout(() => {
+        TratadorErros.exibirAcoesSugeridas(erroProcessado);
+      }, 2000);
+    } finally {
+      setCarregandoGeracao(false);
+    }
+  };
+
+  // Função para confirmar e salvar designações
+  const handleConfirmarDesignacoes = async () => {
+    if (!dadosSelecao || !designacoesGeradas.length) return;
+
+    setCarregandoSalvamento(true);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error("Usuário não autenticado");
+      }
+
+      const resultado = await salvarDesignacoes(designacoesGeradas, dadosSelecao.idPrograma, user.id);
+
+      if (!resultado.sucesso) {
+        throw new Error(resultado.erro || "Erro ao salvar designações");
+      }
+
+      toast({
+        title: "Designações salvas com sucesso!",
+        description: `${designacoesGeradas.length} designação(ões) salva(s) no banco de dados.`,
+      });
+
+      // Fechar modal e limpar estados
+      setModalPreviaAberto(false);
+      setDadosSelecao(null);
+      setDesignacoesGeradas([]);
+
+    } catch (error) {
+      console.error('Erro ao salvar designações:', error);
+
+      // Usar sistema de tratamento de erros
+      const erroProcessado = TratadorErros.processarErro(error, 'Salvamento de designações');
+      TratadorErros.logErro(erroProcessado, 'handleConfirmarDesignacoes');
+      TratadorErros.exibirErro(erroProcessado);
+
+      // Exibir ações sugeridas se o erro for recuperável
+      if (erroProcessado.recuperavel) {
+        setTimeout(() => {
+          TratadorErros.exibirAcoesSugeridas(erroProcessado);
+        }, 2000);
+      }
+    } finally {
+      setCarregandoSalvamento(false);
+    }
+  };
+
+  // Função para regenerar designações
+  const handleRegenerarDesignacoes = () => {
+    if (dadosSelecao) {
+      setModalPreviaAberto(false);
+      // Forçar regeneração
+      handleConfirmarSelecao({ ...dadosSelecao, modoRegeneracao: true });
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Enviadas":
@@ -134,11 +346,30 @@ const Designacoes = () => {
               </div>
               
               <div className="flex flex-wrap gap-2">
-                <Button variant="hero" size="sm">
-                  <Zap className="w-4 h-4 mr-2" />
-                  Gerar Designações Automáticas
+                <Button
+                  variant="hero"
+                  size="sm"
+                  onClick={handleAbrirModalSelecao}
+                  disabled={carregandoGeracao || carregandoSalvamento}
+                >
+                  {carregandoGeracao ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                      Gerando...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4 mr-2" />
+                      Gerar Designações Automáticas
+                    </>
+                  )}
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleAbrirModalSelecao}
+                  disabled={carregandoGeracao || carregandoSalvamento}
+                >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Regenerar Semana
                 </Button>
@@ -321,6 +552,28 @@ const Designacoes = () => {
       </main>
 
       <Footer />
+
+      {/* Modais do Sistema de Designações */}
+      <ModalSelecaoSemana
+        aberto={modalSelecaoAberto}
+        onFechar={() => setModalSelecaoAberto(false)}
+        onConfirmar={handleConfirmarSelecao}
+        carregando={carregandoGeracao}
+      />
+
+      <ModalPreviaDesignacoes
+        aberto={modalPreviaAberto}
+        onFechar={() => setModalPreviaAberto(false)}
+        onConfirmar={handleConfirmarDesignacoes}
+        onRegenerar={handleRegenerarDesignacoes}
+        designacoes={designacoesGeradas}
+        estudantes={estudantesCarregados}
+        estatisticas={estatisticas}
+        conflitos={conflitos}
+        recomendacoes={recomendacoes}
+        dataInicioSemana={dadosSelecao?.dataInicioSemana || ''}
+        carregando={carregandoSalvamento}
+      />
     </div>
   );
 };

@@ -271,32 +271,32 @@ export const areFamilyMembers = async (
       return false;
     }
 
-    // Get student profiles to compare emails
-    const { data: profiles, error: profileError } = await supabase
-      .from('profiles')
+    // Get student data to compare emails
+    const { data: estudantes, error: estudanteError } = await supabase
+      .from('estudantes')
       .select('id, email')
       .in('id', [student1Id, student2Id]);
 
-    if (profileError) {
-      console.error('Error getting student profiles:', profileError);
+    if (estudanteError) {
+      console.error('Error getting student data:', estudanteError);
       return false;
     }
 
-    const student1Profile = profiles?.find(p => p.id === student1Id);
-    const student2Profile = profiles?.find(p => p.id === student2Id);
+    const student1Data = estudantes?.find(e => e.id === student1Id);
+    const student2Data = estudantes?.find(e => e.id === student2Id);
 
-    if (!student1Profile || !student2Profile) {
+    if (!student1Data || !student2Data) {
       return false;
     }
 
     // Check if student2's email is in student1's family members
     const isStudent2InStudent1Family = student1Family?.some(fm =>
-      fm.email === student2Profile.email
+      fm.email === student2Data.email
     ) || false;
 
     // Check if student1's email is in student2's family members
     const isStudent1InStudent2Family = student2Family?.some(fm =>
-      fm.email === student1Profile.email
+      fm.email === student1Data.email
     ) || false;
 
     return isStudent2InStudent1Family || isStudent1InStudent2Family;
@@ -345,23 +345,20 @@ export const haveSameParent = async (
   const { supabase } = await import('@/integrations/supabase/client');
 
   try {
-    // This would need to be implemented based on your student-parent relationship structure
-    // For now, returning false as a placeholder
-    // You would query the estudantes table for id_pai_mae relationships
-
-    const { data: students, error } = await supabase
-      .from('profiles')
-      .select('id, parent_id') // Assuming you have a parent_id field
+    // Query the estudantes table for id_pai_mae relationships
+    const { data: estudantes, error } = await supabase
+      .from('estudantes')
+      .select('id, id_pai_mae')
       .in('id', [student1Id, student2Id]);
 
-    if (error || !students || students.length !== 2) {
+    if (error || !estudantes || estudantes.length !== 2) {
       return false;
     }
 
-    const student1 = students.find(s => s.id === student1Id);
-    const student2 = students.find(s => s.id === student2Id);
+    const student1 = estudantes.find(e => e.id === student1Id);
+    const student2 = estudantes.find(e => e.id === student2Id);
 
-    return !!(student1?.parent_id && student2?.parent_id && student1.parent_id === student2.parent_id);
+    return !!(student1?.id_pai_mae && student2?.id_pai_mae && student1.id_pai_mae === student2.id_pai_mae);
   } catch (error) {
     console.error('Exception checking parent relationship:', error);
     return false;
@@ -376,12 +373,23 @@ export const getFamilyRelationship = async (
   const { supabase } = await import('@/integrations/supabase/client');
 
   try {
+    // Get student2's email first
+    const { data: student2Data, error: student2Error } = await supabase
+      .from('estudantes')
+      .select('email')
+      .eq('id', student2Id)
+      .single();
+
+    if (student2Error || !student2Data?.email) {
+      return null;
+    }
+
     // Check if student2 is in student1's family
     const { data: familyMember, error } = await supabase
       .from('family_members')
       .select('relation')
       .eq('student_id', student1Id)
-      .eq('email', (await supabase.from('profiles').select('email').eq('id', student2Id).single()).data?.email)
+      .eq('email', student2Data.email)
       .single();
 
     if (error || !familyMember) {
