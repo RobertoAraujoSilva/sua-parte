@@ -42,18 +42,40 @@ export const useMeetings = () => {
 
     try {
       setLoading(true);
-      const { data, error } = await supabase
+
+      // Fetch meetings first
+      const { data: meetingsData, error: meetingsError } = await supabase
         .from('meetings')
-        .select(`
-          *,
-          meeting_parts (*),
-          administrative_assignments (*)
-        `)
+        .select('*')
         .eq('user_id', user.id)
         .order('meeting_date', { ascending: true });
 
-      if (error) throw error;
-      setMeetings(data || []);
+      if (meetingsError) throw meetingsError;
+
+      // Fetch meeting parts separately
+      const { data: partsData, error: partsError } = await supabase
+        .from('meeting_parts')
+        .select('*')
+        .in('meeting_id', (meetingsData || []).map(m => m.id));
+
+      if (partsError) throw partsError;
+
+      // Fetch administrative assignments separately
+      const { data: adminData, error: adminError } = await supabase
+        .from('administrative_assignments')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (adminError) throw adminError;
+
+      // Combine the data
+      const meetingsWithParts = (meetingsData || []).map(meeting => ({
+        ...meeting,
+        meeting_parts: (partsData || []).filter(part => part.meeting_id === meeting.id),
+        administrative_assignments: (adminData || []).filter(admin => admin.assignment_date === meeting.meeting_date)
+      }));
+
+      setMeetings(meetingsWithParts);
     } catch (err) {
       console.error('Error fetching meetings:', err);
       toast({
@@ -71,21 +93,37 @@ export const useMeetings = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      // Fetch administrative assignments first
+      const { data: assignmentsData, error: assignmentsError } = await supabase
         .from('administrative_assignments')
-        .select(`
-          *,
-          estudantes:id_estudante (
-            id,
-            nome,
-            cargo
-          )
-        `)
+        .select('*')
         .eq('user_id', user.id)
         .order('assignment_date', { ascending: true });
 
-      if (error) throw error;
-      setAdministrativeAssignments(data || []);
+      if (assignmentsError) throw assignmentsError;
+
+      // Get unique student IDs
+      const studentIds = [...new Set((assignmentsData || []).map(a => a.id_estudante).filter(Boolean))];
+
+      // Fetch student details separately if there are any
+      let studentsData: any[] = [];
+      if (studentIds.length > 0) {
+        const { data: students, error: studentsError } = await supabase
+          .from('estudantes')
+          .select('id, nome, cargo')
+          .in('id', studentIds);
+
+        if (studentsError) throw studentsError;
+        studentsData = students || [];
+      }
+
+      // Combine the data
+      const assignmentsWithStudents = (assignmentsData || []).map(assignment => ({
+        ...assignment,
+        estudante: studentsData.find(student => student.id === assignment.id_estudante) || null
+      }));
+
+      setAdministrativeAssignments(assignmentsWithStudents);
     } catch (err) {
       console.error('Error fetching administrative assignments:', err);
       toast({

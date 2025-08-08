@@ -49,6 +49,8 @@ export const useFamilyMembers = (studentId?: string) => {
           *,
           invitations_log (
             id,
+            family_member_id,
+            sent_by_student_id,
             invite_method,
             invite_status,
             invitation_token,

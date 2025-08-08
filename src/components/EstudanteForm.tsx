@@ -69,7 +69,7 @@ const EstudanteForm = ({ estudante, potentialParents, onSubmit, onCancel, loadin
     setQualificacoes(newQualificacoes);
   }, [formData.cargo, formData.genero, formData.idade]);
 
-  const handleInputChange = (field: keyof EstudanteFormData, value: string | number | Date | null) => {
+  const handleInputChange = (field: keyof EstudanteFormData, value: string | number | boolean | Date | null) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Clear error for this field

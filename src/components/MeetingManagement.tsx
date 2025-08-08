@@ -281,7 +281,7 @@ const MeetingManagement = () => {
                     <div key={assignment.id} className="border rounded-lg p-4">
                       <div className="flex items-center justify-between">
                         <div>
-                          <h3 className="font-medium">{assignment.estudantes?.nome}</h3>
+                          <h3 className="font-medium">{assignment.estudante?.nome}</h3>
                           <p className="text-sm text-gray-600">
                             {ADMINISTRATIVE_ROLE_LABELS[assignment.role]}
                           </p>
@@ -291,7 +291,7 @@ const MeetingManagement = () => {
                         </div>
                         <div className="text-right">
                           <Badge variant="outline">
-                            {assignment.estudantes?.cargo}
+                            {assignment.estudante?.cargo}
                           </Badge>
                           {assignment.assigned_room && (
                             <p className="text-xs text-gray-500 mt-1">

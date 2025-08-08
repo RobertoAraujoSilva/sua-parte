@@ -95,49 +95,76 @@ const PortalFamiliar: React.FC = () => {
       const futureDate = new Date();
       futureDate.setDate(futureDate.getDate() + 56); // 8 weeks
 
-      const { data: assignments, error: assignmentsError } = await supabase
-        .from('assignments')
-        .select(`
-          id,
-          meeting_date,
-          part_number,
-          part_title,
-          assignment_type,
-          theme,
-          duration_minutes,
-          status,
-          profiles!assignments_student_id_fkey (
-            nome_completo
-          ),
-          assistant:profiles!assignments_assistant_id_fkey (
-            nome_completo
-          )
-        `)
-        .or(`student_id.eq.${studentId},assistant_id.eq.${studentId}`)
-        .gte('meeting_date', new Date().toISOString().split('T')[0])
-        .lte('meeting_date', futureDate.toISOString().split('T')[0])
-        .order('meeting_date', { ascending: true })
-        .order('part_number', { ascending: true });
+      // First, get designacoes for the student
+      const { data: designacoes, error: designacoesError } = await supabase
+        .from('designacoes')
+        .select('*')
+        .eq('id_estudante', studentId);
 
-      if (assignmentsError) {
-        console.error('❌ Error loading assignments:', assignmentsError);
+      if (designacoesError) {
+        console.error('❌ Error loading designacoes:', designacoesError);
         setError('Erro ao carregar designações.');
         setLoading(false);
         return;
       }
 
-      const formattedAssignments: Assignment[] = (assignments || []).map(assignment => ({
-        id: assignment.id,
-        meeting_date: assignment.meeting_date,
-        part_number: assignment.part_number,
-        part_title: assignment.part_title,
-        assignment_type: assignment.assignment_type,
-        student_name: assignment.profiles?.nome_completo || 'Nome não encontrado',
-        assistant_name: assignment.assistant?.nome_completo,
-        theme: assignment.theme,
-        duration_minutes: assignment.duration_minutes,
-        status: assignment.status,
-      }));
+      if (!designacoes || designacoes.length === 0) {
+        setUpcomingAssignments([]);
+        setLoading(false);
+        return;
+      }
+
+      // Get programa IDs from designacoes
+      const programaIds = [...new Set(designacoes.map(d => d.id_programa).filter(Boolean))];
+
+      // Get programas data
+      const { data: assignments, error: assignmentsError } = await supabase
+        .from('programas')
+        .select('*')
+        .in('id', programaIds)
+        .gte('data_inicio_semana', new Date().toISOString().split('T')[0])
+        .lte('data_inicio_semana', futureDate.toISOString().split('T')[0])
+        .order('data_inicio_semana', { ascending: true });
+
+      if (assignmentsError) {
+        console.error('❌ Error loading programas:', assignmentsError);
+        setError('Erro ao carregar programas.');
+        setLoading(false);
+        return;
+      }
+
+      // Get student data
+      const { data: estudante, error: estudanteError } = await supabase
+        .from('estudantes')
+        .select('nome')
+        .eq('id', studentId)
+        .single();
+
+      if (estudanteError) {
+        console.error('❌ Error loading student data:', estudanteError);
+      }
+
+      // Combine the data
+      const formattedAssignments: Assignment[] = [];
+
+      (assignments || []).forEach(programa => {
+        const relatedDesignacoes = designacoes.filter(d => d.id_programa === programa.id);
+
+        relatedDesignacoes.forEach(designacao => {
+          formattedAssignments.push({
+            id: designacao.id,
+            meeting_date: programa.data_inicio_semana,
+            part_number: designacao.numero_parte,
+            part_title: `Parte ${designacao.numero_parte}`,
+            assignment_type: designacao.tipo_designacao || 'Designação',
+            student_name: estudante?.nome || 'Nome não encontrado',
+            assistant_name: null, // Not available in current schema
+            theme: designacao.tema || '',
+            duration_minutes: null, // Not available in current schema
+            status: 'scheduled', // Default status
+          });
+        });
+      });
 
       setUpcomingAssignments(formattedAssignments);
       setLoading(false);
