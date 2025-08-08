@@ -3,6 +3,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import EstudanteForm from "@/components/EstudanteForm";
 import EstudanteCard from "@/components/EstudanteCard";
+import SpreadsheetUpload from "@/components/SpreadsheetUpload";
+import TemplateDownload from "@/components/TemplateDownload";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
-import { Plus, Search, Users, ArrowLeft, Upload, BarChart3, Filter } from "lucide-react";
+import { Plus, Search, Users, ArrowLeft, Upload, BarChart3, Filter, FileSpreadsheet } from "lucide-react";
 import { useEstudantes } from "@/hooks/useEstudantes";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -175,7 +177,7 @@ const Estudantes = () => {
           <div className="container mx-auto px-4">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="flex items-center justify-between mb-6">
-                <TabsList className="grid w-auto grid-cols-3">
+                <TabsList className="grid w-auto grid-cols-4">
                   <TabsTrigger value="list" className="flex items-center gap-2">
                     <Users className="w-4 h-4" />
                     Lista
@@ -184,6 +186,10 @@ const Estudantes = () => {
                     <Plus className="w-4 h-4" />
                     {editingEstudante ? "Editar" : "Novo"}
                   </TabsTrigger>
+                  <TabsTrigger value="import" className="flex items-center gap-2">
+                    <FileSpreadsheet className="w-4 h-4" />
+                    Importar
+                  </TabsTrigger>
                   <TabsTrigger value="stats" className="flex items-center gap-2">
                     <BarChart3 className="w-4 h-4" />
                     Estatísticas
@@ -191,7 +197,11 @@ const Estudantes = () => {
                 </TabsList>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" disabled>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setActiveTab("import")}
+                  >
                     <Upload className="w-4 h-4 mr-2" />
                     Importar Planilha
                   </Button>
@@ -426,6 +436,14 @@ const Estudantes = () => {
                     </CardContent>
                   </Card>
                 </div>
+              </TabsContent>
+
+              {/* Import Tab */}
+              <TabsContent value="import" className="space-y-6">
+                <SpreadsheetUpload onImportComplete={() => {
+                  // Refresh students list after import
+                  window.location.reload();
+                }} />
               </TabsContent>
             </Tabs>
           </div>

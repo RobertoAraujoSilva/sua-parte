@@ -267,6 +267,42 @@ export const useEstudantes = () => {
     }
   }, [user]);
 
+  // Bulk import students
+  const bulkImportEstudantes = async (estudantesData: EstudanteInsert[]): Promise<boolean> => {
+    if (!user) {
+      toast({
+        title: "Erro",
+        description: "Usuário não autenticado",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("estudantes")
+        .insert(estudantesData);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: `${estudantesData.length} estudantes importados com sucesso!`,
+      });
+
+      await fetchEstudantes();
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : "Erro na importação em massa";
+      toast({
+        title: "Erro",
+        description: errorMessage,
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
   return {
     estudantes,
     loading,
@@ -278,5 +314,6 @@ export const useEstudantes = () => {
     filterEstudantes,
     getPotentialParents,
     getStatistics,
+    bulkImportEstudantes,
   };
 };

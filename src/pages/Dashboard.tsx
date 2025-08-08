@@ -2,13 +2,19 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Calendar, FileText, Settings, Plus, CalendarDays } from 'lucide-react';
+import { Users, Calendar, FileText, Settings, Plus, CalendarDays, Upload } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { useEstudantes } from '@/hooks/useEstudantes';
+import TemplateDownload from '@/components/TemplateDownload';
 
 const Dashboard = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { getStatistics } = useEstudantes();
+
+  // Get real-time statistics
+  const statistics = getStatistics();
 
   useEffect(() => {
     if (!user) {
@@ -147,6 +153,20 @@ const Dashboard = () => {
               <FileText className="w-4 h-4" />
               Gerar Designações
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+              onClick={() => navigate('/estudantes?tab=import')}
+            >
+              <Upload className="w-4 h-4" />
+              Importar Planilha
+            </Button>
+            <TemplateDownload
+              variant="outline"
+              size="sm"
+              className="flex items-center gap-2"
+            />
           </div>
         </div>
 
@@ -195,7 +215,7 @@ const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-jw-navy">0</div>
+              <div className="text-2xl font-bold text-jw-navy">{statistics.total}</div>
               <p className="text-xs text-muted-foreground">
                 Cadastrados no sistema
               </p>
