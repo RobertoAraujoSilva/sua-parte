@@ -5,12 +5,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, BookOpen, Users, Award, ArrowLeft, User } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { Calendar, BookOpen, Users, Award, ArrowLeft, User, LogOut } from 'lucide-react';
 
 const EstudantePortal = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, profile, loading, isEstudante } = useAuth();
+  const { user, profile, loading, isEstudante, signOut } = useAuth();
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
@@ -37,6 +38,32 @@ const EstudantePortal = () => {
 
     setIsAuthorized(true);
   }, [user, profile, isEstudante, loading, id, navigate]);
+
+  const handleSignOut = async () => {
+    try {
+      const { error } = await signOut();
+      if (error) {
+        toast({
+          title: "Erro",
+          description: "Erro ao sair. Tente novamente.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Sessão encerrada",
+          description: "Você foi desconectado com sucesso.",
+        });
+        navigate('/');
+      }
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao sair. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -124,6 +151,22 @@ const EstudantePortal = () => {
                 </div>
                 <h1 className="text-xl font-semibold text-jw-navy">Portal do Estudante</h1>
               </div>
+            </div>
+
+            {/* User Info and Logout */}
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-jw-navy font-medium">
+                {displayProfile.nome_completo}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleSignOut}
+                className="text-jw-navy hover:text-red-600 hover:bg-red-50"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Sair
+              </Button>
             </div>
           </div>
         </div>

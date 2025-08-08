@@ -4,12 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, Calendar, FileText, Settings, Plus, CalendarDays, Upload } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { toast } from '@/hooks/use-toast';
 import { useEstudantes } from '@/hooks/useEstudantes';
 import TemplateDownload from '@/components/TemplateDownload';
+import Header from '@/components/Header';
+import { DebugPanel } from '@/components/DebugPanel';
 
 const Dashboard = () => {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { getStatistics } = useEstudantes();
 
@@ -21,23 +22,6 @@ const Dashboard = () => {
       navigate('/auth');
     }
   }, [user, navigate]);
-
-  const handleSignOut = async () => {
-    const { error } = await signOut();
-    if (error) {
-      toast({
-        title: "Erro",
-        description: "Erro ao sair. Tente novamente.",
-        variant: "destructive"
-      });
-    } else {
-      toast({
-        title: "Sessão encerrada",
-        description: "Você foi desconectado com sucesso.",
-      });
-      navigate('/');
-    }
-  };
 
   if (!user) {
     return null;
@@ -83,36 +67,11 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-jw-navy text-white shadow-lg">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-jw-blue rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">SM</span>
-              </div>
-              <h1 className="text-xl font-semibold">Sistema Ministerial</h1>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-jw-gold">
-                Olá, {user.user_metadata?.nome_completo || user.email}
-              </span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleSignOut}
-                className="text-white hover:text-jw-gold"
-              >
-                Sair
-              </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="pt-16">
+        <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h2 className="text-3xl font-bold text-jw-navy mb-2">
             Painel de Controle
@@ -250,7 +209,11 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </div>
+        </div>
       </main>
+
+      {/* Debug Panel - Fixed position */}
+      <DebugPanel position="fixed" />
     </div>
   );
 };
