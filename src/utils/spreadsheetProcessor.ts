@@ -216,24 +216,68 @@ export const parseBrazilianDate = (dateString: string): Date | null => {
  */
 export const createTemplate = (): Blob => {
   const workbook = XLSX.utils.book_new();
-  
+
   // Create worksheet with headers and sample data
   const data = [
     TEMPLATE_COLUMNS,
-    ...TEMPLATE_SAMPLE_DATA.map(sample => 
+    ...TEMPLATE_SAMPLE_DATA.map(sample =>
       TEMPLATE_COLUMNS.map(col => sample[col as keyof typeof sample] || '')
     )
   ];
-  
+
   const worksheet = XLSX.utils.aoa_to_sheet(data);
-  
+
   // Set column widths
   const colWidths = TEMPLATE_COLUMNS.map(col => ({ wch: Math.max(col.length, 15) }));
   worksheet['!cols'] = colWidths;
-  
+
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Estudantes');
-  
+
   // Generate Excel file
   const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
   return new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+};
+
+/**
+ * Creates CSV error report for download
+ */
+export const createErrorReport = (validationResults: ValidationResult[]): Blob => {
+  const errorResults = validationResults.filter(result => !result.isValid || result.warnings.length > 0);
+
+  if (errorResults.length === 0) {
+    // Create empty report
+    const csvContent = 'Linha Excel,Tipo,Mensagem\n"Nenhum erro encontrado","Info","Todos os registros são válidos"';
+    return new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  }
+
+  // Create CSV header
+  const headers = ['Linha Excel', 'Tipo', 'Mensagem'];
+  let csvContent = headers.join(',') + '\n';
+
+  // Add error rows
+  errorResults.forEach(result => {
+    const excelRow = result.rowIndex;
+
+    // Add errors
+    result.errors.forEach(error => {
+      const row = [
+        excelRow.toString(),
+        'Erro',
+        `"${error.replace(/"/g, '""')}"`
+      ];
+      csvContent += row.join(',') + '\n';
+    });
+
+    // Add warnings
+    result.warnings.forEach(warning => {
+      const row = [
+        excelRow.toString(),
+        'Aviso',
+        `"${warning.replace(/"/g, '""')}"`
+      ];
+      csvContent += row.join(',') + '\n';
+    });
+  });
+
+  return new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
 };

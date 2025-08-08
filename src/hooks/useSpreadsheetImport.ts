@@ -16,6 +16,12 @@ export const useSpreadsheetImport = () => {
   const [loading, setLoading] = useState(false);
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([]);
   const [importSummary, setImportSummary] = useState<ImportSummary | null>(null);
+  const [importProgress, setImportProgress] = useState<{
+    current: number;
+    total: number;
+    phase: 'importing' | 'linking' | 'complete';
+    message: string;
+  }>({ current: 0, total: 0, phase: 'importing', message: '' });
 
   /**
    * Validates Excel file and returns validation results
@@ -81,12 +87,21 @@ export const useSpreadsheetImport = () => {
       // Process in batches to avoid timeout
       const batchSize = 10;
       const batches = [];
-      
+
       for (let i = 0; i < validResults.length; i += batchSize) {
         batches.push(validResults.slice(i, i + batchSize));
       }
 
-      for (const batch of batches) {
+      // Initialize progress
+      setImportProgress({
+        current: 0,
+        total: validResults.length,
+        phase: 'importing',
+        message: 'Importando estudantes...'
+      });
+
+      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+        const batch = batches[batchIndex];
         const insertData: EstudanteInsert[] = batch.map(result => ({
           user_id: user.id,
           nome: result.data!.nome,
@@ -117,10 +132,34 @@ export const useSpreadsheetImport = () => {
         } else {
           imported += batch.length;
         }
+
+        // Update progress
+        setImportProgress({
+          current: Math.min((batchIndex + 1) * batchSize, validResults.length),
+          total: validResults.length,
+          phase: 'importing',
+          message: `Importando estudantes... ${Math.min((batchIndex + 1) * batchSize, validResults.length)}/${validResults.length}`
+        });
       }
 
-      // TODO: Handle parent relationships in a second pass
-      // This would require matching parent names to imported students
+      // Second pass: Handle parent relationships
+      if (imported > 0) {
+        setImportProgress({
+          current: validResults.length,
+          total: validResults.length,
+          phase: 'linking',
+          message: 'Vinculando relacionamentos familiares...'
+        });
+        await linkParentChildRelationships(validResults);
+      }
+
+      // Complete progress
+      setImportProgress({
+        current: validResults.length,
+        total: validResults.length,
+        phase: 'complete',
+        message: 'Importação concluída!'
+      });
 
       const summary: ImportSummary = {
         totalRows: validationResults.length,
@@ -150,6 +189,69 @@ export const useSpreadsheetImport = () => {
       throw error;
     } finally {
       setLoading(false);
+    }
+  };
+
+  /**
+   * Links parent-child relationships after import
+   */
+  const linkParentChildRelationships = async (validResults: ValidationResult[]) => {
+    if (!user) return;
+
+    try {
+      // Get all students (existing + newly imported) to create name-to-ID mapping
+      const { data: allStudents } = await supabase
+        .from('estudantes')
+        .select('id, nome')
+        .eq('user_id', user.id);
+
+      if (!allStudents) return;
+
+      // Create name-to-ID mapping
+      const nameToIdMap = new Map<string, string>();
+      allStudents.forEach(student => {
+        nameToIdMap.set(student.nome.toLowerCase().trim(), student.id);
+      });
+
+      // Find students that need parent linking
+      const studentsNeedingParents = validResults
+        .filter(result =>
+          result.isValid &&
+          result.data &&
+          result.data.parente_responsavel &&
+          result.data.parente_responsavel.trim() !== ''
+        )
+        .map(result => ({
+          nome: result.data!.nome,
+          parentName: result.data!.parente_responsavel!.toLowerCase().trim()
+        }));
+
+      if (studentsNeedingParents.length === 0) return;
+
+      // Process parent linking in batches
+      const batchSize = 10;
+      for (let i = 0; i < studentsNeedingParents.length; i += batchSize) {
+        const batch = studentsNeedingParents.slice(i, i + batchSize);
+
+        for (const student of batch) {
+          const parentId = nameToIdMap.get(student.parentName);
+          const studentId = nameToIdMap.get(student.nome.toLowerCase().trim());
+
+          if (parentId && studentId && parentId !== studentId) {
+            // Update the student's parent relationship
+            await supabase
+              .from('estudantes')
+              .update({ id_pai_mae: parentId })
+              .eq('id', studentId)
+              .eq('user_id', user.id);
+          }
+        }
+      }
+
+      console.log(`Processed parent-child relationships for ${studentsNeedingParents.length} students`);
+    } catch (error) {
+      console.error('Error linking parent-child relationships:', error);
+      // Don't throw error - this is a secondary operation
     }
   };
 
@@ -197,12 +299,14 @@ export const useSpreadsheetImport = () => {
   const resetImport = () => {
     setValidationResults([]);
     setImportSummary(null);
+    setImportProgress({ current: 0, total: 0, phase: 'importing', message: '' });
   };
 
   return {
     loading,
     validationResults,
     importSummary,
+    importProgress,
     validateFile,
     importStudents,
     checkDuplicates,

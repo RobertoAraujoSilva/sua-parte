@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import EstudanteForm from "@/components/EstudanteForm";
@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Plus, Search, Users, ArrowLeft, Upload, BarChart3, Filter, FileSpreadsheet } from "lucide-react";
 import { useEstudantes } from "@/hooks/useEstudantes";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,6 +26,7 @@ import {
 
 const Estudantes = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
   const {
     estudantes,
@@ -39,8 +40,20 @@ const Estudantes = () => {
     getStatistics,
   } = useEstudantes();
 
-  // UI State
-  const [activeTab, setActiveTab] = useState("list");
+  // UI State - Initialize from URL parameter
+  const [activeTab, setActiveTab] = useState(() => {
+    const tabParam = searchParams.get('tab');
+    return ['list', 'form', 'import', 'stats'].includes(tabParam || '') ? tabParam : 'list';
+  });
+
+  // Update URL when tab changes
+  useEffect(() => {
+    if (activeTab !== 'list') {
+      setSearchParams({ tab: activeTab });
+    } else {
+      setSearchParams({});
+    }
+  }, [activeTab, setSearchParams]);
   const [editingEstudante, setEditingEstudante] = useState<EstudanteWithParent | null>(null);
   const [formLoading, setFormLoading] = useState(false);
 
@@ -105,6 +118,15 @@ const Estudantes = () => {
 
   const handleCancelForm = () => {
     setEditingEstudante(null);
+    setActiveTab("list");
+  };
+
+  const handleImportComplete = () => {
+    // Refresh students list after import
+    window.location.reload();
+  };
+
+  const handleViewList = () => {
     setActiveTab("list");
   };
 
@@ -440,10 +462,10 @@ const Estudantes = () => {
 
               {/* Import Tab */}
               <TabsContent value="import" className="space-y-6">
-                <SpreadsheetUpload onImportComplete={() => {
-                  // Refresh students list after import
-                  window.location.reload();
-                }} />
+                <SpreadsheetUpload
+                  onImportComplete={handleImportComplete}
+                  onViewList={handleViewList}
+                />
               </TabsContent>
             </Tabs>
           </div>
