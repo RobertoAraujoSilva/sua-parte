@@ -23,6 +23,7 @@ import Funcionalidades from "./pages/Funcionalidades";
 import Congregacoes from "./pages/Congregacoes";
 import Suporte from "./pages/Suporte";
 import Sobre from "./pages/Sobre";
+import Doar from "./pages/Doar";
 import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
@@ -50,6 +51,7 @@ const App = () => (
             <Route path="/congregacoes" element={<Congregacoes />} />
             <Route path="/suporte" element={<Suporte />} />
             <Route path="/sobre" element={<Sobre />} />
+            <Route path="/doar" element={<Doar />} />
 
             {/* Instrutor Only Routes */}
             <Route

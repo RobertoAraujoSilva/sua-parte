@@ -1,16 +1,17 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import DonationCard from "@/components/DonationCard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { 
-  MessageCircle, 
-  BookOpen, 
-  Video, 
-  Phone, 
-  Mail, 
+import {
+  MessageCircle,
+  BookOpen,
+  Video,
+  Phone,
+  Mail,
   Clock,
   CheckCircle,
   AlertCircle,
@@ -274,6 +275,27 @@ const Suporte = () => {
                   </Card>
                 );
               })}
+            </div>
+          </div>
+        </section>
+
+        {/* Donation Section */}
+        <section className="py-20">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto">
+              <div className="text-center mb-12">
+                <h2 className="text-3xl font-bold mb-4">Apoie o Projeto</h2>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  O Sistema Ministerial é mantido de forma independente. Sua contribuição
+                  nos ajuda a manter o sistema gratuito e em constante evolução para
+                  todas as congregações.
+                </p>
+              </div>
+              <DonationCard
+                showRecipientInfo={true}
+                showExternalOptions={true}
+                qrSize={160}
+              />
             </div>
           </div>
         </section>

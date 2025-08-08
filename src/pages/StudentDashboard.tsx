@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Calendar, Clock, MapPin, CheckCircle, Heart, Copy, QrCode } from "lucide-react";
+import { Calendar, Clock, MapPin, CheckCircle } from "lucide-react";
+import DonationCard from "@/components/DonationCard";
 
 const StudentDashboard: React.FC = () => {
   const { id } = useParams();
-  const [copiedPix, setCopiedPix] = useState(false);
 
   // Mock data - TODO: Buscar dados do estudante e designações via Supabase
   const estudante = {
@@ -45,23 +45,7 @@ const StudentDashboard: React.FC = () => {
     }
   ];
 
-  const handleCopyPix = async () => {
-    try {
-      await navigator.clipboard.writeText("chave-pix-sistema-ministerial@exemplo.com");
-      setCopiedPix(true);
-      toast({
-        title: "Chave Pix copiada!",
-        description: "A chave foi copiada para sua área de transferência.",
-      });
-      setTimeout(() => setCopiedPix(false), 3000);
-    } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Não foi possível copiar a chave Pix.",
-        variant: "destructive"
-      });
-    }
-  };
+
 
   const handleConfirmarParticipacao = (designacaoId: number) => {
     // TODO: Implementar confirmação no backend
@@ -155,48 +139,7 @@ const StudentDashboard: React.FC = () => {
 
           {/* Doações */}
           <section className="mb-12">
-            <Card className="border-2 border-jw-gold/20">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-red-500" />
-                  Apoie o Sistema Ministerial
-                </CardTitle>
-                <CardDescription>
-                  Sua contribuição ajuda a manter o sistema funcionando e em constante melhoria
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex flex-col md:flex-row items-center gap-6">
-                  <div className="flex-shrink-0">
-                    <div className="w-32 h-32 bg-gradient-to-br from-jw-blue to-jw-blue-dark rounded-lg flex items-center justify-center border-4 border-white shadow-lg">
-                      <QrCode className="w-16 h-16 text-white" />
-                    </div>
-                    <p className="text-xs text-center mt-2 text-gray-500">QR Code Pix</p>
-                  </div>
-
-                  <div className="flex-1 text-center md:text-left">
-                    <h3 className="text-lg font-semibold mb-2">Contribua via Pix</h3>
-                    <p className="text-gray-600 mb-4">
-                      Qualquer valor é bem-vindo e faz a diferença para manter
-                      o sistema ativo e gratuito para todas as congregações.
-                    </p>
-
-                    <Button
-                      variant="hero"
-                      onClick={handleCopyPix}
-                      className="w-full md:w-auto"
-                    >
-                      <Copy className="w-4 h-4 mr-2" />
-                      {copiedPix ? "Chave Copiada!" : "Copiar Chave Pix"}
-                    </Button>
-
-                    <p className="text-xs text-gray-500 mt-2">
-                      chave-pix-sistema-ministerial@exemplo.com
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <DonationCard />
           </section>
 
           {/* Histórico */}

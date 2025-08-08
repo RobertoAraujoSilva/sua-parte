@@ -105,6 +105,9 @@ const Header = () => {
                   <Link to="/sobre" className="hover:text-jw-gold transition-colors">
                     SOBRE
                   </Link>
+                  <Link to="/doar" className="hover:text-jw-gold transition-colors font-semibold">
+                    DOAR
+                  </Link>
                 </>
               )}
 
