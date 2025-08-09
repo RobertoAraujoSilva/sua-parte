@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
+import { testSupabaseConnection } from '@/utils/supabaseConnectionTest';
 
 // Types
 type UserRole = Database['public']['Enums']['user_role'];
@@ -52,26 +53,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 
 
-  // Fetch user profile from database with improved error handling and timeout
+  // Fetch user profile from database with proper timeout handling
   const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
     console.log('🔍 Fetching profile for user ID:', userId);
 
     try {
-      // Add timeout to prevent hanging requests
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 3000); // 3 second timeout
-      });
+      // Helper function to create timeout promise
+      const createTimeout = (ms: number, operation: string) =>
+        new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error(`${operation} timeout after ${ms}ms`)), ms);
+        });
 
-      // First, let's check the current session to ensure we're authenticated
+      // Step 1: Check session with its own timeout (2 seconds)
+      console.log('🔐 Checking current session...');
+      const sessionTimeout = createTimeout(2000, 'Session check');
       const sessionPromise = supabase.auth.getSession();
-      const { data: { session }, error: sessionError } = await Promise.race([sessionPromise, timeoutPromise]);
 
-      console.log('🔐 Current session check:', {
+      const { data: { session }, error: sessionError } = await Promise.race([
+        sessionPromise,
+        sessionTimeout
+      ]);
+
+      console.log('🔐 Session check result:', {
         hasSession: !!session,
         sessionUserId: session?.user?.id,
         targetUserId: userId,
         sessionError: sessionError?.message
       });
+
+      if (sessionError) {
+        console.error('❌ Session error:', sessionError);
+        return null;
+      }
 
       if (!session) {
         console.error('❌ No active session when fetching profile');
@@ -86,46 +99,55 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
 
-      // Try direct profiles table access with timeout
+      // Step 2: Fetch profile with its own timeout (4 seconds)
       console.log('🔍 Fetching from profiles table...');
+      const profileTimeout = createTimeout(4000, 'Profile fetch');
       const profilePromise = supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      const { data: profileData, error: profileError } = await Promise.race([profilePromise, timeoutPromise]);
+      const { data: profileData, error: profileError } = await Promise.race([
+        profilePromise,
+        profileTimeout
+      ]);
 
       if (profileError) {
-        console.log('❌ Profile not found in profiles table, attempting to create from auth metadata:', profileError);
-        // If profile doesn't exist, create one from user metadata
+        if (profileError.code === 'PGRST116') {
+          console.log('📝 Profile not found in database, creating from auth metadata');
+        } else {
+          console.log('❌ Profile fetch error, attempting to create from auth metadata:', profileError);
+        }
+        // If profile doesn't exist or fetch fails, create one from user metadata
         return await createProfileFromAuth(userId);
       }
 
       if (profileData) {
-        // Get email from auth.users separately
-        const email = session?.user?.email || '';
+        // Get email from session
+        const email = session.user.email || '';
         const profileWithEmail = {
           ...profileData,
           email
         };
-        console.log('✅ Profile fetched from profiles table:', profileWithEmail);
+        console.log('✅ Profile fetched successfully from database');
         return profileWithEmail as UserProfile;
       }
 
-      console.log('❌ No profile data returned');
-      return null;
+      console.log('❌ No profile data returned, using metadata fallback');
+      return await createProfileFromAuth(userId);
+
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error('❌ Error fetching profile:', errorMessage);
+      console.error('❌ Error in fetchProfile:', errorMessage);
 
-      // If it's a timeout or network error, try to create profile from auth metadata as fallback
+      // Always try metadata fallback on any error
       try {
-        console.log('🔄 Attempting to create profile from auth metadata as fallback...');
+        console.log('🔄 Using metadata fallback due to error...');
         return await createProfileFromAuth(userId);
       } catch (createError: unknown) {
         const createErrorMessage = createError instanceof Error ? createError.message : 'Unknown error';
-        console.error('❌ Failed to create profile from auth:', createErrorMessage);
+        console.error('❌ Metadata fallback also failed:', createErrorMessage);
         return null;
       }
     }
@@ -134,30 +156,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Create profile from auth metadata if it doesn't exist
   const createProfileFromAuth = useCallback(async (userId: string) => {
     try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      console.log('📝 Creating profile from auth metadata for user:', userId);
+
+      // Get user with timeout
+      const userTimeout = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Get user timeout')), 3000);
+      });
+
+      const { data: { user }, error: userError } = await Promise.race([
+        supabase.auth.getUser(),
+        userTimeout
+      ]);
 
       if (userError || !user) {
-        console.error('Error getting user for profile creation:', userError);
+        console.error('❌ Error getting user for profile creation:', userError);
         return null;
       }
 
       const metadata = user.user_metadata || {};
+      console.log('📋 User metadata:', {
+        hasMetadata: Object.keys(metadata).length > 0,
+        role: metadata.role
+      });
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .insert({
+      // Try to insert profile with timeout
+      const insertTimeout = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Profile insert timeout')), 3000);
+      });
+
+      const { data, error } = await Promise.race([
+        supabase
+          .from('profiles')
+          .insert({
+            id: userId,
+            nome_completo: metadata.nome_completo || '',
+            congregacao: metadata.congregacao || '',
+            cargo: metadata.cargo || '',
+            role: (metadata.role as UserRole) || 'instrutor'
+          })
+          .select()
+          .single(),
+        insertTimeout
+      ]);
+
+      if (error) {
+        console.error('❌ Error creating profile in database:', error);
+        // Return profile from metadata even if DB insert fails
+        const email = user.email || '';
+        const fallbackProfile = {
           id: userId,
           nome_completo: metadata.nome_completo || '',
           congregacao: metadata.congregacao || '',
           cargo: metadata.cargo || '',
-          role: (metadata.role as UserRole) || 'instrutor'
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating profile:', error);
-        return null;
+          role: (metadata.role as UserRole) || 'instrutor',
+          date_of_birth: metadata.date_of_birth || null,
+          email,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        console.log('🔄 Using fallback profile from metadata');
+        return fallbackProfile as UserProfile;
       }
 
       // Return the profile with email from auth
@@ -173,31 +231,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []); // Empty dependency array since createProfileFromAuth doesn't depend on any props or state
 
   useEffect(() => {
-    // Get initial session
+    // Get initial session with improved error handling
     const getInitialSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('🔄 Getting initial session...');
+
+        // Add timeout to prevent hanging on Supabase initialization issues
+        const sessionTimeout = new Promise<never>((_, reject) => {
+          setTimeout(() => reject(new Error('Initial session timeout')), 8000); // Longer timeout for initial load
+        });
+
+        const { data: { session }, error } = await Promise.race([
+          supabase.auth.getSession(),
+          sessionTimeout
+        ]);
 
         if (error) {
-          console.error('Error getting session:', error);
+          console.error('❌ Error getting initial session:', error);
           setLoading(false);
           return;
         }
 
         if (session?.user) {
-          console.log('🔄 Initial session found, setting user immediately');
+          console.log('✅ Initial session found, setting user immediately');
           setSession(session);
           setUser(session.user);
 
           // Fetch profile in background without blocking initial load
-          fetchProfile(session.user.id).then(userProfile => {
-            console.log('📋 Initial profile loaded:', userProfile);
-            setProfile(userProfile);
-          }).catch((error: unknown) => {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            console.error('❌ Initial profile fetch failed:', errorMessage);
-            // Don't block, let ProtectedRoute use metadata
-          });
+          // Use a separate timeout for profile loading
+          const profileLoadTimeout = setTimeout(() => {
+            console.log('⏰ Profile loading taking too long, continuing without profile');
+          }, 5000);
+
+          fetchProfile(session.user.id)
+            .then(userProfile => {
+              clearTimeout(profileLoadTimeout);
+              console.log('✅ Initial profile loaded successfully');
+              setProfile(userProfile);
+            })
+            .catch((error: unknown) => {
+              clearTimeout(profileLoadTimeout);
+              const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+              console.error('❌ Initial profile fetch failed:', errorMessage);
+              // Don't block app initialization, let ProtectedRoute use metadata fallback
+            });
+        } else {
+          console.log('ℹ️ No initial session found');
         }
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -207,6 +286,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setInitialLoadComplete(true);
       }
     };
+
+    // Test connection before attempting authentication
+    if (import.meta.env.DEV) {
+      testSupabaseConnection().then(result => {
+        if (!result.success) {
+          console.warn('⚠️ Supabase connection issues detected before auth initialization:', result.error);
+        }
+      });
+    }
 
     getInitialSession();
 
