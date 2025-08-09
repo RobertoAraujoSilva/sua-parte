@@ -96,6 +96,9 @@ const Header = () => {
                   <Link to="/funcionalidades" className="hover:text-jw-gold transition-colors">
                     FUNCIONALIDADES
                   </Link>
+                  <a href="#faq" className="hover:text-jw-gold transition-colors">
+                    FAQ
+                  </a>
                   <Link to="/congregacoes" className="hover:text-jw-gold transition-colors">
                     CONGREGAÇÕES
                   </Link>
