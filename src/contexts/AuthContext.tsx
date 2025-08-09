@@ -3,6 +3,8 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { testSupabaseConnection } from '@/utils/supabaseConnectionTest';
+import { enhancedSessionRecovery, pageRefreshOptimizer } from '@/utils/pageRefreshOptimization';
+import { runRegionalConnectivityTest } from '@/utils/regionalConnectivityTest';
 
 // Types
 type UserRole = Database['public']['Enums']['user_role'];
@@ -64,9 +66,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setTimeout(() => reject(new Error(`${operation} timeout after ${ms}ms`)), ms);
         });
 
-      // Step 1: Check session with generous timeout to allow token refresh
-      console.log('🔐 Checking current session (allowing time for token refresh)...');
-      const sessionTimeout = createTimeout(8000, 'Session check'); // Increased from 2s to 8s
+      // Step 1: Check session with extended timeout for regional connectivity (sa-east-1)
+      console.log('🔐 Checking current session (allowing time for regional latency + token refresh)...');
+      const sessionTimeout = createTimeout(15000, 'Session check'); // Increased from 8s to 15s for sa-east-1
 
       // Add retry logic for session check
       let session = null;
@@ -135,9 +137,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
 
-      // Step 2: Fetch profile with improved error handling
+      // Step 2: Fetch profile with extended timeout for regional connectivity
       console.log('🔍 Fetching from profiles table...');
-      const profileTimeout = createTimeout(6000, 'Profile fetch'); // Increased from 4s to 6s
+      const profileTimeout = createTimeout(10000, 'Profile fetch'); // Increased from 6s to 10s for sa-east-1
 
       // Add retry logic for profile fetch
       let profileData = null;
@@ -226,9 +228,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('📝 Creating profile from auth metadata for user:', userId);
 
-      // Get user with longer timeout and retry logic
+      // Get user with extended timeout for regional connectivity
       const userTimeout = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Get user timeout')), 6000); // Increased from 3s to 6s
+        setTimeout(() => reject(new Error('Get user timeout')), 10000); // Increased from 6s to 10s for sa-east-1
       });
 
       let user = null;
@@ -334,59 +336,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []); // Empty dependency array since createProfileFromAuth doesn't depend on any props or state
 
   useEffect(() => {
-    // Get initial session with improved error handling
+    // Get initial session with enhanced recovery for sa-east-1 region
     const getInitialSession = async () => {
       try {
-        console.log('🔄 Getting initial session...');
+        console.log('🔄 Getting initial session with enhanced recovery...');
 
-        // Add timeout with retry logic for initial session
-        const sessionTimeout = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('Initial session timeout')), 12000); // Increased to 12s for initial load
-        });
+        // Use enhanced session recovery optimized for page refresh and regional connectivity
+        const recoveryResult = await enhancedSessionRecovery();
 
-        let session = null;
-        let error = null;
-        let retryCount = 0;
-        const maxRetries = 3; // More retries for initial session
+        const session = recoveryResult.session;
+        const fromCache = recoveryResult.fromCache;
+        const duration = recoveryResult.duration;
 
-        while (retryCount <= maxRetries) {
-          try {
-            const result = await Promise.race([
-              supabase.auth.getSession(),
-              sessionTimeout
-            ]);
+        console.log(`🔄 Session recovery completed in ${duration}ms (from cache: ${fromCache})`);
 
-            session = result.data.session;
-            error = result.error;
-
-            // If successful or non-auth error, break
-            if (session || (error && !error.message?.includes('403'))) {
-              break;
-            }
-
-            // If 403 error, wait and retry
-            if (error?.message?.includes('403') && retryCount < maxRetries) {
-              console.log(`🔄 Initial session 403 error, retrying in ${(retryCount + 1) * 2000}ms...`);
-              await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000));
-              retryCount++;
-              continue;
-            }
-
-            break;
-          } catch (timeoutError) {
-            if (retryCount < maxRetries) {
-              console.log(`🔄 Initial session timeout, retrying in ${(retryCount + 1) * 2000}ms...`);
-              await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000));
-              retryCount++;
-              continue;
-            }
-            error = timeoutError;
-            break;
-          }
-        }
-
-        if (error) {
-          console.error('❌ Error getting initial session after retries:', error);
+        if (!session) {
+          console.log('ℹ️ No session found during initial recovery');
           setLoading(false);
           return;
         }
@@ -426,11 +391,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // Test connection before attempting authentication
+    // Test regional connectivity before attempting authentication
     if (import.meta.env.DEV) {
-      testSupabaseConnection().then(result => {
-        if (!result.success) {
-          console.warn('⚠️ Supabase connection issues detected before auth initialization:', result.error);
+      Promise.all([
+        testSupabaseConnection(),
+        runRegionalConnectivityTest()
+      ]).then(([connectionResult, regionalResult]) => {
+        if (!connectionResult.success) {
+          console.warn('⚠️ Supabase connection issues detected:', connectionResult.error);
+        }
+
+        if (regionalResult.overall.stability === 'poor' || regionalResult.overall.stability === 'critical') {
+          console.warn('⚠️ Regional connectivity issues detected for sa-east-1:', {
+            averageLatency: `${regionalResult.overall.averageLatency}ms`,
+            stability: regionalResult.overall.stability,
+            recommendations: regionalResult.overall.recommendations
+          });
         }
       });
     }
