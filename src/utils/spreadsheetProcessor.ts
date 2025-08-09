@@ -282,3 +282,157 @@ export const createErrorReport = (validationResults: ValidationResult[]): Blob =
 
   return new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
 };
+
+/**
+ * Creates enhanced error report with detailed information and statistics
+ */
+export const createEnhancedErrorReport = (
+  validationResults: ValidationResult[],
+  fileName: string = 'planilha'
+): Blob => {
+  const timestamp = format(new Date(), 'dd/MM/yyyy HH:mm:ss');
+
+  let csvContent = '\uFEFF'; // BOM for UTF-8
+
+  // Header with metadata
+  csvContent += `Relatório de Erros - Importação de Estudantes\n`;
+  csvContent += `Arquivo: ${fileName}\n`;
+  csvContent += `Data/Hora: ${timestamp}\n`;
+  csvContent += `Total de registros analisados: ${validationResults.length}\n`;
+
+  const errorsCount = validationResults.filter(r => !r.isValid).length;
+  const warningsCount = validationResults.filter(r => r.warnings.length > 0).length;
+
+  csvContent += `Registros com erros: ${errorsCount}\n`;
+  csvContent += `Registros com avisos: ${warningsCount}\n`;
+  csvContent += `\n`;
+
+  // Column headers
+  csvContent += 'Linha,Tipo,Campo,Valor Original,Problema,Sugestão,Dados Completos\n';
+
+  validationResults.forEach((result, index) => {
+    const excelRow = index + 2; // Excel rows start at 1, plus header
+
+    // Add errors
+    result.errors.forEach(error => {
+      const parts = error.split(':');
+      const field = parts[0]?.trim() || 'Geral';
+      const problem = parts.slice(1).join(':').trim() || error;
+
+      // Get original value for the field
+      const originalValue = getOriginalFieldValue(result.data, field);
+      const suggestion = getSuggestionForError(field, problem);
+      const completeData = formatCompleteData(result.data);
+
+      const row = [
+        excelRow.toString(),
+        'Erro',
+        `"${field.replace(/"/g, '""')}"`,
+        `"${originalValue.replace(/"/g, '""')}"`,
+        `"${problem.replace(/"/g, '""')}"`,
+        `"${suggestion.replace(/"/g, '""')}"`,
+        `"${completeData.replace(/"/g, '""')}"`
+      ];
+      csvContent += row.join(',') + '\n';
+    });
+
+    // Add warnings
+    result.warnings.forEach(warning => {
+      const parts = warning.split(':');
+      const field = parts[0]?.trim() || 'Geral';
+      const problem = parts.slice(1).join(':').trim() || warning;
+
+      const originalValue = getOriginalFieldValue(result.data, field);
+      const suggestion = getSuggestionForWarning(field, problem);
+      const completeData = formatCompleteData(result.data);
+
+      const row = [
+        excelRow.toString(),
+        'Aviso',
+        `"${field.replace(/"/g, '""')}"`,
+        `"${originalValue.replace(/"/g, '""')}"`,
+        `"${problem.replace(/"/g, '""')}"`,
+        `"${suggestion.replace(/"/g, '""')}"`,
+        `"${completeData.replace(/"/g, '""')}"`
+      ];
+      csvContent += row.join(',') + '\n';
+    });
+  });
+
+  return new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+};
+
+/**
+ * Gets original field value from processed data
+ */
+const getOriginalFieldValue = (data: ProcessedStudentData, field: string): string => {
+  const fieldMap: Record<string, keyof ProcessedStudentData> = {
+    'Nome': 'nome',
+    'Data de Nascimento': 'data_nascimento',
+    'Gênero': 'genero',
+    'Cargo': 'cargo',
+    'Email': 'email',
+    'Telefone': 'telefone',
+    'Endereço': 'endereco',
+    'Responsável': 'nome_responsavel',
+    'Status': 'ativo'
+  };
+
+  const key = fieldMap[field];
+  if (key && data[key] !== undefined) {
+    return String(data[key]);
+  }
+
+  return 'N/A';
+};
+
+/**
+ * Provides suggestions for common errors
+ */
+const getSuggestionForError = (field: string, problem: string): string => {
+  const suggestions: Record<string, string> = {
+    'Nome': 'Verifique se o nome está completo e sem caracteres especiais',
+    'Data de Nascimento': 'Use formato DD/MM/AAAA (ex: 15/03/1990)',
+    'Gênero': 'Use "Masculino" ou "Feminino"',
+    'Cargo': 'Use: Ancião, Servo Ministerial, Pioneiro Regular, Publicador Batizado, Publicador Não Batizado, Estudante Novo',
+    'Email': 'Verifique se o email está no formato correto (ex: nome@dominio.com)',
+    'Telefone': 'Use formato (XX) XXXXX-XXXX',
+    'Status': 'Use "Ativo" ou "Inativo"'
+  };
+
+  if (problem.toLowerCase().includes('obrigatório')) {
+    return 'Campo obrigatório - preencha com informação válida';
+  }
+
+  if (problem.toLowerCase().includes('formato')) {
+    return suggestions[field] || 'Verifique o formato do campo';
+  }
+
+  if (problem.toLowerCase().includes('duplicado')) {
+    return 'Nome já existe - verifique se é a mesma pessoa ou use nome completo';
+  }
+
+  return suggestions[field] || 'Verifique e corrija o valor';
+};
+
+/**
+ * Provides suggestions for warnings
+ */
+const getSuggestionForWarning = (field: string, problem: string): string => {
+  if (problem.toLowerCase().includes('duplicado')) {
+    return 'Possível duplicata - verifique se é a mesma pessoa';
+  }
+
+  if (problem.toLowerCase().includes('responsável')) {
+    return 'Verifique se o responsável está cadastrado ou será importado';
+  }
+
+  return 'Revisar informação';
+};
+
+/**
+ * Formats complete data for debugging
+ */
+const formatCompleteData = (data: ProcessedStudentData): string => {
+  return `Nome: ${data.nome || 'N/A'} | Nascimento: ${data.data_nascimento || 'N/A'} | Gênero: ${data.genero || 'N/A'} | Cargo: ${data.cargo || 'N/A'}`;
+};

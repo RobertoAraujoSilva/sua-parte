@@ -193,24 +193,51 @@ export const useSpreadsheetImport = () => {
   };
 
   /**
-   * Links parent-child relationships after import
+   * Enhanced parent-child relationship linking with fuzzy matching
    */
   const linkParentChildRelationships = async (validResults: ValidationResult[]) => {
     if (!user) return;
 
     try {
-      // Get all students (existing + newly imported) to create name-to-ID mapping
+      // Get all students with additional fields for better matching
       const { data: allStudents } = await supabase
         .from('estudantes')
-        .select('id, nome')
+        .select('id, nome, email, telefone, familia')
         .eq('user_id', user.id);
 
       if (!allStudents) return;
 
-      // Create name-to-ID mapping
-      const nameToIdMap = new Map<string, string>();
+      // Create enhanced mapping with multiple search strategies
+      const studentMaps = {
+        byName: new Map<string, string>(),
+        byEmail: new Map<string, string>(),
+        byPhone: new Map<string, string>(),
+        byFamily: new Map<string, string[]>()
+      };
+
       allStudents.forEach(student => {
-        nameToIdMap.set(student.nome.toLowerCase().trim(), student.id);
+        // Name mapping
+        studentMaps.byName.set(student.nome.toLowerCase().trim(), student.id);
+
+        // Email mapping
+        if (student.email) {
+          studentMaps.byEmail.set(student.email.toLowerCase().trim(), student.id);
+        }
+
+        // Phone mapping
+        if (student.telefone) {
+          const normalizedPhone = normalizePhone(student.telefone);
+          studentMaps.byPhone.set(normalizedPhone, student.id);
+        }
+
+        // Family mapping
+        if (student.familia) {
+          const familyKey = student.familia.toLowerCase().trim();
+          if (!studentMaps.byFamily.has(familyKey)) {
+            studentMaps.byFamily.set(familyKey, []);
+          }
+          studentMaps.byFamily.get(familyKey)!.push(student.id);
+        }
       });
 
       // Find students that need parent linking
@@ -223,32 +250,94 @@ export const useSpreadsheetImport = () => {
         )
         .map(result => ({
           nome: result.data!.nome,
-          parentName: result.data!.parente_responsavel!.toLowerCase().trim()
+          parentName: result.data!.parente_responsavel!.toLowerCase().trim(),
+          email: result.data!.email,
+          telefone: result.data!.telefone,
+          familia: result.data!.familia
         }));
 
       if (studentsNeedingParents.length === 0) return;
 
-      // Process parent linking in batches
-      const batchSize = 10;
-      for (let i = 0; i < studentsNeedingParents.length; i += batchSize) {
-        const batch = studentsNeedingParents.slice(i, i + batchSize);
+      let linkedCount = 0;
+      let notFoundCount = 0;
 
-        for (const student of batch) {
-          const parentId = nameToIdMap.get(student.parentName);
-          const studentId = nameToIdMap.get(student.nome.toLowerCase().trim());
+      // Process parent linking with enhanced matching
+      for (const student of studentsNeedingParents) {
+        const studentId = studentMaps.byName.get(student.nome.toLowerCase().trim());
+        if (!studentId) continue;
 
-          if (parentId && studentId && parentId !== studentId) {
-            // Update the student's parent relationship
+        let parentId: string | null = null;
+
+        // Strategy 1: Exact name match
+        parentId = studentMaps.byName.get(student.parentName);
+
+        // Strategy 2: Fuzzy name match within same family
+        if (!parentId && student.familia) {
+          const familyMembers = studentMaps.byFamily.get(student.familia.toLowerCase().trim()) || [];
+          for (const memberId of familyMembers) {
+            const member = allStudents.find(s => s.id === memberId);
+            if (member && calculateNameSimilarity(member.nome, student.parentName) > 0.8) {
+              parentId = memberId;
+              break;
+            }
+          }
+        }
+
+        // Strategy 3: Email match (if parent email provided in notes or other field)
+        if (!parentId && student.email) {
+          // Check if parent might have similar email domain
+          const emailDomain = student.email.split('@')[1];
+          if (emailDomain) {
+            for (const [email, id] of studentMaps.byEmail) {
+              if (email.includes(emailDomain) &&
+                  calculateNameSimilarity(
+                    allStudents.find(s => s.id === id)?.nome || '',
+                    student.parentName
+                  ) > 0.7) {
+                parentId = id;
+                break;
+              }
+            }
+          }
+        }
+
+        // Strategy 4: Phone-based matching (if same family phone)
+        if (!parentId && student.telefone) {
+          const normalizedPhone = normalizePhone(student.telefone);
+          // Look for similar phone numbers (same area code)
+          const areaCode = normalizedPhone.substring(0, 4);
+          for (const [phone, id] of studentMaps.byPhone) {
+            if (phone.startsWith(areaCode) &&
+                calculateNameSimilarity(
+                  allStudents.find(s => s.id === id)?.nome || '',
+                  student.parentName
+                ) > 0.7) {
+              parentId = id;
+              break;
+            }
+          }
+        }
+
+        // Update relationship if parent found
+        if (parentId && parentId !== studentId) {
+          try {
             await supabase
               .from('estudantes')
               .update({ id_pai_mae: parentId })
               .eq('id', studentId)
               .eq('user_id', user.id);
+
+            linkedCount++;
+          } catch (updateError) {
+            console.error(`Error linking ${student.nome} to parent:`, updateError);
           }
+        } else {
+          notFoundCount++;
+          console.warn(`Parent not found for ${student.nome}: ${student.parentName}`);
         }
       }
 
-      console.log(`Processed parent-child relationships for ${studentsNeedingParents.length} students`);
+      console.log(`Parent-child linking completed: ${linkedCount} linked, ${notFoundCount} not found`);
     } catch (error) {
       console.error('Error linking parent-child relationships:', error);
       // Don't throw error - this is a secondary operation
@@ -256,24 +345,112 @@ export const useSpreadsheetImport = () => {
   };
 
   /**
-   * Checks for duplicate students by name
+   * Enhanced duplicate detection by name and birth date
    */
   const checkDuplicates = async (students: ProcessedStudentData[]): Promise<string[]> => {
     if (!user) return [];
 
     try {
-      const names = students.map(s => s.nome);
+      // Get all existing students for comparison
       const { data: existingStudents } = await supabase
         .from('estudantes')
-        .select('nome')
-        .eq('user_id', user.id)
-        .in('nome', names);
+        .select('nome, data_nascimento, email, telefone')
+        .eq('user_id', user.id);
 
-      return existingStudents?.map(s => s.nome) || [];
+      if (!existingStudents || existingStudents.length === 0) {
+        return [];
+      }
+
+      const duplicates: string[] = [];
+
+      students.forEach(student => {
+        const isDuplicate = existingStudents.some(existing => {
+          // Exact name match
+          if (existing.nome.toLowerCase().trim() === student.nome.toLowerCase().trim()) {
+            return true;
+          }
+
+          // Name similarity + birth date match
+          if (student.data_nascimento && existing.data_nascimento) {
+            const nameSimilarity = calculateNameSimilarity(existing.nome, student.nome);
+            if (nameSimilarity > 0.8 && existing.data_nascimento === student.data_nascimento) {
+              return true;
+            }
+          }
+
+          // Email match (if both have email)
+          if (student.email && existing.email &&
+              existing.email.toLowerCase() === student.email.toLowerCase()) {
+            return true;
+          }
+
+          // Phone match (if both have phone)
+          if (student.telefone && existing.telefone &&
+              normalizePhone(existing.telefone) === normalizePhone(student.telefone)) {
+            return true;
+          }
+
+          return false;
+        });
+
+        if (isDuplicate) {
+          duplicates.push(student.nome);
+        }
+      });
+
+      return duplicates;
     } catch (error) {
       console.error('Error checking duplicates:', error);
       return [];
     }
+  };
+
+  /**
+   * Calculates name similarity using Levenshtein distance
+   */
+  const calculateNameSimilarity = (name1: string, name2: string): number => {
+    const s1 = name1.toLowerCase().trim();
+    const s2 = name2.toLowerCase().trim();
+
+    if (s1 === s2) return 1;
+
+    const longer = s1.length > s2.length ? s1 : s2;
+    const shorter = s1.length > s2.length ? s2 : s1;
+
+    if (longer.length === 0) return 1;
+
+    const distance = levenshteinDistance(longer, shorter);
+    return (longer.length - distance) / longer.length;
+  };
+
+  /**
+   * Calculates Levenshtein distance between two strings
+   */
+  const levenshteinDistance = (str1: string, str2: string): number => {
+    const matrix = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
+
+    for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
+    for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
+
+    for (let j = 1; j <= str2.length; j++) {
+      for (let i = 1; i <= str1.length; i++) {
+        const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
+        matrix[j][i] = Math.min(
+          matrix[j][i - 1] + 1,
+          matrix[j - 1][i] + 1,
+          matrix[j - 1][i - 1] + indicator
+        );
+      }
+    }
+
+    return matrix[str2.length][str1.length];
+  };
+
+  /**
+   * Normalizes phone number for comparison
+   */
+  const normalizePhone = (phone: string): string => {
+    return phone.replace(/\D/g, '');
   };
 
   /**

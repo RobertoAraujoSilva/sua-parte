@@ -1,5 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +18,7 @@ import {
 } from 'lucide-react';
 import { useSpreadsheetImport } from '@/hooks/useSpreadsheetImport';
 import { ValidationResult } from '@/types/spreadsheet';
-import { createErrorReport } from '@/utils/spreadsheetProcessor';
+import { createErrorReport, createEnhancedErrorReport } from '@/utils/spreadsheetProcessor';
 import TemplateDownload from './TemplateDownload';
 import ImportHelp from './ImportHelp';
 
@@ -27,6 +29,7 @@ interface SpreadsheetUploadProps {
 
 const SpreadsheetUpload: React.FC<SpreadsheetUploadProps> = ({ onImportComplete, onViewList }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [step, setStep] = useState<'upload' | 'validate' | 'preview' | 'import' | 'complete'>('upload');
@@ -148,18 +151,43 @@ const SpreadsheetUpload: React.FC<SpreadsheetUploadProps> = ({ onImportComplete,
     }
   };
 
+  /**
+   * Downloads enhanced error report as CSV with detailed information
+   */
   const handleDownloadErrorReport = () => {
-    if (validationResults.length === 0) return;
+    const errorResults = validationResults.filter(r => !r.isValid || r.warnings.length > 0);
 
-    const errorBlob = createErrorReport(validationResults);
-    const url = URL.createObjectURL(errorBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `relatorio-erros-${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    if (errorResults.length === 0) {
+      toast({
+        title: 'Nenhum erro encontrado',
+        description: 'Todos os registros estão válidos.',
+      });
+      return;
+    }
+
+    try {
+      const csvBlob = createEnhancedErrorReport(errorResults, selectedFile?.name || 'planilha');
+      const url = URL.createObjectURL(csvBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `relatorio-erros-${format(new Date(), 'yyyy-MM-dd-HHmm')}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: 'Relatório baixado',
+        description: `${errorResults.length} erro(s) e aviso(s) exportados para CSV.`,
+      });
+    } catch (error) {
+      console.error('Erro ao gerar relatório:', error);
+      toast({
+        title: 'Erro ao gerar relatório',
+        description: 'Não foi possível criar o arquivo CSV.',
+        variant: 'destructive'
+      });
+    }
   };
 
   const stats = validationResults.length > 0 ? getImportStats(validationResults) : null;
