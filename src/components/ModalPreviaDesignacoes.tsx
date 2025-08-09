@@ -49,7 +49,7 @@ import {
   RefreshCw,
   Eye
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, isValid, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import type { DesignacaoGerada, EstatisticasDesignacao, ConflitosDesignacao } from '@/types/designacoes';
 import type { EstudanteRow } from '@/types/estudantes';
@@ -82,6 +82,32 @@ export const ModalPreviaDesignacoes: React.FC<ModalPreviaDesignacoesProps> = ({
   carregando = false
 }) => {
   const [tabAtiva, setTabAtiva] = useState('designacoes');
+
+  /**
+   * Safely formats a date string, handling invalid dates gracefully
+   */
+  const formatarDataSegura = (dataString: string): string => {
+    if (!dataString || dataString.trim() === '') {
+      return 'Data não informada';
+    }
+
+    try {
+      // Try to parse the date string
+      const data = parseISO(dataString);
+
+      // Check if the parsed date is valid
+      if (!isValid(data)) {
+        console.warn(`Data inválida recebida: "${dataString}"`);
+        return 'Data inválida';
+      }
+
+      // Format the valid date
+      return format(data, 'dd/MM/yyyy', { locale: ptBR });
+    } catch (error) {
+      console.error('Erro ao formatar data:', error, 'Data recebida:', dataString);
+      return 'Erro na data';
+    }
+  };
 
   const obterNomeEstudante = (estudanteId: string): string => {
     const estudante = estudantes.find(e => e.id === estudanteId);
@@ -138,7 +164,7 @@ export const ModalPreviaDesignacoes: React.FC<ModalPreviaDesignacoesProps> = ({
             Prévia das Designações
           </DialogTitle>
           <DialogDescription>
-            Semana de {format(new Date(dataInicioSemana), 'dd/MM/yyyy', { locale: ptBR })} - 
+            Semana de {formatarDataSegura(dataInicioSemana)} -
             Revise as designações antes de confirmar
           </DialogDescription>
         </DialogHeader>

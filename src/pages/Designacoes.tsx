@@ -565,7 +565,7 @@ const Designacoes = () => {
       />
 
       <ModalPreviaDesignacoes
-        aberto={modalPreviaAberto}
+        aberto={modalPreviaAberto && !!dadosSelecao}
         onFechar={() => setModalPreviaAberto(false)}
         onConfirmar={handleConfirmarDesignacoes}
         onRegenerar={handleRegenerarDesignacoes}
