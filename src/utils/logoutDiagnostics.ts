@@ -96,34 +96,35 @@ export const runLogoutDiagnostics = async (): Promise<ComprehensiveDiagnostic> =
     const signOutPromise = supabase.auth.signOut();
     
     const result = await Promise.race([signOutPromise, timeoutPromise]);
-    
+    const r: any = result as any;
     results.push({
       testName: 'SignOut with Timeout',
-      success: !result.error,
-      error: result.error,
+      success: !r?.error,
+      error: r?.error || null,
       details: {
         completedWithinTimeout: true,
-        result
+        result: r
       },
       timestamp: new Date().toISOString()
     });
     
-    if (result.error) {
-      recommendations.push(`SignOut error: ${result.error.message}`);
+    if (r?.error) {
+      recommendations.push(`SignOut error: ${r.error?.message || 'unknown'}`);
     }
-  } catch (error) {
+  } catch (error: unknown) {
+    const isTimeout = error instanceof Error && error.message.includes('timeout');
     results.push({
       testName: 'SignOut with Timeout',
       success: false,
       error,
       details: {
-        timedOut: error.message.includes('timeout'),
+        timedOut: isTimeout,
         exception: true
       },
       timestamp: new Date().toISOString()
     });
     
-    if (error.message.includes('timeout')) {
+    if (isTimeout) {
       recommendations.push('SignOut is timing out - possible network or service issue');
     }
   }

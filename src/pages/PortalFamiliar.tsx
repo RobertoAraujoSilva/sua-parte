@@ -156,11 +156,11 @@ const PortalFamiliar: React.FC = () => {
             meeting_date: programa.data_inicio_semana,
             part_number: designacao.numero_parte,
             part_title: `Parte ${designacao.numero_parte}`,
-            assignment_type: designacao.tipo_designacao || 'Designação',
+            assignment_type: (designacao as any).tipo_parte || 'designacao',
             student_name: estudante?.nome || 'Nome não encontrado',
             assistant_name: null, // Not available in current schema
-            theme: designacao.tema || '',
-            duration_minutes: null, // Not available in current schema
+            theme: (designacao as any).cena || '',
+            duration_minutes: (designacao as any).tempo_minutos || 0,
             status: 'scheduled', // Default status
           });
         });
@@ -187,12 +187,12 @@ const PortalFamiliar: React.FC = () => {
 
   const getAssignmentTypeLabel = (type: string): string => {
     const types: Record<string, string> = {
-      'bible_reading': 'Leitura da Bíblia',
+      'leitura_biblica': 'Leitura da Bíblia',
       'initial_call': 'Primeira Conversa',
       'return_visit': 'Revisita',
       'bible_study': 'Estudo Bíblico',
-      'talk': 'Discurso',
-      'demonstration': 'Demonstração',
+      'discurso': 'Discurso',
+      'demonstracao': 'Demonstração',
     };
     return types[type] || type;
   };

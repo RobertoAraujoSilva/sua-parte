@@ -38,7 +38,7 @@ export class RegrasS38T {
     return (
       estudante.genero === 'masculino' &&
       estudante.ativo &&
-      CARGOS_QUALIFICADOS_DISCURSOS.includes(estudante.cargo)
+      (CARGOS_QUALIFICADOS_DISCURSOS as readonly string[]).includes(estudante.cargo as any)
     );
   }
 

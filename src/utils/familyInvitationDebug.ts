@@ -219,9 +219,9 @@ export async function testFamilyMemberCreation(studentId: string, testData: {
         name: testData.name,
         email: testData.email,
         gender: testData.gender,
-        relation: testData.relation,
+        relation: (testData.relation as any),
         invitation_status: 'PENDING',
-      })
+      } as any)
       .select()
       .single();
 

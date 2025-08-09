@@ -118,26 +118,6 @@ const ConviteAceitar: React.FC = () => {
           return;
         }
 
-        // Check if user already exists
-        const { data: existingUsers } = await supabase.auth.admin.listUsers();
-        const existingUser = existingUsers.users?.find(u => u.email === familyMember.email);
-
-        if (existingUser) {
-          // User exists, redirect to login
-          setInvitationData({
-            family_member_id: familyMember.id,
-            student_id: familyMember.student_id,
-            invited_by: invitation.sent_by_student_id,
-            family_member_name: familyMember.name,
-            relation: familyMember.relation,
-            invitation_token: token,
-          });
-          setError('Conta já existe. Faça login para aceitar o convite.');
-          setLoading(false);
-          return;
-        }
-
-        // Create new user account
         console.log('👤 Creating new user account for:', familyMember.email);
 
         const { data: newUser, error: signUpError } = await supabase.auth.signUp({

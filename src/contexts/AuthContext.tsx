@@ -384,7 +384,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!user) {
-      return { data: null, error: { message: 'No user logged in' } };
+      return { data: null, error: new Error('No user logged in') };
     }
 
     try {
@@ -395,16 +395,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .select()
         .single();
 
-      if (!error && data) {
-        // Refresh profile
-        const updatedProfile = await fetchProfile(user.id);
-        setProfile(updatedProfile);
+      if (error) {
+        return { data: null, error: new Error(error.message) };
       }
 
-      return { data, error };
-    } catch (error) {
-      console.error('UpdateProfile exception:', error);
-      return { data: null, error };
+      // Refresh and return the fully-typed profile (including email)
+      const updatedProfile = await fetchProfile(user.id);
+      setProfile(updatedProfile);
+      return { data: updatedProfile, error: null };
+    } catch (err: unknown) {
+      const e = err instanceof Error ? err : new Error('UpdateProfile exception');
+      console.error('UpdateProfile exception:', e);
+      return { data: null, error: e };
     }
   };
 

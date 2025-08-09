@@ -218,17 +218,18 @@ export const createTemplate = (): Blob => {
   const workbook = XLSX.utils.book_new();
 
   // Create worksheet with headers and sample data
+  const headers = [...TEMPLATE_COLUMNS] as (string | number)[];
   const data = [
-    TEMPLATE_COLUMNS,
+    headers,
     ...TEMPLATE_SAMPLE_DATA.map(sample =>
-      TEMPLATE_COLUMNS.map(col => sample[col as keyof typeof sample] || '')
+      headers.map(col => (sample as any)[col as keyof typeof sample] || '')
     )
   ];
 
   const worksheet = XLSX.utils.aoa_to_sheet(data);
 
   // Set column widths
-  const colWidths = TEMPLATE_COLUMNS.map(col => ({ wch: Math.max(col.length, 15) }));
+  const colWidths = headers.map(col => ({ wch: Math.max((col as string).length, 15) }));
   worksheet['!cols'] = colWidths;
 
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Estudantes');
