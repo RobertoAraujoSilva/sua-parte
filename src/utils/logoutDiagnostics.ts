@@ -51,11 +51,11 @@ export const runLogoutDiagnostics = async (): Promise<ComprehensiveDiagnostic> =
     if (!sessionData?.session) {
       recommendations.push('User is not logged in - logout test not applicable');
     }
-  } catch (error) {
+  } catch (error: unknown) {
     results.push({
       testName: 'Current Auth State',
       success: false,
-      error,
+      error: error instanceof Error ? error.message : 'Unknown error',
       details: { exception: true },
       timestamp: new Date().toISOString()
     });
@@ -75,11 +75,11 @@ export const runLogoutDiagnostics = async (): Promise<ComprehensiveDiagnostic> =
       },
       timestamp: new Date().toISOString()
     });
-  } catch (error) {
+  } catch (error: unknown) {
     results.push({
       testName: 'Auth Service Connectivity',
       success: false,
-      error,
+      error: error instanceof Error ? error.message : 'Unknown error',
       details: { exception: true },
       timestamp: new Date().toISOString()
     });
@@ -116,7 +116,7 @@ export const runLogoutDiagnostics = async (): Promise<ComprehensiveDiagnostic> =
     results.push({
       testName: 'SignOut with Timeout',
       success: false,
-      error,
+      error: error instanceof Error ? error.message : 'Unknown error',
       details: {
         timedOut: isTimeout,
         exception: true
@@ -150,11 +150,11 @@ export const runLogoutDiagnostics = async (): Promise<ComprehensiveDiagnostic> =
     if (latency > 3000) {
       recommendations.push('High network latency detected - may cause timeouts');
     }
-  } catch (error) {
+  } catch (error: unknown) {
     results.push({
       testName: 'Network Connectivity',
       success: false,
-      error,
+      error: error instanceof Error ? error.message : 'Unknown error',
       details: { exception: true },
       timestamp: new Date().toISOString()
     });
@@ -179,11 +179,11 @@ export const runLogoutDiagnostics = async (): Promise<ComprehensiveDiagnostic> =
       },
       timestamp: new Date().toISOString()
     });
-  } catch (error) {
+  } catch (error: unknown) {
     results.push({
       testName: 'Local Storage State',
       success: false,
-      error,
+      error: error instanceof Error ? error.message : 'Unknown error',
       details: { exception: true },
       timestamp: new Date().toISOString()
     });

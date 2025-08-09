@@ -77,8 +77,9 @@ async function checkAuthenticationState() {
       userEmail: user?.email || null,
       sessionValid: !!session && !sessionError && !userError,
     };
-  } catch (error) {
-    console.error('❌ Error checking auth state:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('❌ Error checking auth state:', errorMessage);
     return {
       isAuthenticated: false,
       userId: null,
@@ -109,7 +110,7 @@ async function checkDatabaseConnectivity() {
     return {
       canConnect: true,
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       canConnect: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -147,7 +148,7 @@ async function checkRLSPolicies() {
       invitationsLogAccess,
       error,
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       familyMembersAccess: false,
       invitationsLogAccess: false,
@@ -176,7 +177,7 @@ async function checkEdgeFunctionAvailability() {
     return {
       available: true,
     };
-  } catch (error) {
+  } catch (error: unknown) {
     return {
       available: false,
       error: error instanceof Error ? error.message : 'Unknown error',

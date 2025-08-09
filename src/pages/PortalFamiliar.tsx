@@ -5,6 +5,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Calendar, Clock, User, BookOpen, Users, Eye } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import type { DesignacaoRow, ProgramaRow } from '@/types/designacoes';
+import type { EstudanteRow } from '@/types/estudantes';
 
 interface FamilyMemberData {
   id: string;
@@ -14,23 +16,27 @@ interface FamilyMemberData {
   student_name: string;
 }
 
-interface Assignment {
+/**
+ * Interface padronizada para designações no Portal Familiar
+ * Alinhada com os campos do sistema de designações S-38-T
+ */
+interface FamilyPortalAssignment {
   id: string;
-  meeting_date: string;
-  part_number: number;
-  part_title: string;
-  assignment_type: string;
+  data_inicio_semana: string; // Campo padronizado do schema
+  numero_parte: number;
+  titulo_parte: string;
+  tipo_parte: 'leitura_biblica' | 'discurso' | 'demonstracao'; // Tipos padronizados
   student_name: string;
   assistant_name?: string;
-  theme: string;
-  duration_minutes: number;
-  status: string;
+  cena?: string; // Campo padronizado do schema
+  tempo_minutos: number; // Campo padronizado do schema
+  status: 'scheduled' | 'confirmed' | 'completed';
 }
 
 const PortalFamiliar: React.FC = () => {
   const { user } = useAuth();
   const [familyMemberData, setFamilyMemberData] = useState<FamilyMemberData | null>(null);
-  const [upcomingAssignments, setUpcomingAssignments] = useState<Assignment[]>([]);
+  const [upcomingAssignments, setUpcomingAssignments] = useState<FamilyPortalAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -144,27 +150,38 @@ const PortalFamiliar: React.FC = () => {
         console.error('❌ Error loading student data:', estudanteError);
       }
 
-      // Combine the data
-      const formattedAssignments: Assignment[] = [];
+      // Combinar dados usando campos padronizados do sistema S-38-T
+      const formattedAssignments: FamilyPortalAssignment[] = [];
 
-      (assignments || []).forEach(programa => {
+      for (const programa of assignments || []) {
         const relatedDesignacoes = designacoes.filter(d => d.id_programa === programa.id);
 
-        relatedDesignacoes.forEach(designacao => {
+        for (const designacao of relatedDesignacoes) {
+          // Buscar nome do ajudante se houver
+          let assistantName: string | undefined;
+          if (designacao.id_ajudante) {
+            const { data: ajudante } = await supabase
+              .from('estudantes')
+              .select('nome')
+              .eq('id', designacao.id_ajudante)
+              .single();
+            assistantName = ajudante?.nome;
+          }
+
           formattedAssignments.push({
             id: designacao.id,
-            meeting_date: programa.data_inicio_semana,
-            part_number: designacao.numero_parte,
-            part_title: `Parte ${designacao.numero_parte}`,
-            assignment_type: (designacao as any).tipo_parte || 'designacao',
+            data_inicio_semana: programa.data_inicio_semana, // Campo padronizado
+            numero_parte: designacao.numero_parte, // Campo padronizado
+            titulo_parte: `Parte ${designacao.numero_parte}`,
+            tipo_parte: designacao.tipo_parte, // Campo padronizado tipado
             student_name: estudante?.nome || 'Nome não encontrado',
-            assistant_name: null, // Not available in current schema
-            theme: (designacao as any).cena || '',
-            duration_minutes: (designacao as any).tempo_minutos || 0,
-            status: 'scheduled', // Default status
+            assistant_name: assistantName,
+            cena: designacao.cena, // Campo padronizado
+            tempo_minutos: designacao.tempo_minutos, // Campo padronizado
+            status: designacao.confirmado ? 'confirmed' : 'scheduled'
           });
-        });
-      });
+        }
+      }
 
       setUpcomingAssignments(formattedAssignments);
       setLoading(false);
@@ -200,10 +217,11 @@ const PortalFamiliar: React.FC = () => {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       'scheduled': { label: 'Agendado', variant: 'default' as const },
-      'completed': { label: 'Concluído', variant: 'secondary' as const },
+      'confirmed': { label: 'Confirmado', variant: 'secondary' as const },
+      'completed': { label: 'Concluído', variant: 'outline' as const },
       'cancelled': { label: 'Cancelado', variant: 'destructive' as const },
     };
-    
+
     const config = statusConfig[status as keyof typeof statusConfig] || { label: status, variant: 'default' as const };
     return <Badge variant={config.variant}>{config.label}</Badge>;
   };
@@ -304,24 +322,26 @@ const PortalFamiliar: React.FC = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-2 mb-2">
-                        <Badge variant="outline">Parte {assignment.part_number}</Badge>
+                        <Badge variant="outline">Parte {assignment.numero_parte}</Badge>
                         {getStatusBadge(assignment.status)}
                       </div>
-                      
+
                       <h3 className="font-semibold text-lg mb-1">
-                        {assignment.part_title}
+                        {assignment.titulo_parte}
                       </h3>
-                      
-                      <p className="text-gray-600 mb-2">{assignment.theme}</p>
-                      
+
+                      {assignment.cena && (
+                        <p className="text-gray-600 mb-2">{assignment.cena}</p>
+                      )}
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-500">
                         <div className="flex items-center">
                           <Calendar className="h-4 w-4 mr-1" />
-                          {formatDate(assignment.meeting_date)}
+                          {formatDate(assignment.data_inicio_semana)}
                         </div>
                         <div className="flex items-center">
                           <Clock className="h-4 w-4 mr-1" />
-                          {assignment.duration_minutes} minutos
+                          {assignment.tempo_minutos} minutos
                         </div>
                         <div className="flex items-center">
                           <User className="h-4 w-4 mr-1" />
@@ -334,10 +354,10 @@ const PortalFamiliar: React.FC = () => {
                           </div>
                         )}
                       </div>
-                      
+
                       <div className="mt-2">
                         <Badge variant="secondary">
-                          {getAssignmentTypeLabel(assignment.assignment_type)}
+                          {getAssignmentTypeLabel(assignment.tipo_parte)}
                         </Badge>
                       </div>
                     </div>

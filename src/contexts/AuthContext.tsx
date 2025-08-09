@@ -155,8 +155,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ...data,
         email: user.email || ''
       } as UserProfile;
-    } catch (error) {
-      console.error('Error creating profile from auth:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error('Error creating profile from auth:', errorMessage);
       return null;
     }
   }, []); // Empty dependency array since createProfileFromAuth doesn't depend on any props or state
@@ -182,13 +183,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           fetchProfile(session.user.id).then(userProfile => {
             console.log('📋 Initial profile loaded:', userProfile);
             setProfile(userProfile);
-          }).catch(error => {
-            console.error('❌ Initial profile fetch failed:', error);
+          }).catch((error: unknown) => {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            console.error('❌ Initial profile fetch failed:', errorMessage);
             // Don't block, let ProtectedRoute use metadata
           });
         }
-      } catch (error) {
-        console.error('Error in getInitialSession:', error);
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error('Error in getInitialSession:', errorMessage);
       } finally {
         setLoading(false);
         setInitialLoadComplete(true);
@@ -225,8 +228,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             const userProfile = await fetchProfile(session.user.id);
             console.log('📋 Profile loaded:', userProfile);
             setProfile(userProfile);
-          } catch (error) {
-            console.error('❌ Profile fetch failed:', error);
+          } catch (error: unknown) {
+            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            console.error('❌ Profile fetch failed:', errorMessage);
             // Don't set loading back to true, let ProtectedRoute use metadata
           }
         } else {
