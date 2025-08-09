@@ -44,16 +44,16 @@ export const testAuthenticationFlow = async (): Promise<AuthFlowTestResult> => {
     recommendations: []
   };
 
-  console.log('🧪 Starting comprehensive authentication flow test...');
+  console.log('🧪 Starting comprehensive authentication flow test with timeout analysis...');
 
   try {
     // Step 1: Test Supabase connection
     console.log('1️⃣ Testing Supabase connection...');
     const connectionStart = Date.now();
-    
+
     const connectionResult = await testSupabaseConnection();
     result.timings.connection = Date.now() - connectionStart;
-    
+
     if (connectionResult.success) {
       result.steps.connection = true;
       console.log('✅ Connection test passed');
@@ -63,28 +63,71 @@ export const testAuthenticationFlow = async (): Promise<AuthFlowTestResult> => {
       console.log('❌ Connection test failed');
     }
 
-    // Step 2: Test session retrieval
-    console.log('2️⃣ Testing session retrieval...');
+    // Step 2: Test session retrieval with timeout analysis
+    console.log('2️⃣ Testing session retrieval with timeout analysis...');
     const sessionStart = Date.now();
-    
-    try {
-      const sessionTimeout = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Session test timeout')), 5000);
-      });
 
-      const { data: { session }, error: sessionError } = await Promise.race([
-        supabase.auth.getSession(),
-        sessionTimeout
-      ]);
+    try {
+      // Test with multiple timeout scenarios
+      const timeouts = [2000, 5000, 8000]; // Test 2s, 5s, 8s timeouts
+      let sessionSuccess = false;
+      let sessionError = null;
+      let optimalTimeout = 0;
+
+      for (const timeoutMs of timeouts) {
+        console.log(`🔍 Testing session retrieval with ${timeoutMs}ms timeout...`);
+        const testStart = Date.now();
+
+        try {
+          const sessionTimeout = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error(`Session test timeout after ${timeoutMs}ms`)), timeoutMs);
+          });
+
+          const { data: { session }, error } = await Promise.race([
+            supabase.auth.getSession(),
+            sessionTimeout
+          ]);
+
+          const testDuration = Date.now() - testStart;
+          console.log(`✅ Session retrieval successful in ${testDuration}ms (timeout: ${timeoutMs}ms)`);
+
+          sessionSuccess = true;
+          optimalTimeout = timeoutMs;
+          sessionError = error;
+
+          if (error) {
+            result.errors.push(`Session error: ${error.message}`);
+            if (error.message.includes('403')) {
+              result.recommendations.push('Session token expired - implement retry logic with exponential backoff');
+            } else {
+              result.recommendations.push('Try refreshing the page or clearing browser storage');
+            }
+          }
+          break;
+        } catch (error) {
+          const testDuration = Date.now() - testStart;
+          console.log(`❌ Session retrieval failed in ${testDuration}ms (timeout: ${timeoutMs}ms)`);
+          sessionError = error;
+
+          if (timeoutMs === timeouts[timeouts.length - 1]) {
+            result.errors.push(`Session timeout even with ${timeoutMs}ms - network or server issues`);
+            result.recommendations.push('Increase session timeout to 10-12 seconds for initial load');
+          }
+        }
+      }
 
       result.timings.session = Date.now() - sessionStart;
 
-      if (sessionError) {
-        result.errors.push(`Session error: ${sessionError.message}`);
-        result.recommendations.push('Try refreshing the page or clearing browser storage');
-      } else {
+      if (sessionSuccess) {
         result.steps.session = true;
-        console.log('✅ Session retrieval successful');
+        console.log(`✅ Session retrieval successful with optimal timeout: ${optimalTimeout}ms`);
+        if (optimalTimeout > 5000) {
+          result.recommendations.push(`Consider increasing session timeout to ${optimalTimeout + 2000}ms for better reliability`);
+        }
+      } else {
+        console.log('❌ Session retrieval failed with all timeout scenarios');
+        result.recommendations.push('Check Supabase authentication service status and network connectivity');
+      }
 
         if (session?.user) {
           console.log('👤 User found in session:', session.user.email);

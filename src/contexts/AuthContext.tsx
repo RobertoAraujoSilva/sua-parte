@@ -53,42 +53,78 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 
 
-  // Fetch user profile from database with proper timeout handling
+  // Fetch user profile from database with improved session handling
   const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
     console.log('🔍 Fetching profile for user ID:', userId);
 
     try {
-      // Helper function to create timeout promise
+      // Helper function to create timeout promise with longer timeouts
       const createTimeout = (ms: number, operation: string) =>
         new Promise<never>((_, reject) => {
           setTimeout(() => reject(new Error(`${operation} timeout after ${ms}ms`)), ms);
         });
 
-      // Step 1: Check session with its own timeout (2 seconds)
-      console.log('🔐 Checking current session...');
-      const sessionTimeout = createTimeout(2000, 'Session check');
-      const sessionPromise = supabase.auth.getSession();
+      // Step 1: Check session with generous timeout to allow token refresh
+      console.log('🔐 Checking current session (allowing time for token refresh)...');
+      const sessionTimeout = createTimeout(8000, 'Session check'); // Increased from 2s to 8s
 
-      const { data: { session }, error: sessionError } = await Promise.race([
-        sessionPromise,
-        sessionTimeout
-      ]);
+      // Add retry logic for session check
+      let session = null;
+      let sessionError = null;
+      let retryCount = 0;
+      const maxRetries = 2;
+
+      while (retryCount <= maxRetries) {
+        try {
+          const sessionPromise = supabase.auth.getSession();
+          const result = await Promise.race([sessionPromise, sessionTimeout]);
+
+          session = result.data.session;
+          sessionError = result.error;
+
+          // If we get a valid session or a non-auth error, break
+          if (session || (sessionError && !sessionError.message.includes('403'))) {
+            break;
+          }
+
+          // If 403 error, wait and retry
+          if (sessionError?.message.includes('403') && retryCount < maxRetries) {
+            console.log(`🔄 Session 403 error, retrying in ${(retryCount + 1) * 1000}ms...`);
+            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
+            retryCount++;
+            continue;
+          }
+
+          break;
+        } catch (error) {
+          if (retryCount < maxRetries) {
+            console.log(`🔄 Session timeout, retrying in ${(retryCount + 1) * 1000}ms...`);
+            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
+            retryCount++;
+            continue;
+          }
+          throw error;
+        }
+      }
 
       console.log('🔐 Session check result:', {
         hasSession: !!session,
         sessionUserId: session?.user?.id,
         targetUserId: userId,
-        sessionError: sessionError?.message
+        sessionError: sessionError?.message,
+        retryCount
       });
 
       if (sessionError) {
-        console.error('❌ Session error:', sessionError);
-        return null;
+        console.error('❌ Session error after retries:', sessionError);
+        // Don't return null immediately, try metadata fallback
+        console.log('🔄 Session error, attempting metadata fallback...');
+        return await createProfileFromAuth(userId);
       }
 
       if (!session) {
-        console.error('❌ No active session when fetching profile');
-        return null;
+        console.error('❌ No active session after retries, using metadata fallback');
+        return await createProfileFromAuth(userId);
       }
 
       if (session.user.id !== userId) {
@@ -99,27 +135,59 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
 
-      // Step 2: Fetch profile with its own timeout (4 seconds)
+      // Step 2: Fetch profile with improved error handling
       console.log('🔍 Fetching from profiles table...');
-      const profileTimeout = createTimeout(4000, 'Profile fetch');
-      const profilePromise = supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      const profileTimeout = createTimeout(6000, 'Profile fetch'); // Increased from 4s to 6s
 
-      const { data: profileData, error: profileError } = await Promise.race([
-        profilePromise,
-        profileTimeout
-      ]);
+      // Add retry logic for profile fetch
+      let profileData = null;
+      let profileError = null;
+      retryCount = 0;
+
+      while (retryCount <= maxRetries) {
+        try {
+          const profilePromise = supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
+          const result = await Promise.race([profilePromise, profileTimeout]);
+
+          profileData = result.data;
+          profileError = result.error;
+
+          // If successful or non-auth error, break
+          if (profileData || (profileError && !profileError.message?.includes('403'))) {
+            break;
+          }
+
+          // If 403 error, wait and retry
+          if (profileError?.message?.includes('403') && retryCount < maxRetries) {
+            console.log(`🔄 Profile 403 error, retrying in ${(retryCount + 1) * 1000}ms...`);
+            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
+            retryCount++;
+            continue;
+          }
+
+          break;
+        } catch (error) {
+          if (retryCount < maxRetries) {
+            console.log(`🔄 Profile timeout, retrying in ${(retryCount + 1) * 1000}ms...`);
+            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
+            retryCount++;
+            continue;
+          }
+          throw error;
+        }
+      }
 
       if (profileError) {
         if (profileError.code === 'PGRST116') {
           console.log('📝 Profile not found in database, creating from auth metadata');
         } else {
-          console.log('❌ Profile fetch error, attempting to create from auth metadata:', profileError);
+          console.log('❌ Profile fetch error after retries, using metadata fallback:', profileError);
         }
-        // If profile doesn't exist or fetch fails, create one from user metadata
         return await createProfileFromAuth(userId);
       }
 
@@ -153,23 +221,58 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []); // useCallback dependency array
 
-  // Create profile from auth metadata if it doesn't exist
+  // Create profile from auth metadata with improved error handling
   const createProfileFromAuth = useCallback(async (userId: string) => {
     try {
       console.log('📝 Creating profile from auth metadata for user:', userId);
 
-      // Get user with timeout
+      // Get user with longer timeout and retry logic
       const userTimeout = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Get user timeout')), 3000);
+        setTimeout(() => reject(new Error('Get user timeout')), 6000); // Increased from 3s to 6s
       });
 
-      const { data: { user }, error: userError } = await Promise.race([
-        supabase.auth.getUser(),
-        userTimeout
-      ]);
+      let user = null;
+      let userError = null;
+      let retryCount = 0;
+      const maxRetries = 2;
+
+      while (retryCount <= maxRetries) {
+        try {
+          const result = await Promise.race([
+            supabase.auth.getUser(),
+            userTimeout
+          ]);
+
+          user = result.data.user;
+          userError = result.error;
+
+          // If successful or non-auth error, break
+          if (user || (userError && !userError.message?.includes('403'))) {
+            break;
+          }
+
+          // If 403 error, wait and retry
+          if (userError?.message?.includes('403') && retryCount < maxRetries) {
+            console.log(`🔄 GetUser 403 error, retrying in ${(retryCount + 1) * 1000}ms...`);
+            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
+            retryCount++;
+            continue;
+          }
+
+          break;
+        } catch (error) {
+          if (retryCount < maxRetries) {
+            console.log(`🔄 GetUser timeout, retrying in ${(retryCount + 1) * 1000}ms...`);
+            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
+            retryCount++;
+            continue;
+          }
+          throw error;
+        }
+      }
 
       if (userError || !user) {
-        console.error('❌ Error getting user for profile creation:', userError);
+        console.error('❌ Error getting user for profile creation after retries:', userError);
         return null;
       }
 
@@ -236,18 +339,54 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         console.log('🔄 Getting initial session...');
 
-        // Add timeout to prevent hanging on Supabase initialization issues
+        // Add timeout with retry logic for initial session
         const sessionTimeout = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('Initial session timeout')), 8000); // Longer timeout for initial load
+          setTimeout(() => reject(new Error('Initial session timeout')), 12000); // Increased to 12s for initial load
         });
 
-        const { data: { session }, error } = await Promise.race([
-          supabase.auth.getSession(),
-          sessionTimeout
-        ]);
+        let session = null;
+        let error = null;
+        let retryCount = 0;
+        const maxRetries = 3; // More retries for initial session
+
+        while (retryCount <= maxRetries) {
+          try {
+            const result = await Promise.race([
+              supabase.auth.getSession(),
+              sessionTimeout
+            ]);
+
+            session = result.data.session;
+            error = result.error;
+
+            // If successful or non-auth error, break
+            if (session || (error && !error.message?.includes('403'))) {
+              break;
+            }
+
+            // If 403 error, wait and retry
+            if (error?.message?.includes('403') && retryCount < maxRetries) {
+              console.log(`🔄 Initial session 403 error, retrying in ${(retryCount + 1) * 2000}ms...`);
+              await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000));
+              retryCount++;
+              continue;
+            }
+
+            break;
+          } catch (timeoutError) {
+            if (retryCount < maxRetries) {
+              console.log(`🔄 Initial session timeout, retrying in ${(retryCount + 1) * 2000}ms...`);
+              await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000));
+              retryCount++;
+              continue;
+            }
+            error = timeoutError;
+            break;
+          }
+        }
 
         if (error) {
-          console.error('❌ Error getting initial session:', error);
+          console.error('❌ Error getting initial session after retries:', error);
           setLoading(false);
           return;
         }
