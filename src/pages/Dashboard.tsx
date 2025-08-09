@@ -8,6 +8,7 @@ import { useEstudantes } from '@/hooks/useEstudantes';
 import TemplateDownload from '@/components/TemplateDownload';
 import Header from '@/components/Header';
 import { DebugPanel } from '@/components/DebugPanel';
+import { TutorialButton } from '@/components/tutorial';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -73,16 +74,21 @@ const Dashboard = () => {
       <main className="pt-16">
         <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-jw-navy mb-2">
-            Painel de Controle
-          </h2>
-          <p className="text-muted-foreground">
-            Gerencie designações ministeriais de forma inteligente e eficiente
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold text-jw-navy mb-2">
+                Painel de Controle
+              </h2>
+              <p className="text-muted-foreground">
+                Gerencie designações ministeriais de forma inteligente e eficiente
+              </p>
+            </div>
+            <TutorialButton page="dashboard" />
+          </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="mb-8">
+        <div className="mb-8" data-tutorial="quick-actions">
           <h3 className="text-lg font-semibold text-jw-navy mb-4">Ações Rápidas</h3>
           <div className="flex flex-wrap gap-4">
             <Button
@@ -130,7 +136,7 @@ const Dashboard = () => {
         </div>
 
         {/* Dashboard Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" data-tutorial="dashboard-cards">
           {dashboardCards.map((card) => {
             const Icon = card.icon;
             return (
@@ -166,7 +172,7 @@ const Dashboard = () => {
         </div>
 
         {/* Stats Overview */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6" data-tutorial="stats-overview">
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">

@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { TutorialProvider } from "@/contexts/TutorialContext";
+import { TutorialOverlay } from "@/components/tutorial";
 import "@/utils/forceLogout"; // Initialize emergency logout tools
 import "@/utils/supabaseHealthCheck"; // Initialize health check tools
 import "@/utils/logoutDiagnostics"; // Initialize logout diagnostics
@@ -37,10 +39,12 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+      <TutorialProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <TutorialOverlay />
+          <BrowserRouter>
           <ErrorBoundary>
             <Routes>
             {/* Public Routes */}
@@ -137,7 +141,8 @@ const App = () => (
             </Routes>
           </ErrorBoundary>
         </BrowserRouter>
-      </TooltipProvider>
+        </TooltipProvider>
+      </TutorialProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

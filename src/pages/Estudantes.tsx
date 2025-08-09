@@ -15,6 +15,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Plus, Search, Users, ArrowLeft, Upload, BarChart3, Filter, FileSpreadsheet } from "lucide-react";
 import { useEstudantes } from "@/hooks/useEstudantes";
 import { useAuth } from "@/contexts/AuthContext";
+import { TutorialButton } from "@/components/tutorial";
 import {
   EstudanteWithParent,
   EstudanteFilters,
@@ -182,14 +183,17 @@ const Estudantes = () => {
               </Button>
             </div>
 
-            <div className="text-white">
-              <h1 className="text-4xl font-bold mb-4">
-                Gestão de <span className="text-jw-gold">Estudantes</span>
-              </h1>
-              <p className="text-xl opacity-90 max-w-2xl">
-                Cadastre e gerencie estudantes da Escola do Ministério Teocrático com
-                validação automática de qualificações e regras congregacionais.
-              </p>
+            <div className="flex items-start justify-between">
+              <div className="text-white">
+                <h1 className="text-4xl font-bold mb-4">
+                  Gestão de <span className="text-jw-gold">Estudantes</span>
+                </h1>
+                <p className="text-xl opacity-90 max-w-2xl">
+                  Cadastre e gerencie estudantes da Escola do Ministério Teocrático com
+                  validação automática de qualificações e regras congregacionais.
+                </p>
+              </div>
+              <TutorialButton page="estudantes" variant="secondary" />
             </div>
           </div>
         </section>
@@ -199,7 +203,7 @@ const Estudantes = () => {
           <div className="container mx-auto px-4">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="flex items-center justify-between mb-6">
-                <TabsList className="grid w-auto grid-cols-4">
+                <TabsList className="grid w-auto grid-cols-4" data-tutorial="tabs-navigation">
                   <TabsTrigger value="list" className="flex items-center gap-2">
                     <Users className="w-4 h-4" />
                     Lista

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { Upload, Calendar, FileText, ArrowLeft, Download, Eye, Trash2 } from "lucide-react";
+import { TutorialButton } from "@/components/tutorial";
 
 const Programas = () => {
   const navigate = useNavigate();
@@ -87,14 +88,17 @@ const Programas = () => {
               </Button>
             </div>
             
-            <div className="text-white">
-              <h1 className="text-4xl font-bold mb-4">
-                Gestão de <span className="text-jw-gold">Programas</span>
-              </h1>
-              <p className="text-xl opacity-90 max-w-2xl">
-                Importe e gerencie programas semanais da apostila Vida e Ministério Cristão 
-                com parsing automático e validação inteligente.
-              </p>
+            <div className="flex items-start justify-between">
+              <div className="text-white">
+                <h1 className="text-4xl font-bold mb-4">
+                  Gestão de <span className="text-jw-gold">Programas</span>
+                </h1>
+                <p className="text-xl opacity-90 max-w-2xl">
+                  Importe e gerencie programas semanais da apostila Vida e Ministério Cristão
+                  com parsing automático e validação inteligente.
+                </p>
+              </div>
+              <TutorialButton page="programas" variant="secondary" />
             </div>
           </div>
         </section>

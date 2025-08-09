@@ -26,6 +26,7 @@ import type {
 } from "@/types/designacoes";
 import type { EstudanteRow } from "@/types/estudantes";
 import { supabase } from "@/integrations/supabase/client";
+import { TutorialButton } from "@/components/tutorial";
 
 const Designacoes = () => {
   const navigate = useNavigate();
@@ -327,14 +328,17 @@ const Designacoes = () => {
               </Button>
             </div>
             
-            <div className="text-white">
-              <h1 className="text-4xl font-bold mb-4">
-                Gestão de <span className="text-jw-gold">Designações</span>
-              </h1>
-              <p className="text-xl opacity-90 max-w-2xl">
-                Gere e gerencie designações automáticas com algoritmo inteligente que 
-                respeita todas as regras da Escola do Ministério Teocrático.
-              </p>
+            <div className="flex items-start justify-between">
+              <div className="text-white">
+                <h1 className="text-4xl font-bold mb-4">
+                  Gestão de <span className="text-jw-gold">Designações</span>
+                </h1>
+                <p className="text-xl opacity-90 max-w-2xl">
+                  Gere e gerencie designações automáticas com algoritmo inteligente que
+                  respeita todas as regras da Escola do Ministério Teocrático.
+                </p>
+              </div>
+              <TutorialButton page="designacoes" variant="secondary" />
             </div>
           </div>
         </section>
@@ -354,6 +358,7 @@ const Designacoes = () => {
                   size="sm"
                   onClick={handleAbrirModalSelecao}
                   disabled={carregandoGeracao || carregandoSalvamento}
+                  data-tutorial="generate-assignments"
                 >
                   {carregandoGeracao ? (
                     <>
