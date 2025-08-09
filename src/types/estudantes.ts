@@ -15,6 +15,103 @@ export interface EstudanteWithParent extends EstudanteRow {
   filhos?: EstudanteRow[];
 }
 
+// S-38-T Speech Types and Qualifications
+export type SpeechType =
+  | 'bible_reading'      // Part 3 - Men only
+  | 'initial_call'       // Parts 4-7 - Both genders
+  | 'return_visit'       // Parts 4-7 - Both genders
+  | 'bible_study'        // Parts 4-7 - Both genders
+  | 'talk'              // Parts 4-7 - Qualified men only
+  | 'demonstration';     // Parts 4-7 - Both genders
+
+export type ProgressLevel =
+  | 'beginning'    // New students, basic assignments
+  | 'developing'   // Improving students, regular assignments
+  | 'qualified'    // Competent students, all assignments
+  | 'advanced';    // Experienced students, teaching others
+
+export interface StudentQualifications {
+  bible_reading: boolean;      // Part 3 capability
+  initial_call: boolean;       // Can do initial calls
+  return_visit: boolean;       // Can do return visits
+  bible_study: boolean;        // Can conduct Bible studies
+  talk: boolean;              // Can give talks (qualified men only)
+  demonstration: boolean;      // Can do demonstrations
+  can_be_helper: boolean;      // Can assist others
+  can_teach_others: boolean;   // Can mentor new students
+}
+
+export interface StudentProgress {
+  student_id: string;
+  progress_level: ProgressLevel;
+  qualifications: StudentQualifications;
+  last_assignment_date?: string;
+  total_assignments: number;
+  performance_notes?: string;
+  instructor_feedback?: string;
+  updated_at: string;
+  updated_by: string;
+}
+
+export interface EstudanteWithProgress extends EstudanteWithParent {
+  progress?: StudentProgress;
+  qualifications?: StudentQualifications;
+}
+
+// Instructor Dashboard Types
+export interface InstructorDashboardData {
+  students_by_progress: Record<ProgressLevel, EstudanteWithProgress[]>;
+  students_by_speech_type: Record<SpeechType, EstudanteWithProgress[]>;
+  recent_updates: StudentProgress[];
+  statistics: {
+    total_students: number;
+    by_progress_level: Record<ProgressLevel, number>;
+    by_speech_type: Record<SpeechType, number>;
+    active_students: number;
+    needs_attention: number;
+  };
+}
+
+export interface DragDropResult {
+  student_id: string;
+  from_level: ProgressLevel;
+  to_level: ProgressLevel;
+  timestamp: string;
+}
+
+// Constants for S-38-T Guidelines
+export const SPEECH_TYPE_LABELS: Record<SpeechType, string> = {
+  bible_reading: 'Leitura da Bíblia (Parte 3)',
+  initial_call: 'Primeira Conversa',
+  return_visit: 'Revisita',
+  bible_study: 'Estudo Bíblico',
+  talk: 'Discurso',
+  demonstration: 'Demonstração'
+};
+
+export const PROGRESS_LEVEL_LABELS: Record<ProgressLevel, string> = {
+  beginning: 'Iniciante',
+  developing: 'Em Desenvolvimento',
+  qualified: 'Qualificado',
+  advanced: 'Avançado'
+};
+
+export const PROGRESS_LEVEL_COLORS: Record<ProgressLevel, string> = {
+  beginning: 'bg-red-50 border-red-200 text-red-800',
+  developing: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+  qualified: 'bg-blue-50 border-blue-200 text-blue-800',
+  advanced: 'bg-green-50 border-green-200 text-green-800'
+};
+
+export const SPEECH_TYPE_ICONS: Record<SpeechType, string> = {
+  bible_reading: '📖',
+  initial_call: '🚪',
+  return_visit: '🔄',
+  bible_study: '📚',
+  talk: '🎤',
+  demonstration: '👥'
+};
+
 export interface EstudanteFormData {
   nome: string;
   idade: number;

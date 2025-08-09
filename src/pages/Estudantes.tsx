@@ -17,6 +17,12 @@ import { useEstudantes } from "@/hooks/useEstudantes";
 import { useAuth } from "@/contexts/AuthContext";
 import { TutorialButton } from "@/components/tutorial";
 import {
+  ProgressBoard,
+  SpeechTypeCategories,
+  InstructorDashboardStats
+} from "@/components/instructor";
+import { useInstructorDashboard } from "@/hooks/useInstructorDashboard";
+import {
   EstudanteWithParent,
   EstudanteFilters,
   Cargo,
@@ -41,10 +47,21 @@ const Estudantes = () => {
     getStatistics,
   } = useEstudantes();
 
+  // Instructor Dashboard Hook
+  const {
+    data: instructorData,
+    loading: instructorLoading,
+    error: instructorError,
+    updateQualifications,
+    updateProgress,
+    moveStudent,
+    refreshData: refreshInstructorData
+  } = useInstructorDashboard();
+
   // UI State - Initialize from URL parameter
   const [activeTab, setActiveTab] = useState(() => {
     const tabParam = searchParams.get('tab');
-    return ['list', 'form', 'import', 'stats'].includes(tabParam || '') ? tabParam : 'list';
+    return ['list', 'form', 'import', 'stats', 'instructor'].includes(tabParam || '') ? tabParam : 'list';
   });
 
   // Update URL when tab changes
@@ -203,7 +220,7 @@ const Estudantes = () => {
           <div className="container mx-auto px-4">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="flex items-center justify-between mb-6">
-                <TabsList className="grid w-auto grid-cols-4" data-tutorial="tabs-navigation">
+                <TabsList className="grid w-auto grid-cols-5" data-tutorial="tabs-navigation">
                   <TabsTrigger value="list" className="flex items-center gap-2">
                     <Users className="w-4 h-4" />
                     Lista
@@ -219,6 +236,10 @@ const Estudantes = () => {
                   <TabsTrigger value="stats" className="flex items-center gap-2">
                     <BarChart3 className="w-4 h-4" />
                     Estatísticas
+                  </TabsTrigger>
+                  <TabsTrigger value="instructor" className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    Painel do Instrutor
                   </TabsTrigger>
                 </TabsList>
 
@@ -462,6 +483,50 @@ const Estudantes = () => {
                     </CardContent>
                   </Card>
                 </div>
+              </TabsContent>
+
+              {/* Instructor Dashboard Tab */}
+              <TabsContent value="instructor" className="space-y-6">
+                {instructorLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-jw-blue mx-auto mb-4"></div>
+                      <p className="text-gray-600">Carregando painel do instrutor...</p>
+                    </div>
+                  </div>
+                ) : instructorError ? (
+                  <div className="text-center py-12">
+                    <p className="text-red-600 mb-4">Erro ao carregar painel do instrutor: {instructorError}</p>
+                    <Button onClick={refreshInstructorData}>Tentar Novamente</Button>
+                  </div>
+                ) : (
+                  <div className="space-y-8">
+                    {/* Dashboard Statistics */}
+                    <div data-tutorial="instructor-stats">
+                      <InstructorDashboardStats data={instructorData} />
+                    </div>
+
+                    {/* Progress Board */}
+                    <div data-tutorial="progress-board">
+                      <ProgressBoard
+                        studentsByProgress={instructorData.students_by_progress}
+                        onMoveStudent={moveStudent}
+                        onUpdateQualifications={updateQualifications}
+                        onUpdateProgress={updateProgress}
+                        isLoading={instructorLoading}
+                      />
+                    </div>
+
+                    {/* Speech Type Categories */}
+                    <div data-tutorial="speech-categories">
+                      <SpeechTypeCategories
+                        studentsBySpeechType={instructorData.students_by_speech_type}
+                        onUpdateQualifications={updateQualifications}
+                        onUpdateProgress={updateProgress}
+                      />
+                    </div>
+                  </div>
+                )}
               </TabsContent>
 
               {/* Import Tab */}

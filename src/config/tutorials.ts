@@ -170,6 +170,60 @@ const estudantesTutorials: Tutorial[] = [
         action: 'click'
       }
     ]
+  },
+  {
+    id: 'instructor-dashboard',
+    title: 'Painel do Instrutor',
+    description: 'Gerencie qualificações e progresso dos estudantes com ferramentas interativas',
+    page: 'estudantes',
+    category: 'advanced',
+    estimatedTime: 8,
+    prerequisites: ['students-basic'],
+    steps: [
+      {
+        id: 'instructor-tab',
+        title: 'Painel do Instrutor',
+        content: 'Acesse o painel interativo do instrutor para gerenciar qualificações e progresso dos estudantes da Escola Ministerial.',
+        target: '[data-value="instructor"]',
+        position: 'bottom',
+        action: 'click'
+      },
+      {
+        id: 'dashboard-stats',
+        title: 'Estatísticas do Instrutor',
+        content: 'Visualize estatísticas detalhadas sobre progresso, qualificações e distribuição dos estudantes.',
+        target: '[data-tutorial="instructor-stats"]',
+        position: 'bottom'
+      },
+      {
+        id: 'progress-board',
+        title: 'Quadro de Progresso',
+        content: 'Use o sistema de arrastar e soltar para mover estudantes entre níveis de progresso: Iniciante, Desenvolvimento, Qualificado e Avançado.',
+        target: '[data-tutorial="progress-board"]',
+        position: 'top'
+      },
+      {
+        id: 'qualification-cards',
+        title: 'Cartões de Qualificação',
+        content: 'Edite as qualificações de cada estudante usando os switches para marcar quais tipos de designação eles podem receber.',
+        target: '[data-tutorial="qualification-card"]',
+        position: 'right'
+      },
+      {
+        id: 'speech-categories',
+        title: 'Categorização por Designação',
+        content: 'Visualize estudantes organizados por tipos de designação S-38-T: Leitura da Bíblia, Discursos, Demonstrações.',
+        target: '[data-tutorial="speech-categories"]',
+        position: 'top'
+      },
+      {
+        id: 'drag-drop-feature',
+        title: 'Arrastar e Soltar',
+        content: 'Arraste estudantes entre colunas para atualizar automaticamente seu nível de progresso e qualificações.',
+        target: '[data-tutorial="drag-drop-area"]',
+        position: 'center'
+      }
+    ]
   }
 ];
 
