@@ -22,14 +22,14 @@ const ProtectedRoute = ({
   const navigate = useNavigate();
   const [profileTimeout, setProfileTimeout] = useState(false);
 
-  // Set up profile timeout to prevent infinite loading
+  // Set up profile timeout to prevent infinite loading - reduced timeout for better UX
   useEffect(() => {
     if (user && !profile && !loading) {
-      console.log('⏰ Setting profile timeout - will fallback to metadata in 5 seconds');
+      console.log('⏰ Setting profile timeout - will fallback to metadata in 3 seconds');
       const timeout = setTimeout(() => {
         console.log('⏰ Profile timeout reached, using metadata fallback');
         setProfileTimeout(true);
-      }, 5000); // 5 second timeout
+      }, 3000); // Reduced to 3 second timeout to match AuthContext
 
       return () => clearTimeout(timeout);
     }
@@ -68,9 +68,14 @@ const ProtectedRoute = ({
       if (profile) {
         userRole = profile.role;
         console.log('✅ ProtectedRoute: Using profile role:', userRole);
-      } else {
+      } else if (user.user_metadata?.role) {
         userRole = user.user_metadata?.role as UserRole;
-        console.log('⚠️ ProtectedRoute: Using metadata role:', userRole, '(profile not loaded)');
+        // Only show warning if we've been waiting for a while
+        if (profileTimeout) {
+          console.log('⚠️ ProtectedRoute: Using metadata role fallback:', userRole, '(profile loading timed out)');
+        } else {
+          console.log('🔄 ProtectedRoute: Using metadata role temporarily:', userRole, '(profile still loading)');
+        }
       }
 
       if (userRole) {
@@ -135,9 +140,14 @@ const ProtectedRoute = ({
     if (profile) {
       userRole = profile.role;
       console.log('✅ ProtectedRoute: Using profile role:', userRole);
-    } else {
+    } else if (user.user_metadata?.role) {
       userRole = user.user_metadata?.role as UserRole;
-      console.log('⚠️ ProtectedRoute: Using metadata role:', userRole, '(profile not loaded yet)');
+      // Only show warning if we've been waiting for a while
+      if (profileTimeout) {
+        console.log('⚠️ ProtectedRoute: Using metadata role fallback:', userRole, '(profile loading timed out)');
+      } else {
+        console.log('🔄 ProtectedRoute: Using metadata role temporarily:', userRole, '(profile still loading)');
+      }
     }
 
     if (!userRole) {

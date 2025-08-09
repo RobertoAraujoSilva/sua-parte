@@ -44,7 +44,12 @@ const App = () => (
           <Toaster />
           <Sonner />
           <TutorialOverlay />
-          <BrowserRouter>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true
+            }}
+          >
           <ErrorBoundary>
             <Routes>
             {/* Public Routes */}

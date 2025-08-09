@@ -52,13 +52,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 
 
-  // Fetch user profile from database
+  // Fetch user profile from database with improved error handling and timeout
   const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
     console.log('🔍 Fetching profile for user ID:', userId);
 
     try {
+      // Add timeout to prevent hanging requests
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 3000); // 3 second timeout
+      });
+
       // First, let's check the current session to ensure we're authenticated
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const sessionPromise = supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await Promise.race([sessionPromise, timeoutPromise]);
+
       console.log('🔐 Current session check:', {
         hasSession: !!session,
         sessionUserId: session?.user?.id,
@@ -79,13 +86,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
 
-      // Try direct profiles table access
+      // Try direct profiles table access with timeout
       console.log('🔍 Fetching from profiles table...');
-      const { data: profileData, error: profileError } = await supabase
+      const profilePromise = supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
+
+      const { data: profileData, error: profileError } = await Promise.race([profilePromise, timeoutPromise]);
 
       if (profileError) {
         console.log('❌ Profile not found in profiles table, attempting to create from auth metadata:', profileError);
@@ -110,8 +119,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       console.error('❌ Error fetching profile:', errorMessage);
 
-      // Try to create profile from auth metadata as fallback
+      // If it's a timeout or network error, try to create profile from auth metadata as fallback
       try {
+        console.log('🔄 Attempting to create profile from auth metadata as fallback...');
         return await createProfileFromAuth(userId);
       } catch (createError: unknown) {
         const createErrorMessage = createError instanceof Error ? createError.message : 'Unknown error';
