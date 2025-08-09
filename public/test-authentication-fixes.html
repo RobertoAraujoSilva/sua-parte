@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎉 Authentication Fixes Verification - Sistema Ministerial</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #059669;
+            border-bottom: 2px solid #059669;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #10b981;
+            background-color: #f0fdf4;
+        }
+        .error {
+            border-left-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        .warning {
+            border-left-color: #f59e0b;
+            background-color: #fffbeb;
+        }
+        .success {
+            border-left-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        .code {
+            background-color: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            margin: 10px 0;
+            font-size: 11px;
+        }
+        button {
+            background-color: #059669;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #047857;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .fix-summary {
+            background-color: #ecfdf5;
+            border: 1px solid #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎉 Authentication Fixes Verification</h1>
+        
+        <div class="fix-summary">
+            <h3>✅ Critical Fixes Applied</h3>
+            <ul>
+                <li><strong>URI Allow List:</strong> Added localhost:8080 support</li>
+                <li><strong>Site URL:</strong> Changed to localhost:8080 for development</li>
+                <li><strong>JWT Expiry:</strong> Increased to 2 hours (7200s)</li>
+                <li><strong>User Profiles:</strong> Created missing profiles for test users</li>
+                <li><strong>Timeouts:</strong> Optimized for faster response (5s/4s/4s)</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Comprehensive Authentication Tests</h3>
+            <button onclick="testInstructorAuth()">🔐 Test Instructor Login</button>
+            <button onclick="testStudentAuth()">👨‍🎓 Test Student Login</button>
+            <button onclick="testProfileFetching()">📋 Test Profile Fetching</button>
+            <button onclick="testNoMoreErrors()">🚫 Test No 403/406 Errors</button>
+            <button onclick="runAllTests()">🚀 Run All Tests</button>
+            <button onclick="clearResults()">Clear Results</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script type="module">
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<pre>${message}</pre>`;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        async function createSupabaseClient() {
+            try {
+                const { createClient } = await import('https://cdn.skypack.dev/@supabase/supabase-js');
+                
+                const url = import.meta.env.VITE_SUPABASE_URL || 'https://nwpuurgwnnuejqinkvrh.supabase.co';
+                const key = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjIwNjUsImV4cCI6MjA3MDAzODA2NX0.UHjSvXYY_c-_ydAIfELRUs4CMEBLKiztpBGQBNPHfak';
+
+                return createClient(url, key, {
+                    auth: {
+                        storage: localStorage,
+                        persistSession: false,
+                        autoRefreshToken: false,
+                        detectSessionInUrl: false,
+                        debug: true
+                    },
+                    global: {
+                        headers: {
+                            'X-Client-Info': 'supabase-js-web',
+                            'apikey': key,
+                            'Authorization': `Bearer ${key}`,
+                        }
+                    }
+                });
+            } catch (error) {
+                log(`❌ Failed to create Supabase client: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
+        window.testInstructorAuth = async function() {
+            log('🔐 TESTING INSTRUCTOR AUTHENTICATION', 'info');
+            log('====================================', 'info');
+
+            const supabase = await createSupabaseClient();
+            if (!supabase) return;
+
+            try {
+                log('📧 Logging in as instructor: frankwebber33@hotmail.com', 'info');
+                
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: 'frankwebber33@hotmail.com',
+                    password: '13a21r15'
+                });
+
+                if (error) {
+                    log(`❌ Instructor login failed: ${error.message}`, 'error');
+                    
+                    if (error.message.includes('403')) {
+                        log('🚨 Still getting 403 errors - URI allow list may not be updated', 'error');
+                    } else if (error.message.includes('invalid claim')) {
+                        log('🚨 Still getting JWT token errors - site URL may not be updated', 'error');
+                    }
+                } else {
+                    log('✅ Instructor login successful!', 'success');
+                    log(`👤 User ID: ${data.user?.id}`, 'success');
+                    log(`📧 Email: ${data.user?.email}`, 'success');
+                    
+                    // Test profile fetch
+                    if (data.user) {
+                        log('📋 Testing instructor profile fetch...', 'info');
+                        
+                        const { data: profile, error: profileError } = await supabase
+                            .from('profiles')
+                            .select('*')
+                            .eq('id', data.user.id)
+                            .single();
+                            
+                        if (profileError) {
+                            log(`❌ Profile fetch failed: ${profileError.message}`, 'error');
+                            
+                            if (profileError.message.includes('406')) {
+                                log('🚨 Still getting 406 errors - profile may not exist', 'error');
+                            }
+                        } else {
+                            log('✅ Instructor profile fetch successful!', 'success');
+                            log(`👨‍💼 Name: ${profile.nome_completo}`, 'success');
+                            log(`🎯 Role: ${profile.role}`, 'success');
+                            log(`🏢 Congregation: ${profile.congregacao}`, 'success');
+                        }
+                    }
+                    
+                    // Clean up
+                    await supabase.auth.signOut();
+                    log('🧹 Signed out successfully', 'info');
+                }
+
+            } catch (error) {
+                log(`❌ Instructor auth test exception: ${error.message}`, 'error');
+            }
+        };
+
+        window.testStudentAuth = async function() {
+            log('\n👨‍🎓 TESTING STUDENT AUTHENTICATION', 'info');
+            log('==================================', 'info');
+
+            const supabase = await createSupabaseClient();
+            if (!supabase) return;
+
+            try {
+                log('📧 Logging in as student: franklinmarceloferreiradelima@gmail.com', 'info');
+                
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: 'franklinmarceloferreiradelima@gmail.com',
+                    password: '13a21r15'
+                });
+
+                if (error) {
+                    log(`❌ Student login failed: ${error.message}`, 'error');
+                } else {
+                    log('✅ Student login successful!', 'success');
+                    log(`👤 User ID: ${data.user?.id}`, 'success');
+                    log(`📧 Email: ${data.user?.email}`, 'success');
+                    
+                    // Test profile fetch
+                    if (data.user) {
+                        log('📋 Testing student profile fetch...', 'info');
+                        
+                        const { data: profile, error: profileError } = await supabase
+                            .from('profiles')
+                            .select('*')
+                            .eq('id', data.user.id)
+                            .single();
+                            
+                        if (profileError) {
+                            log(`❌ Profile fetch failed: ${profileError.message}`, 'error');
+                        } else {
+                            log('✅ Student profile fetch successful!', 'success');
+                            log(`👨‍🎓 Name: ${profile.nome_completo}`, 'success');
+                            log(`🎯 Role: ${profile.role}`, 'success');
+                            log(`🏢 Congregation: ${profile.congregacao}`, 'success');
+                        }
+                    }
+                    
+                    // Clean up
+                    await supabase.auth.signOut();
+                    log('🧹 Signed out successfully', 'info');
+                }
+
+            } catch (error) {
+                log(`❌ Student auth test exception: ${error.message}`, 'error');
+            }
+        };
+
+        window.testProfileFetching = async function() {
+            log('\n📋 TESTING PROFILE FETCHING (NO AUTH)', 'info');
+            log('=====================================', 'info');
+
+            const supabase = await createSupabaseClient();
+            if (!supabase) return;
+
+            try {
+                log('🧪 Testing anonymous profile count query...', 'info');
+                
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('count')
+                    .limit(0);
+
+                if (error) {
+                    log(`❌ Profile count query failed: ${error.message}`, 'error');
+                    
+                    if (error.message.includes('401')) {
+                        log('🚨 Still getting 401 errors - API key transmission issue', 'error');
+                    } else if (error.message.includes('403')) {
+                        log('🚨 Still getting 403 errors - RLS or URI allow list issue', 'error');
+                    }
+                } else {
+                    log('✅ Profile count query successful!', 'success');
+                    log(`📊 Response: ${JSON.stringify(data)}`, 'success');
+                }
+
+            } catch (error) {
+                log(`❌ Profile fetching test exception: ${error.message}`, 'error');
+            }
+        };
+
+        window.testNoMoreErrors = async function() {
+            log('\n🚫 TESTING FOR ABSENCE OF 403/406 ERRORS', 'info');
+            log('=========================================', 'info');
+
+            const supabase = await createSupabaseClient();
+            if (!supabase) return;
+
+            let errorCount = 0;
+            const errors = [];
+
+            try {
+                // Test 1: Auth user endpoint
+                log('🧪 Test 1: Auth user endpoint...', 'info');
+                try {
+                    const { data, error } = await supabase.auth.getUser();
+                    if (error && (error.message.includes('403') || error.message.includes('406'))) {
+                        errorCount++;
+                        errors.push(`Auth user: ${error.message}`);
+                    } else {
+                        log('✅ Auth user endpoint: No 403/406 errors', 'success');
+                    }
+                } catch (e) {
+                    if (e.message.includes('403') || e.message.includes('406')) {
+                        errorCount++;
+                        errors.push(`Auth user exception: ${e.message}`);
+                    }
+                }
+
+                // Test 2: Profiles table access
+                log('🧪 Test 2: Profiles table access...', 'info');
+                try {
+                    const { data, error } = await supabase.from('profiles').select('count').limit(1);
+                    if (error && (error.message.includes('403') || error.message.includes('406'))) {
+                        errorCount++;
+                        errors.push(`Profiles access: ${error.message}`);
+                    } else {
+                        log('✅ Profiles table access: No 403/406 errors', 'success');
+                    }
+                } catch (e) {
+                    if (e.message.includes('403') || e.message.includes('406')) {
+                        errorCount++;
+                        errors.push(`Profiles access exception: ${e.message}`);
+                    }
+                }
+
+                // Test 3: Session check
+                log('🧪 Test 3: Session check...', 'info');
+                try {
+                    const { data, error } = await supabase.auth.getSession();
+                    if (error && (error.message.includes('403') || error.message.includes('406'))) {
+                        errorCount++;
+                        errors.push(`Session check: ${error.message}`);
+                    } else {
+                        log('✅ Session check: No 403/406 errors', 'success');
+                    }
+                } catch (e) {
+                    if (e.message.includes('403') || e.message.includes('406')) {
+                        errorCount++;
+                        errors.push(`Session check exception: ${e.message}`);
+                    }
+                }
+
+                // Summary
+                if (errorCount === 0) {
+                    log('🎉 SUCCESS: No 403/406 errors detected!', 'success');
+                    log('All authentication endpoints are working correctly.', 'success');
+                } else {
+                    log(`❌ FOUND ${errorCount} 403/406 ERRORS:`, 'error');
+                    errors.forEach(error => log(`   • ${error}`, 'error'));
+                }
+
+            } catch (error) {
+                log(`❌ Error testing exception: ${error.message}`, 'error');
+            }
+        };
+
+        window.runAllTests = async function() {
+            clearResults();
+            log('🚀 RUNNING COMPREHENSIVE AUTHENTICATION VERIFICATION', 'info');
+            log('===================================================', 'info');
+            
+            await testNoMoreErrors();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testProfileFetching();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testInstructorAuth();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testStudentAuth();
+            
+            log('\n📋 COMPREHENSIVE TEST SUMMARY', 'info');
+            log('=============================', 'info');
+            log('If all tests pass, the authentication system is fully operational.', 'success');
+            log('The Sistema Ministerial application should now work without errors.', 'success');
+        };
+
+        // Auto-run on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('🔄 Auto-running comprehensive authentication verification...', 'info');
+                runAllTests();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

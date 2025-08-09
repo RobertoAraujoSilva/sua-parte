@@ -16,10 +16,17 @@
     "cypress:verify": "cypress verify",
     "test:e2e": "cypress run",
     "test:e2e:open": "cypress open",
+    "test:e2e:record": "cypress run --record",
     "test:franklin": "cypress run --spec \"cypress/e2e/franklin-login.cy.ts\"",
+    "test:franklin:record": "cypress run --spec \"cypress/e2e/franklin-login.cy.ts\" --record",
     "test:sarah": "cypress run --spec \"cypress/e2e/sarah-student-registration.cy.ts\"",
+    "test:sarah:record": "cypress run --spec \"cypress/e2e/sarah-student-registration.cy.ts\" --record",
     "test:birth-date": "cypress run --spec \"cypress/e2e/sarah-student-registration.cy.ts\"",
     "test:sarah:open": "cypress open --e2e --browser chrome",
+    "test:audit": "cypress run --spec \"cypress/e2e/auditoria_sistema_ministerial.cy.ts\"",
+    "test:audit:record": "cypress run --spec \"cypress/e2e/auditoria_sistema_ministerial.cy.ts\" --record",
+    "test:auth": "cypress run --spec \"cypress/e2e/authentication-roles.cy.ts\"",
+    "test:auth:record": "cypress run --spec \"cypress/e2e/authentication-roles.cy.ts\" --record",
     "test:setup": "cypress install && cypress verify"
   },
   "dependencies": {
@@ -92,7 +99,7 @@
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.21",
-    "cypress": "^13.6.2",
+    "cypress": "^13.17.0",
     "eslint": "^9.32.0",
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
@@ -102,6 +109,7 @@
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.38.0",
-    "vite": "^5.0.0"
+    "vite": "^5.0.0",
+    "vite-plugin-pwa": "^1.0.2"
   }
 }

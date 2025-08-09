@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PWA Icons Generator - Sistema Ministerial</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        canvas { border: 1px solid #ccc; margin: 10px; }
+        .icon-container { display: inline-block; margin: 10px; text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>🎨 Gerador de Ícones PWA - Sistema Ministerial</h1>
+    <p>Este arquivo gera os ícones necessários para o PWA do Sistema Ministerial.</p>
+    
+    <div id="icons-container"></div>
+    
+    <script>
+        // Função para criar ícone com texto
+        function createIcon(size, text, bgColor = '#1f2937', textColor = '#ffffff') {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Fundo
+            ctx.fillStyle = bgColor;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Texto
+            ctx.fillStyle = textColor;
+            ctx.font = `bold ${size * 0.3}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(text, size / 2, size / 2);
+            
+            return canvas;
+        }
+        
+        // Criar ícones
+        const icons = [
+            { size: 192, name: 'pwa-192x192.png' },
+            { size: 512, name: 'pwa-512x512.png' }
+        ];
+        
+        const container = document.getElementById('icons-container');
+        
+        icons.forEach(icon => {
+            const canvas = createIcon(icon.size, 'SM');
+            const div = document.createElement('div');
+            div.className = 'icon-container';
+            
+            const title = document.createElement('h3');
+            title.textContent = icon.name;
+            
+            const downloadLink = document.createElement('a');
+            downloadLink.href = canvas.toDataURL();
+            downloadLink.download = icon.name;
+            downloadLink.textContent = 'Download';
+            downloadLink.style.display = 'block';
+            downloadLink.style.marginTop = '10px';
+            
+            div.appendChild(title);
+            div.appendChild(canvas);
+            div.appendChild(downloadLink);
+            container.appendChild(div);
+        });
+        
+        // Criar favicon
+        const favicon = createIcon(32, 'SM');
+        const faviconDiv = document.createElement('div');
+        faviconDiv.className = 'icon-container';
+        
+        const faviconTitle = document.createElement('h3');
+        faviconTitle.textContent = 'favicon.ico';
+        
+        const faviconLink = document.createElement('a');
+        faviconLink.href = favicon.toDataURL();
+        faviconLink.download = 'favicon.png';
+        faviconLink.textContent = 'Download (renomear para .ico)';
+        faviconLink.style.display = 'block';
+        faviconLink.style.marginTop = '10px';
+        
+        faviconDiv.appendChild(faviconTitle);
+        faviconDiv.appendChild(favicon);
+        faviconDiv.appendChild(faviconLink);
+        container.appendChild(faviconDiv);
+    </script>
+    
+    <div style="margin-top: 30px; padding: 20px; background: #f5f5f5; border-radius: 8px;">
+        <h2>📋 Instruções:</h2>
+        <ol>
+            <li>Abra este arquivo no navegador</li>
+            <li>Clique em "Download" para cada ícone</li>
+            <li>Salve os arquivos na pasta <code>public/</code> do projeto</li>
+            <li>Para o favicon, renomeie o arquivo baixado de .png para .ico</li>
+        </ol>
+        
+        <h3>🎨 Personalização:</h3>
+        <p>Para personalizar os ícones:</p>
+        <ul>
+            <li>Substitua 'SM' por outro texto ou símbolo</li>
+            <li>Altere as cores modificando bgColor e textColor</li>
+            <li>Use um editor de imagem para criar ícones mais elaborados</li>
+        </ul>
+    </div>
+</body>
+</html>

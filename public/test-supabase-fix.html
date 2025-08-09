@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Supabase Fix Test - Sistema Ministerial</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #059669;
+            border-bottom: 2px solid #059669;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #10b981;
+            background-color: #f0fdf4;
+        }
+        .error {
+            border-left-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        .warning {
+            border-left-color: #f59e0b;
+            background-color: #fffbeb;
+        }
+        .success {
+            border-left-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        .code {
+            background-color: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        button {
+            background-color: #059669;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #047857;
+        }
+        #results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Supabase Fix Verification Test</h1>
+        
+        <div class="test-section success">
+            <h3>✅ Fix Applied: Environment Variables with Fallback</h3>
+            <p>Testing if the Supabase client configuration fix resolves the 401 "No API key found" errors.</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Test Actions</h3>
+            <button onclick="testEnvironmentFix()">Test Environment Fix</button>
+            <button onclick="testSupabaseClient()">Test Supabase Client</button>
+            <button onclick="testApiRequest()">Test API Request</button>
+            <button onclick="testAuthentication()">Test Authentication</button>
+            <button onclick="runFullTest()">Run Full Test</button>
+            <button onclick="clearResults()">Clear Results</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script type="module">
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<pre>${message}</pre>`;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        window.testEnvironmentFix = function() {
+            log('🔧 TESTING ENVIRONMENT VARIABLE FIX', 'info');
+            log('===================================', 'info');
+
+            // Check if we're in Vite environment
+            const isVite = typeof import.meta !== 'undefined' && import.meta.env;
+            log(`Vite Environment: ${isVite ? '✅ Detected' : '❌ Not detected'}`, isVite ? 'success' : 'error');
+
+            if (!isVite) {
+                log('❌ Not in Vite environment - cannot test fix', 'error');
+                return;
+            }
+
+            // Test environment variables
+            const env = import.meta.env;
+            const url = env.VITE_SUPABASE_URL;
+            const key = env.VITE_SUPABASE_ANON_KEY;
+
+            log('📊 Environment Variables Status:', 'info');
+            log(`VITE_SUPABASE_URL: ${url ? '✅ LOADED' : '❌ MISSING'}`, url ? 'success' : 'error');
+            log(`VITE_SUPABASE_ANON_KEY: ${key ? '✅ LOADED' : '❌ MISSING'}`, key ? 'success' : 'error');
+
+            if (url) {
+                log(`📍 URL: ${url}`, 'info');
+            }
+            if (key) {
+                log(`🔑 Key: ${key.substring(0, 20)}...`, 'info');
+            }
+
+            // Test fallback values (these should be used if env vars are missing)
+            const fallbackUrl = 'https://nwpuurgwnnuejqinkvrh.supabase.co';
+            const fallbackKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjIwNjUsImV4cCI6MjA3MDAzODA2NX0.UHjSvXYY_c-_ydAIfELRUs4CMEBLKiztpBGQBNPHfak';
+
+            const finalUrl = url || fallbackUrl;
+            const finalKey = key || fallbackKey;
+
+            log('🔄 Final Configuration (with fallbacks):', 'info');
+            log(`Final URL: ${finalUrl}`, 'success');
+            log(`Final Key: ${finalKey.substring(0, 20)}...`, 'success');
+            log(`Using fallback URL: ${!url ? '✅ YES' : '❌ NO'}`, !url ? 'warning' : 'success');
+            log(`Using fallback Key: ${!key ? '✅ YES' : '❌ NO'}`, !key ? 'warning' : 'success');
+        };
+
+        window.testSupabaseClient = async function() {
+            log('\n🔧 TESTING SUPABASE CLIENT CREATION', 'info');
+            log('====================================', 'info');
+
+            try {
+                // Import Supabase
+                const { createClient } = await import('https://cdn.skypack.dev/@supabase/supabase-js');
+                log('✅ Supabase library imported', 'success');
+
+                // Get environment variables with fallbacks (same as in the fix)
+                const url = import.meta.env.VITE_SUPABASE_URL || 'https://nwpuurgwnnuejqinkvrh.supabase.co';
+                const key = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjIwNjUsImV4cCI6MjA3MDAzODA2NX0.UHjSvXYY_c-_ydAIfELRUs4CMEBLKiztpBGQBNPHfak';
+
+                // Create client with explicit headers (same as in the fix)
+                const supabase = createClient(url, key, {
+                    auth: {
+                        storage: localStorage,
+                        persistSession: false,
+                        autoRefreshToken: false,
+                        detectSessionInUrl: false,
+                        debug: true
+                    },
+                    global: {
+                        headers: {
+                            'X-Client-Info': 'supabase-js-web',
+                            'apikey': key,
+                            'Authorization': `Bearer ${key}`,
+                        }
+                    }
+                });
+
+                log('✅ Supabase client created with explicit headers', 'success');
+                log(`📍 URL: ${url}`, 'info');
+                log(`🔑 Key: ${key.substring(0, 20)}...`, 'info');
+
+                // Store for testing
+                window.testSupabase = supabase;
+
+            } catch (error) {
+                log(`❌ Supabase client creation failed: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+        };
+
+        window.testApiRequest = async function() {
+            log('\n🌐 TESTING API REQUEST WITH FIX', 'info');
+            log('===============================', 'info');
+
+            if (!window.testSupabase) {
+                log('❌ No Supabase client available. Run "Test Supabase Client" first.', 'error');
+                return;
+            }
+
+            try {
+                log('🧪 Testing profiles table access...', 'info');
+                
+                // Test the exact same call that was failing
+                const { data, error } = await window.testSupabase
+                    .from('profiles')
+                    .select('count')
+                    .limit(0);
+
+                if (error) {
+                    log(`❌ API request failed: ${error.message}`, 'error');
+                    log(`🔍 Error code: ${error.code}`, 'error');
+                    log(`🔍 Error details: ${error.details}`, 'error');
+                    
+                    if (error.message.includes('No API key found')) {
+                        log('🚨 STILL GETTING "No API key found" ERROR!', 'error');
+                        log('The fix may not be working properly.', 'error');
+                    } else {
+                        log('✅ Different error - API key is being transmitted', 'warning');
+                    }
+                } else {
+                    log('🎉 API request successful! Fix is working!', 'success');
+                    log(`📊 Response: ${JSON.stringify(data)}`, 'success');
+                }
+
+            } catch (error) {
+                log(`❌ API request exception: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+        };
+
+        window.testAuthentication = async function() {
+            log('\n🔐 TESTING AUTHENTICATION WITH FIX', 'info');
+            log('===================================', 'info');
+
+            if (!window.testSupabase) {
+                log('❌ No Supabase client available. Run "Test Supabase Client" first.', 'error');
+                return;
+            }
+
+            try {
+                log('🧪 Testing authentication...', 'info');
+                
+                // Test login with instructor credentials
+                const { data, error } = await window.testSupabase.auth.signInWithPassword({
+                    email: 'frankwebber33@hotmail.com',
+                    password: '13a21r15'
+                });
+
+                if (error) {
+                    log(`❌ Authentication failed: ${error.message}`, 'error');
+                } else {
+                    log('✅ Authentication successful!', 'success');
+                    log(`👤 User: ${data.user?.email}`, 'success');
+                    
+                    // Test profile fetch after authentication
+                    if (data.user) {
+                        log('🔍 Testing profile fetch after authentication...', 'info');
+                        
+                        const { data: profile, error: profileError } = await window.testSupabase
+                            .from('profiles')
+                            .select('*')
+                            .eq('id', data.user.id)
+                            .single();
+                            
+                        if (profileError) {
+                            log(`❌ Profile fetch failed: ${profileError.message}`, 'error');
+                        } else {
+                            log('✅ Profile fetch successful!', 'success');
+                            log(`📋 Profile: ${JSON.stringify(profile, null, 2)}`, 'success');
+                        }
+                    }
+                    
+                    // Clean up
+                    await window.testSupabase.auth.signOut();
+                    log('🧹 Signed out successfully', 'info');
+                }
+
+            } catch (error) {
+                log(`❌ Authentication test exception: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+        };
+
+        window.runFullTest = async function() {
+            clearResults();
+            log('🚀 RUNNING FULL SUPABASE FIX TEST', 'info');
+            log('=================================', 'info');
+            
+            testEnvironmentFix();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testSupabaseClient();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testApiRequest();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testAuthentication();
+            
+            log('\n📋 TEST SUMMARY', 'info');
+            log('===============', 'info');
+            log('If all tests pass, the 401 "No API key found" error should be resolved.', 'success');
+            log('Check the main application at http://localhost:8080 to verify.', 'success');
+        };
+
+        // Auto-run on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('🔄 Auto-running Supabase fix test...', 'info');
+                runFullTest();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

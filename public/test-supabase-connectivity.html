@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌐 Supabase Connectivity Test - Sistema Ministerial</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #10b981;
+            background-color: #f0fdf4;
+        }
+        .error {
+            border-left-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        .warning {
+            border-left-color: #f59e0b;
+            background-color: #fffbeb;
+        }
+        .success {
+            border-left-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        .info {
+            border-left-color: #2563eb;
+            background-color: #eff6ff;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .latency-good { color: #10b981; font-weight: bold; }
+        .latency-warning { color: #f59e0b; font-weight: bold; }
+        .latency-bad { color: #ef4444; font-weight: bold; }
+        .progress {
+            width: 100%;
+            height: 20px;
+            background-color: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background-color: #2563eb;
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌐 Supabase Connectivity & Latency Test</h1>
+        
+        <div class="test-section info">
+            <h3>📊 Connection Analysis for sa-east-1 Region</h3>
+            <p>Testing connectivity to <strong>nwpuurgwnnuejqinkvrh.supabase.co</strong> to determine optimal timeout values and identify connection issues.</p>
+            <ul>
+                <li><strong>Current Timeouts:</strong> Session check: 5000ms, Profile fetch: 4000ms</li>
+                <li><strong>Region:</strong> South America East (São Paulo) - sa-east-1</li>
+                <li><strong>Expected Latency:</strong> 50-200ms (good), 200-500ms (acceptable), >500ms (poor)</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Connectivity Tests</h3>
+            <button onclick="testBasicConnectivity()">🔌 Test Basic Connectivity</button>
+            <button onclick="testLatencyMultiple()">⏱️ Test Latency (10 samples)</button>
+            <button onclick="testTimeoutScenarios()">⏰ Test Timeout Scenarios</button>
+            <button onclick="testAuthEndpoints()">🔐 Test Auth Endpoints</button>
+            <button onclick="runComprehensiveTest()">🚀 Run Comprehensive Test</button>
+            <button onclick="clearResults()">Clear Results</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script type="module">
+        let testResults = [];
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<pre>${message}</pre>`;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            testResults = [];
+        }
+
+        function formatLatency(ms) {
+            if (ms < 200) return `<span class="latency-good">${ms}ms (Good)</span>`;
+            if (ms < 500) return `<span class="latency-warning">${ms}ms (Acceptable)</span>`;
+            return `<span class="latency-bad">${ms}ms (Poor)</span>`;
+        }
+
+        async function createSupabaseClient() {
+            try {
+                const { createClient } = await import('https://cdn.skypack.dev/@supabase/supabase-js');
+                
+                const url = import.meta.env.VITE_SUPABASE_URL || 'https://nwpuurgwnnuejqinkvrh.supabase.co';
+                const key = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjIwNjUsImV4cCI6MjA3MDAzODA2NX0.UHjSvXYY_c-_ydAIfELRUs4CMEBLKiztpBGQBNPHfak';
+
+                return createClient(url, key, {
+                    auth: {
+                        storage: localStorage,
+                        persistSession: false,
+                        autoRefreshToken: false,
+                        detectSessionInUrl: false
+                    },
+                    global: {
+                        headers: {
+                            'X-Client-Info': 'supabase-js-web',
+                            'apikey': key,
+                            'Authorization': `Bearer ${key}`,
+                        }
+                    }
+                });
+            } catch (error) {
+                log(`❌ Failed to create Supabase client: ${error.message}`, 'error');
+                return null;
+            }
+        }
+
+        async function measureLatency(operation, timeout = 10000) {
+            const supabase = await createSupabaseClient();
+            if (!supabase) return { success: false, latency: 0, error: 'Client creation failed' };
+
+            const startTime = Date.now();
+            
+            try {
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error(`Timeout after ${timeout}ms`)), timeout);
+                });
+
+                let result;
+                switch (operation) {
+                    case 'health':
+                        result = await Promise.race([
+                            supabase.from('profiles').select('count').limit(0),
+                            timeoutPromise
+                        ]);
+                        break;
+                    case 'auth':
+                        result = await Promise.race([
+                            supabase.auth.getSession(),
+                            timeoutPromise
+                        ]);
+                        break;
+                    case 'query':
+                        result = await Promise.race([
+                            supabase.from('profiles').select('id').limit(1),
+                            timeoutPromise
+                        ]);
+                        break;
+                    default:
+                        throw new Error('Unknown operation');
+                }
+
+                const latency = Date.now() - startTime;
+                
+                if (result.error) {
+                    return { success: false, latency, error: result.error.message };
+                }
+                
+                return { success: true, latency, error: null };
+
+            } catch (error) {
+                const latency = Date.now() - startTime;
+                return { 
+                    success: false, 
+                    latency, 
+                    error: error.message 
+                };
+            }
+        }
+
+        window.testBasicConnectivity = async function() {
+            log('🔌 TESTING BASIC CONNECTIVITY', 'info');
+            log('==============================', 'info');
+
+            const operations = [
+                { name: 'Health Check', op: 'health' },
+                { name: 'Auth Service', op: 'auth' },
+                { name: 'Database Query', op: 'query' }
+            ];
+
+            for (const { name, op } of operations) {
+                log(`🧪 Testing ${name}...`, 'info');
+                
+                const result = await measureLatency(op, 8000);
+                
+                if (result.success) {
+                    log(`✅ ${name}: ${formatLatency(result.latency)}`, 'success');
+                } else {
+                    log(`❌ ${name}: Failed after ${result.latency}ms - ${result.error}`, 'error');
+                }
+                
+                testResults.push({ operation: name, ...result });
+                
+                // Small delay between tests
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        };
+
+        window.testLatencyMultiple = async function() {
+            log('\n⏱️ TESTING LATENCY WITH MULTIPLE SAMPLES', 'info');
+            log('=========================================', 'info');
+
+            const samples = 10;
+            const results = [];
+            
+            log(`📊 Running ${samples} latency tests...`, 'info');
+            
+            // Create progress bar
+            const progressDiv = document.createElement('div');
+            progressDiv.className = 'test-section info';
+            progressDiv.innerHTML = `
+                <div class="progress">
+                    <div class="progress-bar" id="latency-progress" style="width: 0%"></div>
+                </div>
+                <span id="progress-text">0/${samples} tests completed</span>
+            `;
+            document.getElementById('results').appendChild(progressDiv);
+
+            for (let i = 0; i < samples; i++) {
+                const result = await measureLatency('health', 6000);
+                results.push(result);
+                
+                // Update progress
+                const progress = ((i + 1) / samples) * 100;
+                document.getElementById('latency-progress').style.width = `${progress}%`;
+                document.getElementById('progress-text').textContent = `${i + 1}/${samples} tests completed`;
+                
+                if (result.success) {
+                    log(`📊 Sample ${i + 1}: ${formatLatency(result.latency)}`, 'info');
+                } else {
+                    log(`📊 Sample ${i + 1}: Failed - ${result.error}`, 'warning');
+                }
+                
+                // Small delay between samples
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+
+            // Calculate statistics
+            const successfulResults = results.filter(r => r.success);
+            if (successfulResults.length > 0) {
+                const latencies = successfulResults.map(r => r.latency);
+                const avg = latencies.reduce((a, b) => a + b, 0) / latencies.length;
+                const min = Math.min(...latencies);
+                const max = Math.max(...latencies);
+                const p95 = latencies.sort((a, b) => a - b)[Math.floor(latencies.length * 0.95)];
+
+                log('\n📈 LATENCY STATISTICS:', 'success');
+                log(`   Average: ${formatLatency(Math.round(avg))}`, 'success');
+                log(`   Minimum: ${formatLatency(min)}`, 'success');
+                log(`   Maximum: ${formatLatency(max)}`, 'success');
+                log(`   95th Percentile: ${formatLatency(p95)}`, 'success');
+                log(`   Success Rate: ${successfulResults.length}/${samples} (${Math.round(successfulResults.length/samples*100)}%)`, 'success');
+
+                // Recommend timeout values
+                const recommendedTimeout = Math.max(p95 * 2, 3000);
+                log(`\n💡 RECOMMENDED TIMEOUT: ${recommendedTimeout}ms`, 'info');
+                log(`   (Based on 95th percentile × 2 with 3s minimum)`, 'info');
+            } else {
+                log('❌ All latency tests failed!', 'error');
+            }
+        };
+
+        window.testTimeoutScenarios = async function() {
+            log('\n⏰ TESTING TIMEOUT SCENARIOS', 'info');
+            log('============================', 'info');
+
+            const timeouts = [1000, 2000, 3000, 5000, 8000, 10000];
+            
+            for (const timeout of timeouts) {
+                log(`🕐 Testing with ${timeout}ms timeout...`, 'info');
+                
+                const result = await measureLatency('health', timeout);
+                
+                if (result.success) {
+                    log(`✅ ${timeout}ms: Success in ${formatLatency(result.latency)}`, 'success');
+                } else {
+                    if (result.error.includes('Timeout')) {
+                        log(`⏰ ${timeout}ms: Timeout (connection took >${timeout}ms)`, 'warning');
+                    } else {
+                        log(`❌ ${timeout}ms: Error - ${result.error}`, 'error');
+                    }
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 300));
+            }
+        };
+
+        window.testAuthEndpoints = async function() {
+            log('\n🔐 TESTING AUTH ENDPOINTS SPECIFICALLY', 'info');
+            log('=====================================', 'info');
+
+            const supabase = await createSupabaseClient();
+            if (!supabase) return;
+
+            const authTests = [
+                {
+                    name: 'Get Session',
+                    test: () => supabase.auth.getSession()
+                },
+                {
+                    name: 'Get User',
+                    test: () => supabase.auth.getUser()
+                }
+            ];
+
+            for (const { name, test } of authTests) {
+                log(`🧪 Testing ${name}...`, 'info');
+                
+                const startTime = Date.now();
+                try {
+                    const timeoutPromise = new Promise((_, reject) => {
+                        setTimeout(() => reject(new Error('Auth timeout after 6000ms')), 6000);
+                    });
+
+                    const result = await Promise.race([test(), timeoutPromise]);
+                    const latency = Date.now() - startTime;
+                    
+                    if (result.error) {
+                        log(`❌ ${name}: Error after ${latency}ms - ${result.error.message}`, 'error');
+                    } else {
+                        log(`✅ ${name}: Success in ${formatLatency(latency)}`, 'success');
+                    }
+                } catch (error) {
+                    const latency = Date.now() - startTime;
+                    log(`❌ ${name}: Failed after ${latency}ms - ${error.message}`, 'error');
+                }
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        };
+
+        window.runComprehensiveTest = async function() {
+            clearResults();
+            log('🚀 RUNNING COMPREHENSIVE CONNECTIVITY TEST', 'info');
+            log('==========================================', 'info');
+            
+            await testBasicConnectivity();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testLatencyMultiple();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testTimeoutScenarios();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testAuthEndpoints();
+            
+            log('\n📋 COMPREHENSIVE TEST SUMMARY', 'info');
+            log('=============================', 'info');
+            log('Review the results above to determine optimal timeout values.', 'info');
+            log('Look for patterns in latency and identify the best timeout settings.', 'info');
+        };
+
+        // Auto-run on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('🔄 Auto-running comprehensive connectivity test...', 'info');
+                runComprehensiveTest();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

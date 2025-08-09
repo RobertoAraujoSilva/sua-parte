@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Definitive API Key Fix Test - Sistema Ministerial</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #059669;
+            border-bottom: 2px solid #059669;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #10b981;
+            background-color: #f0fdf4;
+        }
+        .error {
+            border-left-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        .warning {
+            border-left-color: #f59e0b;
+            background-color: #fffbeb;
+        }
+        .success {
+            border-left-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        .code {
+            background-color: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            margin: 10px 0;
+            font-size: 11px;
+        }
+        button {
+            background-color: #059669;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #047857;
+        }
+        #results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Definitive API Key Fix Test</h1>
+        
+        <div class="test-section success">
+            <h3>✅ Applied: Aggressive API Key Enforcement</h3>
+            <p>Testing the definitive fix with forced API key headers in every request.</p>
+            <ul>
+                <li>Multiple API key headers (apikey, Authorization, X-Supabase-API-Key)</li>
+                <li>Forced Headers object to prevent header loss</li>
+                <li>Comprehensive request logging</li>
+                <li>Immediate client verification</li>
+            </ul>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Test Actions</h3>
+            <button onclick="forceRefreshAndTest()">🔄 Force Refresh & Test</button>
+            <button onclick="testAggressiveApiKey()">🔐 Test Aggressive API Key</button>
+            <button onclick="testMultipleRequests()">📊 Test Multiple Requests</button>
+            <button onclick="testAuthenticationFlow()">🔑 Test Auth Flow</button>
+            <button onclick="runComprehensiveTest()">🚀 Run Comprehensive Test</button>
+            <button onclick="clearResults()">Clear Results</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script type="module">
+        let requestLog = [];
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<pre>${message}</pre>`;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            requestLog = [];
+        }
+
+        // Intercept fetch to monitor all requests
+        const originalFetch = window.fetch;
+        window.fetch = async function(url, options = {}) {
+            const requestInfo = {
+                url: url.toString(),
+                method: options.method || 'GET',
+                headers: options.headers ? Object.fromEntries(new Headers(options.headers).entries()) : {},
+                timestamp: new Date().toISOString()
+            };
+            
+            requestLog.push(requestInfo);
+            
+            try {
+                const response = await originalFetch(url, options);
+                requestInfo.status = response.status;
+                requestInfo.statusText = response.statusText;
+                return response;
+            } catch (error) {
+                requestInfo.error = error.message;
+                throw error;
+            }
+        };
+
+        window.forceRefreshAndTest = function() {
+            log('🔄 FORCING BROWSER REFRESH AND CACHE CLEAR', 'info');
+            log('============================================', 'info');
+            
+            // Clear all caches
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => {
+                        caches.delete(name);
+                    });
+                });
+            }
+            
+            // Clear localStorage and sessionStorage
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            log('✅ Caches cleared', 'success');
+            log('✅ Storage cleared', 'success');
+            log('🔄 Reloading page with cache bypass...', 'info');
+            
+            // Force reload with cache bypass
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 1000);
+        };
+
+        window.testAggressiveApiKey = async function() {
+            log('🔐 TESTING AGGRESSIVE API KEY ENFORCEMENT', 'info');
+            log('=========================================', 'info');
+
+            try {
+                // Import Supabase with aggressive configuration
+                const { createClient } = await import('https://cdn.skypack.dev/@supabase/supabase-js');
+                
+                // Use the same aggressive configuration as our fix
+                const url = import.meta.env.VITE_SUPABASE_URL || 'https://nwpuurgwnnuejqinkvrh.supabase.co';
+                const key = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjIwNjUsImV4cCI6MjA3MDAzODA2NX0.UHjSvXYY_c-_ydAIfELRUs4CMEBLKiztpBGQBNPHfak';
+
+                log('🔧 Creating client with aggressive API key enforcement...', 'info');
+                
+                const supabase = createClient(url, key, {
+                    auth: {
+                        storage: localStorage,
+                        persistSession: false,
+                        autoRefreshToken: false,
+                        detectSessionInUrl: false,
+                        debug: true
+                    },
+                    global: {
+                        headers: {
+                            'X-Client-Info': 'supabase-js-web',
+                            'apikey': key,
+                            'Authorization': `Bearer ${key}`,
+                            'X-Supabase-API-Key': key,
+                        },
+                        fetch: (url, options = {}) => {
+                            const forcedHeaders = new Headers(options.headers || {});
+                            
+                            // Force multiple API key headers
+                            forcedHeaders.set('apikey', key);
+                            forcedHeaders.set('Authorization', `Bearer ${key}`);
+                            forcedHeaders.set('X-Supabase-API-Key', key);
+                            forcedHeaders.set('Cache-Control', 'no-cache');
+
+                            log(`🌐 Request to: ${url}`, 'info');
+                            log(`🔑 API Key Headers:`, 'info');
+                            log(`   apikey: ${forcedHeaders.get('apikey')?.substring(0, 20)}...`, 'info');
+                            log(`   Authorization: ${forcedHeaders.get('Authorization')?.substring(0, 30)}...`, 'info');
+                            log(`   X-Supabase-API-Key: ${forcedHeaders.get('X-Supabase-API-Key')?.substring(0, 20)}...`, 'info');
+
+                            return fetch(url, {
+                                ...options,
+                                headers: forcedHeaders,
+                            });
+                        }
+                    }
+                });
+
+                log('✅ Aggressive Supabase client created', 'success');
+                window.aggressiveSupabase = supabase;
+
+            } catch (error) {
+                log(`❌ Aggressive client creation failed: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+        };
+
+        window.testMultipleRequests = async function() {
+            log('\n📊 TESTING MULTIPLE API REQUESTS', 'info');
+            log('=================================', 'info');
+
+            if (!window.aggressiveSupabase) {
+                log('❌ No aggressive Supabase client. Run "Test Aggressive API Key" first.', 'error');
+                return;
+            }
+
+            try {
+                // Clear request log
+                requestLog = [];
+
+                log('🧪 Making multiple API requests...', 'info');
+
+                // Test 1: Profiles count
+                log('📊 Test 1: Profiles count query...', 'info');
+                const { data: countData, error: countError } = await window.aggressiveSupabase
+                    .from('profiles')
+                    .select('count')
+                    .limit(0);
+
+                if (countError) {
+                    log(`❌ Profiles count failed: ${countError.message}`, 'error');
+                } else {
+                    log('✅ Profiles count successful', 'success');
+                }
+
+                // Test 2: Profiles select
+                log('📊 Test 2: Profiles select query...', 'info');
+                const { data: selectData, error: selectError } = await window.aggressiveSupabase
+                    .from('profiles')
+                    .select('id, nome')
+                    .limit(1);
+
+                if (selectError) {
+                    log(`❌ Profiles select failed: ${selectError.message}`, 'error');
+                } else {
+                    log('✅ Profiles select successful', 'success');
+                }
+
+                // Test 3: Auth user
+                log('📊 Test 3: Auth user query...', 'info');
+                const { data: userData, error: userError } = await window.aggressiveSupabase.auth.getUser();
+
+                if (userError) {
+                    log(`❌ Auth user failed: ${userError.message}`, 'error');
+                } else {
+                    log('✅ Auth user successful', 'success');
+                }
+
+                // Analyze all requests
+                log('\n📋 REQUEST ANALYSIS:', 'info');
+                const supabaseRequests = requestLog.filter(req => req.url.includes('supabase.co'));
+                
+                if (supabaseRequests.length === 0) {
+                    log('❌ No Supabase requests detected!', 'error');
+                } else {
+                    supabaseRequests.forEach((req, index) => {
+                        log(`Request ${index + 1}:`, 'info');
+                        log(`  URL: ${req.url}`, 'info');
+                        log(`  Method: ${req.method}`, 'info');
+                        log(`  Status: ${req.status || 'PENDING'}`, req.status === 200 ? 'success' : 'error');
+                        log(`  Has apikey: ${req.headers.apikey ? '✅' : '❌'}`, req.headers.apikey ? 'success' : 'error');
+                        log(`  Has Authorization: ${req.headers.Authorization ? '✅' : '❌'}`, req.headers.Authorization ? 'success' : 'error');
+                        if (req.error) {
+                            log(`  Error: ${req.error}`, 'error');
+                        }
+                    });
+                }
+
+            } catch (error) {
+                log(`❌ Multiple requests test failed: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+        };
+
+        window.testAuthenticationFlow = async function() {
+            log('\n🔑 TESTING AUTHENTICATION FLOW', 'info');
+            log('===============================', 'info');
+
+            if (!window.aggressiveSupabase) {
+                log('❌ No aggressive Supabase client. Run "Test Aggressive API Key" first.', 'error');
+                return;
+            }
+
+            try {
+                log('🔐 Attempting login with instructor credentials...', 'info');
+                
+                const { data, error } = await window.aggressiveSupabase.auth.signInWithPassword({
+                    email: 'frankwebber33@hotmail.com',
+                    password: '13a21r15'
+                });
+
+                if (error) {
+                    log(`❌ Authentication failed: ${error.message}`, 'error');
+                    
+                    if (error.message.includes('No API key found')) {
+                        log('🚨 STILL GETTING "No API key found" ERROR!', 'error');
+                        log('The aggressive fix is not working.', 'error');
+                    } else if (error.message.includes('invalid claim: missing sub claim')) {
+                        log('🚨 GETTING "missing sub claim" ERROR!', 'error');
+                        log('This indicates JWT/API key issues.', 'error');
+                    } else {
+                        log('✅ Different error - API key transmission may be working', 'warning');
+                    }
+                } else {
+                    log('🎉 AUTHENTICATION SUCCESSFUL!', 'success');
+                    log(`👤 User: ${data.user?.email}`, 'success');
+                    
+                    // Test profile fetch
+                    if (data.user) {
+                        log('📋 Testing profile fetch after authentication...', 'info');
+                        
+                        const { data: profile, error: profileError } = await window.aggressiveSupabase
+                            .from('profiles')
+                            .select('*')
+                            .eq('id', data.user.id)
+                            .single();
+                            
+                        if (profileError) {
+                            log(`❌ Profile fetch failed: ${profileError.message}`, 'error');
+                        } else {
+                            log('✅ Profile fetch successful!', 'success');
+                        }
+                    }
+                    
+                    // Clean up
+                    await window.aggressiveSupabase.auth.signOut();
+                    log('🧹 Signed out successfully', 'info');
+                }
+
+            } catch (error) {
+                log(`❌ Authentication flow exception: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+        };
+
+        window.runComprehensiveTest = async function() {
+            clearResults();
+            log('🚀 RUNNING COMPREHENSIVE DEFINITIVE FIX TEST', 'info');
+            log('=============================================', 'info');
+            
+            await testAggressiveApiKey();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testMultipleRequests();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testAuthenticationFlow();
+            
+            log('\n📋 COMPREHENSIVE TEST SUMMARY', 'info');
+            log('=============================', 'info');
+            log('If all tests pass, the 401 "No API key found" error is resolved.', 'success');
+            log('If tests still fail, there may be a deeper configuration issue.', 'warning');
+        };
+
+        // Auto-run on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('🔄 Auto-running comprehensive definitive fix test...', 'info');
+                runComprehensiveTest();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

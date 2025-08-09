@@ -1,9 +1,11 @@
 /**
  * Supabase Connection Test Utility
  * Quick connectivity test for debugging authentication issues
+ * Optimized for sa-east-1 region with adaptive timeouts
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { getTimeoutConfig, executeWithRetry, adaptiveTimeouts, logTimeoutConfig } from './supabaseTimeoutConfig';
 
 export interface ConnectionTestResult {
   success: boolean;
@@ -18,6 +20,11 @@ export interface ConnectionTestResult {
 
 export const testSupabaseConnection = async (): Promise<ConnectionTestResult> => {
   const startTime = Date.now();
+  const timeouts = getTimeoutConfig();
+
+  // Log timeout configuration for debugging
+  logTimeoutConfig();
+
   const result: ConnectionTestResult = {
     success: false,
     latency: 0,
@@ -29,22 +36,26 @@ export const testSupabaseConnection = async (): Promise<ConnectionTestResult> =>
   };
 
   try {
-    console.log('🔍 Testing Supabase connection...');
+    console.log('🔍 Testing Supabase connection with optimized timeouts...');
 
-    // Test 1: Basic connection with timeout
-    const connectionTimeout = new Promise<never>((_, reject) => {
-      setTimeout(() => reject(new Error('Connection timeout')), 5000);
-    });
-
+    // Test 1: Basic connection with adaptive timeout
     try {
-      const { error: healthError } = await Promise.race([
-        supabase.from('profiles').select('count').limit(0),
-        connectionTimeout
-      ]);
+      const connectionStartTime = Date.now();
+
+      const { error: healthError } = await executeWithRetry(
+        () => supabase.from('profiles').select('count').limit(0),
+        adaptiveTimeouts.databaseQuery.getAdaptiveTimeout(),
+        'Connection test',
+        timeouts.maxRetries,
+        timeouts.retryDelay
+      );
+
+      const connectionDuration = Date.now() - connectionStartTime;
+      adaptiveTimeouts.databaseQuery.recordSuccess(connectionDuration);
 
       if (!healthError) {
         result.details.canConnect = true;
-        console.log('✅ Basic connection: OK');
+        console.log(`✅ Basic connection: OK (${connectionDuration}ms)`);
       } else {
         console.log('❌ Basic connection failed:', healthError.message);
         result.error = `Connection failed: ${healthError.message}`;
@@ -55,21 +66,25 @@ export const testSupabaseConnection = async (): Promise<ConnectionTestResult> =>
       result.error = `Connection test failed: ${errorMessage}`;
     }
 
-    // Test 2: Auth service
+    // Test 2: Auth service with adaptive timeout
     if (result.details.canConnect) {
       try {
-        const authTimeout = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('Auth timeout')), 3000);
-        });
+        const authStartTime = Date.now();
 
-        const { error: authError } = await Promise.race([
-          supabase.auth.getSession(),
-          authTimeout
-        ]);
+        const { error: authError } = await executeWithRetry(
+          () => supabase.auth.getSession(),
+          adaptiveTimeouts.authOperation.getAdaptiveTimeout(),
+          'Auth service test',
+          timeouts.maxRetries,
+          timeouts.retryDelay
+        );
+
+        const authDuration = Date.now() - authStartTime;
+        adaptiveTimeouts.authOperation.recordSuccess(authDuration);
 
         if (!authError) {
           result.details.canAuth = true;
-          console.log('✅ Auth service: OK');
+          console.log(`✅ Auth service: OK (${authDuration}ms)`);
         } else {
           console.log('❌ Auth service failed:', authError.message);
           result.error = `Auth failed: ${authError.message}`;

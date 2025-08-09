@@ -14,7 +14,19 @@ declare global {
   namespace Cypress {
     interface Chainable {
       /**
-       * Login como Franklin (estudante)
+       * Login como Instrutor (admin completo)
+       * @example cy.loginAsInstructor()
+       */
+      loginAsInstructor(): Chainable<void>
+
+      /**
+       * Login como Estudante (acesso limitado)
+       * @example cy.loginAsStudent()
+       */
+      loginAsStudent(): Chainable<void>
+
+      /**
+       * Login como Franklin (estudante - legacy)
        * @example cy.loginAsFranklin()
        */
       loginAsFranklin(): Chainable<void>
@@ -122,6 +134,74 @@ Cypress.Commands.add('loginWithCredentials', (email: string, password: string) =
   cy.wait('@authToken', { timeout: 15000 })
 })
 
+// Comando para login como Instrutor (admin completo)
+Cypress.Commands.add('loginAsInstructor', () => {
+  const email = Cypress.env('INSTRUCTOR_EMAIL')
+  const password = Cypress.env('INSTRUCTOR_PASSWORD')
+
+  cy.log('🔐 Fazendo login como Instrutor (Admin)...')
+  cy.visit(Cypress.env('AUTH_URL'))
+
+  // Aguardar a página carregar
+  cy.waitForPageLoad()
+
+  // Preencher formulário de login
+  cy.get('input[type="email"]', { timeout: 10000 })
+    .should('be.visible')
+    .clear()
+    .type(email, { delay: 50 })
+
+  cy.get('input[type="password"]')
+    .should('be.visible')
+    .clear()
+    .type(password, { delay: 50 })
+
+  // Clicar no botão de login
+  cy.get('button[type="submit"]')
+    .should('be.visible')
+    .should('not.be.disabled')
+    .click()
+
+  // Aguardar resposta da autenticação
+  cy.wait('@authToken', { timeout: 15000 }).then((interception) => {
+    cy.log('✅ Login como Instrutor realizado com sucesso')
+  })
+})
+
+// Comando para login como Estudante (acesso limitado)
+Cypress.Commands.add('loginAsStudent', () => {
+  const email = Cypress.env('STUDENT_EMAIL')
+  const password = Cypress.env('STUDENT_PASSWORD')
+
+  cy.log('🔐 Fazendo login como Estudante...')
+  cy.visit(Cypress.env('AUTH_URL'))
+
+  // Aguardar a página carregar
+  cy.waitForPageLoad()
+
+  // Preencher formulário de login
+  cy.get('input[type="email"]', { timeout: 10000 })
+    .should('be.visible')
+    .clear()
+    .type(email, { delay: 50 })
+
+  cy.get('input[type="password"]')
+    .should('be.visible')
+    .clear()
+    .type(password, { delay: 50 })
+
+  // Clicar no botão de login
+  cy.get('button[type="submit"]')
+    .should('be.visible')
+    .should('not.be.disabled')
+    .click()
+
+  // Aguardar resposta da autenticação
+  cy.wait('@authToken', { timeout: 15000 }).then((interception) => {
+    cy.log('✅ Login como Estudante realizado com sucesso')
+  })
+})
+
 // Comando para aguardar carregamento da página
 Cypress.Commands.add('waitForPageLoad', () => {
   cy.log('⏳ Aguardando carregamento da página...')
@@ -161,7 +241,7 @@ Cypress.Commands.add('waitForElement', (selector: string, timeout: number = 1000
 })
 
 // Comando adicional para debug
-Cypress.Commands.add('debug', () => {
+Cypress.Commands.add('debugTest', () => {
   cy.log('🐛 Debug: Pausando execução...')
   cy.pause()
 })

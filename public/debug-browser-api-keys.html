@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 Browser API Key Debug - Sistema Ministerial</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #dc2626;
+            border-bottom: 2px solid #dc2626;
+            padding-bottom: 10px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border-left: 4px solid #10b981;
+            background-color: #f0fdf4;
+        }
+        .error {
+            border-left-color: #ef4444;
+            background-color: #fef2f2;
+        }
+        .warning {
+            border-left-color: #f59e0b;
+            background-color: #fffbeb;
+        }
+        .success {
+            border-left-color: #10b981;
+            background-color: #f0fdf4;
+        }
+        .code {
+            background-color: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            margin: 10px 0;
+            font-size: 11px;
+        }
+        button {
+            background-color: #dc2626;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #b91c1c;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .network-request {
+            background-color: #f3f4f6;
+            border: 1px solid #d1d5db;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Browser API Key Debug Tool</h1>
+        
+        <div class="test-section error">
+            <h3>🚨 Issue: 401 "No API key found in request" errors persist</h3>
+            <p>This tool will analyze the exact browser environment and network requests to identify why API keys are not being transmitted.</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Diagnostic Tests</h3>
+            <button onclick="testEnvironmentVariables()">1. Test Environment Variables</button>
+            <button onclick="testSupabaseClientCreation()">2. Test Supabase Client</button>
+            <button onclick="interceptNetworkRequests()">3. Intercept Network Requests</button>
+            <button onclick="testDirectApiCall()">4. Test Direct API Call</button>
+            <button onclick="testAuthFlow()">5. Test Auth Flow</button>
+            <button onclick="runFullDiagnostic()">🚀 Run Full Diagnostic</button>
+            <button onclick="clearResults()">Clear Results</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script type="module">
+        let networkRequests = [];
+        let originalFetch = window.fetch;
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-section ${type}`;
+            div.innerHTML = `<pre>${message}</pre>`;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            networkRequests = [];
+        }
+
+        // Intercept all fetch requests to analyze headers
+        function setupNetworkInterception() {
+            window.fetch = async function(url, options = {}) {
+                const requestInfo = {
+                    url: url.toString(),
+                    method: options.method || 'GET',
+                    headers: options.headers || {},
+                    timestamp: new Date().toISOString(),
+                    hasApiKey: false,
+                    hasAuth: false
+                };
+
+                // Check for API key in headers
+                if (options.headers) {
+                    const headers = new Headers(options.headers);
+                    requestInfo.hasApiKey = headers.has('apikey');
+                    requestInfo.hasAuth = headers.has('Authorization');
+                    requestInfo.apiKeyValue = headers.get('apikey');
+                    requestInfo.authValue = headers.get('Authorization');
+                }
+
+                networkRequests.push(requestInfo);
+
+                // Call original fetch
+                try {
+                    const response = await originalFetch(url, options);
+                    requestInfo.status = response.status;
+                    requestInfo.statusText = response.statusText;
+                    return response;
+                } catch (error) {
+                    requestInfo.error = error.message;
+                    throw error;
+                }
+            };
+        }
+
+        window.testEnvironmentVariables = function() {
+            log('🔍 TESTING ENVIRONMENT VARIABLES IN BROWSER', 'info');
+            log('=============================================', 'info');
+
+            // Check if we're in Vite environment
+            const isVite = typeof import.meta !== 'undefined' && import.meta.env;
+            log(`Vite Environment: ${isVite ? '✅ Detected' : '❌ Not detected'}`, isVite ? 'success' : 'error');
+
+            if (!isVite) {
+                log('❌ CRITICAL: Not in Vite environment!', 'error');
+                log('This means environment variables cannot be loaded.', 'error');
+                return;
+            }
+
+            // Check environment variables
+            const env = import.meta.env;
+            log('📊 Environment Variables Analysis:', 'info');
+            
+            const criticalVars = {
+                'VITE_SUPABASE_URL': env.VITE_SUPABASE_URL,
+                'VITE_SUPABASE_ANON_KEY': env.VITE_SUPABASE_ANON_KEY
+            };
+
+            const otherVars = {
+                'DEV': env.DEV,
+                'PROD': env.PROD,
+                'MODE': env.MODE,
+                'BASE_URL': env.BASE_URL
+            };
+
+            log('🔑 Critical Variables:', 'info');
+            for (const [key, value] of Object.entries(criticalVars)) {
+                if (value !== undefined) {
+                    if (key.includes('KEY')) {
+                        log(`✅ ${key}: ${value.substring(0, 20)}...`, 'success');
+                    } else {
+                        log(`✅ ${key}: ${value}`, 'success');
+                    }
+                } else {
+                    log(`❌ ${key}: UNDEFINED`, 'error');
+                }
+            }
+
+            log('📋 Other Variables:', 'info');
+            for (const [key, value] of Object.entries(otherVars)) {
+                log(`${value !== undefined ? '✅' : '❌'} ${key}: ${value}`, value !== undefined ? 'info' : 'warning');
+            }
+
+            // Check if critical variables are present
+            const hasUrl = !!env.VITE_SUPABASE_URL;
+            const hasKey = !!env.VITE_SUPABASE_ANON_KEY;
+
+            if (hasUrl && hasKey) {
+                log('✅ CRITICAL VARIABLES PRESENT', 'success');
+            } else {
+                log('❌ CRITICAL VARIABLES MISSING', 'error');
+                log('This will cause 401 "No API key found" errors!', 'error');
+            }
+        };
+
+        window.testSupabaseClientCreation = async function() {
+            log('\n🔧 TESTING SUPABASE CLIENT CREATION', 'info');
+            log('====================================', 'info');
+
+            try {
+                // Import Supabase
+                const { createClient } = await import('https://cdn.skypack.dev/@supabase/supabase-js');
+                log('✅ Supabase library imported successfully', 'success');
+
+                // Check environment variables
+                if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+                    log('❌ Environment variables not available for client creation', 'error');
+                    log('Using fallback values...', 'warning');
+                }
+
+                // Use the same logic as our fixed client
+                const url = import.meta.env.VITE_SUPABASE_URL || 'https://nwpuurgwnnuejqinkvrh.supabase.co';
+                const key = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjIwNjUsImV4cCI6MjA3MDAzODA2NX0.UHjSvXYY_c-_ydAIfELRUs4CMEBLKiztpBGQBNPHfak';
+
+                log('🔧 Creating Supabase client with explicit headers...', 'info');
+                log(`📍 URL: ${url}`, 'info');
+                log(`🔑 Key: ${key.substring(0, 20)}...`, 'info');
+
+                // Create client with explicit headers (same as our fix)
+                const supabase = createClient(url, key, {
+                    auth: {
+                        storage: localStorage,
+                        persistSession: false,
+                        autoRefreshToken: false,
+                        detectSessionInUrl: false,
+                        debug: true
+                    },
+                    global: {
+                        headers: {
+                            'X-Client-Info': 'supabase-js-web',
+                            'apikey': key,
+                            'Authorization': `Bearer ${key}`,
+                        }
+                    }
+                });
+
+                log('✅ Supabase client created with explicit headers', 'success');
+                
+                // Store for testing
+                window.testSupabase = supabase;
+                window.testApiKey = key;
+
+                // Verify the client has the correct configuration
+                log('🔍 Client configuration verification:', 'info');
+                log(`Client URL: ${url}`, 'info');
+                log(`Client Key: ${key.substring(0, 20)}...`, 'info');
+
+            } catch (error) {
+                log(`❌ Supabase client creation failed: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+        };
+
+        window.interceptNetworkRequests = function() {
+            log('\n🌐 SETTING UP NETWORK REQUEST INTERCEPTION', 'info');
+            log('============================================', 'info');
+
+            setupNetworkInterception();
+            log('✅ Network interception enabled', 'success');
+            log('All subsequent requests will be monitored for API key headers.', 'info');
+            log('Make some API calls and then check the results.', 'warning');
+        };
+
+        window.testDirectApiCall = async function() {
+            log('\n🧪 TESTING DIRECT API CALL', 'info');
+            log('===========================', 'info');
+
+            if (!window.testSupabase) {
+                log('❌ No Supabase client available. Run "Test Supabase Client" first.', 'error');
+                return;
+            }
+
+            try {
+                log('🔄 Making direct API call to profiles table...', 'info');
+                
+                // Clear previous requests
+                networkRequests = [];
+                
+                // Make the exact same call that's failing
+                const { data, error } = await window.testSupabase
+                    .from('profiles')
+                    .select('count')
+                    .limit(0);
+
+                // Analyze the network request
+                const supabaseRequests = networkRequests.filter(req => 
+                    req.url.includes('supabase.co') && req.url.includes('/rest/v1/')
+                );
+
+                log('📊 Network Request Analysis:', 'info');
+                if (supabaseRequests.length === 0) {
+                    log('❌ No Supabase requests detected!', 'error');
+                } else {
+                    supabaseRequests.forEach((req, index) => {
+                        log(`Request ${index + 1}:`, 'info');
+                        log(`  URL: ${req.url}`, 'info');
+                        log(`  Method: ${req.method}`, 'info');
+                        log(`  Has API Key: ${req.hasApiKey ? '✅ YES' : '❌ NO'}`, req.hasApiKey ? 'success' : 'error');
+                        log(`  Has Authorization: ${req.hasAuth ? '✅ YES' : '❌ NO'}`, req.hasAuth ? 'success' : 'error');
+                        log(`  Status: ${req.status || 'PENDING'}`, req.status === 200 ? 'success' : 'error');
+                        
+                        if (req.hasApiKey) {
+                            log(`  API Key: ${req.apiKeyValue?.substring(0, 20)}...`, 'info');
+                        }
+                        if (req.hasAuth) {
+                            log(`  Authorization: ${req.authValue?.substring(0, 30)}...`, 'info');
+                        }
+                        if (req.error) {
+                            log(`  Error: ${req.error}`, 'error');
+                        }
+                    });
+                }
+
+                // Analyze the response
+                if (error) {
+                    log(`❌ API call failed: ${error.message}`, 'error');
+                    log(`🔍 Error code: ${error.code}`, 'error');
+                    log(`🔍 Error details: ${error.details}`, 'error');
+                    
+                    if (error.message.includes('No API key found')) {
+                        log('🚨 CONFIRMED: "No API key found" error!', 'error');
+                        log('The API key is not being transmitted in the request headers.', 'error');
+                    }
+                } else {
+                    log('✅ API call successful!', 'success');
+                    log(`📊 Response: ${JSON.stringify(data)}`, 'success');
+                }
+
+            } catch (error) {
+                log(`❌ Direct API call exception: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+        };
+
+        window.testAuthFlow = async function() {
+            log('\n🔐 TESTING AUTHENTICATION FLOW', 'info');
+            log('===============================', 'info');
+
+            if (!window.testSupabase) {
+                log('❌ No Supabase client available. Run "Test Supabase Client" first.', 'error');
+                return;
+            }
+
+            try {
+                log('🔄 Testing authentication with instructor credentials...', 'info');
+                
+                // Clear previous requests
+                networkRequests = [];
+                
+                const { data, error } = await window.testSupabase.auth.signInWithPassword({
+                    email: 'frankwebber33@hotmail.com',
+                    password: '13a21r15'
+                });
+
+                // Analyze auth requests
+                const authRequests = networkRequests.filter(req => 
+                    req.url.includes('supabase.co') && req.url.includes('/auth/v1/')
+                );
+
+                log('📊 Auth Request Analysis:', 'info');
+                authRequests.forEach((req, index) => {
+                    log(`Auth Request ${index + 1}:`, 'info');
+                    log(`  URL: ${req.url}`, 'info');
+                    log(`  Method: ${req.method}`, 'info');
+                    log(`  Has API Key: ${req.hasApiKey ? '✅ YES' : '❌ NO'}`, req.hasApiKey ? 'success' : 'error');
+                    log(`  Status: ${req.status || 'PENDING'}`, req.status === 200 ? 'success' : 'error');
+                });
+
+                if (error) {
+                    log(`❌ Authentication failed: ${error.message}`, 'error');
+                    if (error.message.includes('invalid claim: missing sub claim')) {
+                        log('🚨 CONFIRMED: "missing sub claim" error!', 'error');
+                        log('This indicates JWT token issues or API key problems.', 'error');
+                    }
+                } else {
+                    log('✅ Authentication successful!', 'success');
+                    log(`👤 User: ${data.user?.email}`, 'success');
+                    
+                    // Clean up
+                    await window.testSupabase.auth.signOut();
+                    log('🧹 Signed out successfully', 'info');
+                }
+
+            } catch (error) {
+                log(`❌ Auth flow test exception: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+        };
+
+        window.runFullDiagnostic = async function() {
+            clearResults();
+            log('🚀 RUNNING FULL BROWSER API KEY DIAGNOSTIC', 'info');
+            log('==========================================', 'info');
+            
+            testEnvironmentVariables();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testSupabaseClientCreation();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            interceptNetworkRequests();
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            await testDirectApiCall();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testAuthFlow();
+            
+            log('\n📋 DIAGNOSTIC SUMMARY', 'info');
+            log('====================', 'info');
+            log('Review the results above to identify the root cause of 401 errors.', 'warning');
+            log('Pay special attention to network request headers and API key transmission.', 'warning');
+        };
+
+        // Auto-run on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                log('🔄 Auto-running browser API key diagnostic...', 'info');
+                runFullDiagnostic();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

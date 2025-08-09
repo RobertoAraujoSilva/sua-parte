@@ -2,9 +2,6 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
-import { testSupabaseConnection } from '@/utils/supabaseConnectionTest';
-import { enhancedSessionRecovery, pageRefreshOptimizer } from '@/utils/pageRefreshOptimization';
-import { runRegionalConnectivityTest } from '@/utils/regionalConnectivityTest';
 
 // Types
 type UserRole = Database['public']['Enums']['user_role'];
@@ -51,81 +48,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
 
 
-  // Fetch user profile from database with improved session handling
+  // Fetch user profile from database with simplified logic
   const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
     console.log('🔍 Fetching profile for user ID:', userId);
 
     try {
-      // Helper function to create timeout promise with longer timeouts
-      const createTimeout = (ms: number, operation: string) =>
-        new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error(`${operation} timeout after ${ms}ms`)), ms);
-        });
-
-      // Step 1: Check session with extended timeout for regional connectivity (sa-east-1)
-      console.log('🔐 Checking current session (allowing time for regional latency + token refresh)...');
-      const sessionTimeout = createTimeout(15000, 'Session check'); // Increased from 8s to 15s for sa-east-1
-
-      // Add retry logic for session check
-      let session = null;
-      let sessionError = null;
-      let retryCount = 0;
-      const maxRetries = 2;
-
-      while (retryCount <= maxRetries) {
-        try {
-          const sessionPromise = supabase.auth.getSession();
-          const result = await Promise.race([sessionPromise, sessionTimeout]);
-
-          session = result.data.session;
-          sessionError = result.error;
-
-          // If we get a valid session or a non-auth error, break
-          if (session || (sessionError && !sessionError.message.includes('403'))) {
-            break;
-          }
-
-          // If 403 error, wait and retry
-          if (sessionError?.message.includes('403') && retryCount < maxRetries) {
-            console.log(`🔄 Session 403 error, retrying in ${(retryCount + 1) * 1000}ms...`);
-            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
-            retryCount++;
-            continue;
-          }
-
-          break;
-        } catch (error) {
-          if (retryCount < maxRetries) {
-            console.log(`🔄 Session timeout, retrying in ${(retryCount + 1) * 1000}ms...`);
-            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
-            retryCount++;
-            continue;
-          }
-          throw error;
-        }
-      }
-
-      console.log('🔐 Session check result:', {
-        hasSession: !!session,
-        sessionUserId: session?.user?.id,
-        targetUserId: userId,
-        sessionError: sessionError?.message,
-        retryCount
-      });
+      // Step 1: Check current session
+      console.log('🔐 Checking current session...');
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError) {
-        console.error('❌ Session error after retries:', sessionError);
-        // Don't return null immediately, try metadata fallback
-        console.log('🔄 Session error, attempting metadata fallback...');
+        console.error('❌ Session error:', sessionError);
         return await createProfileFromAuth(userId);
       }
 
       if (!session) {
-        console.error('❌ No active session after retries, using metadata fallback');
+        console.log('❌ No active session, using metadata fallback');
         return await createProfileFromAuth(userId);
       }
 
@@ -137,58 +78,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null;
       }
 
-      // Step 2: Fetch profile with extended timeout for regional connectivity
+      // Step 2: Fetch profile from database
       console.log('🔍 Fetching from profiles table...');
-      const profileTimeout = createTimeout(10000, 'Profile fetch'); // Increased from 6s to 10s for sa-east-1
-
-      // Add retry logic for profile fetch
-      let profileData = null;
-      let profileError = null;
-      retryCount = 0;
-
-      while (retryCount <= maxRetries) {
-        try {
-          const profilePromise = supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', userId)
-            .single();
-
-          const result = await Promise.race([profilePromise, profileTimeout]);
-
-          profileData = result.data;
-          profileError = result.error;
-
-          // If successful or non-auth error, break
-          if (profileData || (profileError && !profileError.message?.includes('403'))) {
-            break;
-          }
-
-          // If 403 error, wait and retry
-          if (profileError?.message?.includes('403') && retryCount < maxRetries) {
-            console.log(`🔄 Profile 403 error, retrying in ${(retryCount + 1) * 1000}ms...`);
-            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
-            retryCount++;
-            continue;
-          }
-
-          break;
-        } catch (error) {
-          if (retryCount < maxRetries) {
-            console.log(`🔄 Profile timeout, retrying in ${(retryCount + 1) * 1000}ms...`);
-            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
-            retryCount++;
-            continue;
-          }
-          throw error;
-        }
-      }
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
       if (profileError) {
         if (profileError.code === 'PGRST116') {
           console.log('📝 Profile not found in database, creating from auth metadata');
         } else {
-          console.log('❌ Profile fetch error after retries, using metadata fallback:', profileError);
+          console.log('❌ Profile fetch error, using metadata fallback:', profileError);
         }
         return await createProfileFromAuth(userId);
       }
@@ -200,81 +102,46 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           ...profileData,
           email
         };
-        console.log('✅ Profile fetched successfully from database');
-        return profileWithEmail as UserProfile;
+
+        console.log('✅ Profile fetched successfully:', {
+          id: profileWithEmail.id,
+          nome_completo: profileWithEmail.nome_completo,
+          role: profileWithEmail.role,
+          email: profileWithEmail.email
+        });
+
+        return profileWithEmail;
       }
 
-      console.log('❌ No profile data returned, using metadata fallback');
+      console.log('❌ No profile data found, using metadata fallback');
       return await createProfileFromAuth(userId);
 
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error('❌ Error in fetchProfile:', errorMessage);
-
-      // Always try metadata fallback on any error
-      try {
-        console.log('🔄 Using metadata fallback due to error...');
-        return await createProfileFromAuth(userId);
-      } catch (createError: unknown) {
-        const createErrorMessage = createError instanceof Error ? createError.message : 'Unknown error';
-        console.error('❌ Metadata fallback also failed:', createErrorMessage);
-        return null;
-      }
+    } catch (error) {
+      console.error('❌ Error in fetchProfile:', error);
+      return await createProfileFromAuth(userId);
     }
-  }, []); // useCallback dependency array
+  }, []);
 
-  // Create profile from auth metadata with improved error handling
+  // Create profile from auth metadata with simplified logic
   const createProfileFromAuth = useCallback(async (userId: string) => {
     try {
       console.log('📝 Creating profile from auth metadata for user:', userId);
 
-      // Get user with extended timeout for regional connectivity
-      const userTimeout = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Get user timeout')), 10000); // Increased from 6s to 10s for sa-east-1
-      });
+      // Get current user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-      let user = null;
-      let userError = null;
-      let retryCount = 0;
-      const maxRetries = 2;
-
-      while (retryCount <= maxRetries) {
-        try {
-          const result = await Promise.race([
-            supabase.auth.getUser(),
-            userTimeout
-          ]);
-
-          user = result.data.user;
-          userError = result.error;
-
-          // If successful or non-auth error, break
-          if (user || (userError && !userError.message?.includes('403'))) {
-            break;
-          }
-
-          // If 403 error, wait and retry
-          if (userError?.message?.includes('403') && retryCount < maxRetries) {
-            console.log(`🔄 GetUser 403 error, retrying in ${(retryCount + 1) * 1000}ms...`);
-            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
-            retryCount++;
-            continue;
-          }
-
-          break;
-        } catch (error) {
-          if (retryCount < maxRetries) {
-            console.log(`🔄 GetUser timeout, retrying in ${(retryCount + 1) * 1000}ms...`);
-            await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 1000));
-            retryCount++;
-            continue;
-          }
-          throw error;
-        }
+      if (userError) {
+        console.error('❌ Error getting user:', userError);
+        return null;
       }
 
-      if (userError || !user) {
-        console.error('❌ Error getting user for profile creation after retries:', userError);
+      if (!user) {
+        console.error('❌ No user found');
+        return null;
+      }
+
+      if (user.id !== userId) {
+        console.error('❌ User ID mismatch in createProfileFromAuth');
         return null;
       }
 
@@ -284,25 +151,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         role: metadata.role
       });
 
-      // Try to insert profile with timeout
-      const insertTimeout = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Profile insert timeout')), 3000);
-      });
-
-      const { data, error } = await Promise.race([
-        supabase
-          .from('profiles')
-          .insert({
-            id: userId,
-            nome_completo: metadata.nome_completo || '',
-            congregacao: metadata.congregacao || '',
-            cargo: metadata.cargo || '',
-            role: (metadata.role as UserRole) || 'instrutor'
-          })
-          .select()
-          .single(),
-        insertTimeout
-      ]);
+      // Try to insert profile in database
+      const { data, error } = await supabase
+        .from('profiles')
+        .insert({
+          id: userId,
+          nome_completo: metadata.nome_completo || '',
+          congregacao: metadata.congregacao || '',
+          cargo: metadata.cargo || '',
+          role: (metadata.role as UserRole) || 'instrutor'
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error('❌ Error creating profile in database:', error);
@@ -336,48 +196,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []); // Empty dependency array since createProfileFromAuth doesn't depend on any props or state
 
   useEffect(() => {
-    // Get initial session with enhanced recovery for sa-east-1 region
+    // Get initial session with standard Supabase approach
     const getInitialSession = async () => {
       try {
-        console.log('🔄 Getting initial session with enhanced recovery...');
+        console.log('🔄 Getting initial session...');
 
-        // Use enhanced session recovery optimized for page refresh and regional connectivity
-        const recoveryResult = await enhancedSessionRecovery();
+        const { data: { session }, error } = await supabase.auth.getSession();
 
-        const session = recoveryResult.session;
-        const fromCache = recoveryResult.fromCache;
-        const duration = recoveryResult.duration;
-
-        console.log(`🔄 Session recovery completed in ${duration}ms (from cache: ${fromCache})`);
+        if (error) {
+          console.error('❌ Error getting initial session:', error);
+          setLoading(false);
+          return;
+        }
 
         if (!session) {
-          console.log('ℹ️ No session found during initial recovery');
+          console.log('ℹ️ No session found');
           setLoading(false);
           return;
         }
 
         if (session?.user) {
-          console.log('✅ Initial session found, setting user immediately');
+          console.log('✅ Initial session found');
           setSession(session);
           setUser(session.user);
 
-          // Fetch profile in background without blocking initial load
-          // Use a separate timeout for profile loading
-          const profileLoadTimeout = setTimeout(() => {
-            console.log('⏰ Profile loading taking too long, continuing without profile');
-          }, 5000);
-
+          // Fetch profile
           fetchProfile(session.user.id)
             .then(userProfile => {
-              clearTimeout(profileLoadTimeout);
               console.log('✅ Initial profile loaded successfully');
               setProfile(userProfile);
             })
             .catch((error: unknown) => {
-              clearTimeout(profileLoadTimeout);
               const errorMessage = error instanceof Error ? error.message : 'Unknown error';
               console.error('❌ Initial profile fetch failed:', errorMessage);
-              // Don't block app initialization, let ProtectedRoute use metadata fallback
             });
         } else {
           console.log('ℹ️ No initial session found');
@@ -387,29 +238,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Error in getInitialSession:', errorMessage);
       } finally {
         setLoading(false);
-        setInitialLoadComplete(true);
       }
     };
-
-    // Test regional connectivity before attempting authentication
-    if (import.meta.env.DEV) {
-      Promise.all([
-        testSupabaseConnection(),
-        runRegionalConnectivityTest()
-      ]).then(([connectionResult, regionalResult]) => {
-        if (!connectionResult.success) {
-          console.warn('⚠️ Supabase connection issues detected:', connectionResult.error);
-        }
-
-        if (regionalResult.overall.stability === 'poor' || regionalResult.overall.stability === 'critical') {
-          console.warn('⚠️ Regional connectivity issues detected for sa-east-1:', {
-            averageLatency: `${regionalResult.overall.averageLatency}ms`,
-            stability: regionalResult.overall.stability,
-            recommendations: regionalResult.overall.recommendations
-          });
-        }
-      });
-    }
 
     getInitialSession();
 
@@ -418,25 +248,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       async (event, session) => {
         console.log('🔄 Auth state changed:', event, session?.user?.email);
 
-        // Skip processing during initial load to prevent race conditions
-        if (!initialLoadComplete && event === 'INITIAL_SESSION') {
-          console.log('⏭️ Skipping INITIAL_SESSION event (already handled by getInitialSession)');
-          return;
-        }
-
-        // Set loading to true when processing auth changes
-        setLoading(true);
-
         if (session?.user) {
-          console.log('👤 Setting user and session immediately...');
+          console.log('👤 Setting user and session...');
           setSession(session);
           setUser(session.user);
 
-          // Set loading to false immediately so ProtectedRoute can proceed with metadata
-          setLoading(false);
-
-          // Fetch profile in background without blocking loading state
-          console.log('🔄 Fetching profile in background...');
+          // Fetch profile
           try {
             const userProfile = await fetchProfile(session.user.id);
             console.log('📋 Profile loaded:', userProfile);
@@ -444,20 +261,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } catch (error: unknown) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
             console.error('❌ Profile fetch failed:', errorMessage);
-            // Don't set loading back to true, let ProtectedRoute use metadata
           }
         } else {
           console.log('🚪 User signed out, clearing data...');
           setSession(null);
           setUser(null);
           setProfile(null);
-          setLoading(false);
         }
+
+        setLoading(false);
       }
     );
 
     return () => subscription.unsubscribe();
-  }, [initialLoadComplete, fetchProfile]);
+  }, [fetchProfile]);
 
   const signUp = async (data: SignUpData) => {
     try {
