@@ -1,6 +1,6 @@
 import { defineConfig } from 'cypress'
 
-const config = defineConfig({
+export default defineConfig({
   e2e: {
     baseUrl: 'https://sua-parte.lovable.app',
     viewportWidth: 1280,
@@ -71,5 +71,3 @@ const config = defineConfig({
     supportFile: 'cypress/support/component.ts'
   }
 })
-
-export default config
