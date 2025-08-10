@@ -27,6 +27,7 @@ import type {
 import type { EstudanteRow } from "@/types/estudantes";
 import { supabase } from "@/integrations/supabase/client";
 import { TutorialButton } from "@/components/tutorial";
+import { DebugPanel } from '@/components/DebugPanel';
 
 const Designacoes = () => {
   const navigate = useNavigate();
@@ -560,6 +561,7 @@ const Designacoes = () => {
       </main>
 
       <Footer />
+      <DebugPanel />
 
       {/* Modais do Sistema de Designações */}
       <ModalSelecaoSemana

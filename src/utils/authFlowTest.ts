@@ -68,11 +68,11 @@ export const testAuthenticationFlow = async (): Promise<AuthFlowTestResult> => {
     const sessionStart = Date.now();
 
     try {
-      // Test with multiple timeout scenarios
-      const timeouts = [2000, 5000, 8000]; // Test 2s, 5s, 8s timeouts
+      const timeouts = [2000, 5000, 8000];
       let sessionSuccess = false;
-      let sessionError = null;
+      let sessionError: any = null;
       let optimalTimeout = 0;
+      let retrievedSession: any = null;
 
       for (const timeoutMs of timeouts) {
         console.log(`🔍 Testing session retrieval with ${timeoutMs}ms timeout...`);
@@ -83,10 +83,13 @@ export const testAuthenticationFlow = async (): Promise<AuthFlowTestResult> => {
             setTimeout(() => reject(new Error(`Session test timeout after ${timeoutMs}ms`)), timeoutMs);
           });
 
-          const { data: { session }, error } = await Promise.race([
+          const raceResult = await Promise.race([
             supabase.auth.getSession(),
             sessionTimeout
-          ]);
+          ]) as any;
+
+          const session = raceResult?.data?.session ?? null;
+          const error = raceResult?.error ?? null;
 
           const testDuration = Date.now() - testStart;
           console.log(`✅ Session retrieval successful in ${testDuration}ms (timeout: ${timeoutMs}ms)`);
@@ -94,20 +97,21 @@ export const testAuthenticationFlow = async (): Promise<AuthFlowTestResult> => {
           sessionSuccess = true;
           optimalTimeout = timeoutMs;
           sessionError = error;
+          retrievedSession = session;
 
           if (error) {
             result.errors.push(`Session error: ${error.message}`);
-            if (error.message.includes('403')) {
+            if (String(error.message || '').includes('403')) {
               result.recommendations.push('Session token expired - implement retry logic with exponential backoff');
             } else {
               result.recommendations.push('Try refreshing the page or clearing browser storage');
             }
           }
           break;
-        } catch (error) {
+        } catch (err) {
           const testDuration = Date.now() - testStart;
           console.log(`❌ Session retrieval failed in ${testDuration}ms (timeout: ${timeoutMs}ms)`);
-          sessionError = error;
+          sessionError = err;
 
           if (timeoutMs === timeouts[timeouts.length - 1]) {
             result.errors.push(`Session timeout even with ${timeoutMs}ms - network or server issues`);
@@ -129,68 +133,65 @@ export const testAuthenticationFlow = async (): Promise<AuthFlowTestResult> => {
         result.recommendations.push('Check Supabase authentication service status and network connectivity');
       }
 
-        if (session?.user) {
-          console.log('👤 User found in session:', session.user.email);
-          
-          // Step 3: Test profile loading
-          console.log('3️⃣ Testing profile loading...');
-          const profileStart = Date.now();
-          
-          try {
-            const profileTimeout = new Promise<never>((_, reject) => {
-              setTimeout(() => reject(new Error('Profile test timeout')), 4000);
-            });
+      if (retrievedSession?.user) {
+        console.log('👤 User found in session:', retrievedSession.user.email);
 
-            const { data: profileData, error: profileError } = await Promise.race([
-              supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', session.user.id)
-                .single(),
-              profileTimeout
-            ]);
+        // Step 3: Test profile loading
+        console.log('3️⃣ Testing profile loading...');
+        const profileStart = Date.now();
 
-            result.timings.profile = Date.now() - profileStart;
+        try {
+          const profileTimeout = new Promise<never>((_, reject) => {
+            setTimeout(() => reject(new Error('Profile test timeout')), 4000);
+          });
 
-            if (profileError) {
-              if (profileError.code === 'PGRST116') {
-                console.log('📝 Profile not found in database (expected for new users)');
-                result.recommendations.push('Profile will be created from user metadata');
-              } else {
-                result.errors.push(`Profile error: ${profileError.message}`);
-                result.recommendations.push('Check database permissions and profile table structure');
-              }
+          const { data: profileData, error: profileError } = await Promise.race([
+            supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', retrievedSession.user.id)
+              .single(),
+            profileTimeout
+          ]) as any;
+
+          result.timings.profile = Date.now() - profileStart;
+
+          if (profileError) {
+            if ((profileError as any).code === 'PGRST116') {
+              console.log('📝 Profile not found in database (expected for new users)');
+              result.recommendations.push('Profile will be created from user metadata');
             } else {
-              result.steps.profile = true;
-              console.log('✅ Profile loading successful');
+              result.errors.push(`Profile error: ${profileError.message}`);
+              result.recommendations.push('Check database permissions and profile table structure');
             }
-
-            // Step 4: Test metadata fallback
-            console.log('4️⃣ Testing metadata fallback...');
-            const metadata = session.user.user_metadata || {};
-            
-            if (metadata.role) {
-              result.steps.metadata = true;
-              console.log('✅ User metadata available:', { role: metadata.role });
-            } else {
-              result.errors.push('No role found in user metadata');
-              result.recommendations.push('Ensure user registration includes role metadata');
-            }
-
-          } catch (profileError) {
-            result.timings.profile = Date.now() - profileStart;
-            const errorMessage = profileError instanceof Error ? profileError.message : 'Unknown error';
-            result.errors.push(`Profile test failed: ${errorMessage}`);
-            result.recommendations.push('Check database connectivity and permissions');
+          } else {
+            result.steps.profile = true;
+            console.log('✅ Profile loading successful');
           }
 
-        } else {
-          console.log('ℹ️ No user in session (not logged in)');
-          result.recommendations.push('User needs to log in to test full authentication flow');
-        }
-      }
+          // Step 4: Test metadata fallback
+          console.log('4️⃣ Testing metadata fallback...');
+          const metadata = retrievedSession.user.user_metadata || {};
 
-    } catch (sessionError) {
+          if (metadata.role) {
+            result.steps.metadata = true;
+            console.log('✅ User metadata available:', { role: metadata.role });
+          } else {
+            result.errors.push('No role found in user metadata');
+            result.recommendations.push('Ensure user registration includes role metadata');
+          }
+
+        } catch (profileError: any) {
+          result.timings.profile = Date.now() - profileStart;
+          const errorMessage = profileError instanceof Error ? profileError.message : 'Unknown error';
+          result.errors.push(`Profile test failed: ${errorMessage}`);
+          result.recommendations.push('Check database connectivity and permissions');
+        }
+      } else {
+        console.log('ℹ️ No user in session (not logged in)');
+        result.recommendations.push('User needs to log in to test full authentication flow');
+      }
+    } catch (sessionError: any) {
       result.timings.session = Date.now() - sessionStart;
       const errorMessage = sessionError instanceof Error ? sessionError.message : 'Unknown error';
       result.errors.push(`Session test failed: ${errorMessage}`);

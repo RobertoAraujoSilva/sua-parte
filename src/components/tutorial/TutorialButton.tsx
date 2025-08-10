@@ -99,8 +99,8 @@ export const TutorialButton: React.FC<TutorialButtonProps> = ({
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button
-          variant={variant}
-          size={size}
+          variant={(variant === 'primary' ? 'hero' : variant === 'secondary' ? 'secondary' : 'ghost') as any}
+          size={(size === 'md' ? 'default' : size) as any}
           className={cn(
             "flex items-center gap-2",
             variant === 'minimal' && "h-8 px-2 text-xs",

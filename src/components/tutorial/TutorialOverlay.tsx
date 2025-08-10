@@ -221,7 +221,7 @@ export const TutorialOverlay: React.FC<TutorialOverlayProps> = ({ className }) =
       )}
 
       {/* CSS for highlighting */}
-      <style jsx global>{`
+      <style>{`
         .tutorial-highlight {
           position: relative !important;
           z-index: 9999 !important;

@@ -30,6 +30,7 @@ import {
   CARGO_LABELS,
   GENERO_LABELS,
 } from "@/types/estudantes";
+import { DebugPanel } from '@/components/DebugPanel';
 
 const Estudantes = () => {
   const navigate = useNavigate();
@@ -542,6 +543,7 @@ const Estudantes = () => {
       </main>
 
       <Footer />
+      <DebugPanel />
     </div>
   );
 };
