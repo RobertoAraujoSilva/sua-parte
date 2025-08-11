@@ -368,13 +368,10 @@ export const createEnhancedErrorReport = (
 const getOriginalFieldValue = (data: ProcessedStudentData, field: string): string => {
   const fieldMap: Record<string, keyof ProcessedStudentData> = {
     'Nome': 'nome',
-    'Data de Nascimento': 'data_nascimento',
     'Gênero': 'genero',
     'Cargo': 'cargo',
     'Email': 'email',
     'Telefone': 'telefone',
-    'Endereço': 'endereco',
-    'Responsável': 'nome_responsavel',
     'Status': 'ativo'
   };
 
@@ -434,5 +431,5 @@ const getSuggestionForWarning = (field: string, problem: string): string => {
  * Formats complete data for debugging
  */
 const formatCompleteData = (data: ProcessedStudentData): string => {
-  return `Nome: ${data.nome || 'N/A'} | Nascimento: ${data.data_nascimento || 'N/A'} | Gênero: ${data.genero || 'N/A'} | Cargo: ${data.cargo || 'N/A'}`;
+  return `Nome: ${data.nome || 'N/A'} | Batismo: ${data.data_batismo || 'N/A'} | Gênero: ${data.genero || 'N/A'} | Cargo: ${data.cargo || 'N/A'}`;
 };

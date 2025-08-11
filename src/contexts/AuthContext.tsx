@@ -98,11 +98,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (profileData) {
         // Get email from session
         const email = session.user.email || '';
-        const profileWithEmail = {
-          ...profileData,
-          email
+        const profileWithEmail: UserProfile = {
+          ...(profileData as any),
+          email,
+          date_of_birth: (profileData as any).date_of_birth ?? null,
+          created_at: (profileData as any).created_at ?? null,
+          updated_at: (profileData as any).updated_at ?? null,
         };
-
         console.log('✅ Profile fetched successfully:', {
           id: profileWithEmail.id,
           nome_completo: profileWithEmail.nome_completo,

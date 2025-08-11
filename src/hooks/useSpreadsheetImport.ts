@@ -202,7 +202,7 @@ export const useSpreadsheetImport = () => {
       // Get all students with additional fields for better matching
       const { data: allStudents } = await supabase
         .from('estudantes')
-        .select('id, nome, email, telefone, familia')
+        .select('id, nome, email, telefone')
         .eq('user_id', user.id);
 
       if (!allStudents) return;
@@ -212,12 +212,13 @@ export const useSpreadsheetImport = () => {
         byName: new Map<string, string>(),
         byEmail: new Map<string, string>(),
         byPhone: new Map<string, string>(),
-        byFamily: new Map<string, string[]>()
       };
 
       allStudents.forEach(student => {
         // Name mapping
-        studentMaps.byName.set(student.nome.toLowerCase().trim(), student.id);
+        if (student.nome) {
+          studentMaps.byName.set(student.nome.toLowerCase().trim(), student.id);
+        }
 
         // Email mapping
         if (student.email) {
@@ -228,15 +229,6 @@ export const useSpreadsheetImport = () => {
         if (student.telefone) {
           const normalizedPhone = normalizePhone(student.telefone);
           studentMaps.byPhone.set(normalizedPhone, student.id);
-        }
-
-        // Family mapping
-        if (student.familia) {
-          const familyKey = student.familia.toLowerCase().trim();
-          if (!studentMaps.byFamily.has(familyKey)) {
-            studentMaps.byFamily.set(familyKey, []);
-          }
-          studentMaps.byFamily.get(familyKey)!.push(student.id);
         }
       });
 
@@ -253,7 +245,6 @@ export const useSpreadsheetImport = () => {
           parentName: result.data!.parente_responsavel!.toLowerCase().trim(),
           email: result.data!.email,
           telefone: result.data!.telefone,
-          familia: result.data!.familia
         }));
 
       if (studentsNeedingParents.length === 0) return;
@@ -271,13 +262,11 @@ export const useSpreadsheetImport = () => {
         // Strategy 1: Exact name match
         parentId = studentMaps.byName.get(student.parentName);
 
-        // Strategy 2: Fuzzy name match within same family
-        if (!parentId && student.familia) {
-          const familyMembers = studentMaps.byFamily.get(student.familia.toLowerCase().trim()) || [];
-          for (const memberId of familyMembers) {
-            const member = allStudents.find(s => s.id === memberId);
-            if (member && calculateNameSimilarity(member.nome, student.parentName) > 0.8) {
-              parentId = memberId;
+        // Strategy 2: Fuzzy name match across all students
+        if (!parentId) {
+          for (const [name, id] of studentMaps.byName) {
+            if (calculateNameSimilarity(name, student.parentName) > 0.8) {
+              parentId = id;
               break;
             }
           }
@@ -301,7 +290,7 @@ export const useSpreadsheetImport = () => {
           }
         }
 
-        // Strategy 4: Phone-based matching (if same family phone)
+        // Strategy 4: Phone-based matching
         if (!parentId && student.telefone) {
           const normalizedPhone = normalizePhone(student.telefone);
           // Look for similar phone numbers (same area code)
@@ -354,7 +343,7 @@ export const useSpreadsheetImport = () => {
       // Get all existing students for comparison
       const { data: existingStudents } = await supabase
         .from('estudantes')
-        .select('nome, data_nascimento, email, telefone')
+        .select('nome, email, telefone')
         .eq('user_id', user.id);
 
       if (!existingStudents || existingStudents.length === 0) {
@@ -370,13 +359,7 @@ export const useSpreadsheetImport = () => {
             return true;
           }
 
-          // Name similarity + birth date match
-          if (student.data_nascimento && existing.data_nascimento) {
-            const nameSimilarity = calculateNameSimilarity(existing.nome, student.nome);
-            if (nameSimilarity > 0.8 && existing.data_nascimento === student.data_nascimento) {
-              return true;
-            }
-          }
+          // Removed birth date match due to unavailable field in schema
 
           // Email match (if both have email)
           if (student.email && existing.email &&

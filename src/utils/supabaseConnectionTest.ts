@@ -42,8 +42,8 @@ export const testSupabaseConnection = async (): Promise<ConnectionTestResult> =>
     try {
       const connectionStartTime = Date.now();
 
-      const { error: healthError } = await executeWithRetry(
-        () => supabase.from('profiles').select('count').limit(0),
+      const { error: healthError } = await executeWithRetry<any>(
+        async () => await supabase.from('profiles').select('count').limit(0),
         adaptiveTimeouts.databaseQuery.getAdaptiveTimeout(),
         'Connection test',
         timeouts.maxRetries,
@@ -71,8 +71,8 @@ export const testSupabaseConnection = async (): Promise<ConnectionTestResult> =>
       try {
         const authStartTime = Date.now();
 
-        const { error: authError } = await executeWithRetry(
-          () => supabase.auth.getSession(),
+        const { error: authError } = await executeWithRetry<any>(
+          async () => await supabase.auth.getSession(),
           adaptiveTimeouts.authOperation.getAdaptiveTimeout(),
           'Auth service test',
           timeouts.maxRetries,
@@ -102,12 +102,12 @@ export const testSupabaseConnection = async (): Promise<ConnectionTestResult> =>
         const queryTimeout = new Promise<never>((_, reject) => {
           setTimeout(() => reject(new Error('Query timeout')), 3000);
         });
+        const queryPromise = supabase.from('profiles').select('id').limit(1) as unknown as Promise<any>;
 
         const { error: queryError } = await Promise.race([
-          supabase.from('profiles').select('id').limit(1),
+          queryPromise,
           queryTimeout
-        ]);
-
+        ]) as any;
         if (!queryError) {
           result.details.canQuery = true;
           console.log('✅ Database query: OK');

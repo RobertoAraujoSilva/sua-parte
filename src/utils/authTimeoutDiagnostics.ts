@@ -252,7 +252,7 @@ export const runAuthTimeoutDiagnostics = async (): Promise<AuthDiagnosticsResult
       console.log('5️⃣ Testing profile query timeouts...');
       const profileTest = await testOperationTimeouts(
         'Profile Query',
-        () => supabase.from('profiles').select('id').limit(1),
+        async () => await supabase.from('profiles').select('id').limit(1),
         [4000, 6000, 8000]
       );
       result.tests.push(profileTest);

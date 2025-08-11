@@ -168,12 +168,18 @@ const PortalFamiliar: React.FC = () => {
             assistantName = ajudante?.nome;
           }
 
+          // Garantir tipos válidos para tipo_parte
+          const allowedTipos = ['leitura_biblica', 'discurso', 'demonstracao'] as const;
+          const tipoParte = (allowedTipos as readonly string[]).includes(String(designacao.tipo_parte))
+            ? (designacao.tipo_parte as 'leitura_biblica' | 'discurso' | 'demonstracao')
+            : 'discurso';
+
           formattedAssignments.push({
             id: designacao.id,
             data_inicio_semana: programa.data_inicio_semana, // Campo padronizado
             numero_parte: designacao.numero_parte, // Campo padronizado
             titulo_parte: `Parte ${designacao.numero_parte}`,
-            tipo_parte: designacao.tipo_parte, // Campo padronizado tipado
+            tipo_parte: tipoParte, // Campo padronizado tipado
             student_name: estudante?.nome || 'Nome não encontrado',
             assistant_name: assistantName,
             cena: designacao.cena, // Campo padronizado
