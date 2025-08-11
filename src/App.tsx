@@ -16,6 +16,8 @@ import Demo from "./pages/Demo";
 import Dashboard from "./pages/Dashboard";
 import Estudantes from "./pages/Estudantes";
 import Programas from "./pages/Programas";
+import ProgramasTest from "./pages/ProgramasTest";
+import PdfParsingTest from "./pages/PdfParsingTest";
 import Designacoes from "./pages/Designacoes";
 import Relatorios from "./pages/Relatorios";
 import Reunioes from "./pages/Reunioes";
@@ -84,6 +86,22 @@ const App = () => (
               element={
                 <ProtectedRoute allowedRoles={['instrutor']}>
                   <Programas />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/programas-test"
+              element={
+                <ProtectedRoute allowedRoles={['instrutor']}>
+                  <ProgramasTest />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pdf-parsing-test"
+              element={
+                <ProtectedRoute allowedRoles={['instrutor']}>
+                  <PdfParsingTest />
                 </ProtectedRoute>
               }
             />

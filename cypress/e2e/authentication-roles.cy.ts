@@ -119,16 +119,101 @@ describe('🔐 Autenticação e Controle de Acesso', () => {
     it('🔑 Deve permitir login com credenciais customizadas', () => {
       const customEmail = Cypress.env('INSTRUCTOR_EMAIL')
       const customPassword = Cypress.env('INSTRUCTOR_PASSWORD')
-      
+
       cy.log(`🧪 Testando login customizado com ${customEmail}`)
-      
+
       // Usar comando de login customizado
       cy.loginWithCredentials(customEmail, customPassword)
-      
+
       // Verificar que o login funciona
       cy.url().should('include', '/dashboard')
-      
+
       cy.log('✅ Login customizado funcionando corretamente')
+    })
+  })
+
+  describe('📚 Teste de Acesso à Página de Programas', () => {
+    it('🔑 Instrutor deve ter acesso à funcionalidade de upload de PDF', () => {
+      cy.log('🧪 Testando acesso do instrutor à página de programas')
+
+      // Login como instrutor
+      cy.loginAsInstructor()
+
+      // Navegar para página de programas
+      cy.visit('/programas')
+      cy.url().should('include', '/programas')
+
+      // Verificar elementos da página
+      cy.contains('Gestão de Programas').should('be.visible')
+      cy.contains('Importar Novo Programa').should('be.visible')
+
+      // Verificar botão de upload de PDF
+      cy.get('[data-testid="pdf-upload-button"]').should('be.visible')
+      cy.contains('Selecionar Arquivo PDF').should('be.visible')
+
+      cy.log('✅ Instrutor tem acesso completo à página de programas')
+    })
+
+    it('🚫 Estudante não deve ter acesso à página de programas', () => {
+      cy.log('🧪 Testando restrição de acesso do estudante à página de programas')
+
+      // Login como estudante
+      cy.loginAsStudent()
+
+      // Tentar acessar página de programas
+      cy.visit('/programas', { failOnStatusCode: false })
+
+      // Deve ser redirecionado para portal do estudante
+      cy.url().should('not.include', '/programas')
+      cy.url().should('match', /\/(estudante|portal)/)
+
+      cy.log('✅ Estudante corretamente restrito da página de programas')
+    })
+  })
+
+  describe('🔐 Teste de Logout', () => {
+    it('🚪 Deve fazer logout do instrutor corretamente', () => {
+      cy.loginAsInstrutor()
+      cy.url().should('include', '/dashboard')
+
+      // Procurar botão de logout
+      cy.get('body').then($body => {
+        if ($body.find('[data-testid="user-menu"]').length > 0) {
+          cy.get('[data-testid="user-menu"]').click()
+          cy.contains('Sair').click()
+        } else if ($body.find('button:contains("Test Logout")').length > 0) {
+          cy.contains('Test Logout').click()
+        } else {
+          cy.contains('Logout').click()
+        }
+      })
+
+      // Deve redirecionar para página de auth
+      cy.url().should('include', '/auth')
+
+      cy.log('✅ Logout do instrutor realizado com sucesso')
+    })
+
+    it('🚪 Deve fazer logout do estudante corretamente', () => {
+      cy.loginAsStudent()
+      cy.url().should('match', /\/(estudante|portal)/)
+
+      // Procurar botão de logout
+      cy.get('body').then($body => {
+        if ($body.find('[data-testid="user-menu"]').length > 0) {
+          cy.get('[data-testid="user-menu"]').click()
+          cy.contains('Sair').click()
+        } else if ($body.find('button:contains("Test Logout")').length > 0) {
+          cy.contains('Test Logout').click()
+        } else {
+          cy.contains('Logout').click()
+        }
+      })
+
+      // Deve redirecionar para página de auth
+      cy.url().should('include', '/auth')
+
+      cy.log('✅ Logout do estudante realizado com sucesso')
     })
   })
 

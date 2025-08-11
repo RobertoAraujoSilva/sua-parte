@@ -54,72 +54,71 @@ const Designacoes = () => {
   const [conflitos, setConflitos] = useState<ConflitosDesignacao[]>([]);
   const [recomendacoes, setRecomendacoes] = useState<string[]>([]);
 
-  // Mock data for demonstration
-  const designacoes = [
-    {
-      id: 1,
-      semana: "12-18 de Agosto de 2024",
-      status: "Enviadas",
-      dataGeracao: "2024-08-05",
-      dataEnvio: "2024-08-05",
-      totalPartes: 12,
-      partesDesignadas: 12,
-      estudantesNotificados: 8,
-      confirmacoes: 6
-    },
-    {
-      id: 2,
-      semana: "19-25 de Agosto de 2024",
-      status: "Geradas",
-      dataGeracao: "2024-08-12",
-      dataEnvio: null,
-      totalPartes: 12,
-      partesDesignadas: 12,
-      estudantesNotificados: 0,
-      confirmacoes: 0
-    },
-    {
-      id: 3,
-      semana: "26 de Agosto - 1 de Setembro de 2024",
-      status: "Pendente",
-      dataGeracao: null,
-      dataEnvio: null,
-      totalPartes: 12,
-      partesDesignadas: 0,
-      estudantesNotificados: 0,
-      confirmacoes: 0
-    }
-  ];
+  // State for real assignment data
+  const [assignmentPrograms, setAssignmentPrograms] = useState([]);
+  const [loadingAssignments, setLoadingAssignments] = useState(true);
 
-  const partes = [
-    {
-      id: 1,
-      tipo: "Tesouros da Palavra de Deus",
-      titulo: "Leitura da Bíblia",
-      estudante: "João Silva",
-      auxiliar: null,
-      tempo: "4 min",
-      sala: "Principal"
-    },
-    {
-      id: 2,
-      tipo: "Faça Seu Melhor no Ministério",
-      titulo: "Primeira Conversa",
-      estudante: "Maria Santos",
-      auxiliar: "Ana Costa",
-      tempo: "3 min",
-      sala: "Principal"
-    },
-    {
-      id: 3,
-      tipo: "Faça Seu Melhor no Ministério",
-      titulo: "Revisita",
-      estudante: "Pedro Costa",
-      auxiliar: "Carlos Lima",
-      tempo: "4 min",
-      sala: "Auxiliar"
+  // Load assignments from database
+  useEffect(() => {
+    loadAssignments();
+  }, []);
+
+  const loadAssignments = async () => {
+    try {
+      setLoadingAssignments(true);
+
+      // Load programs with generated assignments
+      const { data: programs, error: programsError } = await supabase
+        .from('programas')
+        .select(`
+          id,
+          data_inicio_semana,
+          mes_apostila,
+          partes,
+          status,
+          assignment_status,
+          assignments_generated_at,
+          total_assignments_generated,
+          designacoes (
+            id,
+            id_estudante,
+            numero_parte,
+            tipo_parte,
+            cena,
+            tempo_minutos,
+            id_ajudante,
+            confirmado,
+            estudantes!designacoes_id_estudante_fkey (
+              id,
+              nome,
+              cargo,
+              genero
+            ),
+            ajudante:estudantes!designacoes_id_ajudante_fkey (
+              id,
+              nome,
+              cargo,
+              genero
+            )
+          )
+        `)
+        .eq('assignment_status', 'generated')
+        .order('data_inicio_semana', { ascending: false });
+
+      if (programsError) {
+        console.error('Error loading programs:', programsError);
+        return;
+      }
+
+      setAssignmentPrograms(programs || []);
+    } catch (error) {
+      console.error('Error loading assignments:', error);
+    } finally {
+      setLoadingAssignments(false);
     }
-  ];
+  };
+
+  // Remove mock data - rely entirely on database queries
 
   // Função para abrir modal de seleção de semana
   const handleAbrirModalSelecao = () => {
@@ -391,6 +390,124 @@ const Designacoes = () => {
           </div>
         </section>
 
+        {/* Generated Assignments from Programs */}
+        {assignmentPrograms.length > 0 && (
+          <section className="py-8 bg-green-50">
+            <div className="container mx-auto px-4">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-jw-navy">Designações Geradas Recentemente</h2>
+                  <p className="text-gray-600">Designações criadas através do sistema de geração automática</p>
+                </div>
+                <Badge className="bg-green-100 text-green-800">
+                  {assignmentPrograms.length} programa(s) com designações
+                </Badge>
+              </div>
+
+              <div className="space-y-6">
+                {assignmentPrograms.map((program) => (
+                  <Card key={program.id} className="border-l-4 border-l-green-500">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            <Calendar className="w-5 h-5 text-green-600" />
+                            {program.mes_apostila || `Semana de ${new Date(program.data_inicio_semana).toLocaleDateString('pt-BR')}`}
+                          </CardTitle>
+                          <CardDescription>
+                            Geradas em {new Date(program.assignments_generated_at).toLocaleDateString('pt-BR')} às {new Date(program.assignments_generated_at).toLocaleTimeString('pt-BR')}
+                          </CardDescription>
+                        </div>
+                        <div className="flex gap-2">
+                          <Badge className="bg-green-100 text-green-800">
+                            {program.total_assignments_generated} designações
+                          </Badge>
+                          <Badge variant="outline">
+                            {program.status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {program.designacoes && program.designacoes.length > 0 ? (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {program.designacoes.map((assignment, index) => (
+                              <Card key={assignment.id} className="border border-gray-200">
+                                <CardHeader className="pb-2">
+                                  <div className="flex items-center justify-between">
+                                    <Badge variant="outline" className="text-xs">
+                                      Parte {assignment.numero_parte}
+                                    </Badge>
+                                    <Badge className={assignment.confirmado ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                                      {assignment.confirmado ? 'Confirmado' : 'Pendente'}
+                                    </Badge>
+                                  </div>
+                                  <CardTitle className="text-sm">{assignment.tipo_parte}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="pt-0">
+                                  <div className="space-y-2 text-sm">
+                                    <div>
+                                      <span className="font-medium text-gray-600">Estudante:</span>
+                                      <p className="text-gray-900">
+                                        {assignment.estudantes?.nome || `ID: ${assignment.id_estudante}`}
+                                      </p>
+                                      {assignment.estudantes?.cargo && (
+                                        <p className="text-xs text-gray-500">{assignment.estudantes.cargo}</p>
+                                      )}
+                                    </div>
+                                    {assignment.id_ajudante && (
+                                      <div>
+                                        <span className="font-medium text-gray-600">Ajudante:</span>
+                                        <p className="text-gray-900">
+                                          {assignment.ajudante?.nome || `ID: ${assignment.id_ajudante}`}
+                                        </p>
+                                      </div>
+                                    )}
+                                    {assignment.cena && (
+                                      <div>
+                                        <span className="font-medium text-gray-600">Cenário:</span>
+                                        <p className="text-gray-700 text-xs">{assignment.cena}</p>
+                                      </div>
+                                    )}
+                                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                                      <Clock className="w-3 h-3" />
+                                      {assignment.tempo_minutos} min
+                                    </div>
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            ))}
+                          </div>
+                          <div className="flex gap-2 pt-4 border-t">
+                            <Button variant="outline" size="sm">
+                              <Eye className="w-4 h-4 mr-2" />
+                              Ver Detalhes
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <Send className="w-4 h-4 mr-2" />
+                              Enviar Notificações
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              <Download className="w-4 h-4 mr-2" />
+                              Exportar PDF
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-center py-4 text-gray-500">
+                          <AlertTriangle className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                          <p>Nenhuma designação encontrada para este programa</p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Designations Overview */}
         <section className="py-8">
           <div className="container mx-auto px-4">
@@ -411,118 +528,49 @@ const Designacoes = () => {
               </div>
             </div>
 
-            <div className="space-y-4">
-              {designacoes.map((designacao) => (
-                <Card key={designacao.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{designacao.semana}</CardTitle>
-                        <CardDescription>
-                          {designacao.dataGeracao ? 
-                            `Geradas em ${new Date(designacao.dataGeracao).toLocaleDateString('pt-BR')}` :
-                            'Aguardando geração'
-                          }
-                        </CardDescription>
-                      </div>
-                      <Badge className={getStatusColor(designacao.status)}>
-                        {designacao.status}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div>
-                        <h4 className="font-medium text-gray-700 mb-2">Progresso:</h4>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>Partes Designadas</span>
-                            <span>{designacao.partesDesignadas}/{designacao.totalPartes}</span>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2">
-                            <div 
-                              className="bg-jw-blue h-2 rounded-full" 
-                              style={{ width: `${(designacao.partesDesignadas / designacao.totalPartes) * 100}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium text-gray-700 mb-2">Notificações:</h4>
-                        <div className="space-y-1 text-sm">
-                          <div className="flex justify-between">
-                            <span>Estudantes Notificados</span>
-                            <span>{designacao.estudantesNotificados}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Confirmações</span>
-                            <span className="text-green-600">{designacao.confirmacoes}</span>
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h4 className="font-medium text-gray-700 mb-2">Ações:</h4>
-                        <div className="flex flex-wrap gap-2">
-                          <Button variant="outline" size="sm">
-                            <Eye className="w-4 h-4 mr-1" />
-                            Ver Detalhes
-                          </Button>
-                          {designacao.status === "Geradas" && (
-                            <Button variant="hero" size="sm">
-                              <Send className="w-4 h-4 mr-1" />
-                              Enviar
-                            </Button>
-                          )}
-                          {designacao.status === "Pendente" && (
-                            <Button variant="hero" size="sm">
-                              <Zap className="w-4 h-4 mr-1" />
-                              Gerar
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            {/* Show message that only real data is displayed */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-8">
+                  <div className="text-jw-blue mb-4">📊</div>
+                  <h3 className="text-lg font-medium text-gray-700 mb-2">
+                    Designações Baseadas em Dados Reais
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    Esta página agora exibe apenas designações reais criadas através do sistema de geração automática.
+                    As designações aparecerão aqui após serem geradas na página de Programas.
+                  </p>
+                  <Button
+                    variant="outline"
+                    onClick={() => window.location.href = '/programas'}
+                  >
+                    Ir para Programas
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </section>
 
-        {/* Current Week Details */}
+        {/* Current Week Details - Now shows real data only */}
         <section className="py-8 bg-gray-50">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl font-bold text-jw-navy mb-6">Designações da Semana Atual</h2>
-            
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {partes.map((parte) => (
-                <Card key={parte.id} className="border-l-4 border-l-jw-blue">
-                  <CardHeader className="pb-3">
-                    <Badge variant="outline" className="w-fit mb-2">
-                      {parte.tipo}
-                    </Badge>
-                    <CardTitle className="text-base">{parte.titulo}</CardTitle>
-                    <CardDescription>{parte.tempo} • Sala {parte.sala}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div>
-                        <span className="text-sm font-medium text-gray-600">Estudante:</span>
-                        <p className="text-sm">{parte.estudante}</p>
-                      </div>
-                      {parte.auxiliar && (
-                        <div>
-                          <span className="text-sm font-medium text-gray-600">Auxiliar:</span>
-                          <p className="text-sm">{parte.auxiliar}</p>
-                        </div>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-8">
+                  <div className="text-gray-400 mb-4">📅</div>
+                  <h3 className="text-lg font-medium text-gray-700 mb-2">
+                    Designações da Semana
+                  </h3>
+                  <p className="text-gray-600">
+                    As designações da semana atual aparecerão aqui quando forem geradas através do sistema.
+                    Utilize a seção "Designações Geradas Recentemente" acima para ver as designações criadas.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </section>
 

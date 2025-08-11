@@ -432,20 +432,30 @@ export class GeradorDesignacoes {
 /**
  * Função utilitária para criar gerador de designações com estudantes atuais
  */
-export const criarGeradorDesignacoes = async (): Promise<GeradorDesignacoes> => {
+export const criarGeradorDesignacoes = async (userId: string): Promise<GeradorDesignacoes> => {
   try {
+    console.log('🔧 Creating assignment generator for user:', userId);
+
     const { data: estudantes, error } = await supabase
       .from('estudantes')
       .select('*')
+      .eq('user_id', userId)
       .eq('ativo', true)
       .order('nome');
 
     if (error) {
-      console.error('Erro ao carregar estudantes para gerador de designações:', error);
-      return new GeradorDesignacoes([]);
+      console.error('❌ Error loading students for assignment generator:', error);
+      throw new Error(`Erro ao carregar estudantes: ${error.message}`);
     }
 
-    const estudantesMapeados: Estudante[] = (estudantes || []).map(estudante => ({
+    if (!estudantes || estudantes.length === 0) {
+      console.warn('⚠️ No active students found for user:', userId);
+      throw new Error('Nenhum estudante ativo encontrado. Cadastre estudantes antes de gerar designações.');
+    }
+
+    console.log(`✅ Loaded ${estudantes.length} active students for assignment generation`);
+
+    const estudantesMapeados: Estudante[] = estudantes.map(estudante => ({
       id: estudante.id,
       nome: estudante.nome,
       genero: estudante.genero,
@@ -458,8 +468,11 @@ export const criarGeradorDesignacoes = async (): Promise<GeradorDesignacoes> => 
 
     return new GeradorDesignacoes(estudantesMapeados);
   } catch (error) {
-    console.error('Exceção ao criar gerador de designações:', error);
-    return new GeradorDesignacoes([]);
+    console.error('❌ Exception creating assignment generator:', error);
+    if (error instanceof Error) {
+      throw error; // Re-throw known errors
+    }
+    throw new Error('Erro inesperado ao criar gerador de designações');
   }
 };
 

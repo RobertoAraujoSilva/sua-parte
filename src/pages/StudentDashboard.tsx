@@ -1,51 +1,80 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Calendar, Clock, MapPin, CheckCircle } from "lucide-react";
+import { Calendar, Clock, MapPin, CheckCircle, AlertCircle } from "lucide-react";
 import DonationCard from "@/components/DonationCard";
+import { StudentAssignmentView } from "@/components/StudentAssignmentView";
+import { supabase } from "@/integrations/supabase/client";
 
 const StudentDashboard: React.FC = () => {
   const { id } = useParams();
 
-  // Mock data - TODO: Buscar dados do estudante e designações via Supabase
-  const estudante = {
-    id: id,
-    nome: "João Silva",
-    congregacao: "Congregação Central",
-    cargo: "Servo Ministerial"
+  // State for real student data
+  const [estudante, setEstudante] = useState<any>(null);
+  const [loadingStudent, setLoadingStudent] = useState(true);
+  const [studentError, setStudentError] = useState<string | null>(null);
+
+  // Load student data from database
+  const loadStudent = async () => {
+    if (!id) {
+      setStudentError('ID do estudante não fornecido');
+      setLoadingStudent(false);
+      return;
+    }
+
+    try {
+      setLoadingStudent(true);
+      setStudentError(null);
+
+      console.log('👤 Loading student data for ID:', id);
+
+      const { data, error } = await supabase
+        .from('estudantes')
+        .select(`
+          id,
+          nome,
+          email,
+          telefone,
+          data_nascimento,
+          genero,
+          cargo,
+          batizado,
+          ativo,
+          qualificacoes,
+          created_at
+        `)
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('❌ Error loading student:', error);
+        setStudentError(`Erro ao carregar dados do estudante: ${error.message}`);
+        return;
+      }
+
+      if (!data) {
+        setStudentError('Estudante não encontrado');
+        return;
+      }
+
+      console.log('✅ Student loaded:', data);
+      setEstudante(data);
+
+    } catch (error) {
+      console.error('❌ Exception loading student:', error);
+      setStudentError('Erro inesperado ao carregar dados do estudante');
+    } finally {
+      setLoadingStudent(false);
+    }
   };
 
-  const designacoes = [
-    {
-      id: 1,
-      semana: "12-18 de Agosto de 2024",
-      tipo: "Leitura da Bíblia",
-      titulo: "Gênesis 1:1-31",
-      data: "2024-08-15",
-      horario: "19:30",
-      sala: "Principal",
-      tempo: "4 min",
-      status: "Confirmada",
-      observacoes: "Preparar com ênfase na criação"
-    },
-    {
-      id: 2,
-      semana: "19-25 de Agosto de 2024",
-      tipo: "Primeira Conversa",
-      titulo: "Como a Bíblia pode ajudar?",
-      data: "2024-08-22",
-      horario: "20:15",
-      sala: "Principal",
-      tempo: "3 min",
-      status: "Pendente",
-      observacoes: "Usar publicação 'Boas Notícias'"
-    }
-  ];
-
-
+  // Load student data when component mounts
+  useEffect(() => {
+    loadStudent();
+  }, [id]);
 
   const handleConfirmarParticipacao = (designacaoId: number) => {
     // TODO: Implementar confirmação no backend
@@ -67,6 +96,73 @@ const StudentDashboard: React.FC = () => {
     }
   };
 
+  // Loading state
+  if (loadingStudent) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jw-blue mx-auto mb-4"></div>
+          <p className="text-gray-600">Carregando dados do estudante...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (studentError) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="max-w-md mx-auto border-red-200">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-red-700 mb-2">Erro ao Carregar Dados</h2>
+              <p className="text-red-600 mb-4">{studentError}</p>
+              <Button
+                variant="outline"
+                onClick={loadStudent}
+                className="mr-2"
+              >
+                Tentar Novamente
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => window.history.back()}
+              >
+                Voltar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Student not found
+  if (!estudante) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Card className="max-w-md mx-auto">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="text-gray-400 mb-4">👤</div>
+              <h2 className="text-xl font-semibold text-gray-700 mb-2">Estudante Não Encontrado</h2>
+              <p className="text-gray-600 mb-4">
+                Não foi possível encontrar os dados do estudante com ID: {id}
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => window.history.back()}
+              >
+                Voltar
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -75,7 +171,10 @@ const StudentDashboard: React.FC = () => {
           <div className="text-center">
             <h1 className="text-3xl font-bold mb-2">Portal do Estudante</h1>
             <p className="text-xl opacity-90">Bem-vindo, {estudante.nome}</p>
-            <p className="text-sm opacity-75">{estudante.congregacao} • {estudante.cargo}</p>
+            <p className="text-sm opacity-75">
+              {estudante.cargo ? `${estudante.cargo}` : 'Estudante'}
+              {estudante.batizado ? ' • Batizado' : ' • Não Batizado'}
+            </p>
           </div>
         </div>
       </header>
@@ -85,56 +184,7 @@ const StudentDashboard: React.FC = () => {
           {/* Minhas Designações */}
           <section className="mb-12">
             <h2 className="text-2xl font-bold text-jw-navy mb-6">Minhas Designações</h2>
-            <div className="space-y-4">
-              {designacoes.map((designacao) => (
-                <Card key={designacao.id} className="border-l-4 border-l-jw-blue">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="text-lg">{designacao.tipo}</CardTitle>
-                        <CardDescription>{designacao.titulo}</CardDescription>
-                      </div>
-                      <Badge className={getStatusColor(designacao.status)}>
-                        {designacao.status}
-                      </Badge>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Calendar className="w-4 h-4 text-jw-blue" />
-                          <span>{new Date(designacao.data).toLocaleDateString('pt-BR')}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="w-4 h-4 text-jw-blue" />
-                          <span>{designacao.horario} • {designacao.tempo}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <MapPin className="w-4 h-4 text-jw-blue" />
-                          <span>Sala {designacao.sala}</span>
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-sm mb-1">Observações:</h4>
-                        <p className="text-sm text-gray-600">{designacao.observacoes}</p>
-                      </div>
-                    </div>
-
-                    {designacao.status === "Pendente" && (
-                      <Button
-                        variant="hero"
-                        size="sm"
-                        onClick={() => handleConfirmarParticipacao(designacao.id)}
-                      >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Confirmar Participação
-                      </Button>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            <StudentAssignmentView studentId={id || ''} showAllAssignments={false} />
           </section>
 
           {/* Doações */}
