@@ -226,32 +226,50 @@ export type Database = {
       }
       programas: {
         Row: {
+          assignment_generation_error: string | null
+          assignment_status: string | null
+          assignments_generated_at: string | null
+          arquivo: string
           created_at: string | null
           data_inicio_semana: string
           id: string
           mes_apostila: string | null
           partes: Json
+          semana: string
           status: Database["public"]["Enums"]["status_programa"] | null
+          total_assignments_generated: number | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          assignment_generation_error?: string | null
+          assignment_status?: string | null
+          assignments_generated_at?: string | null
+          arquivo?: string
           created_at?: string | null
           data_inicio_semana: string
           id?: string
           mes_apostila?: string | null
           partes: Json
+          semana?: string
           status?: Database["public"]["Enums"]["status_programa"] | null
+          total_assignments_generated?: number | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          assignment_generation_error?: string | null
+          assignment_status?: string | null
+          assignments_generated_at?: string | null
+          arquivo?: string
           created_at?: string | null
           data_inicio_semana?: string
           id?: string
           mes_apostila?: string | null
           partes?: Json
+          semana?: string
           status?: Database["public"]["Enums"]["status_programa"] | null
+          total_assignments_generated?: number | null
           updated_at?: string | null
           user_id?: string
         }
@@ -515,37 +533,28 @@ export type Database = {
       family_members: {
         Row: {
           id: string
+          user_id: string
           student_id: string
-          name: string
-          email: string | null
-          phone: string | null
-          gender: "M" | "F"
-          relation: "Pai" | "Mãe" | "Cônjuge" | "Filho" | "Filha" | "Irmão" | "Irmã"
-          invitation_status: "PENDING" | "SENT" | "ACCEPTED" | "EXPIRED"
+          related_student_id: string
+          relationship_type: "pai" | "mae" | "filho" | "filha" | "irmao" | "irma" | "conjuge"
           created_at: string
           updated_at: string
         }
         Insert: {
           id?: string
+          user_id: string
           student_id: string
-          name: string
-          email?: string | null
-          phone?: string | null
-          gender: "M" | "F"
-          relation: "Pai" | "Mãe" | "Cônjuge" | "Filho" | "Filha" | "Irmão" | "Irmã"
-          invitation_status?: "PENDING" | "SENT" | "ACCEPTED" | "EXPIRED"
+          related_student_id: string
+          relationship_type: "pai" | "mae" | "filho" | "filha" | "irmao" | "irma" | "conjuge"
           created_at?: string
           updated_at?: string
         }
         Update: {
           id?: string
+          user_id?: string
           student_id?: string
-          name?: string
-          email?: string | null
-          phone?: string | null
-          gender?: "M" | "F"
-          relation?: "Pai" | "Mãe" | "Cônjuge" | "Filho" | "Filha" | "Irmão" | "Irmã"
-          invitation_status?: "PENDING" | "SENT" | "ACCEPTED" | "EXPIRED"
+          related_student_id?: string
+          relationship_type?: "pai" | "mae" | "filho" | "filha" | "irmao" | "irma" | "conjuge"
           created_at?: string
           updated_at?: string
         }
@@ -554,7 +563,14 @@ export type Database = {
             foreignKeyName: "family_members_student_id_fkey"
             columns: ["student_id"]
             isOneToOne: false
-            referencedRelation: "profiles"
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "family_members_related_student_id_fkey"
+            columns: ["related_student_id"]
+            isOneToOne: false
+            referencedRelation: "estudantes"
             referencedColumns: ["id"]
           }
         ]
@@ -641,7 +657,7 @@ export type Database = {
         | "cancelled"
       room_type: "main_hall" | "auxiliary_room_1" | "auxiliary_room_2" | "auxiliary_room_3"
       status_programa: "ativo" | "inativo" | "arquivado"
-      user_role: "instrutor" | "estudante" | "family_member"
+      user_role: "instrutor" | "estudante" | "family_member" | "developer"
     }
     CompositeTypes: {
       [_ in never]: never

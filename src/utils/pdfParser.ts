@@ -246,14 +246,104 @@ export class JWPdfParser {
   }
 
   /**
-   * Main parsing function
+   * Validate date for future date prevention and reasonable limits
+   */
+  private static validateDate(dateStr: string): { isValid: boolean; error?: string } {
+    try {
+      const date = new Date(dateStr);
+      const now = new Date();
+
+      // Check if date is valid
+      if (isNaN(date.getTime())) {
+        return { isValid: false, error: 'Data inválida' };
+      }
+
+      // Check if date is too far in the future (max 2 years ahead)
+      const maxFutureDate = new Date();
+      maxFutureDate.setFullYear(maxFutureDate.getFullYear() + 2);
+
+      if (date > maxFutureDate) {
+        return { isValid: false, error: 'Data muito distante no futuro' };
+      }
+
+      // Check if date is too far in the past (max 5 years ago)
+      const minPastDate = new Date();
+      minPastDate.setFullYear(minPastDate.getFullYear() - 5);
+
+      if (date < minPastDate) {
+        return { isValid: false, error: 'Data muito antiga' };
+      }
+
+      return { isValid: true };
+    } catch (error) {
+      return { isValid: false, error: 'Erro ao validar data' };
+    }
+  }
+
+  /**
+   * Enhanced main parsing function with validation and error handling
    */
   static async parsePdf(file: File): Promise<ParsedPdfData> {
-    // Start with filename parsing
-    const filenameData = this.parseFilename(file.name);
-    
-    // For now, return filename-based parsing
-    // In the future, we can add actual PDF content parsing here
-    return filenameData as ParsedPdfData;
+    try {
+      // Validate file integrity
+      if (!file || file.size === 0) {
+        throw new Error('Arquivo PDF vazio ou corrompido');
+      }
+
+      if (file.size > 50 * 1024 * 1024) { // 50MB limit
+        throw new Error('Arquivo PDF muito grande (limite: 50MB)');
+      }
+
+      // Start with filename parsing
+      const filenameData = this.parseFilename(file.name);
+
+      // Validate extracted date if present
+      if (filenameData.data_inicio) {
+        const dateValidation = this.validateDate(filenameData.data_inicio);
+        if (!dateValidation.isValid) {
+          console.warn(`⚠️ Date validation failed for ${file.name}:`, dateValidation.error);
+          // Use current date as fallback
+          filenameData.data_inicio = new Date().toISOString().split('T')[0];
+          filenameData.detalhes_extras = {
+            ...filenameData.detalhes_extras,
+            date_validation_warning: dateValidation.error,
+            date_corrected: true
+          };
+        }
+      }
+
+      // Add file integrity info
+      filenameData.detalhes_extras = {
+        ...filenameData.detalhes_extras,
+        file_size_mb: (file.size / 1024 / 1024).toFixed(2),
+        file_validated: true,
+        parsing_timestamp: new Date().toISOString()
+      };
+
+      return filenameData as ParsedPdfData;
+
+    } catch (error) {
+      console.error('❌ Critical PDF parsing error:', error);
+
+      // Return safe fallback with error information
+      return {
+        semana: `Erro - ${file.name}`,
+        mes_ano: '',
+        tipo_documento: 'programa_semanal',
+        partes: [
+          'Tesouros da Palavra de Deus',
+          'Faça Seu Melhor no Ministério',
+          'Nossa Vida Cristã'
+        ],
+        data_inicio: new Date().toISOString().split('T')[0],
+        detalhes_extras: {
+          parsing_method: 'error_fallback',
+          error_message: error instanceof Error ? error.message : 'Erro desconhecido',
+          file_corrupted: true,
+          manual_review_required: true,
+          parsing_timestamp: new Date().toISOString()
+        }
+      };
+    }
   }
 }

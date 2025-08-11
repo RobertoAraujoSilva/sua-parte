@@ -10,10 +10,13 @@ import { Upload, Calendar, FileText, ArrowLeft, Download, Eye, Trash2, Users, Za
 import { TutorialButton } from "@/components/tutorial";
 import { useAuth } from "@/contexts/AuthContext";
 import { PdfUpload } from "@/components/PdfUpload";
+import { JWContentParser } from "@/components/JWContentParser";
 import { toast } from "@/hooks/use-toast";
 import { useAssignmentGeneration } from "@/hooks/useAssignmentGeneration";
 import { AssignmentGenerationModal } from "@/components/AssignmentGenerationModal";
 import { AssignmentPreviewModal } from "@/components/AssignmentPreviewModal";
+import { ProgramDetailModal } from "@/components/ProgramDetailModal";
+import { TemplateLibrary } from "@/components/TemplateLibrary";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 
@@ -35,19 +38,24 @@ const Programas = () => {
   const [programas, setProgramas] = useState([]);
   const [loadingPrograms, setLoadingPrograms] = useState(true);
   const [programsError, setProgramsError] = useState<string | null>(null);
+  const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
+  const [uploadingSpreadsheet, setUploadingSpreadsheet] = useState(false);
+  const [showProgramDetail, setShowProgramDetail] = useState(false);
 
   // Calculate real statistics from programs data
   const programStats = useMemo(() => {
     const total = programas.length;
-    const generated = programas.filter(p => p.designacoesGeradas || p.status === 'Designações Geradas').length;
-    const pending = programas.filter(p => !p.designacoesGeradas && p.status !== 'Designações Geradas').length;
-    const totalParts = programas.reduce((sum, p) => sum + (p.partes?.length || 0), 0);
+    const approved = programas.filter(p => p.assignment_status === 'approved').length;
+    const draft = programas.filter(p => p.assignment_status === 'generated').length;
+    const pending = programas.filter(p => p.assignment_status === 'pending').length;
+    const totalAssignments = programas.reduce((sum, p) => sum + (p.total_assignments_generated || 0), 0);
 
     return {
       total,
-      generated,
+      approved,
+      draft,
       pending,
-      totalParts
+      totalAssignments
     };
   }, [programas]);
 
@@ -64,22 +72,9 @@ const Programas = () => {
 
       console.log('📚 Loading programs for user:', user.id);
 
+      // Use the new function to get complete program information
       const { data, error } = await supabase
-        .from('programas')
-        .select(`
-          id,
-          data_inicio_semana,
-          mes_apostila,
-          partes,
-          status,
-          assignment_status,
-          assignments_generated_at,
-          total_assignments_generated,
-          created_at,
-          updated_at
-        `)
-        .eq('user_id', user.id)
-        .order('data_inicio_semana', { ascending: false });
+        .rpc('get_programs_complete', { user_uuid: user.id });
 
       if (error) {
         console.error('❌ Error loading programs:', error);
@@ -92,8 +87,8 @@ const Programas = () => {
       // Transform database data to match UI expectations
       const transformedPrograms = (data || []).map(program => ({
         id: program.id,
-        semana: program.mes_apostila || `Semana de ${new Date(program.data_inicio_semana).toLocaleDateString('pt-BR')}`,
-        arquivo: `programa-${program.data_inicio_semana}.pdf`, // Fallback filename
+        semana: program.semana || program.mes_apostila || `Semana de ${new Date(program.data_inicio_semana).toLocaleDateString('pt-BR')}`,
+        arquivo: program.arquivo || `programa-${program.data_inicio_semana}.pdf`,
         status: program.assignment_status === 'generated' ? 'Designações Geradas' :
                 program.assignment_status === 'generating' ? 'Gerando Designações' :
                 'Aguardando Designações',
@@ -101,6 +96,7 @@ const Programas = () => {
         designacoesGeradas: program.assignment_status === 'generated',
         data_inicio_semana: program.data_inicio_semana,
         mes_apostila: program.mes_apostila,
+        assignment_status: program.assignment_status,
         partes: Array.isArray(program.partes) ? program.partes : [
           "Tesouros da Palavra de Deus",
           "Faça Seu Melhor no Ministério",
@@ -161,11 +157,44 @@ const Programas = () => {
     }
 
     try {
+      const dataInicio = uploadData.extractedData?.data_inicio || new Date().toISOString().split('T')[0];
+      const mesApostila = uploadData.extractedData?.mes_ano || null;
+
+      // Check for duplicate programs using the database function
+      console.log('🔍 Checking for duplicate programs...');
+      
+      const { data: isDuplicate, error: checkError } = await supabase
+        .rpc('check_programa_duplicate', {
+          p_user_id: user.id,
+          p_mes_apostila: mesApostila || '',
+          p_data_inicio_semana: dataInicio
+        });
+
+      if (checkError) {
+        console.error('❌ Error checking for duplicates:', checkError);
+        toast({
+          title: "Erro de Verificação",
+          description: "Não foi possível verificar programas duplicados. Tente novamente.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (isDuplicate) {
+        console.log('⚠️ Duplicate program found');
+        toast({
+          title: "Programa Já Existe",
+          description: `Um programa para "${mesApostila || 'esta semana'}" já foi importado.`,
+          variant: "destructive"
+        });
+        return;
+      }
+
       // Save program to database
       const programData = {
         user_id: user.id,
-        data_inicio_semana: uploadData.extractedData?.data_inicio || new Date().toISOString().split('T')[0],
-        mes_apostila: uploadData.extractedData?.mes_ano || null,
+        data_inicio_semana: dataInicio,
+        mes_apostila: mesApostila,
         partes: uploadData.extractedData?.partes || [
           "Tesouros da Palavra de Deus",
           "Faça Seu Melhor no Ministério",
@@ -226,11 +255,30 @@ const Programas = () => {
     setSelectedProgram(programa);
     resetState();
 
+    console.log('🎯 Generating assignments for program:', programa);
+    console.log('📋 Program partes raw:', programa.partes);
+    console.log('📋 Program partes type:', typeof programa.partes);
+
+    // Ensure partes is an array
+    let partes = programa.partes;
+    if (typeof partes === 'string') {
+      try {
+        partes = JSON.parse(partes);
+      } catch (error) {
+        console.error('Error parsing partes:', error);
+        partes = [];
+      }
+    }
+    if (!Array.isArray(partes)) {
+      console.error('Partes is not an array:', partes);
+      partes = [];
+    }
+
     const programData = {
       id: programa.id.toString(),
-      semana: programa.semana,
-      arquivo: programa.arquivo,
-      partes: programa.partes,
+      semana: programa.semana || `Semana de ${new Date(programa.data_inicio_semana).toLocaleDateString('pt-BR')}`,
+      arquivo: programa.arquivo || 'programa.pdf',
+      partes: partes,
       data_inicio_semana: programa.data_inicio_semana || new Date().toISOString().split('T')[0],
       mes_apostila: programa.mes_apostila
     };
@@ -238,8 +286,13 @@ const Programas = () => {
     const result = await generateAssignments(programData, user.id);
 
     if (result.success && result.assignments) {
-      // Show preview modal
-      setShowPreviewModal(true);
+      // Redirect to preview page instead of showing modal
+      navigate(`/programa/${programa.id}`);
+
+      toast({
+        title: "Designações Geradas!",
+        description: "Revise as designações e aprove quando estiver satisfeito.",
+      });
     }
   };
 
@@ -288,6 +341,211 @@ const Programas = () => {
 
   const handlePdfUploadStart = () => {
     console.log('PDF upload started');
+  };
+
+  const handleSpreadsheetUpload = async (file: File, templateId: string) => {
+    try {
+      setUploadingSpreadsheet(true);
+
+      // Here you would implement the spreadsheet parsing logic
+      // For now, we'll just show a success message
+      toast({
+        title: "Planilha Recebida!",
+        description: "A planilha será processada e as designações geradas automaticamente.",
+      });
+
+      // Navigate to the program preview page
+      navigate(`/programa/${templateId}`);
+
+    } catch (error) {
+      console.error('Error uploading spreadsheet:', error);
+      toast({
+        title: "Erro no Upload",
+        description: "Não foi possível processar a planilha. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploadingSpreadsheet(false);
+    }
+  };
+
+  // Handler for visualizing program details
+  const handleVisualizarPrograma = (programa: any) => {
+    console.log('Visualizing program:', programa);
+    setSelectedProgram(programa);
+    setShowProgramDetail(true);
+  };
+
+  // Handler for downloading program PDF
+  const handleDownloadPrograma = async (programa: any) => {
+    console.log('Downloading program:', programa);
+
+    try {
+      // First, try to download from Supabase storage if file exists
+      if (programa.arquivo && programa.arquivo !== `programa-${programa.data_inicio_semana}.pdf`) {
+        try {
+          const { data, error } = await supabase.storage
+            .from('programas')
+            .download(programa.arquivo);
+
+          if (!error && data) {
+            // Create download link
+            const url = URL.createObjectURL(data);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = programa.arquivo;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            toast({
+              title: "Download Iniciado",
+              description: `Baixando: ${programa.arquivo}`,
+            });
+            return;
+          }
+        } catch (storageError) {
+          console.log('File not found in storage, will generate PDF instead');
+        }
+      }
+
+      // If no file in storage, generate a PDF from program data
+      await generateProgramPDF(programa);
+
+    } catch (error) {
+      console.error('Download error:', error);
+      toast({
+        title: "Erro no Download",
+        description: "Ocorreu um erro ao tentar baixar o arquivo.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Generate PDF from program data
+  const generateProgramPDF = async (programa: any) => {
+    try {
+      // Create a simple HTML content for the PDF
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <title>${programa.semana}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 20px; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .title { font-size: 24px; font-weight: bold; color: #1e40af; }
+            .subtitle { font-size: 16px; color: #666; margin-top: 10px; }
+            .section { margin: 20px 0; }
+            .section-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+            .part { margin: 10px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid #1e40af; }
+            .part-number { font-weight: bold; color: #1e40af; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="title">${programa.semana}</div>
+            <div class="subtitle">Semana de ${new Date(programa.data_inicio_semana).toLocaleDateString('pt-BR')}</div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Partes do Programa:</div>
+            ${programa.partes.map((parte: string, index: number) => `
+              <div class="part">
+                <span class="part-number">${index + 1}.</span> ${parte}
+              </div>
+            `).join('')}
+          </div>
+
+          <div class="section">
+            <div class="section-title">Status:</div>
+            <p>${programa.status}</p>
+          </div>
+
+          <div class="section">
+            <div class="section-title">Data de Importação:</div>
+            <p>${new Date(programa.dataImportacao).toLocaleDateString('pt-BR')}</p>
+          </div>
+        </body>
+        </html>
+      `;
+
+      // Create a blob with the HTML content
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+
+      // Create download link
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${programa.semana.replace(/[^a-zA-Z0-9]/g, '_')}.html`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Download Iniciado",
+        description: `Gerando arquivo para: ${programa.semana}`,
+      });
+
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "Erro na Geração",
+        description: "Não foi possível gerar o arquivo do programa.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Handler for deleting program
+  const handleDeletarPrograma = async (programa: any) => {
+    console.log('Deleting program:', programa);
+
+    const confirmDelete = window.confirm(
+      `Tem certeza que deseja deletar o programa "${programa.semana}"?\n\nEsta ação não pode ser desfeita e também removerá todas as designações associadas.`
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      // Delete the program from database
+      const { error } = await supabase
+        .from('programas')
+        .delete()
+        .eq('id', programa.id);
+
+      if (error) {
+        console.error('Error deleting program:', error);
+        toast({
+          title: "Erro ao Deletar",
+          description: "Não foi possível deletar o programa. Tente novamente.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Remove from local state
+      setProgramas(prev => prev.filter(p => p.id !== programa.id));
+
+      toast({
+        title: "Programa Deletado",
+        description: `O programa "${programa.semana}" foi removido com sucesso.`,
+      });
+
+      // Reload programs to ensure consistency
+      loadPrograms();
+
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast({
+        title: "Erro ao Deletar",
+        description: "Ocorreu um erro ao deletar o programa.",
+        variant: "destructive"
+      });
+    }
   };
 
 
@@ -357,10 +615,18 @@ const Programas = () => {
         {/* Upload Section */}
         <section className="py-8 bg-white border-b">
           <div className="container mx-auto px-4">
-            <PdfUpload
-              onUploadComplete={handlePdfUploadComplete}
-              onUploadStart={handlePdfUploadStart}
-            />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* PDF Upload */}
+              <PdfUpload
+                onUploadComplete={handlePdfUploadComplete}
+                onUploadStart={handlePdfUploadStart}
+              />
+
+              {/* JW.org Content Parser */}
+              <JWContentParser
+                onParseComplete={handlePdfUploadComplete}
+              />
+            </div>
           </div>
         </section>
 
@@ -368,17 +634,35 @@ const Programas = () => {
         <section className="py-8">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-jw-navy">Programas Importados</h2>
+              <h2 className="text-2xl font-bold text-jw-navy">
+                {showTemplateLibrary ? 'Biblioteca de Templates' : 'Programas Importados'}
+              </h2>
               <div className="flex gap-2">
-                <Input 
-                  placeholder="Buscar programas..." 
-                  className="w-64"
-                />
+                <Button
+                  variant={showTemplateLibrary ? "default" : "outline"}
+                  onClick={() => setShowTemplateLibrary(!showTemplateLibrary)}
+                >
+                  <FileText className="w-4 h-4 mr-2" />
+                  {showTemplateLibrary ? 'Ver Meus Programas' : 'Templates Prontos'}
+                </Button>
+                {!showTemplateLibrary && (
+                  <Input
+                    placeholder="Buscar programas..."
+                    className="w-64"
+                  />
+                )}
               </div>
             </div>
 
-            {/* Loading State */}
-            {loadingPrograms && (
+            {/* Template Library */}
+            {showTemplateLibrary ? (
+              <TemplateLibrary
+                onUploadSpreadsheet={handleSpreadsheetUpload}
+              />
+            ) : (
+              <>
+                {/* Loading State */}
+                {loadingPrograms && (
               <div className="space-y-4">
                 {[1, 2, 3].map(i => (
                   <Card key={i} className="animate-pulse">
@@ -475,27 +759,55 @@ const Programas = () => {
                       <div>
                         <h4 className="font-medium text-gray-700 mb-2">Status das Designações:</h4>
                         <div className="flex items-center gap-2 mb-4">
-                          {programa.designacoesGeradas ? (
+                          {programa.assignment_status === 'approved' ? (
                             <Badge className="bg-green-100 text-green-800">
-                              Designações Geradas
+                              ✓ Aprovado
+                            </Badge>
+                          ) : programa.assignment_status === 'generated' ? (
+                            <Badge className="bg-blue-100 text-blue-800">
+                              📋 Rascunho
+                            </Badge>
+                          ) : programa.assignment_status === 'generating' ? (
+                            <Badge className="bg-orange-100 text-orange-800">
+                              ⏳ Gerando...
                             </Badge>
                           ) : (
                             <Badge className="bg-yellow-100 text-yellow-800">
-                              Aguardando Designações
+                              ⏸️ Aguardando
+                            </Badge>
+                          )}
+                          {programa.total_assignments_generated > 0 && (
+                            <Badge variant="outline" className="text-xs">
+                              {programa.total_assignments_generated} designações
                             </Badge>
                           )}
                         </div>
                         
                         <div className="flex flex-wrap gap-2">
-                          <Button variant="outline" size="sm">
+                          {/* Visualizar Button - For all programs */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleVisualizarPrograma(programa)}
+                          >
                             <Eye className="w-4 h-4 mr-1" />
                             Visualizar
                           </Button>
-                          <Button variant="outline" size="sm">
-                            <Download className="w-4 h-4 mr-1" />
-                            Download
-                          </Button>
-                          {!programa.designacoesGeradas && (
+
+                          {/* Preview/Review Button - Always available if assignments exist */}
+                          {(programa.assignment_status === 'generated' || programa.assignment_status === 'approved') && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => navigate(`/programa/${programa.id}`)}
+                            >
+                              <Users className="w-4 h-4 mr-1" />
+                              {programa.assignment_status === 'approved' ? 'Ver Designações' : 'Revisar Designações'}
+                            </Button>
+                          )}
+
+                          {/* Generate Assignments Button - Only for pending programs */}
+                          {programa.assignment_status === 'pending' && (
                             <Button
                               variant="hero"
                               size="sm"
@@ -516,7 +828,21 @@ const Programas = () => {
                               )}
                             </Button>
                           )}
-                          {programa.designacoesGeradas && (
+
+                          {/* Download PDF - Only for approved programs */}
+                          {programa.assignment_status === 'approved' && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDownloadPrograma(programa)}
+                            >
+                              <Download className="w-4 h-4 mr-1" />
+                              Baixar PDF
+                            </Button>
+                          )}
+
+                          {/* View Assignments - For approved programs */}
+                          {programa.assignment_status === 'approved' && (
                             <Button
                               variant="outline"
                               size="sm"
@@ -526,7 +852,12 @@ const Programas = () => {
                               Ver Designações
                             </Button>
                           )}
-                          <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700"
+                            onClick={() => handleDeletarPrograma(programa)}
+                          >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -536,6 +867,8 @@ const Programas = () => {
                 </Card>
                 ))}
               </div>
+            )}
+              </>
             )}
           </div>
         </section>
@@ -563,22 +896,22 @@ const Programas = () => {
                     {loadingPrograms ? (
                       <div className="animate-pulse bg-gray-200 h-9 w-8 rounded mx-auto"></div>
                     ) : (
-                      programStats.generated
+                      programStats.approved
                     )}
                   </div>
-                  <div className="text-sm text-gray-600">Programas Processados</div>
+                  <div className="text-sm text-gray-600">Programas Aprovados</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-yellow-600 mb-2">
+                  <div className="text-3xl font-bold text-blue-600 mb-2">
                     {loadingPrograms ? (
                       <div className="animate-pulse bg-gray-200 h-9 w-8 rounded mx-auto"></div>
                     ) : (
-                      programStats.pending
+                      programStats.draft
                     )}
                   </div>
-                  <div className="text-sm text-gray-600">Aguardando Processamento</div>
+                  <div className="text-sm text-gray-600">Rascunhos para Revisão</div>
                 </CardContent>
               </Card>
               <Card>
@@ -587,10 +920,10 @@ const Programas = () => {
                     {loadingPrograms ? (
                       <div className="animate-pulse bg-gray-200 h-9 w-8 rounded mx-auto"></div>
                     ) : (
-                      programStats.totalParts
+                      programStats.totalAssignments
                     )}
                   </div>
-                  <div className="text-sm text-gray-600">Partes Identificadas</div>
+                  <div className="text-sm text-gray-600">Designações Geradas</div>
                 </CardContent>
               </Card>
             </div>
@@ -616,6 +949,15 @@ const Programas = () => {
         assignments={generatedAssignments}
         programTitle={selectedProgram?.semana || ''}
         isConfirming={isConfirmingAssignments}
+      />
+
+      {/* Program Detail Modal */}
+      <ProgramDetailModal
+        isOpen={showProgramDetail}
+        onClose={() => setShowProgramDetail(false)}
+        programa={selectedProgram}
+        onDownload={handleDownloadPrograma}
+        onViewAssignments={(programa) => navigate('/designacoes')}
       />
     </div>
   );

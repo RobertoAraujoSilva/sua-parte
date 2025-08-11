@@ -373,32 +373,51 @@ export const getFamilyRelationship = async (
   const { supabase } = await import('@/integrations/supabase/client');
 
   try {
-    // Get student2's email first
-    const { data: student2Data, error: student2Error } = await supabase
+    console.log('🔍 Checking family relationship between students:', { student1Id, student2Id });
+
+    // For assignment generation, we'll use a simplified approach:
+    // Check if students have the same id_pai_mae (parent) in the estudantes table
+    // This indicates they are siblings and can be paired together
+
+    const { data: students, error: studentsError } = await supabase
       .from('estudantes')
-      .select('email')
-      .eq('id', student2Id)
-      .single();
+      .select('id, id_pai_mae, nome')
+      .in('id', [student1Id, student2Id]);
 
-    if (student2Error || !student2Data?.email) {
+    if (studentsError || !students || students.length !== 2) {
+      console.log('❌ Could not find both students:', studentsError);
       return null;
     }
 
-    // Check if student2 is in student1's family
-    const { data: familyMember, error } = await supabase
-      .from('family_members')
-      .select('relation')
-      .eq('student_id', student1Id)
-      .eq('email', student2Data.email)
-      .single();
+    const student1 = students.find(s => s.id === student1Id);
+    const student2 = students.find(s => s.id === student2Id);
 
-    if (error || !familyMember) {
+    if (!student1 || !student2) {
+      console.log('❌ Could not find student records');
       return null;
     }
 
-    return familyMember.relation as Relation;
+    // Check if they have the same parent (siblings)
+    if (student1.id_pai_mae && student2.id_pai_mae && student1.id_pai_mae === student2.id_pai_mae) {
+      console.log('✅ Found sibling relationship between:', student1.nome, 'and', student2.nome);
+      return 'Irmão'; // Generic sibling relationship for assignment purposes
+    }
+
+    // Check if one is the parent of the other
+    if (student1.id_pai_mae === student2Id) {
+      console.log('✅ Found parent-child relationship:', student2.nome, 'is parent of', student1.nome);
+      return 'Pai'; // student2 is parent of student1
+    }
+
+    if (student2.id_pai_mae === student1Id) {
+      console.log('✅ Found parent-child relationship:', student1.nome, 'is parent of', student2.nome);
+      return 'Pai'; // student1 is parent of student2
+    }
+
+    console.log('ℹ️ No family relationship found between students');
+    return null;
   } catch (error) {
-    console.error('Exception getting family relationship:', error);
+    console.error('❌ Exception getting family relationship:', error);
     return null;
   }
 };

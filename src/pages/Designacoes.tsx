@@ -83,6 +83,7 @@ const Designacoes = () => {
             id,
             id_estudante,
             numero_parte,
+            titulo_parte,
             tipo_parte,
             cena,
             tempo_minutos,
@@ -542,7 +543,7 @@ const Designacoes = () => {
                   </p>
                   <Button
                     variant="outline"
-                    onClick={() => window.location.href = '/programas'}
+                    onClick={() => navigate('/programas')}
                   >
                     Ir para Programas
                   </Button>

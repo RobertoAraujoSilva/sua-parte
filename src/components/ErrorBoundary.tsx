@@ -26,7 +26,15 @@ class ErrorBoundary extends Component<Props, State> {
     // Log the error to console for debugging
     console.error('🚨 ErrorBoundary caught an error:', error);
     console.error('📍 Error info:', errorInfo);
-    
+    console.error('🌐 Current URL:', window.location.href);
+    console.error('🔍 Environment:', {
+      mode: import.meta.env.MODE,
+      dev: import.meta.env.DEV,
+      prod: import.meta.env.PROD,
+      hasSupabaseUrl: !!import.meta.env.VITE_SUPABASE_URL,
+      hasSupabaseKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY
+    });
+
     // Update state with error details
     this.setState({
       error,

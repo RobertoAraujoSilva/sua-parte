@@ -54,7 +54,7 @@ export interface TutorialContextType {
   getAvailableTutorials: (page?: string) => Tutorial[];
 }
 
-export type TutorialPage = 'dashboard' | 'estudantes' | 'programas' | 'designacoes' | 'reunioes' | 'relatorios';
+export type TutorialPage = 'dashboard' | 'estudantes' | 'programas' | 'designacoes' | 'reunioes' | 'relatorios' | 'developer-panel' | 'template-library' | 'program-preview';
 
 export interface TutorialHighlight {
   element: HTMLElement;

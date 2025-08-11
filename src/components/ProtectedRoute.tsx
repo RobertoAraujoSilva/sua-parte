@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Database } from '@/integrations/supabase/types';
+import { supabase } from '@/integrations/supabase/client';
 
 type UserRole = Database['public']['Enums']['user_role'];
 
@@ -22,14 +23,14 @@ const ProtectedRoute = ({
   const navigate = useNavigate();
   const [profileTimeout, setProfileTimeout] = useState(false);
 
-  // Set up profile timeout to prevent infinite loading - reduced timeout for better UX
+  // Set up profile timeout - simplified without redundant session check
   useEffect(() => {
     if (user && !profile && !loading) {
       console.log('⏰ Setting profile timeout - will fallback to metadata in 3 seconds');
       const timeout = setTimeout(() => {
         console.log('⏰ Profile timeout reached, using metadata fallback');
         setProfileTimeout(true);
-      }, 3000); // Reduced to 3 second timeout to match AuthContext
+      }, 3000); // Reduced to 3 seconds and removed redundant session check
 
       return () => clearTimeout(timeout);
     }
@@ -45,7 +46,8 @@ const ProtectedRoute = ({
       profileTimeout,
       allowedRoles,
       requireAuth,
-      redirectTo
+      redirectTo,
+      userMetadata: user?.user_metadata // Add full metadata for debugging
     });
 
     if (loading) {
@@ -89,7 +91,16 @@ const ProtectedRoute = ({
           if (redirectTo) {
             navigate(redirectTo);
           } else if (userRole === 'instrutor') {
-            navigate('/dashboard');
+            // Check if first-time user needs onboarding
+            const onboardingCompleted = localStorage.getItem('onboarding_completed');
+            const currentPath = window.location.pathname;
+            const isOnboardingRoute = ['/bem-vindo', '/configuracao-inicial', '/primeiro-programa'].includes(currentPath);
+
+            if (!onboardingCompleted && !isOnboardingRoute) {
+              navigate('/bem-vindo');
+            } else {
+              navigate('/dashboard');
+            }
           } else if (userRole === 'estudante') {
             navigate(`/estudante/${user.id}`);
           } else if (userRole === 'family_member') {
@@ -100,6 +111,20 @@ const ProtectedRoute = ({
           return;
         } else {
           console.log('✅ ProtectedRoute: Access granted for role:', userRole);
+
+          // Additional check for instructors accessing main app without onboarding
+          if (userRole === 'instrutor' && allowedRoles.includes('instrutor')) {
+            const onboardingCompleted = localStorage.getItem('onboarding_completed');
+            const currentPath = window.location.pathname;
+            const isOnboardingRoute = ['/bem-vindo', '/configuracao-inicial', '/primeiro-programa'].includes(currentPath);
+            const isMainAppRoute = ['/dashboard', '/estudantes', '/programas', '/designacoes'].includes(currentPath);
+
+            if (!onboardingCompleted && isMainAppRoute) {
+              console.log('🔄 Redirecting to onboarding for first-time user');
+              navigate('/bem-vindo');
+              return;
+            }
+          }
         }
       } else {
         // No role found - check if we should wait or timeout
@@ -117,6 +142,7 @@ const ProtectedRoute = ({
 
   // Show loading state
   if (loading) {
+    console.log('🔄 ProtectedRoute: Showing loading state');
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -181,6 +207,7 @@ const ProtectedRoute = ({
   }
 
   // Render children if all checks pass
+  console.log('✅ ProtectedRoute: Rendering children - all checks passed');
   return <>{children}</>;
 };
 

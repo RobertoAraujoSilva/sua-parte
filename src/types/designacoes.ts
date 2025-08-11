@@ -10,7 +10,19 @@ export type ProgramaInsert = Database["public"]["Tables"]["programas"]["Insert"]
 export type ProgramaUpdate = Database["public"]["Tables"]["programas"]["Update"];
 
 // Tipos específicos para o sistema de designações S-38-T
-export type TipoParteS38T = 'leitura_biblica' | 'discurso' | 'demonstracao';
+export type TipoParteS38T =
+  | 'leitura_biblica'
+  | 'discurso'
+  | 'demonstracao'
+  | 'oracao_abertura'
+  | 'comentarios_iniciais'
+  | 'tesouros_palavra'
+  | 'joias_espirituais'
+  | 'parte_ministerio'
+  | 'vida_crista'
+  | 'estudo_biblico_congregacao'
+  | 'oracao_encerramento'
+  | 'comentarios_finais';
 export type StatusDesignacao = 'pendente' | 'gerada' | 'enviada' | 'confirmada';
 
 // Interface para parte do programa seguindo S-38-T
@@ -139,7 +151,16 @@ export const CARGOS_QUALIFICADOS_DISCURSOS = [
 export const TIPO_PARTE_LABELS: Record<TipoParteS38T, string> = {
   leitura_biblica: 'Leitura da Bíblia',
   discurso: 'Discurso',
-  demonstracao: 'Demonstração'
+  demonstracao: 'Demonstração',
+  oracao_abertura: 'Oração de Abertura',
+  comentarios_iniciais: 'Comentários Iniciais',
+  tesouros_palavra: 'Tesouros da Palavra de Deus',
+  joias_espirituais: 'Joias Espirituais',
+  parte_ministerio: 'Faça Seu Melhor no Ministério',
+  vida_crista: 'Nossa Vida Cristã',
+  estudo_biblico_congregacao: 'Estudo Bíblico da Congregação',
+  oracao_encerramento: 'Oração de Encerramento',
+  comentarios_finais: 'Comentários Finais'
 };
 
 // Labels para status de designação
@@ -161,7 +182,7 @@ export const podedarDiscursos = (cargo: string, genero: string): boolean => {
 
 // Função para verificar se uma parte requer ajudante
 export const requerAjudante = (tipo_parte: TipoParteS38T): boolean => {
-  return tipo_parte === 'demonstracao';
+  return tipo_parte === 'demonstracao' || tipo_parte === 'parte_ministerio';
 };
 
 // Função para calcular prioridade de designação

@@ -334,52 +334,28 @@ export const useSpreadsheetImport = () => {
   };
 
   /**
-   * Enhanced duplicate detection by name and birth date
+   * Enhanced duplicate detection using database function
    */
   const checkDuplicates = async (students: ProcessedStudentData[]): Promise<string[]> => {
     if (!user) return [];
 
     try {
-      // Get all existing students for comparison
-      const { data: existingStudents } = await supabase
-        .from('estudantes')
-        .select('nome, email, telefone')
-        .eq('user_id', user.id);
-
-      if (!existingStudents || existingStudents.length === 0) {
-        return [];
-      }
-
       const duplicates: string[] = [];
 
-      students.forEach(student => {
-        const isDuplicate = existingStudents.some(existing => {
-          // Exact name match
-          if (existing.nome.toLowerCase().trim() === student.nome.toLowerCase().trim()) {
-            return true;
-          }
-
-          // Removed birth date match due to unavailable field in schema
-
-          // Email match (if both have email)
-          if (student.email && existing.email &&
-              existing.email.toLowerCase() === student.email.toLowerCase()) {
-            return true;
-          }
-
-          // Phone match (if both have phone)
-          if (student.telefone && existing.telefone &&
-              normalizePhone(existing.telefone) === normalizePhone(student.telefone)) {
-            return true;
-          }
-
-          return false;
-        });
+      // Check each student using the database function
+      for (const student of students) {
+        const { data: isDuplicate } = await supabase
+          .rpc('check_student_duplicate', {
+            p_user_id: user.id,
+            p_nome: student.nome,
+            p_email: student.email || null,
+            p_telefone: student.telefone || null
+          });
 
         if (isDuplicate) {
           duplicates.push(student.nome);
         }
-      });
+      }
 
       return duplicates;
     } catch (error) {

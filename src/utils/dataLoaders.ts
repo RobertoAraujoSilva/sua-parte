@@ -72,10 +72,11 @@ export const carregarHistoricoDesignacoes = async (
         id_ajudante,
         numero_parte,
         tipo_parte,
-        programas!inner(data_inicio_semana)
+        programas!inner(
+          data_inicio_semana
+        )
       `)
-      .gte('programas.data_inicio_semana', dataCorte.toISOString().split('T')[0])
-      .order('programas.data_inicio_semana', { ascending: false });
+      .gte('programas.data_inicio_semana', dataCorte.toISOString().split('T')[0]);
 
     if (error) {
       console.error('Erro ao carregar histórico de designações:', error);

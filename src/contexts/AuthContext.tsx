@@ -2,6 +2,42 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
+import { getCachedProfile, setCachedProfile, invalidateProfileCache } from '@/utils/profileCache';
+
+// Conditional logging utility for authentication events
+const logAuthEvent = (message: string, data?: any) => {
+  const isDev = import.meta.env.DEV;
+  const isDebugEnabled = typeof window !== 'undefined' && localStorage.getItem('debug-auth') === 'true';
+
+  if (isDev || isDebugEnabled) {
+    console.log(message, data);
+  }
+};
+
+// Debug function for testing profile fetch
+const testProfileFetch = async (userId: string) => {
+  console.log('🧪 Testing direct profile fetch for:', userId);
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+
+    console.log('🧪 Direct fetch result:', { data, error });
+    return { data, error };
+  } catch (err) {
+    console.log('🧪 Direct fetch exception:', err);
+    return { data: null, error: err };
+  }
+};
+
+// Make test function available globally in development (moved to avoid Fast Refresh issues)
+const initializeDebugTools = () => {
+  if (typeof window !== 'undefined' && import.meta.env.DEV) {
+    (window as any).testProfileFetch = testProfileFetch;
+  }
+};
 
 // Types
 type UserRole = Database['public']['Enums']['user_role'];
@@ -49,85 +85,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-
-
-  // Fetch user profile from database with simplified logic
-  const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
-    console.log('🔍 Fetching profile for user ID:', userId);
-
-    try {
-      // Step 1: Check current session
-      console.log('🔐 Checking current session...');
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-      if (sessionError) {
-        console.error('❌ Session error:', sessionError);
-        return await createProfileFromAuth(userId);
-      }
-
-      if (!session) {
-        console.log('❌ No active session, using metadata fallback');
-        return await createProfileFromAuth(userId);
-      }
-
-      if (session.user.id !== userId) {
-        console.error('❌ Session user ID mismatch:', {
-          sessionUserId: session.user.id,
-          requestedUserId: userId
-        });
-        return null;
-      }
-
-      // Step 2: Fetch profile from database
-      console.log('🔍 Fetching from profiles table...');
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
-
-      if (profileError) {
-        if (profileError.code === 'PGRST116') {
-          console.log('📝 Profile not found in database, creating from auth metadata');
-        } else {
-          console.log('❌ Profile fetch error, using metadata fallback:', profileError);
-        }
-        return await createProfileFromAuth(userId);
-      }
-
-      if (profileData) {
-        // Get email from session
-        const email = session.user.email || '';
-        const profileWithEmail: UserProfile = {
-          ...(profileData as any),
-          email,
-          date_of_birth: (profileData as any).date_of_birth ?? null,
-          created_at: (profileData as any).created_at ?? null,
-          updated_at: (profileData as any).updated_at ?? null,
-        };
-        console.log('✅ Profile fetched successfully:', {
-          id: profileWithEmail.id,
-          nome_completo: profileWithEmail.nome_completo,
-          role: profileWithEmail.role,
-          email: profileWithEmail.email
-        });
-
-        return profileWithEmail;
-      }
-
-      console.log('❌ No profile data found, using metadata fallback');
-      return await createProfileFromAuth(userId);
-
-    } catch (error) {
-      console.error('❌ Error in fetchProfile:', error);
-      return await createProfileFromAuth(userId);
-    }
+  // Initialize debug tools in development
+  useEffect(() => {
+    initializeDebugTools();
   }, []);
 
-  // Create profile from auth metadata with simplified logic
+  // Create profile from auth metadata - DEFINED FIRST to avoid hoisting issues
   const createProfileFromAuth = useCallback(async (userId: string) => {
     try {
-      console.log('📝 Creating profile from auth metadata for user:', userId);
+      logAuthEvent('📝 Creating profile from auth metadata for user:', userId);
 
       // Get current user
       const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -148,40 +114,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const metadata = user.user_metadata || {};
-      console.log('📋 User metadata:', {
+      logAuthEvent('📋 User metadata:', {
         hasMetadata: Object.keys(metadata).length > 0,
-        role: metadata.role
+        role: metadata.role,
+        email: user.email
       });
 
-      // Try to insert profile in database
+      // Ensure we always have a valid name
+      const nome_completo = metadata.nome_completo ||
+                           user.email?.split('@')[0] ||
+                           'Instrutor';
+
+      // Ensure we always have a valid role
+      const role = (metadata.role as UserRole) || 'instrutor';
+
+      // Try to insert profile in database with validated data
       const { data, error } = await supabase
         .from('profiles')
         .insert({
           id: userId,
-          nome_completo: metadata.nome_completo || '',
+          nome_completo,
           congregacao: metadata.congregacao || '',
-          cargo: metadata.cargo || '',
-          role: (metadata.role as UserRole) || 'instrutor'
+          cargo: metadata.cargo || 'instrutor',
+          role
         })
         .select()
         .single();
 
       if (error) {
         console.error('❌ Error creating profile in database:', error);
-        // Return profile from metadata even if DB insert fails
+        // Return profile from metadata even if DB insert fails (with validated data)
         const email = user.email || '';
         const fallbackProfile = {
           id: userId,
-          nome_completo: metadata.nome_completo || '',
+          nome_completo,
           congregacao: metadata.congregacao || '',
-          cargo: metadata.cargo || '',
-          role: (metadata.role as UserRole) || 'instrutor',
+          cargo: metadata.cargo || 'instrutor',
+          role,
           date_of_birth: metadata.date_of_birth || null,
           email,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
-        console.log('🔄 Using fallback profile from metadata');
+        logAuthEvent('🔄 Using fallback profile from metadata with validated data');
         return fallbackProfile as UserProfile;
       }
 
@@ -197,87 +172,75 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []); // Empty dependency array since createProfileFromAuth doesn't depend on any props or state
 
-  useEffect(() => {
-    // Get initial session with standard Supabase approach
-    const getInitialSession = async () => {
-      try {
-        console.log('🔄 Getting initial session...');
-
-        const { data: { session }, error } = await supabase.auth.getSession();
-
-        if (error) {
-          console.error('❌ Error getting initial session:', error);
-          setLoading(false);
-          return;
-        }
-
-        if (!session) {
-          console.log('ℹ️ No session found');
-          setLoading(false);
-          return;
-        }
-
-        if (session?.user) {
-          console.log('✅ Initial session found');
-          setSession(session);
-          setUser(session.user);
-
-          // Fetch profile
-          fetchProfile(session.user.id)
-            .then(userProfile => {
-              console.log('✅ Initial profile loaded successfully');
-              setProfile(userProfile);
-            })
-            .catch((error: unknown) => {
-              const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-              console.error('❌ Initial profile fetch failed:', errorMessage);
-            });
-        } else {
-          console.log('ℹ️ No initial session found');
-        }
-      } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error('Error in getInitialSession:', errorMessage);
-      } finally {
-        setLoading(false);
+  // Fetch user profile from database - SIMPLIFIED without debouncing to fix hanging issue
+  const fetchProfile = useCallback(async (userId: string): Promise<UserProfile | null> => {
+    try {
+      // Check cache first
+      const cachedProfile = getCachedProfile(userId);
+      if (cachedProfile) {
+        logAuthEvent('📋 Using cached profile for user:', userId);
+        return cachedProfile;
       }
-    };
 
-    getInitialSession();
+      logAuthEvent('🔍 Fetching profile from database for user ID:', userId);
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('🔄 Auth state changed:', event, session?.user?.email);
+      // Directly fetch profile from database
+      logAuthEvent('🔄 Querying profiles table...');
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-        if (session?.user) {
-          console.log('👤 Setting user and session...');
-          setSession(session);
-          setUser(session.user);
+      logAuthEvent('📊 Profile query result:', {
+        hasData: !!profileData,
+        hasError: !!profileError,
+        errorCode: profileError?.code,
+        errorMessage: profileError?.message
+      });
 
-          // Fetch profile
-          try {
-            const userProfile = await fetchProfile(session.user.id);
-            console.log('📋 Profile loaded:', userProfile);
-            setProfile(userProfile);
-          } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            console.error('❌ Profile fetch failed:', errorMessage);
-          }
+      if (profileError) {
+        if (profileError.code === 'PGRST116') {
+          logAuthEvent('📝 Profile not found in database, creating from auth metadata');
         } else {
-          console.log('🚪 User signed out, clearing data...');
-          setSession(null);
-          setUser(null);
-          setProfile(null);
+          logAuthEvent('❌ Profile fetch error, using metadata fallback:', profileError);
         }
-
-        setLoading(false);
+        return await createProfileFromAuth(userId);
       }
-    );
 
-    return () => subscription.unsubscribe();
-  }, [fetchProfile]);
+      if (profileData) {
+        // Get email from current user
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        const email = currentUser?.email || '';
 
+        const profileWithEmail = {
+          ...profileData,
+          email
+        } as UserProfile;
+
+        logAuthEvent('✅ Profile fetched successfully:', {
+          id: profileWithEmail.id,
+          nome_completo: profileWithEmail.nome_completo,
+          role: profileWithEmail.role,
+          email: profileWithEmail.email
+        });
+
+        // Cache the profile for future use
+        setCachedProfile(userId, profileWithEmail);
+
+        return profileWithEmail;
+      }
+
+      logAuthEvent('❌ No profile data found, using metadata fallback');
+      return await createProfileFromAuth(userId);
+
+    } catch (error) {
+      logAuthEvent('❌ Error in fetchProfile:', error);
+      return await createProfileFromAuth(userId);
+    }
+  }, [createProfileFromAuth]); // Removed debouncing dependency
+
+  // Authentication functions
   const signUp = async (data: SignUpData) => {
     try {
       const { error } = await supabase.auth.signUp({
@@ -324,96 +287,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signOut = async () => {
-    console.log('🔄 AuthContext signOut called');
-    console.log('🔄 Current user:', user?.email, user?.id);
-    console.log('🔄 Current session exists:', !!session);
+    logAuthEvent('🔄 AuthContext signOut called');
+    logAuthEvent('🔄 Current user:', { email: user?.email, id: user?.id });
+    logAuthEvent('🔄 Current session exists:', !!session);
 
     // Immediate local cleanup function
     const clearLocalState = () => {
-      console.log('🧹 Clearing local auth state...');
+      logAuthEvent('🧹 Clearing local auth state...');
       setUser(null);
       setSession(null);
       setProfile(null);
+      invalidateProfileCache(user?.id || '');
 
       // Clear any stored tokens/data
       localStorage.removeItem('supabase.auth.token');
       sessionStorage.clear();
     };
 
-    // CRITICAL FIX: Use aggressive timeout to prevent hanging
-    const CRITICAL_TIMEOUT = 1500; // 1.5 seconds max wait
-
     try {
-      console.log('🔄 Calling supabase.auth.signOut()...');
-      console.log('🔄 Supabase client status:', !!supabase);
-
-      // Log current auth state before signOut
-      try {
-        const { data: currentSession } = await supabase.auth.getSession();
-        console.log('🔄 Current session before signOut:', {
-          hasSession: !!currentSession?.session,
-          userId: currentSession?.session?.user?.id,
-          expiresAt: currentSession?.session?.expires_at
-        });
-      } catch (sessionCheckError) {
-        console.log('⚠️ Could not check current session:', sessionCheckError);
-      }
-
-      // CRITICAL FIX: Aggressive timeout to prevent hanging
-      const timeoutPromise = new Promise((resolve) =>
-        setTimeout(() => {
-          console.log('⏰ CRITICAL TIMEOUT - Supabase signOut hanging, forcing completion');
-          resolve({ error: { message: 'Critical signOut timeout', code: 'CRITICAL_TIMEOUT' } });
-        }, CRITICAL_TIMEOUT)
-      );
-
-      // CRITICAL FIX: Single attempt with immediate fallback
-      let result;
-      try {
-        console.log('🔄 Attempting signOut with critical timeout...');
-        result = await Promise.race([
-          supabase.auth.signOut(),
-          timeoutPromise
-        ]);
-
-        console.log('🔄 SignOut attempt completed:', result);
-      } catch (signOutError) {
-        console.log('⚠️ SignOut attempt failed immediately:', signOutError);
-        result = { error: { message: 'SignOut immediate failure', code: 'IMMEDIATE_FAILURE', details: signOutError } };
-      }
-
-      console.log('🔄 Supabase signOut result:', result);
-      console.log('🔄 Supabase signOut result type:', typeof result);
-
-      const { error } = result;
+      logAuthEvent('🔄 Calling supabase.auth.signOut()...');
+      
+      const { error } = await supabase.auth.signOut();
+      
       if (error) {
         console.error('❌ SignOut error from Supabase:', error);
-        console.error('❌ SignOut error details:', JSON.stringify(error, null, 2));
-        console.error('❌ SignOut error type:', typeof error);
-        console.error('❌ SignOut error message:', error?.message);
-        console.error('❌ SignOut error code:', error?.code);
-        console.error('❌ SignOut error status:', error?.status);
-
-        // Log additional context
-        console.error('❌ Current user before signOut:', user?.id, user?.email);
-        console.error('❌ Current session before signOut:', session?.access_token ? 'exists' : 'none');
-
-        // Still proceed with local cleanup
-        clearLocalState();
-        return { error: null }; // Return success to UI since local cleanup worked
       } else {
-        console.log('✅ Supabase signOut successful');
-        clearLocalState();
-        return { error: null };
+        logAuthEvent('✅ Supabase signOut successful');
       }
+      
+      clearLocalState();
+      return { error: null };
 
     } catch (error) {
       console.error('❌ SignOut exception:', error);
-
-      // Always clear local state on any error
       clearLocalState();
-
-      // Return success to UI since local cleanup is what matters for UX
       return { error: null };
     }
   };
@@ -435,7 +342,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { data: null, error: new Error(error.message) };
       }
 
-      // Refresh and return the fully-typed profile (including email)
+      // Invalidate cache and refresh profile
+      invalidateProfileCache(user.id);
       const updatedProfile = await fetchProfile(user.id);
       setProfile(updatedProfile);
       return { data: updatedProfile, error: null };
@@ -445,6 +353,123 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return { data: null, error: e };
     }
   };
+
+  // Initialize auth state on mount
+  useEffect(() => {
+    const getInitialSession = async () => {
+      try {
+        logAuthEvent('🔄 Getting initial session...');
+
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error('❌ Error getting initial session:', error);
+          setLoading(false);
+          return;
+        }
+
+        if (session) {
+          logAuthEvent('✅ Initial session found');
+          setSession(session);
+          setUser(session.user);
+
+          // Fetch profile for the user with timeout and fallback
+          try {
+            logAuthEvent('🔄 Starting initial profile fetch...');
+
+            // Set a timeout for profile fetch to prevent hanging (synchronized to 3 seconds)
+            const profilePromise = fetchProfile(session.user.id);
+            const timeoutPromise = new Promise<UserProfile | null>((_, reject) => {
+              setTimeout(() => reject(new Error('Profile fetch timeout')), 3000);
+            });
+
+            const userProfile = await Promise.race([profilePromise, timeoutPromise]);
+
+            if (userProfile) {
+              logAuthEvent('✅ Initial profile loaded successfully:', userProfile.nome_completo);
+              setProfile(userProfile);
+            } else {
+              logAuthEvent('❌ Initial profile fetch returned null, using metadata fallback');
+              // Create profile from metadata as fallback
+              const fallbackProfile = await createProfileFromAuth(session.user.id);
+              setProfile(fallbackProfile);
+            }
+          } catch (error) {
+            logAuthEvent('❌ Initial profile fetch error/timeout, using metadata fallback:', error);
+            // Create profile from metadata as fallback
+            try {
+              const fallbackProfile = await createProfileFromAuth(session.user.id);
+              setProfile(fallbackProfile);
+            } catch (fallbackError) {
+              logAuthEvent('❌ Fallback profile creation failed:', fallbackError);
+              setProfile(null);
+            }
+          }
+        } else {
+          logAuthEvent('ℹ️ No initial session found');
+        }
+
+        setLoading(false);
+      } catch (error) {
+        console.error('❌ Exception getting initial session:', error);
+        setLoading(false);
+      }
+    };
+
+    getInitialSession();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        logAuthEvent('🔄 Auth state change:', { event, hasSession: !!session });
+
+        if (event === 'SIGNED_IN' && session) {
+          setSession(session);
+          setUser(session.user);
+
+          // Fetch profile for the user with timeout and fallback
+          try {
+            logAuthEvent('🔄 Starting profile fetch in auth state change...');
+
+            // Set a timeout for profile fetch to prevent hanging (synchronized to 3 seconds)
+            const profilePromise = fetchProfile(session.user.id);
+            const timeoutPromise = new Promise<UserProfile | null>((_, reject) => {
+              setTimeout(() => reject(new Error('Profile fetch timeout')), 3000);
+            });
+
+            const userProfile = await Promise.race([profilePromise, timeoutPromise]);
+
+            if (userProfile) {
+              logAuthEvent('✅ Profile loaded in auth state change:', userProfile.nome_completo);
+              setProfile(userProfile);
+            } else {
+              logAuthEvent('❌ Profile fetch returned null in auth state change, using metadata fallback');
+              const fallbackProfile = await createProfileFromAuth(session.user.id);
+              setProfile(fallbackProfile);
+            }
+          } catch (error) {
+            logAuthEvent('❌ Profile fetch error/timeout in auth state change, using metadata fallback:', error);
+            try {
+              const fallbackProfile = await createProfileFromAuth(session.user.id);
+              setProfile(fallbackProfile);
+            } catch (fallbackError) {
+              logAuthEvent('❌ Fallback profile creation failed in auth state change:', fallbackError);
+              setProfile(null);
+            }
+          }
+        } else if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setUser(null);
+          setProfile(null);
+          invalidateProfileCache('');
+        }
+
+        setLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [fetchProfile]);
 
   // Computed properties for role checking
   const isInstrutor = profile?.role === 'instrutor';

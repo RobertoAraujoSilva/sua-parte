@@ -51,55 +51,127 @@ export class RegrasS38T {
   }
 
   /**
-   * REGRA 4: Verificação de elegibilidade geral para uma parte específica
+   * REGRA 4: Orações - APENAS homens qualificados
+   * Baseado no documento S-38-T, seção sobre orações públicas
+   */
+  static podeFazerOracao(estudante: EstudanteRow): boolean {
+    return (
+      estudante.genero === 'masculino' &&
+      estudante.ativo &&
+      (CARGOS_QUALIFICADOS_DISCURSOS as readonly string[]).includes(estudante.cargo as any)
+    );
+  }
+
+  /**
+   * REGRA 5: Tesouros da Palavra de Deus - APENAS homens qualificados
+   * Baseado no documento S-38-T, seção sobre ensino público
+   */
+  static podeFazerTesouros(estudante: EstudanteRow): boolean {
+    return (
+      estudante.genero === 'masculino' &&
+      estudante.ativo &&
+      (CARGOS_QUALIFICADOS_DISCURSOS as readonly string[]).includes(estudante.cargo as any)
+    );
+  }
+
+  /**
+   * REGRA 6: Joias Espirituais - APENAS homens qualificados
+   * Baseado no documento S-38-T, seção sobre ensino público
+   */
+  static podeFazerJoiasEspirituais(estudante: EstudanteRow): boolean {
+    return (
+      estudante.genero === 'masculino' &&
+      estudante.ativo &&
+      (CARGOS_QUALIFICADOS_DISCURSOS as readonly string[]).includes(estudante.cargo as any)
+    );
+  }
+
+  /**
+   * REGRA 7: Nossa Vida Cristã - APENAS homens qualificados
+   * Baseado no documento S-38-T, seção sobre ensino público
+   */
+  static podeFazerVidaCrista(estudante: EstudanteRow): boolean {
+    return (
+      estudante.genero === 'masculino' &&
+      estudante.ativo &&
+      (CARGOS_QUALIFICADOS_DISCURSOS as readonly string[]).includes(estudante.cargo as any)
+    );
+  }
+
+  /**
+   * REGRA 8: Estudo Bíblico da Congregação - APENAS homens qualificados
+   * Baseado no documento S-38-T, seção sobre condução de estudos
+   */
+  static podeFazerEstudoBiblico(estudante: EstudanteRow): boolean {
+    return (
+      estudante.genero === 'masculino' &&
+      estudante.ativo &&
+      (CARGOS_QUALIFICADOS_DISCURSOS as readonly string[]).includes(estudante.cargo as any)
+    );
+  }
+
+  /**
+   * REGRA 9: Partes do Ministério - Ambos os gêneros
+   * Baseado no documento S-38-T, seção sobre demonstrações do ministério
+   */
+  static podeFazerParteMinisterio(estudante: EstudanteRow): boolean {
+    return estudante.ativo;
+  }
+
+  /**
+   * REGRA 10: Verificação de elegibilidade geral para uma parte específica
    */
   static podeReceberParte(estudante: EstudanteRow, parte: ParteProgramaS38T): boolean {
     if (!estudante.ativo) {
       return false;
     }
 
-    switch (parte.numero_parte) {
-      case 3:
-        // Parte 3 é sempre leitura da Bíblia
+    // Verificar por tipo de parte ao invés de número
+    switch (parte.tipo_parte) {
+      case 'leitura_biblica':
         return this.podeReceberLeituraBiblica(estudante);
-      
-      case 4:
-      case 5:
-      case 6:
-      case 7:
-        // Partes 4-7 podem ser discursos ou demonstrações
-        if (parte.tipo_parte === 'discurso') {
-          return this.podedarDiscurso(estudante);
-        } else if (parte.tipo_parte === 'demonstracao') {
-          return this.podeFazerDemonstracao(estudante);
-        }
-        return false;
-      
+
+      case 'discurso':
+        return this.podedarDiscurso(estudante);
+
+      case 'demonstracao':
+        return this.podeFazerDemonstracao(estudante);
+
+      case 'oracao_abertura':
+      case 'oracao_encerramento':
+        return this.podeFazerOracao(estudante);
+
+      case 'comentarios_iniciais':
+      case 'comentarios_finais':
+        return this.podeFazerOracao(estudante); // Mesmas regras das orações
+
+      case 'tesouros_palavra':
+        return this.podeFazerTesouros(estudante);
+
+      case 'joias_espirituais':
+        return this.podeFazerJoiasEspirituais(estudante);
+
+      case 'parte_ministerio':
+        return this.podeFazerParteMinisterio(estudante);
+
+      case 'vida_crista':
+        return this.podeFazerVidaCrista(estudante);
+
+      case 'estudo_biblico_congregacao':
+        return this.podeFazerEstudoBiblico(estudante);
+
       default:
         return false;
     }
   }
 
   /**
-   * REGRA 5: Verificação se uma parte requer ajudante
+   * REGRA 11: Verificação se uma parte requer ajudante
    */
   static precisaAjudante(parte: ParteProgramaS38T): boolean {
-    // Leitura da Bíblia não precisa de ajudante
-    if (parte.tipo_parte === 'leitura_biblica') {
-      return false;
-    }
-
-    // Discursos não precisam de ajudante
-    if (parte.tipo_parte === 'discurso') {
-      return false;
-    }
-
-    // Demonstrações sempre precisam de ajudante
-    if (parte.tipo_parte === 'demonstracao') {
-      return true;
-    }
-
-    return false;
+    // Partes que precisam de ajudante
+    const tiposComAjudante = ['demonstracao', 'parte_ministerio'];
+    return tiposComAjudante.includes(parte.tipo_parte);
   }
 
   /**

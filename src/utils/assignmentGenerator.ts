@@ -8,6 +8,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { canBePaired, getFamilyRelationship } from '@/types/family';
 import type { Database } from '@/integrations/supabase/types';
+import { RegrasS38T as MainRegrasS38T } from '@/utils/regrasS38T';
 
 // Tipos baseados no schema do Supabase
 type EstudanteRow = Database['public']['Tables']['estudantes']['Row'];
@@ -54,78 +55,62 @@ export interface OpcoesDegeracao {
   preferir_pares_familiares?: boolean;
 }
 
-/**
- * Implementação das Regras S-38-T para Designações
- */
-export class RegrasS38T {
-  /**
-   * Verifica se um estudante pode receber uma parte específica baseado nas diretrizes S-38-T
-   */
-  static podeReceberParte(estudante: Estudante, parte: ParteProgramaS38T): boolean {
-    // Parte 3 (Leitura da Bíblia) - APENAS homens
-    if (parte.numero_parte === 3 && parte.tipo_parte === 'leitura_biblica') {
-      return estudante.genero === 'masculino';
-    }
+// Helper functions for assignment generation
+const podeReceberParte = (estudante: Estudante, parte: ParteProgramaS38T): boolean => {
+  // Convert to EstudanteRow format for the main rules
+  const estudanteRow = {
+    id: estudante.id,
+    nome: estudante.nome,
+    genero: estudante.genero,
+    cargo: estudante.cargo,
+    ativo: estudante.ativo,
+    idade: estudante.idade,
+    email: estudante.email,
+    id_pai_mae: estudante.id_pai_mae,
+    user_id: '', // Not needed for rule checking
+    created_at: '', // Not needed for rule checking
+    updated_at: '' // Not needed for rule checking
+  };
 
-    // Partes 4-7 - Ambos os gêneros, mas discursos apenas para homens qualificados
-    if (parte.numero_parte >= 4 && parte.numero_parte <= 7) {
-      if (parte.tipo_parte === 'discurso') {
-        // Discursos requerem homens qualificados (Ancião, Servo Ministerial, Pioneiro Regular, Publicador Batizado)
-        return estudante.genero === 'masculino' &&
-               ['anciao', 'servo_ministerial', 'pioneiro_regular', 'publicador_batizado'].includes(estudante.cargo);
-      }
+  return MainRegrasS38T.podeReceberParte(estudanteRow, parte);
+};
 
-      // Demonstrações podem ser feitas por ambos os gêneros
-      return true;
-    }
+const precisaAjudante = (parte: ParteProgramaS38T): boolean => {
+  return MainRegrasS38T.precisaAjudante(parte);
+};
 
-    return true;
-  }
+const podemFormarPar = async (estudante1: Estudante, estudante2: Estudante): Promise<boolean> => {
+  // Convert to EstudanteRow format for the main rules
+  const estudante1Row = {
+    id: estudante1.id,
+    nome: estudante1.nome,
+    genero: estudante1.genero,
+    cargo: estudante1.cargo,
+    ativo: estudante1.ativo,
+    idade: estudante1.idade,
+    email: estudante1.email,
+    id_pai_mae: estudante1.id_pai_mae,
+    user_id: '',
+    created_at: '',
+    updated_at: ''
+  };
 
-  /**
-   * Verifica se um estudante está qualificado para dar discursos
-   */
-  static podedarDiscursos(estudante: Estudante): boolean {
-    return estudante.genero === 'masculino' &&
-           ['anciao', 'servo_ministerial', 'pioneiro_regular', 'publicador_batizado'].includes(estudante.cargo);
-  }
+  const estudante2Row = {
+    id: estudante2.id,
+    nome: estudante2.nome,
+    genero: estudante2.genero,
+    cargo: estudante2.cargo,
+    ativo: estudante2.ativo,
+    idade: estudante2.idade,
+    email: estudante2.email,
+    id_pai_mae: estudante2.id_pai_mae,
+    user_id: '',
+    created_at: '',
+    updated_at: ''
+  };
 
-  /**
-   * Verifica se um estudante precisa de ajudante para sua designação
-   */
-  static precisaAjudante(estudante: Estudante, parte: ParteProgramaS38T): boolean {
-    // Leitura da Bíblia não precisa de ajudante
-    if (parte.tipo_parte === 'leitura_biblica') {
-      return false;
-    }
-
-    // Discursos não precisam de ajudantes
-    if (parte.tipo_parte === 'discurso') {
-      return false;
-    }
-
-    // Demonstrações sempre precisam de ajudante
-    return parte.tipo_parte === 'demonstracao';
-  }
-
-  /**
-   * Verifica se dois estudantes podem formar um par (regras de gênero e idade)
-   */
-  static async podemFormarPar(estudante1: Estudante, estudante2: Estudante): Promise<boolean> {
-    // Menores de idade (< 18) devem sempre estar em pares do mesmo gênero
-    if ((estudante1.idade && estudante1.idade < 18) || (estudante2.idade && estudante2.idade < 18)) {
-      return estudante1.genero === estudante2.genero;
-    }
-
-    // Se são do mesmo gênero, sempre podem formar par
-    if (estudante1.genero === estudante2.genero) {
-      return true;
-    }
-
-    // Se são de gêneros diferentes, devem ser familiares
-    return await getFamilyRelationship(estudante1.id, estudante2.id) !== null;
-  }
-}
+  return MainRegrasS38T.podemFormarPar(estudante1Row, estudante2Row);
+};
 
 /**
  * Gerador Principal de Designações S-38-T
@@ -152,10 +137,11 @@ export class GeradorDesignacoes {
         .select(`
           id_estudante,
           id_ajudante,
-          programas!inner(data_inicio_semana)
+          programas!inner(
+            data_inicio_semana
+          )
         `)
-        .gte('programas.data_inicio_semana', dataCorte.toISOString().split('T')[0])
-        .order('programas.data_inicio_semana', { ascending: false });
+        .gte('programas.data_inicio_semana', dataCorte.toISOString().split('T')[0]);
 
       if (error) {
         console.error('Erro ao carregar designações recentes:', error);
@@ -214,7 +200,7 @@ export class GeradorDesignacoes {
     // Filtrar estudantes elegíveis
     const estudantesElegiveis = this.estudantes.filter(estudante =>
       !excluirIds.includes(estudante.id) &&
-      RegrasS38T.podeReceberParte(estudante, parte)
+      podeReceberParte(estudante, parte)
     );
 
     if (estudantesElegiveis.length === 0) {
@@ -258,9 +244,9 @@ export class GeradorDesignacoes {
 
     for (const ajudante of ajudantesPotenciais) {
       // Verificar se podem formar par de acordo com as diretrizes S-38-T
-      const podemFormarPar = await RegrasS38T.podemFormarPar(estudante, ajudante);
+      const podemFormarParResult = await podemFormarPar(estudante, ajudante);
 
-      if (podemFormarPar) {
+      if (podemFormarParResult) {
         const ehFamiliar = estudante.genero !== ajudante.genero ?
           await getFamilyRelationship(estudante.id, ajudante.id) !== null : false;
 
@@ -328,7 +314,7 @@ export class GeradorDesignacoes {
       };
 
       // Encontrar ajudante se necessário
-      if (RegrasS38T.precisaAjudante(estudante, parte)) {
+      if (precisaAjudante(parte)) {
         const ajudante = await this.encontrarMelhorAjudante(estudante, parte, Array.from(estudantesUsados));
 
         if (ajudante) {
@@ -380,15 +366,15 @@ export class GeradorDesignacoes {
         requer_ajudante: !!designacao.id_ajudante
       };
 
-      if (!RegrasS38T.podeReceberParte(estudante, parte)) {
+      if (!podeReceberParte(estudante, parte)) {
         erros.push(`${estudante.nome} não pode receber parte ${designacao.numero_parte} (${designacao.tipo_parte})`);
       }
 
       // Validar pareamento de ajudante se aplicável
       if (ajudante) {
-        const podemFormarPar = await RegrasS38T.podemFormarPar(estudante, ajudante);
+        const podemFormarParResult = await podemFormarPar(estudante, ajudante);
 
-        if (!podemFormarPar) {
+        if (!podemFormarParResult) {
           erros.push(`${estudante.nome} e ${ajudante.nome} não podem formar par (diretrizes S-38-T)`);
         }
       }
@@ -546,11 +532,20 @@ export const salvarDesignacoes = async (
       id_estudante: designacao.id_estudante,
       id_ajudante: designacao.id_ajudante || null,
       numero_parte: designacao.numero_parte,
+      titulo_parte: designacao.titulo_parte,
       tipo_parte: designacao.tipo_parte,
       cena: designacao.cena || null,
       tempo_minutos: designacao.tempo_minutos,
       confirmado: designacao.confirmado || false
     }));
+
+    // Log data being inserted for debugging
+    console.log('📝 Inserindo designações:', {
+      quantidade: designacoesParaSalvar.length,
+      partes: designacoesParaSalvar.map(d => ({ numero: d.numero_parte, tipo: d.tipo_parte, titulo: d.titulo_parte })),
+      userId,
+      idPrograma
+    });
 
     // Inserção em lote com RLS automático
     const { error } = await supabase
@@ -558,11 +553,27 @@ export const salvarDesignacoes = async (
       .insert(designacoesParaSalvar);
 
     if (error) {
-      console.error('Erro ao salvar designações:', error);
+      console.error('❌ Erro ao salvar designações:', {
+        error,
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        dadosInseridos: designacoesParaSalvar
+      });
+
+      // Provide more specific error messages
+      let errorMessage = error.message;
+      if (error.message.includes('designacoes_numero_parte_check')) {
+        errorMessage = 'Erro: Número de parte inválido. Execute a migração do banco de dados para suportar partes 1-12.';
+      } else if (error.message.includes('designacoes_tipo_parte_check')) {
+        errorMessage = 'Erro: Tipo de parte inválido. Execute a migração do banco de dados para suportar novos tipos de designação.';
+      }
+
       return {
         sucesso: false,
-        erro: `Erro na gravação: ${error.message}`,
-        detalhes: { supabaseError: error }
+        erro: `Erro na gravação: ${errorMessage}`,
+        detalhes: { supabaseError: error, dadosInseridos: designacoesParaSalvar }
       };
     }
 

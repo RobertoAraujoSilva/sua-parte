@@ -52,9 +52,12 @@ export const useAssignmentGeneration = () => {
     }));
 
     try {
+      // Step 0: Set program status to generating
+      await updateProgramAssignmentStatus(programData.id, 'generating');
+
       // Step 1: Load students
       updateProgress(10, 'Carregando estudantes ativos...');
-      
+
       const { data: estudantes, error: estudantesError } = await supabase
         .from('estudantes')
         .select('*')
@@ -88,10 +91,10 @@ export const useAssignmentGeneration = () => {
       
       const designacoes = await gerador.gerarDesignacoes({
         data_inicio_semana: programData.data_inicio_semana,
-        partes_programa: partesPrograma,
+        id_programa: programData.id,
+        partes: partesPrograma,
         excluir_estudante_ids: [],
-        priorizar_novos: true,
-        permitir_consecutivas: false
+        preferir_pares_familiares: false
       });
 
       if (designacoes.length === 0) {
@@ -112,10 +115,10 @@ export const useAssignmentGeneration = () => {
         throw new Error(resultadoSalvar.erro || 'Erro ao salvar designações');
       }
 
-      // Step 6: Update program status
+      // Step 6: Update program assignment status
       updateProgress(95, 'Atualizando status do programa...');
-      
-      await updateProgramStatus(programId, 'ativo');
+
+      await updateProgramAssignmentStatus(programId, 'generated', designacoes.length);
 
       // Step 7: Complete
       updateProgress(100, 'Designações geradas com sucesso!');
@@ -135,7 +138,14 @@ export const useAssignmentGeneration = () => {
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-      
+
+      // Set program status to failed
+      try {
+        await updateProgramAssignmentStatus(programData.id, 'failed');
+      } catch (statusError) {
+        console.error('Error updating program status to failed:', statusError);
+      }
+
       setState(prev => ({
         ...prev,
         isGenerating: false,
@@ -172,30 +182,112 @@ export const useAssignmentGeneration = () => {
 // Helper function to parse program parts into assignment format
 const parsePartesPrograma = async (partes: string[]) => {
   const partesPrograma = [];
-  
-  // Standard JW meeting structure
+
+  console.log('📋 Parsing program parts:', partes);
+
+  // Complete JW meeting structure following Watchtower format
   const parteTemplates = [
-    { numero: 3, tipo: 'leitura_biblica', titulo: 'Leitura da Bíblia', tempo: 4, genero_restricao: 'masculino' },
-    { numero: 4, tipo: 'demonstracao', titulo: 'Primeira Conversa', tempo: 3, genero_restricao: null },
-    { numero: 5, tipo: 'demonstracao', titulo: 'Revisita', tempo: 4, genero_restricao: null },
-    { numero: 6, tipo: 'demonstracao', titulo: 'Estudo Bíblico', tempo: 6, genero_restricao: null },
-    { numero: 7, tipo: 'discurso', titulo: 'Discurso', tempo: 5, genero_restricao: 'masculino' }
+    // Opening section
+    { numero: 1, tipo: 'oracao_abertura', titulo: 'Oração de Abertura', tempo: 1, genero_restricao: 'masculino' },
+    { numero: 2, tipo: 'comentarios_iniciais', titulo: 'Comentários Iniciais', tempo: 1, genero_restricao: 'masculino' },
+
+    // Treasures from God's Word section
+    { numero: 3, tipo: 'tesouros_palavra', titulo: 'Tesouros da Palavra de Deus', tempo: 10, genero_restricao: 'masculino' },
+    { numero: 4, tipo: 'joias_espirituais', titulo: 'Joias Espirituais', tempo: 10, genero_restricao: 'masculino' },
+    { numero: 5, tipo: 'leitura_biblica', titulo: 'Leitura da Bíblia', tempo: 4, genero_restricao: 'masculino' },
+
+    // Apply Yourself to Ministry section (3 parts)
+    { numero: 6, tipo: 'parte_ministerio', titulo: 'Primeira Conversa', tempo: 3, genero_restricao: null },
+    { numero: 7, tipo: 'parte_ministerio', titulo: 'Revisita', tempo: 4, genero_restricao: null },
+    { numero: 8, tipo: 'parte_ministerio', titulo: 'Estudo Bíblico', tempo: 5, genero_restricao: null },
+
+    // Our Christian Life section
+    { numero: 9, tipo: 'vida_crista', titulo: 'Nossa Vida Cristã', tempo: 15, genero_restricao: 'masculino' },
+    { numero: 10, tipo: 'estudo_biblico_congregacao', titulo: 'Estudo Bíblico da Congregação', tempo: 30, genero_restricao: 'masculino' },
+
+    // Closing section
+    { numero: 11, tipo: 'comentarios_finais', titulo: 'Comentários Finais', tempo: 3, genero_restricao: 'masculino' },
+    { numero: 12, tipo: 'oracao_encerramento', titulo: 'Oração de Encerramento', tempo: 1, genero_restricao: 'masculino' }
   ];
 
-  // Map program parts to assignment parts
-  for (let i = 0; i < Math.min(partes.length, parteTemplates.length); i++) {
-    const template = parteTemplates[i];
-    const parteNome = partes[i];
-    
+  // Create assignments for all parts of the complete meeting structure
+  for (const template of parteTemplates) {
+    // Use specific titles from program parts if available, otherwise use template
+    let titulo = template.titulo;
+    let tempo = template.tempo;
+
+    // Enhanced mapping for parsed content from JW.org
+    if (partes.length > 0) {
+      // Try to find matching part by content analysis
+      const matchingPart = partes.find(parte => {
+        const parteLower = parte.toLowerCase();
+
+        // Match by type keywords
+        if (template.tipo === 'tesouros_palavra' &&
+            (parteLower.includes('tesouros') || parteLower.includes('sábios') || parteLower.includes('princípios'))) {
+          return true;
+        }
+        if (template.tipo === 'joias_espirituais' &&
+            (parteLower.includes('joias') || parteLower.includes('espirituais'))) {
+          return true;
+        }
+        if (template.tipo === 'leitura_biblica' &&
+            (parteLower.includes('leitura') || parteLower.includes('pro.') || parteLower.includes('prov'))) {
+          return true;
+        }
+        if (template.tipo === 'parte_ministerio' &&
+            (parteLower.includes('conversa') || parteLower.includes('interesse') || parteLower.includes('discurso'))) {
+          return true;
+        }
+        if (template.tipo === 'vida_crista' &&
+            (parteLower.includes('necessidades') || parteLower.includes('locais'))) {
+          return true;
+        }
+        if (template.tipo === 'estudo_biblico_congregacao' &&
+            (parteLower.includes('estudo') && parteLower.includes('congregação'))) {
+          return true;
+        }
+
+        return false;
+      });
+
+      if (matchingPart) {
+        // Extract title and timing from matched part
+        titulo = matchingPart.replace(/\(\d+\s*min\)/i, '').trim();
+
+        // Extract timing if present
+        const timeMatch = matchingPart.match(/\((\d+)\s*min\)/i);
+        if (timeMatch) {
+          tempo = parseInt(timeMatch[1]);
+        }
+      } else {
+        // Fallback to simple index-based mapping for basic imports
+        if (template.tipo === 'tesouros_palavra' && partes[0]) {
+          titulo = partes[0];
+        } else if (template.tipo === 'parte_ministerio' && partes[1]) {
+          titulo = `${partes[1]} - ${template.titulo}`;
+        } else if (template.tipo === 'vida_crista' && partes[2]) {
+          titulo = partes[2];
+        }
+      }
+    }
+
     partesPrograma.push({
       numero_parte: template.numero,
-      titulo_parte: parteNome || template.titulo,
+      titulo_parte: titulo,
       tipo_parte: template.tipo,
-      tempo_minutos: template.tempo,
-      requer_ajudante: template.tipo === 'demonstracao',
+      tempo_minutos: tempo,
+      requer_ajudante: template.tipo === 'parte_ministerio',
       restricao_genero: template.genero_restricao
     });
   }
+
+  console.log('✅ Generated program structure:', partesPrograma.map(p => ({
+    numero: p.numero_parte,
+    titulo: p.titulo_parte,
+    tipo: p.tipo_parte,
+    tempo: p.tempo_minutos
+  })));
 
   return partesPrograma;
 };
@@ -234,14 +326,31 @@ const ensureProgramExists = async (programData: ProgramData, userId: string): Pr
   return newProgram.id;
 };
 
-// Helper function to update program status
-const updateProgramStatus = async (programId: string, status: 'ativo' | 'inativo' | 'arquivado') => {
+// Helper function to update program assignment status
+const updateProgramAssignmentStatus = async (
+  programId: string,
+  assignmentStatus: 'pending' | 'generating' | 'generated' | 'failed',
+  totalAssignments?: number
+) => {
+  const updateData: any = {
+    assignment_status: assignmentStatus,
+    updated_at: new Date().toISOString()
+  };
+
+  if (assignmentStatus === 'generated') {
+    updateData.assignments_generated_at = new Date().toISOString();
+    if (totalAssignments) {
+      updateData.total_assignments_generated = totalAssignments;
+    }
+  }
+
   const { error } = await supabase
     .from('programas')
-    .update({ status, updated_at: new Date().toISOString() })
+    .update(updateData)
     .eq('id', programId);
 
   if (error) {
-    console.error('Erro ao atualizar status do programa:', error);
+    console.error('Error updating program assignment status:', error);
+    throw new Error(`Erro ao atualizar status de designações do programa: ${error.message}`);
   }
 };
