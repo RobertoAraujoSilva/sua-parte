@@ -4,6 +4,26 @@
 
 The Sistema Ministerial now features an **enhanced PDF parsing system** specifically designed to handle official "Vida e Ministério Cristão" (Life and Ministry Meeting Workbook) PDF files from JW.org with intelligent pattern recognition and content extraction.
 
+## ⚠️ **Current Limitations (Production Status)**
+
+### **Parsing Method: Filename Analysis Only**
+- **Current Implementation**: The system analyzes PDF filenames rather than extracting content from PDF files
+- **Supported Patterns**: Official JW.org formats (`mwb_T_YYYYMM.pdf`), weekly programs, assignment forms
+- **Content Extraction**: Not implemented - relies on filename patterns and fallback data
+- **Production Impact**: Functional for standard JW.org files, requires manual verification for custom formats
+
+### **Why Filename-Based Parsing?**
+1. **Reliability**: JW.org uses consistent filename patterns that contain all necessary metadata
+2. **Performance**: Fast processing without complex PDF content extraction libraries
+3. **Compatibility**: Works across all browsers and devices without additional dependencies
+4. **Accuracy**: Official filenames provide accurate date, month, and document type information
+
+### **Future Enhancement Opportunities**
+- **Real PDF Content Extraction**: Implement PDF.js or similar library for content parsing
+- **OCR Integration**: Add optical character recognition for scanned documents
+- **Multi-language Support**: Extend pattern recognition for different language versions
+- **Custom Format Support**: Allow users to define custom parsing patterns
+
 ## ✨ Key Improvements
 
 ### 🔍 **Issue 1 Resolution: Enhanced Week Information Extraction**

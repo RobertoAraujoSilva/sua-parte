@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,20 +9,77 @@ import TemplateDownload from '@/components/TemplateDownload';
 import Header from '@/components/Header';
 import { DebugPanel } from '@/components/DebugPanel';
 import { TutorialButton } from '@/components/tutorial';
+import { supabase } from '@/integrations/supabase/client';
 
 const Dashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { getStatistics } = useEstudantes();
 
-  // Get real-time statistics
+  // Get real-time statistics from students
   const statistics = getStatistics();
+
+  // State for dashboard statistics
+  const [dashboardStats, setDashboardStats] = useState({
+    programsCount: 0,
+    assignmentsCount: 0,
+    loadingStats: true
+  });
+
+  // Load real dashboard statistics from database
+  const loadDashboardStats = async () => {
+    if (!user?.id) {
+      setDashboardStats(prev => ({ ...prev, loadingStats: false }));
+      return;
+    }
+
+    try {
+      console.log('📊 Loading dashboard statistics for user:', user.id);
+
+      // Load programs and assignments counts in parallel
+      const [programsResult, assignmentsResult] = await Promise.all([
+        supabase
+          .from('programas')
+          .select('id', { count: 'exact' })
+          .eq('user_id', user.id)
+          .eq('status', 'ativo'),
+
+        supabase
+          .from('designacoes')
+          .select('id', { count: 'exact' })
+          .eq('user_id', user.id)
+          .gte('created_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()) // This month
+      ]);
+
+      const programsCount = programsResult.count || 0;
+      const assignmentsCount = assignmentsResult.count || 0;
+
+      console.log('✅ Dashboard stats loaded:', { programsCount, assignmentsCount });
+
+      setDashboardStats({
+        programsCount,
+        assignmentsCount,
+        loadingStats: false
+      });
+
+    } catch (error) {
+      console.error('❌ Error loading dashboard statistics:', error);
+      setDashboardStats(prev => ({ ...prev, loadingStats: false }));
+    }
+  };
 
   useEffect(() => {
     if (!user) {
       navigate('/auth');
     }
   }, [user, navigate]);
+
+  // Load dashboard statistics when user is available
+  useEffect(() => {
+    if (user?.id) {
+      loadDashboardStats();
+    }
+  }, [user?.id]);
 
   if (!user) {
     return null;
@@ -194,7 +251,13 @@ const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-jw-navy">0</div>
+              <div className="text-2xl font-bold text-jw-navy">
+                {dashboardStats.loadingStats ? (
+                  <div className="animate-pulse bg-gray-200 h-8 w-12 rounded"></div>
+                ) : (
+                  dashboardStats.programsCount
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Semanas programadas
               </p>
@@ -208,7 +271,13 @@ const Dashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-jw-navy">0</div>
+              <div className="text-2xl font-bold text-jw-navy">
+                {dashboardStats.loadingStats ? (
+                  <div className="animate-pulse bg-gray-200 h-8 w-12 rounded"></div>
+                ) : (
+                  dashboardStats.assignmentsCount
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">
                 Neste mês
               </p>

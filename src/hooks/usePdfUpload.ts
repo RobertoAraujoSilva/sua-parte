@@ -54,22 +54,33 @@ export const usePdfUpload = () => {
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     try {
-      // Use the enhanced PDF parser
+      // Use the enhanced PDF parser (currently filename-based)
+      // NOTE: This parser analyzes filename patterns rather than PDF content
+      // for JW.org workbooks (mwb_T_YYYYMM.pdf) and other common formats
       const extractedData = await JWPdfParser.parsePdf(file);
 
-      console.log('📄 PDF Parsing Results:', {
+      console.log('📄 PDF Parsing Results (Filename-based):', {
         filename: file.name,
         extractedData,
         fileSize: file.size,
-        fileType: file.type
+        fileType: file.type,
+        parsingMethod: 'filename_analysis'
       });
+
+      // Add parsing method info to extracted data
+      extractedData.detalhes_extras = {
+        ...extractedData.detalhes_extras,
+        parsing_method: 'filename_analysis',
+        content_extracted: false,
+        filename_recognized: true
+      };
 
       return extractedData;
     } catch (error) {
       console.error('❌ Error parsing PDF:', error);
 
-      // Fallback to basic filename parsing
-      return {
+      // Enhanced fallback with better error information
+      const fallbackData = {
         semana: `Programa Importado - ${file.name}`,
         mes_ano: '',
         tipo_documento: 'programa_semanal',
@@ -79,8 +90,17 @@ export const usePdfUpload = () => {
           'Nossa Vida Cristã'
         ],
         data_inicio: new Date().toISOString().split('T')[0],
-        detalhes_extras: {}
+        detalhes_extras: {
+          parsing_method: 'fallback',
+          content_extracted: false,
+          filename_recognized: false,
+          error_message: error instanceof Error ? error.message : 'Unknown parsing error',
+          manual_review_needed: true
+        }
       };
+
+      console.warn('⚠️ Using fallback parsing for:', file.name);
+      return fallbackData;
     }
   }, []);
 
@@ -131,10 +151,24 @@ export const usePdfUpload = () => {
         result
       }));
 
-      toast({
-        title: 'PDF importado com sucesso!',
-        description: `Programa "${extractedData.semana}" foi processado e está pronto para gerar designações.`,
-      });
+      // Show appropriate toast based on parsing method
+      if (extractedData.detalhes_extras?.parsing_method === 'fallback') {
+        toast({
+          title: 'PDF importado com limitações',
+          description: `Programa "${extractedData.semana}" foi importado, mas requer revisão manual das informações extraídas.`,
+          variant: 'destructive'
+        });
+      } else if (extractedData.detalhes_extras?.parsing_method === 'filename_analysis') {
+        toast({
+          title: 'PDF importado com sucesso!',
+          description: `Programa "${extractedData.semana}" foi processado baseado no nome do arquivo. Verifique se as informações estão corretas.`,
+        });
+      } else {
+        toast({
+          title: 'PDF importado com sucesso!',
+          description: `Programa "${extractedData.semana}" foi processado e está pronto para gerar designações.`,
+        });
+      }
 
       return result;
 

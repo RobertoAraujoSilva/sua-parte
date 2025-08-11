@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,21 @@ const Programas = () => {
   const [programas, setProgramas] = useState([]);
   const [loadingPrograms, setLoadingPrograms] = useState(true);
   const [programsError, setProgramsError] = useState<string | null>(null);
+
+  // Calculate real statistics from programs data
+  const programStats = useMemo(() => {
+    const total = programas.length;
+    const generated = programas.filter(p => p.designacoesGeradas || p.status === 'Designações Geradas').length;
+    const pending = programas.filter(p => !p.designacoesGeradas && p.status !== 'Designações Geradas').length;
+    const totalParts = programas.reduce((sum, p) => sum + (p.partes?.length || 0), 0);
+
+    return {
+      total,
+      generated,
+      pending,
+      totalParts
+    };
+  }, [programas]);
 
   // Load programs from database
   const loadPrograms = async () => {
@@ -532,25 +547,49 @@ const Programas = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <Card>
                 <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-jw-blue mb-2">3</div>
+                  <div className="text-3xl font-bold text-jw-blue mb-2">
+                    {loadingPrograms ? (
+                      <div className="animate-pulse bg-gray-200 h-9 w-8 rounded mx-auto"></div>
+                    ) : (
+                      programStats.total
+                    )}
+                  </div>
                   <div className="text-sm text-gray-600">Programas Importados</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-2">1</div>
+                  <div className="text-3xl font-bold text-green-600 mb-2">
+                    {loadingPrograms ? (
+                      <div className="animate-pulse bg-gray-200 h-9 w-8 rounded mx-auto"></div>
+                    ) : (
+                      programStats.generated
+                    )}
+                  </div>
                   <div className="text-sm text-gray-600">Programas Processados</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-yellow-600 mb-2">1</div>
+                  <div className="text-3xl font-bold text-yellow-600 mb-2">
+                    {loadingPrograms ? (
+                      <div className="animate-pulse bg-gray-200 h-9 w-8 rounded mx-auto"></div>
+                    ) : (
+                      programStats.pending
+                    )}
+                  </div>
                   <div className="text-sm text-gray-600">Aguardando Processamento</div>
                 </CardContent>
               </Card>
               <Card>
                 <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-purple-600 mb-2">9</div>
+                  <div className="text-3xl font-bold text-purple-600 mb-2">
+                    {loadingPrograms ? (
+                      <div className="animate-pulse bg-gray-200 h-9 w-8 rounded mx-auto"></div>
+                    ) : (
+                      programStats.totalParts
+                    )}
+                  </div>
                   <div className="text-sm text-gray-600">Partes Identificadas</div>
                 </CardContent>
               </Card>
