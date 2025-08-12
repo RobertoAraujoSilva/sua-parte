@@ -401,7 +401,17 @@ export const translations: Record<Language, Record<string, string>> = {
     'Contato Técnico': 'Technical Contact',
     'Atualizações': 'Updates',
     'Comunidade': 'Community',
-    'Desenvolvido para servir congregações das Testemunhas de Jeová.': 'Developed to serve Jehovah\'s Witnesses congregations.'
+    'Desenvolvido para servir congregações das Testemunhas de Jeová.': 'Developed to serve Jehovah\'s Witnesses congregations.',
+    'Sistema Ministerial': 'Ministerial System',
+    'Automatização inteligente de designações ministeriais para congregações das Testemunhas de Jeová, com foco em eficiência e conformidade.': 'Intelligent automation of ministerial assignments for Jehovah\'s Witnesses congregations, focused on efficiency and compliance.',
+    'Desenvolvido com dedicação para servir às necessidades congregacionais e apoiar o trabalho ministerial.': 'Developed with dedication to serve congregational needs and support ministerial work.',
+    'Funcionalidades': 'Features',
+    'Importação de Programas': 'Program Import',
+    'Designações Automáticas': 'Automatic Assignments',
+    'Notificações': 'Notifications',
+    'Relatórios': 'Reports',
+    'Suporte': 'Support',
+    'Tutorial de Uso': 'Usage Tutorial'
   }
 };
 
