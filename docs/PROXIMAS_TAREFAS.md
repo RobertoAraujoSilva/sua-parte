@@ -269,9 +269,9 @@ const resultado = await TestadorSistemaDesignacoes.executarTeste('regras');
 
 ## Referências
 
-- ✅ **SISTEMA_DESIGNACOES_S38T.md** (documentação completa do sistema implementado)
-- ✅ **CORRECAO_QRCODE_BUILD.md** (correção do erro de build)
-- docs/PLANO.md (visão macro)
+- ✅ **[SISTEMA_DESIGNACOES_S38T.md](SISTEMA_DESIGNACOES_S38T.md)** (documentação completa do sistema implementado)
+- ✅ **[CORRECAO_QRCODE_BUILD.md](CORRECAO_QRCODE_BUILD.md)** (correção do erro de build)
+- [PLANO.md](PLANO.md) (visão macro)
 - cypress/e2e/* (fluxos críticos)
 - src/utils/* (gerador, regras, balanceamento, loaders)
 

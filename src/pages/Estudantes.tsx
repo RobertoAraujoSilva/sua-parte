@@ -16,6 +16,7 @@ import { Plus, Search, Users, ArrowLeft, Upload, BarChart3, Filter, FileSpreadsh
 import { useEstudantes } from "@/hooks/useEstudantes";
 import { useAuth } from "@/contexts/AuthContext";
 import { TutorialButton } from "@/components/tutorial";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
   ProgressBoard,
   SpeechTypeCategories,
@@ -33,6 +34,7 @@ import {
 import { DebugPanel } from '@/components/DebugPanel';
 
 const Estudantes = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
@@ -157,7 +159,7 @@ const Estudantes = () => {
         <main className="pt-16">
           <div className="container mx-auto px-4 py-20 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jw-blue mx-auto mb-4"></div>
-            <p>Carregando estudantes...</p>
+            <p>{t('Carregando estudantes...')}</p>
           </div>
         </main>
         <Footer />
@@ -172,8 +174,8 @@ const Estudantes = () => {
         <Header />
         <main className="pt-16">
           <div className="container mx-auto px-4 py-20 text-center">
-            <p className="text-red-600 mb-4">Erro ao carregar estudantes: {error}</p>
-            <Button onClick={() => window.location.reload()}>Tentar Novamente</Button>
+            <p className="text-red-600 mb-4">{t('Erro ao carregar estudantes:')} {error}</p>
+            <Button onClick={() => window.location.reload()}>{t('Tentar Novamente')}</Button>
           </div>
         </main>
         <Footer />
@@ -197,18 +199,17 @@ const Estudantes = () => {
                 onClick={() => navigate('/dashboard')}
               >
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                Voltar ao Dashboard
+                {t('Voltar ao Dashboard')}
               </Button>
             </div>
 
             <div className="flex items-start justify-between">
               <div className="text-white">
                 <h1 className="text-4xl font-bold mb-4">
-                  Gestão de <span className="text-jw-gold">Estudantes</span>
+                  {t('Gestão de Estudantes')} <span className="text-jw-gold">{t('de')}</span> <span className="text-jw-gold">Estudantes</span>
                 </h1>
                 <p className="text-xl opacity-90 max-w-2xl">
-                  Cadastre e gerencie estudantes da Escola do Ministério Teocrático com
-                  validação automática de qualificações e regras congregacionais.
+                  {t('Cadastre e gerencie estudantes da Escola do Ministério Teocrático com validação automática de qualificações e regras congregacionais.')}
                 </p>
               </div>
               <TutorialButton page="estudantes" variant="secondary" />
@@ -224,23 +225,23 @@ const Estudantes = () => {
                 <TabsList className="grid w-auto grid-cols-5" data-tutorial="tabs-navigation">
                   <TabsTrigger value="list" className="flex items-center gap-2">
                     <Users className="w-4 h-4" />
-                    Lista
+                    {t('Lista')}
                   </TabsTrigger>
                   <TabsTrigger value="form" className="flex items-center gap-2">
                     <Plus className="w-4 h-4" />
-                    {editingEstudante ? "Editar" : "Novo"}
+                    {editingEstudante ? t('Editar') : t('Novo')}
                   </TabsTrigger>
                   <TabsTrigger value="import" className="flex items-center gap-2">
                     <FileSpreadsheet className="w-4 h-4" />
-                    Importar
+                    {t('Importar')}
                   </TabsTrigger>
                   <TabsTrigger value="stats" className="flex items-center gap-2">
                     <BarChart3 className="w-4 h-4" />
-                    Estatísticas
+                    {t('Estatísticas')}
                   </TabsTrigger>
                   <TabsTrigger value="instructor" className="flex items-center gap-2">
                     <Users className="w-4 h-4" />
-                    Painel do Instrutor
+                    {t('Painel do Instrutor')}
                   </TabsTrigger>
                 </TabsList>
 
@@ -251,7 +252,7 @@ const Estudantes = () => {
                     onClick={() => setActiveTab("import")}
                   >
                     <Upload className="w-4 h-4 mr-2" />
-                    Importar Planilha
+                    {t('Importar Planilha')}
                   </Button>
                   <Button
                     variant="hero"
@@ -262,7 +263,7 @@ const Estudantes = () => {
                     }}
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Novo Estudante
+                    {t('Novo Estudante')}
                   </Button>
                 </div>
               </div>
@@ -274,7 +275,7 @@ const Estudantes = () => {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Filter className="w-5 h-5" />
-                      Filtros
+                      {t('Filtros')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -282,7 +283,7 @@ const Estudantes = () => {
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <Input
-                          placeholder="Buscar por nome..."
+                          placeholder={t('Buscar por nome...')}
                           value={filters.searchTerm}
                           onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
                           className="pl-10"
@@ -294,10 +295,10 @@ const Estudantes = () => {
                         onValueChange={(value) => handleFilterChange("cargo", value)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Filtrar por cargo" />
+                          <SelectValue placeholder={t('Filtrar por cargo')} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="todos">Todos os cargos</SelectItem>
+                          <SelectItem value="todos">{t('Todos os cargos')}</SelectItem>
                           {Object.entries(CARGO_LABELS).map(([value, label]) => (
                             <SelectItem key={value} value={value}>
                               {label}
@@ -311,10 +312,10 @@ const Estudantes = () => {
                         onValueChange={(value) => handleFilterChange("genero", value)}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Filtrar por gênero" />
+                          <SelectValue placeholder={t('Filtrar por gênero')} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="todos">Todos os gêneros</SelectItem>
+                          <SelectItem value="todos">{t('Todos os gêneros')}</SelectItem>
                           {Object.entries(GENERO_LABELS).map(([value, label]) => (
                             <SelectItem key={value} value={value}>
                               {label}
@@ -328,12 +329,12 @@ const Estudantes = () => {
                         onValueChange={(value) => handleFilterChange("ativo", value === "todos" ? "todos" : value === "true")}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="Filtrar por status" />
+                          <SelectValue placeholder={t('Filtrar por status')} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="todos">Todos os status</SelectItem>
-                          <SelectItem value="true">Apenas ativos</SelectItem>
-                          <SelectItem value="false">Apenas inativos</SelectItem>
+                          <SelectItem value="todos">{t('Todos os status')}</SelectItem>
+                          <SelectItem value="true">{t('Apenas ativos')}</SelectItem>
+                          <SelectItem value="false">{t('Apenas inativos')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -359,14 +360,14 @@ const Estudantes = () => {
                     <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-gray-600 mb-2">
                       {filters.searchTerm || filters.cargo !== "todos" || filters.genero !== "todos" || filters.ativo !== "todos"
-                        ? "Nenhum estudante encontrado"
-                        : "Nenhum estudante cadastrado"
+                        ? t('Nenhum estudante encontrado')
+                        : t('Nenhum estudante cadastrado')
                       }
                     </h3>
                     <p className="text-gray-500 mb-4">
                       {filters.searchTerm || filters.cargo !== "todos" || filters.genero !== "todos" || filters.ativo !== "todos"
-                        ? "Tente ajustar os filtros de busca"
-                        : "Comece cadastrando seu primeiro estudante"
+                        ? t('Tente ajustar os filtros de busca')
+                        : t('Comece cadastrando seu primeiro estudante')
                       }
                     </p>
                     <Button
@@ -377,7 +378,7 @@ const Estudantes = () => {
                       }}
                     >
                       <Plus className="w-4 h-4 mr-2" />
-                      Cadastrar Primeiro Estudante
+                      {t('Cadastrar Primeiro Estudante')}
                     </Button>
                   </div>
                 )}
@@ -400,25 +401,25 @@ const Estudantes = () => {
                   <Card>
                     <CardContent className="p-6 text-center">
                       <div className="text-3xl font-bold text-jw-blue mb-2">{statistics.total}</div>
-                      <div className="text-sm text-gray-600">Total de Estudantes</div>
+                      <div className="text-sm text-gray-600">{t('Total de Estudantes')}</div>
                     </CardContent>
                   </Card>
                   <Card>
                     <CardContent className="p-6 text-center">
                       <div className="text-3xl font-bold text-green-600 mb-2">{statistics.ativos}</div>
-                      <div className="text-sm text-gray-600">Estudantes Ativos</div>
+                      <div className="text-sm text-gray-600">{t('Estudantes Ativos')}</div>
                     </CardContent>
                   </Card>
                   <Card>
                     <CardContent className="p-6 text-center">
                       <div className="text-3xl font-bold text-red-600 mb-2">{statistics.inativos}</div>
-                      <div className="text-sm text-gray-600">Estudantes Inativos</div>
+                      <div className="text-sm text-gray-600">{t('Estudantes Inativos')}</div>
                     </CardContent>
                   </Card>
                   <Card>
                     <CardContent className="p-6 text-center">
                       <div className="text-3xl font-bold text-orange-600 mb-2">{statistics.menores}</div>
-                      <div className="text-sm text-gray-600">Menores de Idade</div>
+                      <div className="text-sm text-gray-600">{t('Menores de Idade')}</div>
                     </CardContent>
                   </Card>
                 </div>
@@ -427,12 +428,12 @@ const Estudantes = () => {
                   {/* Gender Distribution */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Distribuição por Gênero</CardTitle>
+                      <CardTitle>{t('Distribuição por Gênero')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-4">
                         <div className="flex items-center justify-between">
-                          <span>Homens</span>
+                          <span>{t('Homens')}</span>
                           <div className="flex items-center gap-2">
                             <div className="w-32 bg-gray-200 rounded-full h-2">
                               <div
@@ -444,7 +445,7 @@ const Estudantes = () => {
                           </div>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span>Mulheres</span>
+                          <span>{t('Mulheres')}</span>
                           <div className="flex items-center gap-2">
                             <div className="w-32 bg-gray-200 rounded-full h-2">
                               <div
@@ -462,7 +463,7 @@ const Estudantes = () => {
                   {/* Role Distribution */}
                   <Card>
                     <CardHeader>
-                      <CardTitle>Distribuição por Cargo</CardTitle>
+                      <CardTitle>{t('Distribuição por Cargo')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-3">
@@ -492,13 +493,13 @@ const Estudantes = () => {
                   <div className="flex items-center justify-center py-12">
                     <div className="text-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-jw-blue mx-auto mb-4"></div>
-                      <p className="text-gray-600">Carregando painel do instrutor...</p>
+                      <p className="text-gray-600">{t('Carregando painel do instrutor...')}</p>
                     </div>
                   </div>
                 ) : instructorError ? (
                   <div className="text-center py-12">
-                    <p className="text-red-600 mb-4">Erro ao carregar painel do instrutor: {instructorError}</p>
-                    <Button onClick={refreshInstructorData}>Tentar Novamente</Button>
+                    <p className="text-red-600 mb-4">{t('Erro ao carregar painel do instrutor:')} {instructorError}</p>
+                    <Button onClick={refreshInstructorData}>{t('Tentar Novamente')}</Button>
                   </div>
                 ) : (
                   <div className="space-y-8">

@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TutorialProvider } from "@/contexts/TutorialContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TutorialOverlay } from "@/components/tutorial";
 // Debug tools will be loaded conditionally in development only
 import Index from "./pages/Index";
@@ -82,190 +83,192 @@ const ConditionalDebugPanel: React.FC = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TutorialProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <TutorialOverlay />
-          <BrowserRouter
-            future={{
-              v7_startTransition: true,
-              v7_relativeSplatPath: true
-            }}
-          >
-          <ErrorBoundary>
-            <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/demo" element={<Demo />} />
-            <Route path="/funcionalidades" element={<Funcionalidades />} />
-            <Route path="/congregacoes" element={<Congregacoes />} />
-            <Route path="/suporte" element={<Suporte />} />
-            <Route path="/sobre" element={<Sobre />} />
-            <Route path="/doar" element={<Doar />} />
+    <LanguageProvider>
+      <AuthProvider>
+        <TutorialProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <TutorialOverlay />
+            <BrowserRouter
+              future={{
+                v7_startTransition: true,
+                v7_relativeSplatPath: true
+              }}
+            >
+              <ErrorBoundary>
+                <Routes>
+                  {/* Public Routes */}
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/demo" element={<Demo />} />
+                  <Route path="/funcionalidades" element={<Funcionalidades />} />
+                  <Route path="/congregacoes" element={<Congregacoes />} />
+                  <Route path="/suporte" element={<Suporte />} />
+                  <Route path="/sobre" element={<Sobre />} />
+                  <Route path="/doar" element={<Doar />} />
 
-            {/* Onboarding Routes */}
-            <Route
-              path="/bem-vindo"
-              element={
-                <ProtectedRoute allowedRoles={['instrutor']}>
-                  <BemVindo />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/configuracao-inicial"
-              element={
-                <ProtectedRoute allowedRoles={['instrutor']}>
-                  <ConfiguracaoInicial />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/primeiro-programa"
-              element={
-                <ProtectedRoute allowedRoles={['instrutor']}>
-                  <PrimeiroPrograma />
-                </ProtectedRoute>
-              }
-            />
+                  {/* Onboarding Routes */}
+                  <Route
+                    path="/bem-vindo"
+                    element={
+                      <ProtectedRoute allowedRoles={['instrutor']}>
+                        <BemVindo />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/configuracao-inicial"
+                    element={
+                      <ProtectedRoute allowedRoles={['instrutor']}>
+                        <ConfiguracaoInicial />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/primeiro-programa"
+                    element={
+                      <ProtectedRoute allowedRoles={['instrutor']}>
+                        <PrimeiroPrograma />
+                      </ProtectedRoute>
+                    }
+                  />
 
-            {/* Developer Panel Route */}
-            <Route
-              path="/admin/developer"
-              element={
-                <ProtectedRoute allowedRoles={['developer']}>
-                  <DeveloperPanel />
-                </ProtectedRoute>
-              }
-            />
+                  {/* Developer Panel Route */}
+                  <Route
+                    path="/admin/developer"
+                    element={
+                      <ProtectedRoute allowedRoles={['developer']}>
+                        <DeveloperPanel />
+                      </ProtectedRoute>
+                    }
+                  />
 
-            {/* Debug Route - Only in development */}
-            {import.meta.env.DEV && (
-              <Route path="/debug-dashboard" element={<Dashboard />} />
-            )}
+                  {/* Debug Route - Only in development */}
+                  {import.meta.env.DEV && (
+                    <Route path="/debug-dashboard" element={<Dashboard />} />
+                  )}
 
-            {/* Instrutor Only Routes */}
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={['instrutor']}>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/estudantes"
-              element={
-                <ProtectedRoute allowedRoles={['instrutor']}>
-                  <Estudantes />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/programas"
-              element={
-                <ProtectedRoute allowedRoles={['instrutor']}>
-                  <Programas />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/programa/:id"
-              element={
-                <ProtectedRoute allowedRoles={['instrutor']}>
-                  <ProgramaPreview />
-                </ProtectedRoute>
-              }
-            />
-            {/* Test Routes - Only in development */}
-            {import.meta.env.DEV && (
-              <>
-                <Route
-                  path="/programas-test"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <ProgramasTest />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/pdf-parsing-test"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <PdfParsingTest />
-                    </ProtectedRoute>
-                  }
-                />
-              </>
-            )}
-            <Route
-              path="/designacoes"
-              element={
-                <ProtectedRoute allowedRoles={['instrutor']}>
-                  <Designacoes />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/relatorios"
-              element={
-                <ProtectedRoute allowedRoles={['instrutor']}>
-                  <Relatorios />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/reunioes"
-              element={
-                <ProtectedRoute allowedRoles={['instrutor']}>
-                  <Reunioes />
-                </ProtectedRoute>
-              }
-            />
+                  {/* Instrutor Only Routes */}
+                  <Route
+                    path="/dashboard"
+                    element={
+                      <ProtectedRoute allowedRoles={['instrutor']}>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/estudantes"
+                    element={
+                      <ProtectedRoute allowedRoles={['instrutor']}>
+                        <Estudantes />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/programas"
+                    element={
+                      <ProtectedRoute allowedRoles={['instrutor']}>
+                        <Programas />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/programa/:id"
+                    element={
+                      <ProtectedRoute allowedRoles={['instrutor']}>
+                        <ProgramaPreview />
+                      </ProtectedRoute>
+                    }
+                  />
+                  {/* Test Routes - Only in development */}
+                  {import.meta.env.DEV && (
+                    <>
+                      <Route
+                        path="/programas-test"
+                        element={
+                          <ProtectedRoute allowedRoles={['instrutor']}>
+                            <ProgramasTest />
+                          </ProtectedRoute>
+                        }
+                      />
+                      <Route
+                        path="/pdf-parsing-test"
+                        element={
+                          <ProtectedRoute allowedRoles={['instrutor']}>
+                            <PdfParsingTest />
+                          </ProtectedRoute>
+                        }
+                      />
+                    </>
+                  )}
+                  <Route
+                    path="/designacoes"
+                    element={
+                      <ProtectedRoute allowedRoles={['instrutor']}>
+                        <Designacoes />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/relatorios"
+                    element={
+                      <ProtectedRoute allowedRoles={['instrutor']}>
+                        <Relatorios />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/reunioes"
+                    element={
+                      <ProtectedRoute allowedRoles={['instrutor']}>
+                        <Reunioes />
+                      </ProtectedRoute>
+                    }
+                  />
 
-            {/* Estudante Only Routes */}
-            <Route
-              path="/estudante/:id"
-              element={
-                <ProtectedRoute allowedRoles={['estudante']}>
-                  <EstudantePortal />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/estudante/:id/familia"
-              element={
-                <ProtectedRoute allowedRoles={['estudante', 'instrutor']}>
-                  <FamiliaPage />
-                </ProtectedRoute>
-              }
-            />
+                  {/* Estudante Only Routes */}
+                  <Route
+                    path="/estudante/:id"
+                    element={
+                      <ProtectedRoute allowedRoles={['estudante']}>
+                        <EstudantePortal />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/estudante/:id/familia"
+                    element={
+                      <ProtectedRoute allowedRoles={['estudante', 'instrutor']}>
+                        <FamiliaPage />
+                      </ProtectedRoute>
+                    }
+                  />
 
-            {/* Family Invitation Routes */}
-            <Route path="/convite/aceitar" element={<ConviteAceitar />} />
-            <Route
-              path="/portal-familiar"
-              element={
-                <ProtectedRoute allowedRoles={['family_member']}>
-                  <PortalFamiliar />
-                </ProtectedRoute>
-              }
-            />
+                  {/* Family Invitation Routes */}
+                  <Route path="/convite/aceitar" element={<ConviteAceitar />} />
+                  <Route
+                    path="/portal-familiar"
+                    element={
+                      <ProtectedRoute allowedRoles={['family_member']}>
+                        <PortalFamiliar />
+                      </ProtectedRoute>
+                    }
+                  />
 
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-            </Routes>
-          </ErrorBoundary>
-        </BrowserRouter>
-        </TooltipProvider>
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </ErrorBoundary>
+            </BrowserRouter>
+          </TooltipProvider>
 
-        {/* Debug Panel - Only shows in development */}
-        <ConditionalDebugPanel />
-      </TutorialProvider>
-    </AuthProvider>
+          {/* Debug Panel - Only shows in development */}
+          <ConditionalDebugPanel />
+        </TutorialProvider>
+      </AuthProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 

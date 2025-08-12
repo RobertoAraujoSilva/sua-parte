@@ -1,4 +1,8 @@
+import { useTranslation } from "@/hooks/useTranslation";
+
 const Footer = () => {
+  const { t } = useTranslation();
+  
   return (
     <footer className="bg-jw-navy text-white py-12">
       <div className="container mx-auto px-4">
@@ -8,45 +12,43 @@ const Footer = () => {
               <div className="w-8 h-8 bg-jw-blue rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">SM</span>
               </div>
-              <h3 className="text-xl font-semibold">Sistema Ministerial</h3>
+              <h3 className="text-xl font-semibold">{t('Sistema Ministerial')}</h3>
             </div>
             <p className="text-white/80 mb-4 max-w-md">
-              Automatização inteligente de designações ministeriais para congregações 
-              das Testemunhas de Jeová, com foco em eficiência e conformidade.
+              {t('Automatização inteligente de designações ministeriais para congregações das Testemunhas de Jeová, com foco em eficiência e conformidade.')}
             </p>
             <p className="text-sm text-white/60">
-              Desenvolvido com dedicação para servir às necessidades congregacionais 
-              e apoiar o trabalho ministerial.
+              {t('Desenvolvido com dedicação para servir às necessidades congregacionais e apoiar o trabalho ministerial.')}
             </p>
           </div>
           
           <div>
-            <h4 className="font-semibold mb-4">Funcionalidades</h4>
+            <h4 className="font-semibold mb-4">{t('Funcionalidades')}</h4>
             <ul className="space-y-2 text-sm text-white/80">
-              <li>Gestão de Estudantes</li>
-              <li>Importação de Programas</li>
-              <li>Designações Automáticas</li>
-              <li>Notificações</li>
-              <li>Portal do Estudante</li>
-              <li>Relatórios</li>
+              <li>{t('Gestão de Estudantes')}</li>
+              <li>{t('Importação de Programas')}</li>
+              <li>{t('Designações Automáticas')}</li>
+              <li>{t('Notificações')}</li>
+              <li>{t('Portal do Estudante')}</li>
+              <li>{t('Relatórios')}</li>
             </ul>
           </div>
           
           <div>
-            <h4 className="font-semibold mb-4">Suporte</h4>
+            <h4 className="font-semibold mb-4">{t('Suporte')}</h4>
             <ul className="space-y-2 text-sm text-white/80">
-              <li>Tutorial de Uso</li>
-              <li>Documentação</li>
-              <li>Contato Técnico</li>
-              <li>Atualizações</li>
-              <li>Comunidade</li>
+              <li>{t('Tutorial de Uso')}</li>
+              <li>{t('Documentação')}</li>
+              <li>{t('Contato Técnico')}</li>
+              <li>{t('Atualizações')}</li>
+              <li>{t('Comunidade')}</li>
             </ul>
           </div>
         </div>
         
         <div className="border-t border-white/20 mt-8 pt-8 text-center">
           <p className="text-sm text-white/60">
-            © 2024 Sistema Ministerial. Desenvolvido para servir às congregações das Testemunhas de Jeová.
+            © 2024 {t('Sistema Ministerial')}. {t('Desenvolvido para servir congregações das Testemunhas de Jeová.')}
           </p>
         </div>
       </div>

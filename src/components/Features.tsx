@@ -1,37 +1,39 @@
 import { Card } from "@/components/ui/card";
 import { Users, BookOpen, Bell, BarChart3, Shield, Smartphone } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const Features = () => {
+  const { t } = useTranslation();
   const features = [
     {
       icon: Users,
-      title: "Gestão Completa de Estudantes",
-      description: "Cadastro detalhado com validação de cargos, parentesco e qualificações congregacionais para designações precisas."
+      title: t('Gestão Completa de Estudantes'),
+      description: t('Cadastro detalhado com validação de cargos, parentesco e qualificações congregacionais para designações precisas.')
     },
     {
       icon: BookOpen,
-      title: "Importação de Programas Semanais",
-      description: "Importação automática a partir de PDFs oficiais da apostila Vida e Ministério Cristão com parsing inteligente."
+      title: t('Importação de Programas Semanais'),
+      description: t('Importação automática a partir de PDFs oficiais da apostila Vida e Ministério Cristão com parsing inteligente.')
     },
     {
       icon: Bell,
-      title: "Notificações Automáticas",
-      description: "Envio por e-mail e WhatsApp com detalhes da designação, cena e instruções específicas para cada estudante."
+      title: t('Notificações Automáticas'),
+      description: t('Envio por e-mail e WhatsApp com detalhes da designação, cena e instruções específicas para cada estudante.')
     },
     {
       icon: BarChart3,
-      title: "Relatórios e Análises",
-      description: "Dashboard completo com histórico de participação, métricas de engajamento e relatórios para coordenadores."
+      title: t('Relatórios e Análises'),
+      description: t('Dashboard completo com histórico de participação, métricas de engajamento e relatórios para coordenadores.')
     },
     {
       icon: Shield,
-      title: "Conformidade com Regras",
-      description: "Algoritmo inteligente que respeita todas as diretrizes da Escola do Ministério Teocrático e regulamentos congregacionais."
+      title: t('Conformidade com Regras'),
+      description: t('Algoritmo inteligente que respeita todas as diretrizes da Escola do Ministério Teocrático e regulamentos congregacionais.')
     },
     {
       icon: Smartphone,
-      title: "Portal do Estudante",
-      description: "Interface responsiva para estudantes visualizarem designações, confirmarem participação e contribuírem via doações."
+      title: t('Portal do Estudante'),
+      description: t('Interface responsiva para estudantes visualizarem designações, confirmarem participação e contribuírem via doações.')
     }
   ];
 
@@ -40,11 +42,10 @@ const Features = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Funcionalidades Principais
+            {t('Funcionalidades Principais')}
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Tudo que sua congregação precisa para automatizar e otimizar o processo 
-            de designações ministeriais com total conformidade.
+            {t('Tudo que sua congregação precisa para automatizar e otimizar o processo de designações ministeriais com total conformidade.')}
           </p>
         </div>
         

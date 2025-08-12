@@ -1,10 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate, Link } from "react-router-dom";
-import { LogOut, User, Settings } from "lucide-react";
+import { LogOut, User, Settings, Languages } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useDebugLogger } from "@/utils/debugLogger";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,8 +18,10 @@ import {
 
 const Header = () => {
   const { user, profile, signOut, isInstrutor, isEstudante } = useAuth();
-  const navigate = useNavigate();
-  const { logLogoutAttempt, logLogoutResult, logError, logNavigation } = useDebugLogger();
+    const { t, language } = useTranslation();
+    const { toggleLanguage } = useLanguage();
+    const navigate = useNavigate();
+    const { logLogoutAttempt, logLogoutResult, logError, logNavigation } = useDebugLogger();
 
   // Create fallback role checking for when profile hasn't loaded yet
   const userIsInstrutor = isInstrutor || user?.user_metadata?.role === 'instrutor';
@@ -43,8 +47,8 @@ const Header = () => {
         logError(error, 'Header handleSignOut', user);
 
         toast({
-          title: "Erro",
-          description: "Erro ao sair. Tente novamente.",
+          title: t("Erro"),
+          description: t("Erro ao sair. Tente novamente."),
           variant: "destructive"
         });
       } else {
@@ -53,8 +57,8 @@ const Header = () => {
         logNavigation(window.location.pathname, '/', user);
 
         toast({
-          title: "Sessão encerrada",
-          description: "Você foi desconectado com sucesso.",
+          title: t("Sessão encerrada"),
+          description: t("Você foi desconectado com sucesso."),
         });
 
         // Small delay to ensure logs are captured
@@ -68,8 +72,8 @@ const Header = () => {
       logError(error, 'Header handleSignOut Exception', user);
 
       toast({
-        title: "Erro",
-        description: "Erro inesperado ao sair. Tente novamente.",
+        title: t("Erro"),
+        description: t("Erro inesperado ao sair. Tente novamente."),
         variant: "destructive"
       });
     }
@@ -88,69 +92,82 @@ const Header = () => {
             </div>
             
             <nav className="hidden md:flex items-center space-x-6">
-              {!user && (
-                <>
-                  <Link to="/" className="hover:text-jw-gold transition-colors">
-                    INÍCIO
-                  </Link>
-                  <Link to="/funcionalidades" className="hover:text-jw-gold transition-colors">
-                    FUNCIONALIDADES
-                  </Link>
-                  <a href="#faq" className="hover:text-jw-gold transition-colors">
-                    FAQ
-                  </a>
-                  <Link to="/congregacoes" className="hover:text-jw-gold transition-colors">
-                    CONGREGAÇÕES
-                  </Link>
-                  <Link to="/suporte" className="hover:text-jw-gold transition-colors">
-                    SUPORTE
-                  </Link>
-                  <Link to="/sobre" className="hover:text-jw-gold transition-colors">
-                    SOBRE
-                  </Link>
-                  <Link to="/doar" className="hover:text-jw-gold transition-colors font-semibold">
-                    DOAR
-                  </Link>
-                </>
-              )}
-
-              {userIsInstrutor && (
-                <>
-                  <Link to="/dashboard" className="hover:text-jw-gold transition-colors">
-                    DASHBOARD
-                  </Link>
-                  <Link to="/estudantes" className="hover:text-jw-gold transition-colors">
-                    ESTUDANTES
-                  </Link>
-                  <Link to="/programas" className="hover:text-jw-gold transition-colors">
-                    PROGRAMAS
-                  </Link>
-                  <Link to="/designacoes" className="hover:text-jw-gold transition-colors">
-                    DESIGNAÇÕES
-                  </Link>
-                  <Link to="/relatorios" className="hover:text-jw-gold transition-colors">
-                    RELATÓRIOS
-                  </Link>
-                </>
-              )}
-            </nav>
+                          {!user && (
+                            <>
+                              <Link to="/" className="hover:text-jw-gold transition-colors">
+                                                  {t('INÍCIO')}
+                                                </Link>
+                                                <Link to="/funcionalidades" className="hover:text-jw-gold transition-colors">
+                                                  {t('FUNCIONALIDADES')}
+                                                </Link>
+                                                <a href="#faq" className="hover:text-jw-gold transition-colors">
+                                                  {t('FAQ')}
+                                                </a>
+                                                <Link to="/congregacoes" className="hover:text-jw-gold transition-colors">
+                                                  {t('CONGREGAÇÕES')}
+                                                </Link>
+                                                <Link to="/suporte" className="hover:text-jw-gold transition-colors">
+                                                  {t('SUPORTE')}
+                                                </Link>
+                                                <Link to="/sobre" className="hover:text-jw-gold transition-colors">
+                                                  {t('SOBRE')}
+                                                </Link>
+                                                <Link to="/doar" className="hover:text-jw-gold transition-colors font-semibold">
+                                                  {t('DOAR')}
+                                                </Link>
+                            </>
+                          )}
+            
+                          {userIsInstrutor && (
+                            <>
+                              <Link to="/dashboard" className="hover:text-jw-gold transition-colors">
+                                                  {t('DASHBOARD')}
+                                                </Link>
+                                                <Link to="/estudantes" className="hover:text-jw-gold transition-colors">
+                                                  {t('ESTUDANTES')}
+                                                </Link>
+                                                <Link to="/programas" className="hover:text-jw-gold transition-colors">
+                                                  {t('PROGRAMAS')}
+                                                </Link>
+                                                <Link to="/designacoes" className="hover:text-jw-gold transition-colors">
+                                                  {t('DESIGNAÇÕES')}
+                                                </Link>
+                                                <Link to="/relatorios" className="hover:text-jw-gold transition-colors">
+                                                  {t('RELATÓRIOS')}
+                                                </Link>
+                            </>
+                          )}
+                        </nav>
           </div>
           
-          <div className="flex items-center space-x-4">
+ <div className="flex items-center space-x-4">
+            {/* Language Toggle Button */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:text-jw-gold"
+              onClick={toggleLanguage}
+              title={language === 'pt' ? t('Alternar para Inglês') : t('Alternar para Português')}
+            >
+              <Languages className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">
+                {language === 'pt' ? t('Inglês') : t('Português')}
+              </span>
+            </Button>
             {user ? (
               <>
                 {/* Debug Test Button - Remove after testing */}
                 <Button
-                  onClick={() => {
-                    console.log('🧪 Direct test button clicked');
-                    handleSignOut('test');
-                  }}
-                  variant="outline"
-                  size="sm"
-                  className="text-xs bg-red-600 text-white hover:bg-red-700"
-                >
-                  Test Logout
-                </Button>
+                                  onClick={() => {
+                                    console.log('🧪 Direct test button clicked');
+                                    handleSignOut('test');
+                                  }}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-xs bg-red-600 text-white hover:bg-red-700"
+                                >
+                                  {t('Test Logout')}
+                                </Button>
 
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -160,8 +177,8 @@ const Header = () => {
                       {profile?.nome_completo || user.user_metadata?.nome_completo || user.email}
                     </span>
                     <Badge variant="outline" className="text-xs border-jw-gold text-jw-gold">
-                      {(profile?.role === 'instrutor' || user.user_metadata?.role === 'instrutor') ? 'Instrutor' : 'Estudante'}
-                    </Badge>
+                                          {(profile?.role === 'instrutor' || user.user_metadata?.role === 'instrutor') ? t('Instrutor') : t('Estudante')}
+                                                              </Badge>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -171,25 +188,25 @@ const Header = () => {
                         {profile?.nome_completo || user.user_metadata?.nome_completo || user.email}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {profile?.congregacao || user.user_metadata?.congregacao || 'Congregação'}
+                        {profile?.congregacao || user.user_metadata?.congregacao || t('Congregação')}
                       </p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
 
                   {userIsInstrutor && (
-                    <DropdownMenuItem onClick={() => navigate('/dashboard')}>
-                      <Settings className="w-4 h-4 mr-2" />
-                      Dashboard
-                    </DropdownMenuItem>
-                  )}
-
-                  {userIsEstudante && (
-                    <DropdownMenuItem onClick={() => navigate(`/estudante/${user.id}`)}>
-                      <User className="w-4 h-4 mr-2" />
-                      Meu Portal
-                    </DropdownMenuItem>
-                  )}
+                                      <DropdownMenuItem onClick={() => navigate('/dashboard')}>
+                                                            <Settings className="w-4 h-4 mr-2" />
+                                                            {t('Dashboard')}
+                                                          </DropdownMenuItem>
+                                                        )}
+                                      
+                                                        {userIsEstudante && (
+                                                          <DropdownMenuItem onClick={() => navigate(`/estudante/${user.id}`)}>
+                                                            <User className="w-4 h-4 mr-2" />
+                                                            {t('Meu Portal')}
+                                                          </DropdownMenuItem>
+                                                        )}
 
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -208,28 +225,28 @@ const Header = () => {
                     className="text-red-600 cursor-pointer"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
-                    Sair
-                  </DropdownMenuItem>
+                                        {t('Sair')}
+                                      </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               </>
             ) : (
               <>
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-white hover:text-jw-gold"
-                  onClick={() => navigate('/auth')}
-                >
-                  Entrar
-                </Button>
-                <Button
-                  variant="hero"
-                  size="sm"
-                  onClick={() => navigate('/auth')}
-                >
-                  Começar
-                </Button>
+                                  variant="ghost"
+                                  size="sm"
+                                  className="text-white hover:text-jw-gold"
+                                  onClick={() => navigate('/auth')}
+                                >
+                                  {t('Entrar')}
+                                </Button>
+                                <Button
+                                  variant="hero"
+                                  size="sm"
+                                  onClick={() => navigate('/auth')}
+                                >
+                                  {t('Começar')}
+                                </Button>
               </>
             )}
           </div>
