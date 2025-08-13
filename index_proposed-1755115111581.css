@@ -174,23 +174,11 @@ All colors MUST be HSL.
 @layer base {
   * {
     @apply border-border;
-    box-sizing: border-box;
   }
 
   body {
     @apply bg-background text-foreground;
-    overflow-x: hidden;
   }
-  
-  /* Prevent horizontal scroll on all elements */
-  *, *::before, *::after {
-    max-width: 100%;
-  }
-}
-
-/* Global overflow prevention */
-html, body {
-  overflow-x: hidden;
 }
 
 /* Tablet Portrait Responsive Fixes */
@@ -277,11 +265,11 @@ html, body {
 
 /* Utility classes for responsive design */
 .responsive-container {
-  @apply w-full max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 overflow-x-hidden;
+  @apply w-full max-w-none px-2 sm:px-4 lg:px-6;
 }
 
 .responsive-grid {
-  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-full;
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
 }
 
 .responsive-tabs {
@@ -294,23 +282,4 @@ html, body {
 
 .responsive-buttons {
   @apply flex flex-col sm:flex-row gap-2 sm:gap-4;
-}
-
-/* CTA flutuante fixo */
-.floating-cta {
-  @apply fixed right-4 bottom-6 z-40 rounded-full shadow-lg px-4 py-3 text-sm font-semibold bg-primary text-white max-w-[90vw] md:right-6 md:bottom-8;
-  transform: translateZ(0); /* Force hardware acceleration */
-}
-
-/* Text balance utility for better line breaks */
-.text-balance {
-  text-wrap: balance;
-}
-
-/* Clamp utility for responsive text */
-.text-clamp {
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }

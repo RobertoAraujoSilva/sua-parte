@@ -259,14 +259,14 @@ const FAQSection: React.FC = () => {
   const currentCategory = filteredCategories.find(cat => cat.id === selectedCategory) || filteredCategories[0];
 
   return (
-    <section id="faq" className="py-20 bg-muted/30">
-      <div className="container mx-auto px-4">
+    <section id="faq" className="py-20 bg-muted/30 overflow-x-hidden">
+      <div className="responsive-container">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-balance text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-foreground mb-4">
             Perguntas Frequentes
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-balance text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
             Encontre respostas para as dúvidas mais comuns sobre o Sistema Ministerial.
             Tudo que você precisa saber para começar a usar nossa plataforma.
           </p>

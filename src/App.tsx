@@ -50,7 +50,11 @@ if (import.meta.env.DEV) {
     import("@/utils/supabaseHealthCheck"),
     import("@/utils/logoutDiagnostics"),
     import("@/utils/emergencyLogout"),
-    import("@/utils/familyMemberDebug")
+    import("@/utils/familyMemberDebug"),
+    import("@/utils/reviewDatabase"),
+    import("@/utils/executeMigration"),
+    import("@/utils/syncStudentsToInstructors"),
+    import("@/utils/quickSync")
   ]).then(() => {
     console.log('✅ Debug tools loaded successfully');
   }).catch(error => {
