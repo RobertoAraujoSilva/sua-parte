@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, CalendarDays, RefreshCw, CloudDownload, FileSpreadsheet, BarChart } from "lucide-react";
 import { AgGridReact } from "ag-grid-react";
 import type { ColDef } from "ag-grid-community";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import "ag-grid-community/styles/ag-grid.css";
@@ -68,14 +68,14 @@ export default function ProgramasPage() {
       
       if (error) {
         console.error(error);
-        toast.error("Erro ao carregar programas");
+        toast({ title: "Erro ao carregar programas", variant: "destructive" });
       } else {
         setRows(reset ? data ?? [] : data ?? []);
         setTotal(count ?? 0);
       }
     } catch (error) {
       console.error("Exception loading data:", error);
-      toast.error("Erro ao carregar programas");
+      toast({ title: "Erro ao carregar programas", variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -96,11 +96,11 @@ export default function ProgramasPage() {
         return;
       }
       
-      const programs = data || [];
+      const programs = (data ?? []) as any[];
       const totalPrograms = programs.length;
       const thisMonth = new Date();
       thisMonth.setDate(1);
-      const thisMonthPrograms = programs.filter(p => 
+      const thisMonthPrograms = programs.filter((p: any) =>
         new Date(p.data_programa) >= thisMonth
       ).length;
       
@@ -160,16 +160,16 @@ export default function ProgramasPage() {
       
       if (error) throw error;
       
-      toast.success("Campo atualizado com sucesso");
+      toast({ title: "Campo atualizado com sucesso" });
     } catch (e) {
       console.error(e);
-      toast.error("Erro ao atualizar campo");
+      toast({ title: "Erro ao atualizar campo", variant: "destructive" });
     }
   };
 
   const exportCsv = () => {
     gridRef.current?.api.exportDataAsCsv({ fileName: "programas.csv" });
-    toast.success("Planilha exportada com sucesso");
+    toast({ title: "Planilha exportada com sucesso" });
   };
 
   const renderListView = () => (

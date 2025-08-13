@@ -1,0 +1,48 @@
+# Auditoria do Plano
+
+- [x] 1.1 Migrações aprimoradas
+- [x] 1.2 Backfill + FamilyInferenceEngine
+- [x] 1.3 Tipos TS (EstudanteEnhanced, enums)
+- [x] 1.4 RLS atualizada p/ novo schema
+- [x] 2.1 Landing otimizada/SEO/PWA
+- [x] 2.2 Autenticação + RBAC
+- [x] 2.3 Dashboard avançado
+- [x] 2.4 Gestão de Estudantes avançada
+- [x] 2.5 Gestão de Programas com parsing
+- [x] 2.6 Designações (algoritmo + preview)
+- [x] 3.1 Engine S-38-T reforçada
+- [x] 3.2 Validação familiar nova
+- [x] 3.3 Balanceamento histórico
+- [x] 3.4 Testes abrangentes p/ designações
+- [x] 4.1 Responsividade e A11y
+- [x] 4.2 Loading progressivo (skeleton/offline)
+- [x] 4.3 Tratamento de erros + toasts
+- [ ] 4.4 Busca global/navegação avançada
+- [x] 5.1 Import planilha robusto
+- [x] 5.2 PDF/content processing
+- [x] 5.3 Export avançado (PDF/XLSX)
+- [x] 5.4 Operações em lote
+- [x] 6.1 Perf frontend (memo/virtual/cache)
+- [x] 6.2 Índices/queries otimizadas
+- [x] 6.3 Cache/queues
+- [x] 6.4 Monitoring/alertas
+- [x] 7.1 MFA/RBAC/auditoria
+- [x] 7.2 Proteção de dados
+- [x] 7.3 Segurança de API
+- [x] 7.4 Conformidade/audit
+- [ ] 8.1 REST API + OpenAPI
+- [x] 8.2 Integrações externas
+- [x] 8.3 Retry/backoff/circuit breaker
+- [ ] 8.4 Monitoring API
+- [ ] 9.1 Unit tests
+- [x] 9.2 E2E Cypress
+- [x] 9.3 CI/CD
+- [x] 9.4 Qualidade/monitoramento
+- [x] 10.1 Docs de usuário
+- [x] 10.3 Docs dev/API
+- [x] 10.4 Feedback/suporte
+- [ ] 11.1 UI de geração ligada ao engine
+- [x] 11.2 Form de estudante com família
+- [x] 11.3 Utils integrados ao UI
+- [x] 11.5 Páginas e routing
+
