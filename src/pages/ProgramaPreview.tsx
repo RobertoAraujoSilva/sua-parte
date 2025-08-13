@@ -25,6 +25,7 @@ import { AssignmentEditModal } from "@/components/AssignmentEditModal";
 import { TutorialManager } from "@/components/TutorialManager";
 import { TutorialIntegration } from "@/components/TutorialIntegration";
 import { JWTerminologyHelper } from "@/components/JWTerminologyHelper";
+import { generateAssignmentsPDF } from "@/utils/pdfGenerator";
 
 interface Assignment {
   id: string;
@@ -43,19 +44,21 @@ interface Assignment {
     nome: string;
     cargo: string;
     genero: string;
-  };
+  } | null;
   confirmado: boolean;
+  [key: string]: any; // Allow additional properties from database
 }
 
 interface Program {
   id: string;
   data_inicio_semana: string;
   mes_apostila: string;
-  partes: string[];
+  partes: any;
   status: string;
   assignment_status: string;
   assignments_generated_at: string;
   total_assignments_generated: number;
+  [key: string]: any; // Allow additional properties
 }
 
 const ProgramaPreview = () => {
@@ -97,22 +100,44 @@ const ProgramaPreview = () => {
       // Load assignments with student details
       const { data: assignmentsData, error: assignmentsError } = await supabase
         .from('designacoes')
-        .select(`
-          id,
-          numero_parte,
-          titulo_parte,
-          tipo_parte,
-          tempo_minutos,
-          confirmado,
-          estudante:id_estudante(id, nome, cargo, genero),
-          ajudante:id_ajudante(id, nome, cargo, genero)
-        `)
+        .select('*')
         .eq('id_programa', id)
         .eq('user_id', user?.id)
         .order('numero_parte');
 
       if (assignmentsError) throw assignmentsError;
-      setAssignments(assignmentsData || []);
+      
+      // Load student details separately to avoid embedding issues
+      const assignmentIds = (assignmentsData || []).map(a => a.id);
+      if (assignmentIds.length > 0) {
+        // Load all students for this program
+        const studentIds = [
+          ...new Set(
+            (assignmentsData || []).flatMap(a => [a.id_estudante, a.id_ajudante]).filter(Boolean)
+          )
+        ];
+        
+        const { data: studentsData } = await supabase
+          .from('estudantes')
+          .select('id, nome, cargo, genero')
+          .in('id', studentIds);
+        
+        const studentMap = (studentsData || []).reduce((acc, student) => {
+          acc[student.id] = student;
+          return acc;
+        }, {} as Record<string, any>);
+        
+        // Transform assignments with student data
+        const transformedData = (assignmentsData || []).map(assignment => ({
+          ...assignment,
+          estudante: studentMap[assignment.id_estudante] || { id: '', nome: '', cargo: '', genero: '' },
+          ajudante: assignment.id_ajudante ? studentMap[assignment.id_ajudante] : undefined
+        }));
+        
+        setAssignments(transformedData);
+      } else {
+        setAssignments([]);
+      }
 
     } catch (error) {
       console.error('Error loading program and assignments:', error);
@@ -209,31 +234,20 @@ const ProgramaPreview = () => {
   };
 
   const handleExportPDF = async () => {
+    if (!program || assignments.length === 0) {
+      toast({
+        title: "Dados Insuficientes",
+        description: "Não há dados suficientes para gerar o PDF.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
-      toast({
-        title: "Gerando PDF...",
-        description: "O arquivo PDF está sendo preparado para download.",
-      });
-
-      // TODO: Implement PDF generation
-      // This would typically involve:
-      // 1. Creating a PDF template with program and assignment data
-      // 2. Using a library like jsPDF or react-pdf
-      // 3. Formatting the assignments in proper JW meeting structure
-
-      toast({
-        title: "Funcionalidade em Desenvolvimento",
-        description: "A exportação em PDF será implementada em breve.",
-        variant: "destructive"
-      });
-
+      await generateAssignmentsPDF(program, assignments);
     } catch (error) {
-      console.error('Error exporting PDF:', error);
-      toast({
-        title: "Erro na Exportação",
-        description: "Não foi possível gerar o PDF. Tente novamente.",
-        variant: "destructive"
-      });
+      // Error handling is done in the utility function
+      console.error('PDF generation failed:', error);
     }
   };
 

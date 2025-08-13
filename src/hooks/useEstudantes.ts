@@ -28,20 +28,17 @@ export const useEstudantes = () => {
 
       const { data, error } = await supabase
         .from("estudantes")
-        .select(`
-          *,
-          pai_mae:id_pai_mae(*)
-        `)
+        .select('*')
         .eq("user_id", user.id)
         .order("nome");
 
       if (error) throw error;
 
-      // Process data to include children relationships
-      const estudantesWithRelations = data.map((estudante) => ({
+      // Simple mapping for now
+      const estudantesWithRelations = (data || []).map((estudante) => ({
         ...estudante,
-        pai_mae: estudante.pai_mae,
-        filhos: data.filter((e) => e.id_pai_mae === estudante.id),
+        pai_mae: null,
+        filhos: [],
       }));
 
       setEstudantes(estudantesWithRelations);

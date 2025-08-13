@@ -12,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Plus, Search, Users, ArrowLeft, Upload, BarChart3, Filter, FileSpreadsheet } from "lucide-react";
+import { Plus, Search, Users, ArrowLeft, Upload, BarChart3, Filter, FileSpreadsheet, Table } from "lucide-react";
+import StudentsSpreadsheet from "@/components/StudentsSpreadsheet";
 import { useEstudantes } from "@/hooks/useEstudantes";
 import { useAuth } from "@/contexts/AuthContext";
 import { TutorialButton } from "@/components/tutorial";
@@ -64,7 +65,7 @@ const Estudantes = () => {
   // UI State - Initialize from URL parameter
   const [activeTab, setActiveTab] = useState(() => {
     const tabParam = searchParams.get('tab');
-    return ['list', 'form', 'import', 'stats', 'instructor'].includes(tabParam || '') ? tabParam : 'list';
+    return ['list', 'form', 'import', 'stats', 'instructor', 'spreadsheet'].includes(tabParam || '') ? tabParam : 'list';
   });
 
   // Update URL when tab changes
@@ -219,10 +220,10 @@ const Estudantes = () => {
 
         {/* Main Content */}
         <section className="py-8">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-4 max-w-none">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <div className="flex items-center justify-between mb-6">
-                <TabsList className="grid w-auto grid-cols-5" data-tutorial="tabs-navigation">
+                <TabsList className="grid w-auto grid-cols-6" data-tutorial="tabs-navigation">
                   <TabsTrigger value="list" className="flex items-center gap-2">
                     <Users className="w-4 h-4" />
                     {t('Lista')}
@@ -234,6 +235,10 @@ const Estudantes = () => {
                   <TabsTrigger value="import" className="flex items-center gap-2">
                     <FileSpreadsheet className="w-4 h-4" />
                     {t('Importar')}
+                  </TabsTrigger>
+                  <TabsTrigger value="spreadsheet" className="flex items-center gap-2">
+                    <Table className="w-4 h-4" />
+                    Planilha
                   </TabsTrigger>
                   <TabsTrigger value="stats" className="flex items-center gap-2">
                     <BarChart3 className="w-4 h-4" />
@@ -537,6 +542,23 @@ const Estudantes = () => {
                   onImportComplete={handleImportComplete}
                   onViewList={handleViewList}
                 />
+              </TabsContent>
+
+              {/* Spreadsheet Tab */}
+              <TabsContent value="spreadsheet" className="space-y-6 w-full">
+                {loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-jw-blue mx-auto mb-4"></div>
+                      <p className="text-gray-600">Carregando estudantes...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <StudentsSpreadsheet
+                    estudantes={estudantes}
+                    onRefresh={() => window.location.reload()}
+                  />
+                )}
               </TabsContent>
             </Tabs>
           </div>

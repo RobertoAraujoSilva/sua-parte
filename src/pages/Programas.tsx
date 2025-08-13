@@ -19,6 +19,7 @@ import { ProgramDetailModal } from "@/components/ProgramDetailModal";
 import { TemplateLibrary } from "@/components/TemplateLibrary";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
+import { generateProgramPDF } from "@/utils/pdfGenerator";
 
 const Programas = () => {
   const navigate = useNavigate();
@@ -411,7 +412,7 @@ const Programas = () => {
       }
 
       // If no file in storage, generate a PDF from program data
-      await generateProgramPDF(programa);
+      await handleGenerateProgramPDF(programa);
 
     } catch (error) {
       console.error('Download error:', error);
@@ -423,80 +424,13 @@ const Programas = () => {
     }
   };
 
-  // Generate PDF from program data
-  const generateProgramPDF = async (programa: any) => {
+  // Generate PDF from program data using utility
+  const handleGenerateProgramPDF = async (programa: any) => {
     try {
-      // Create a simple HTML content for the PDF
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>${programa.semana}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .title { font-size: 24px; font-weight: bold; color: #1e40af; }
-            .subtitle { font-size: 16px; color: #666; margin-top: 10px; }
-            .section { margin: 20px 0; }
-            .section-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-            .part { margin: 10px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid #1e40af; }
-            .part-number { font-weight: bold; color: #1e40af; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="title">${programa.semana}</div>
-            <div class="subtitle">Semana de ${new Date(programa.data_inicio_semana).toLocaleDateString('pt-BR')}</div>
-          </div>
-
-          <div class="section">
-            <div class="section-title">Partes do Programa:</div>
-            ${programa.partes.map((parte: string, index: number) => `
-              <div class="part">
-                <span class="part-number">${index + 1}.</span> ${parte}
-              </div>
-            `).join('')}
-          </div>
-
-          <div class="section">
-            <div class="section-title">Status:</div>
-            <p>${programa.status}</p>
-          </div>
-
-          <div class="section">
-            <div class="section-title">Data de Importação:</div>
-            <p>${new Date(programa.dataImportacao).toLocaleDateString('pt-BR')}</p>
-          </div>
-        </body>
-        </html>
-      `;
-
-      // Create a blob with the HTML content
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-
-      // Create download link
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${programa.semana.replace(/[^a-zA-Z0-9]/g, '_')}.html`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      toast({
-        title: "Download Iniciado",
-        description: `Gerando arquivo para: ${programa.semana}`,
-      });
-
+      await generateProgramPDF(programa);
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast({
-        title: "Erro na Geração",
-        description: "Não foi possível gerar o arquivo do programa.",
-        variant: "destructive"
-      });
+      // Error handling is done in the utility function
+      console.error('PDF generation failed:', error);
     }
   };
 

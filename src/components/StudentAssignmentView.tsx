@@ -2,18 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  Users, 
-  BookOpen, 
-  CheckCircle, 
+import {
+  Calendar,
+  Clock,
+  User,
+  Users,
+  BookOpen,
+  CheckCircle,
   AlertCircle,
   Download,
   Eye
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from "@/hooks/use-toast";
 
 interface StudentAssignmentViewProps {
   studentId: string;
@@ -50,6 +51,33 @@ export const StudentAssignmentView: React.FC<StudentAssignmentViewProps> = ({
 
   useEffect(() => {
     loadStudentAssignments();
+    
+    // Set up real-time subscription
+    const assignmentChannel = supabase
+      .channel('assignments-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'designacoes',
+          filter: `id_estudante=eq.${studentId}`
+        },
+        (payload) => {
+          // Update the specific assignment in the list
+          setAssignments(prev => prev.map(assignment =>
+            assignment.id === payload.new.id
+              ? { ...assignment, ...payload.new }
+              : assignment
+          ));
+        }
+      )
+      .subscribe();
+
+    // Clean up subscription
+    return () => {
+      supabase.removeChannel(assignmentChannel);
+    };
   }, [studentId]);
 
   const loadStudentAssignments = async () => {
@@ -147,13 +175,24 @@ export const StudentAssignmentView: React.FC<StudentAssignmentViewProps> = ({
       if (error) throw error;
 
       // Update local state
-      setAssignments(prev => prev.map(assignment => 
-        assignment.id === assignmentId 
+      setAssignments(prev => prev.map(assignment =>
+        assignment.id === assignmentId
           ? { ...assignment, confirmado: true }
           : assignment
       ));
+      
+      // Show success message
+      toast({
+        title: "Participação Confirmada!",
+        description: "Sua confirmação de participação foi registrada com sucesso.",
+      });
     } catch (err) {
       console.error('Error confirming assignment:', err);
+      toast({
+        title: "Erro ao Confirmar Participação",
+        description: "Ocorreu um erro ao registrar sua confirmação. Tente novamente.",
+        variant: "destructive"
+      });
     }
   };
 
