@@ -1,3 +1,17 @@
+// Safe parsers for DB -> union types
+export function parseGender(value: string): Gender {
+  return value === 'M' || value === 'F' ? value : 'M'; // Default to 'M' if unknown
+}
+
+export function parseRelation(value: string): Relation {
+  const valid: Relation[] = ['Pai', 'Mãe', 'Cônjuge', 'Filho', 'Filha', 'Irmão', 'Irmã'];
+  return valid.includes(value as Relation) ? (value as Relation) : 'Filho'; // Default to 'Filho' if unknown
+}
+
+export function parseInvitationStatus(value: string): InvitationStatus {
+  const valid: InvitationStatus[] = ['PENDING', 'SENT', 'ACCEPTED', 'EXPIRED'];
+  return valid.includes(value as InvitationStatus) ? (value as InvitationStatus) : 'PENDING'; // Default to 'PENDING' if unknown
+}
 import { Database } from '@/integrations/supabase/types';
 
 // Database types

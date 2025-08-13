@@ -65,7 +65,16 @@ export const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
         .order('data_inicio_semana', { ascending: false });
 
       if (error) throw error;
-      setTemplates(data || []);
+      setTemplates(
+        (data || []).map((tpl: any) => ({
+          ...tpl,
+          parsed_meeting_parts: Array.isArray(tpl.parsed_meeting_parts)
+            ? tpl.parsed_meeting_parts
+            : (typeof tpl.parsed_meeting_parts === 'string'
+                ? (() => { try { return JSON.parse(tpl.parsed_meeting_parts); } catch { return []; } })()
+                : [])
+        }))
+      );
 
     } catch (error) {
       console.error('Error loading templates:', error);
