@@ -156,36 +156,86 @@ const Designacoes = () => {
       // Criar gerador de designações
       const gerador = new GeradorDesignacoes(dadosCompletos.estudantes.estudantes);
 
-      // Extrair partes do programa (simulado para demonstração)
-      const partesPrograma: ParteProgramaS38T[] = [
-        {
-          numero_parte: 3,
-          titulo_parte: "Leitura da Bíblia",
-          tipo_parte: 'leitura_biblica',
-          tempo_minutos: 4,
-          requer_ajudante: false
-        },
-        {
-          numero_parte: 4,
-          titulo_parte: "Primeira Conversa",
-          tipo_parte: 'demonstracao',
-          tempo_minutos: 3,
-          requer_ajudante: true
-        },
-        {
-          numero_parte: 5,
-          titulo_parte: "Revisita",
-          tipo_parte: 'demonstracao',
-          tempo_minutos: 4,
-          requer_ajudante: true
+      // Extrair partes do programa real
+      let partesPrograma: ParteProgramaS38T[] = [];
+      if (dadosSelecao.programa.partes && Array.isArray(dadosSelecao.programa.partes)) {
+        // Tentar converter as partes do programa
+        try {
+          partesPrograma = dadosSelecao.programa.partes.map((parte: any) => ({
+            numero_parte: parte.numero_parte,
+            titulo_parte: parte.titulo_parte,
+            tipo_parte: parte.tipo_parte,
+            tempo_minutos: parte.tempo_minutos,
+            cena: parte.cena,
+            requer_ajudante: parte.requer_ajudante,
+            restricao_genero: parte.restricao_genero
+          })) as ParteProgramaS38T[];
+        } catch (error) {
+          console.error('Erro ao converter partes do programa:', error);
+          // Usar partes padrão se houver erro na conversão
+          partesPrograma = [
+            {
+              numero_parte: 3,
+              titulo_parte: "Leitura da Bíblia",
+              tipo_parte: 'leitura_biblica',
+              tempo_minutos: 4,
+              requer_ajudante: false
+            },
+            {
+              numero_parte: 4,
+              titulo_parte: "Primeira Conversa",
+              tipo_parte: 'demonstracao',
+              tempo_minutos: 3,
+              requer_ajudante: true
+            },
+            {
+              numero_parte: 5,
+              titulo_parte: "Revisita",
+              tipo_parte: 'demonstracao',
+              tempo_minutos: 4,
+              requer_ajudante: true
+            }
+          ];
         }
-      ];
+      } else {
+        // Usar partes padrão se não houver partes válidas
+        partesPrograma = [
+          {
+            numero_parte: 3,
+            titulo_parte: "Leitura da Bíblia",
+            tipo_parte: 'leitura_biblica',
+            tempo_minutos: 4,
+            requer_ajudante: false
+          },
+          {
+            numero_parte: 4,
+            titulo_parte: "Primeira Conversa",
+            tipo_parte: 'demonstracao',
+            tempo_minutos: 3,
+            requer_ajudante: true
+          },
+          {
+            numero_parte: 5,
+            titulo_parte: "Revisita",
+            tipo_parte: 'demonstracao',
+            tempo_minutos: 4,
+            requer_ajudante: true
+          }
+        ];
+      }
+
+      // Filtrar partes para garantir compatibilidade com o gerador de designações
+      const partesFiltradas = partesPrograma.filter(parte =>
+        parte.tipo_parte === 'leitura_biblica' ||
+        parte.tipo_parte === 'discurso' ||
+        parte.tipo_parte === 'demonstracao'
+      );
 
       // Gerar designações
       const opcoes = {
         data_inicio_semana: dados.dataInicioSemana,
         id_programa: dados.idPrograma,
-        partes: partesPrograma
+        partes: partesFiltradas
       };
 
       const designacoesGeradas = await gerador.gerarDesignacoes(opcoes);
