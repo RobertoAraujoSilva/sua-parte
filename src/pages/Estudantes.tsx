@@ -33,6 +33,8 @@ import {
   GENERO_LABELS,
 } from "@/types/estudantes";
 import { DebugPanel } from '@/components/DebugPanel';
+import { runGlobalCongregationMigration } from '@/utils/runGlobalMigration';
+
 
 const Estudantes = () => {
   const { t } = useTranslation();
@@ -190,8 +192,8 @@ const Estudantes = () => {
 
       <main className="pt-16">
         {/* Header Section */}
-        <section className="bg-gradient-to-br from-jw-navy via-jw-blue to-jw-blue-dark py-12">
-          <div className="container mx-auto px-4">
+        <section className="bg-gradient-to-br from-jw-navy via-jw-blue to-jw-blue-dark py-6 sm:py-12">
+          <div className="container mx-auto px-2 sm:px-4">
             <div className="flex items-center gap-4 mb-6">
               <Button
                 variant="ghost"
@@ -204,26 +206,28 @@ const Estudantes = () => {
               </Button>
             </div>
 
-            <div className="flex items-start justify-between">
-              <div className="text-white">
-                <h1 className="text-4xl font-bold mb-4">
+            <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
+              <div className="text-white flex-1">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-4">
                   {t('Gestão de Estudantes')} <span className="text-jw-gold">{t('de')}</span> <span className="text-jw-gold">Estudantes</span>
                 </h1>
-                <p className="text-xl opacity-90 max-w-2xl">
+                <p className="text-base sm:text-lg lg:text-xl opacity-90 max-w-2xl">
                   {t('Cadastre e gerencie estudantes da Escola do Ministério Teocrático com validação automática de qualificações e regras congregacionais.')}
                 </p>
               </div>
-              <TutorialButton page="estudantes" variant="secondary" />
+              <div className="flex-shrink-0">
+                <TutorialButton page="estudantes" variant="secondary" />
+              </div>
             </div>
           </div>
         </section>
 
         {/* Main Content */}
-        <section className="py-8">
-          <div className="container mx-auto px-4 max-w-none">
+        <section className="py-4 sm:py-8">
+          <div className="responsive-container">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <div className="flex items-center justify-between mb-6">
-                <TabsList className="grid w-auto grid-cols-6" data-tutorial="tabs-navigation">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-4">
+                <TabsList className="responsive-tabs w-full sm:w-auto" data-tutorial="tabs-navigation">
                   <TabsTrigger value="list" className="flex items-center gap-2">
                     <Users className="w-4 h-4" />
                     {t('Lista')}
@@ -250,7 +254,8 @@ const Estudantes = () => {
                   </TabsTrigger>
                 </TabsList>
 
-                <div className="flex gap-2">
+                <div className="responsive-buttons w-full sm:w-auto">
+
                   <Button
                     variant="outline"
                     size="sm"
@@ -284,7 +289,7 @@ const Estudantes = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="responsive-form">
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                         <Input
@@ -347,7 +352,7 @@ const Estudantes = () => {
                 </Card>
 
                 {/* Students Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="responsive-grid students-grid">
                   {filteredEstudantes.map((estudante) => (
                     <EstudanteCard
                       key={estudante.id}
@@ -401,8 +406,8 @@ const Estudantes = () => {
               </TabsContent>
 
               {/* Statistics Tab */}
-              <TabsContent value="stats" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <TabsContent value="stats" className="space-y-4 sm:space-y-6">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
                   <Card>
                     <CardContent className="p-6 text-center">
                       <div className="text-3xl font-bold text-jw-blue mb-2">{statistics.total}</div>
@@ -429,7 +434,7 @@ const Estudantes = () => {
                   </Card>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   {/* Gender Distribution */}
                   <Card>
                     <CardHeader>
@@ -545,7 +550,7 @@ const Estudantes = () => {
               </TabsContent>
 
               {/* Spreadsheet Tab */}
-              <TabsContent value="spreadsheet" className="space-y-6 w-full">
+              <TabsContent value="spreadsheet" className="space-y-4 sm:space-y-6 w-full overflow-x-auto">
                 {loading ? (
                   <div className="flex items-center justify-center py-12">
                     <div className="text-center">

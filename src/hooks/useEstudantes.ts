@@ -18,7 +18,7 @@ export const useEstudantes = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch all students for the current user
+  // Fetch all students for the current user (own students + same congregation)
   const fetchEstudantes = async () => {
     if (!user) return;
 
@@ -26,16 +26,37 @@ export const useEstudantes = () => {
       setLoading(true);
       setError(null);
 
+      // Get user's congregation from profiles
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('congregacao')
+        .eq('id', user.id)
+        .single();
+      
+      const userCongregacao = userProfile?.congregacao || user.user_metadata?.congregacao || 'Market Harborough';
+      
+      console.log('🔍 Fetching students for congregation:', userCongregacao);
+      
       const { data, error } = await supabase
         .from("estudantes")
         .select('*')
-        .eq("user_id", user.id)
         .order("nome");
-
-      if (error) throw error;
+      
+      if (error) {
+        console.error('❌ Error fetching students:', error);
+        throw error;
+      }
+      
+      // Filter by congregation on client side to avoid URL encoding issues
+      const filteredData = data?.filter(student => 
+        student.congregacao === userCongregacao ||
+        student.congregacao?.toLowerCase() === userCongregacao?.toLowerCase()
+      ) || [];
+      
+      console.log('✅ Students fetched and filtered:', filteredData.length, 'students found for', userCongregacao);
 
       // Simple mapping for now
-      const estudantesWithRelations = (data || []).map((estudante) => ({
+      const estudantesWithRelations = filteredData.map((estudante) => ({
         ...estudante,
         pai_mae: null,
         filhos: [],
@@ -75,6 +96,8 @@ export const useEstudantes = () => {
       const insertData: EstudanteInsert = {
         ...data,
         user_id: user.id,
+        congregacao: user.user_metadata?.congregacao || 'Market Harborough',
+        congregacao_id: null, // Will be set by trigger
         data_batismo: data.data_batismo || null,
         email: data.email || null,
         telefone: data.telefone || null,

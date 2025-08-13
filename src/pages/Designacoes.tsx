@@ -156,20 +156,25 @@ const Designacoes = () => {
       // Criar gerador de designações
       const gerador = new GeradorDesignacoes(dadosCompletos.estudantes.estudantes);
 
-      // Extrair partes do programa real
-      let partesPrograma: ParteProgramaS38T[] = [];
-      if (dadosSelecao.programa.partes && Array.isArray(dadosSelecao.programa.partes)) {
-        // Tentar converter as partes do programa
+      // Extrair partes do programa real e converter para o tipo correto
+      let partesPrograma: import('@/utils/assignmentGenerator').ParteProgramaS38T[] = [];
+      if (dados.programa.partes && Array.isArray(dados.programa.partes)) {
+        // Tentar converter as partes do programa para o tipo correto
         try {
-          partesPrograma = dadosSelecao.programa.partes.map((parte: any) => ({
-            numero_parte: parte.numero_parte,
-            titulo_parte: parte.titulo_parte,
-            tipo_parte: parte.tipo_parte,
-            tempo_minutos: parte.tempo_minutos,
-            cena: parte.cena,
-            requer_ajudante: parte.requer_ajudante,
-            restricao_genero: parte.restricao_genero
-          })) as ParteProgramaS38T[];
+          partesPrograma = dados.programa.partes
+            .filter((parte: any) => 
+              parte.tipo_parte === 'leitura_biblica' || 
+              parte.tipo_parte === 'discurso' || 
+              parte.tipo_parte === 'demonstracao'
+            )
+            .map((parte: any) => ({
+              numero_parte: parte.numero_parte,
+              titulo_parte: parte.titulo_parte,
+              tipo_parte: parte.tipo_parte,
+              tempo_minutos: parte.tempo_minutos,
+              cena: parte.cena,
+              requer_ajudante: parte.requer_ajudante
+            }));
         } catch (error) {
           console.error('Erro ao converter partes do programa:', error);
           // Usar partes padrão se houver erro na conversão
@@ -224,18 +229,11 @@ const Designacoes = () => {
         ];
       }
 
-      // Filtrar partes para garantir compatibilidade com o gerador de designações
-      const partesFiltradas = partesPrograma.filter(parte =>
-        parte.tipo_parte === 'leitura_biblica' ||
-        parte.tipo_parte === 'discurso' ||
-        parte.tipo_parte === 'demonstracao'
-      );
-
       // Gerar designações
       const opcoes = {
         data_inicio_semana: dados.dataInicioSemana,
         id_programa: dados.idPrograma,
-        partes: partesFiltradas
+        partes: partesPrograma
       };
 
       const designacoesGeradas = await gerador.gerarDesignacoes(opcoes);
@@ -536,6 +534,8 @@ const Designacoes = () => {
                               Ver Detalhes
                             </Button>
                             <Button variant="outline" size="sm">
+                              <Send className="w-4 h-4 mr-2" />
+                              Enviar Notificações
                               <Send className="w-4 h-4 mr-2" />
                               Enviar Notificações
                             </Button>

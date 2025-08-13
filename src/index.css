@@ -56,6 +56,14 @@
   word-break: break-word;
 }
 
+.ag-theme-alpine .ag-header-group-cell {
+  background-color: #f3f4f6;
+  font-weight: 700;
+  color: #1f2937;
+  border-bottom: 2px solid #d1d5db;
+  text-align: center;
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
@@ -171,4 +179,107 @@ All colors MUST be HSL.
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Tablet Portrait Responsive Fixes */
+@media (max-width: 1024px) and (orientation: portrait) {
+  .container {
+    @apply px-2 sm:px-4;
+  }
+  
+  /* Header adjustments */
+  .header-nav {
+    @apply hidden;
+  }
+  
+  .header-mobile-nav {
+    @apply flex;
+  }
+  
+  /* Card grids responsive */
+  .students-grid {
+    @apply grid-cols-1 sm:grid-cols-2;
+  }
+  
+  /* Tab navigation */
+  .tabs-list {
+    @apply grid-cols-3 sm:grid-cols-6;
+  }
+  
+  /* Form layouts */
+  .form-grid {
+    @apply grid-cols-1 sm:grid-cols-2;
+  }
+  
+  /* Modal adjustments */
+  .modal-content {
+    @apply max-w-[90vw] max-h-[80vh] overflow-y-auto;
+  }
+}
+
+/* Mobile Portrait Specific */
+@media (max-width: 768px) and (orientation: portrait) {
+  .container {
+    @apply px-2;
+  }
+  
+  .students-grid {
+    @apply grid-cols-1;
+  }
+  
+  .tabs-list {
+    @apply grid-cols-2;
+  }
+  
+  .form-grid {
+    @apply grid-cols-1;
+  }
+  
+  /* Header title responsive */
+  .header-title {
+    @apply text-lg sm:text-xl;
+  }
+  
+  /* Button groups */
+  .button-group {
+    @apply flex-col sm:flex-row gap-2;
+  }
+}
+
+/* AG Grid responsive adjustments */
+@media (max-width: 1024px) {
+  .ag-theme-alpine {
+    --ag-row-height: 36px;
+    --ag-header-height: 44px;
+  }
+  
+  .ag-theme-alpine .ag-cell {
+    padding: 6px 8px;
+    font-size: 14px;
+  }
+  
+  .ag-theme-alpine .ag-header-cell {
+    font-size: 13px;
+  }
+}
+
+/* Utility classes for responsive design */
+.responsive-container {
+  @apply w-full max-w-none px-2 sm:px-4 lg:px-6;
+}
+
+.responsive-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
+}
+
+.responsive-tabs {
+  @apply grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6;
+}
+
+.responsive-form {
+  @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+}
+
+.responsive-buttons {
+  @apply flex flex-col sm:flex-row gap-2 sm:gap-4;
 }

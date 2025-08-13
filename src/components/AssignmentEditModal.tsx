@@ -166,7 +166,7 @@ export const AssignmentEditModal: React.FC<AssignmentEditModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-[95vw] sm:max-w-[90vw] lg:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <User className="w-5 h-5" />
@@ -179,7 +179,7 @@ export const AssignmentEditModal: React.FC<AssignmentEditModalProps> = ({
 
         <div className="space-y-6">
           {/* Assignment Info */}
-          <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+          <div className="flex flex-wrap items-center gap-2 p-3 bg-gray-50 rounded-lg">
             <Badge variant="outline" className="font-mono">
               {editedAssignment.numero_parte.toString().padStart(2, '0')}
             </Badge>
@@ -198,34 +198,35 @@ export const AssignmentEditModal: React.FC<AssignmentEditModalProps> = ({
             )}
           </div>
 
-          {/* Title */}
-          <div className="space-y-2">
-            <Label htmlFor="titulo">Título da Parte</Label>
-            <Input
-              id="titulo"
-              value={editedAssignment.titulo_parte}
-              onChange={(e) => setEditedAssignment(prev => prev ? {
-                ...prev,
-                titulo_parte: e.target.value
-              } : null)}
-              placeholder="Digite o título da parte"
-            />
-          </div>
-
-          {/* Timing */}
-          <div className="space-y-2">
-            <Label htmlFor="tempo">Tempo (minutos)</Label>
-            <Input
-              id="tempo"
-              type="number"
-              min="1"
-              max="60"
-              value={editedAssignment.tempo_minutos}
-              onChange={(e) => setEditedAssignment(prev => prev ? {
-                ...prev,
-                tempo_minutos: parseInt(e.target.value) || 1
-              } : null)}
-            />
+          {/* Title and Timing */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="titulo">Título da Parte</Label>
+              <Input
+                id="titulo"
+                value={editedAssignment.titulo_parte}
+                onChange={(e) => setEditedAssignment(prev => prev ? {
+                  ...prev,
+                  titulo_parte: e.target.value
+                } : null)}
+                placeholder="Digite o título da parte"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="tempo">Tempo (minutos)</Label>
+              <Input
+                id="tempo"
+                type="number"
+                min="1"
+                max="60"
+                value={editedAssignment.tempo_minutos}
+                onChange={(e) => setEditedAssignment(prev => prev ? {
+                  ...prev,
+                  tempo_minutos: parseInt(e.target.value) || 1
+                } : null)}
+              />
+            </div>
           </div>
 
           {/* Scene/Context */}
@@ -243,72 +244,32 @@ export const AssignmentEditModal: React.FC<AssignmentEditModalProps> = ({
             />
           </div>
 
-          {/* Main Student */}
-          <div className="space-y-2">
-            <Label>Estudante Principal</Label>
-            <Select
-              value={editedAssignment.estudante.id}
-              onValueChange={(value) => {
-                const student = availableStudents.find(s => s.id === value);
-                if (student) {
-                  setEditedAssignment(prev => prev ? {
-                    ...prev,
-                    estudante: student
-                  } : null);
-                }
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {getFilteredStudents(false).map((student) => (
-                  <SelectItem key={student.id} value={student.id}>
-                    <div className="flex items-center gap-2">
-                      <span>{student.nome}</span>
-                      <Badge variant="outline" className="text-xs">
-                        {student.cargo}
-                      </Badge>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Helper Student */}
-          {requiresHelper && (
+          {/* Students Selection */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Main Student */}
             <div className="space-y-2">
-              <Label>Ajudante</Label>
+              <Label>Estudante Principal</Label>
               <Select
-                value={editedAssignment.ajudante?.id || ''}
+                value={editedAssignment.estudante.id}
                 onValueChange={(value) => {
-                  if (value === '') {
+                  const student = availableStudents.find(s => s.id === value);
+                  if (student) {
                     setEditedAssignment(prev => prev ? {
                       ...prev,
-                      ajudante: undefined
+                      estudante: student
                     } : null);
-                  } else {
-                    const student = availableStudents.find(s => s.id === value);
-                    if (student) {
-                      setEditedAssignment(prev => prev ? {
-                        ...prev,
-                        ajudante: student
-                      } : null);
-                    }
                   }
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Selecione um ajudante" />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Nenhum ajudante</SelectItem>
-                  {getFilteredStudents(true).map((student) => (
+                  {getFilteredStudents(false).map((student) => (
                     <SelectItem key={student.id} value={student.id}>
                       <div className="flex items-center gap-2">
-                        <span>{student.nome}</span>
-                        <Badge variant="outline" className="text-xs">
+                        <span className="truncate">{student.nome}</span>
+                        <Badge variant="outline" className="text-xs flex-shrink-0">
                           {student.cargo}
                         </Badge>
                       </div>
@@ -317,7 +278,50 @@ export const AssignmentEditModal: React.FC<AssignmentEditModalProps> = ({
                 </SelectContent>
               </Select>
             </div>
-          )}
+
+            {/* Helper Student */}
+            {requiresHelper && (
+              <div className="space-y-2">
+                <Label>Ajudante</Label>
+                <Select
+                  value={editedAssignment.ajudante?.id || ''}
+                  onValueChange={(value) => {
+                    if (value === '') {
+                      setEditedAssignment(prev => prev ? {
+                        ...prev,
+                        ajudante: undefined
+                      } : null);
+                    } else {
+                      const student = availableStudents.find(s => s.id === value);
+                      if (student) {
+                        setEditedAssignment(prev => prev ? {
+                          ...prev,
+                          ajudante: student
+                        } : null);
+                      }
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um ajudante" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Nenhum ajudante</SelectItem>
+                    {getFilteredStudents(true).map((student) => (
+                      <SelectItem key={student.id} value={student.id}>
+                        <div className="flex items-center gap-2">
+                          <span className="truncate">{student.nome}</span>
+                          <Badge variant="outline" className="text-xs flex-shrink-0">
+                            {student.cargo}
+                          </Badge>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+          </div>
 
           {/* S-38-T Compliance Warning */}
           {genderInfo.restriction === 'Apenas Homens' && editedAssignment.estudante.genero !== 'masculino' && (
@@ -330,14 +334,15 @@ export const AssignmentEditModal: React.FC<AssignmentEditModalProps> = ({
           )}
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
+        <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
+          <Button variant="outline" onClick={onClose} className="w-full sm:w-auto">
             <X className="w-4 h-4 mr-2" />
             Cancelar
           </Button>
           <Button 
             onClick={handleSave} 
             disabled={saving || loading}
+            className="w-full sm:w-auto"
           >
             {saving ? (
               <>
