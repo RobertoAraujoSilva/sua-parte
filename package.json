@@ -42,7 +42,8 @@
     "test:assignment-generation:record": "cypress run --spec \"cypress/e2e/assignment-generation.cy.ts\" --record",
     "test:all-new": "cypress run --spec \"cypress/e2e/{pdf-upload-functionality,programs-page-functionality,sistema-ministerial-e2e,enhanced-pdf-parsing,assignment-generation}.cy.ts\"",
     "test:complete-workflow": "cypress run --spec \"cypress/e2e/{enhanced-pdf-parsing,assignment-generation}.cy.ts\"",
-    "test:setup": "cypress install && cypress verify"
+    "test:setup": "cypress install && cypress verify",
+    "audit:plan": "node ./scripts/audit-implementation.mjs"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
@@ -76,6 +77,8 @@
     "@radix-ui/react-tooltip": "^1.2.7",
     "@supabase/supabase-js": "^2.54.0",
     "@tanstack/react-query": "^5.83.0",
+    "ag-grid-community": "^34.1.1",
+    "ag-grid-react": "^34.1.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",

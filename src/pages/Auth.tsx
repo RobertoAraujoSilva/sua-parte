@@ -9,9 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
-import { Eye, EyeOff, LogIn, UserPlus, Users, GraduationCap, Shield, BookOpen } from 'lucide-react';
+import { Eye, EyeOff, LogIn, UserPlus, Shield, BookOpen } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
 import { CARGO_LABELS } from '@/types/estudantes';
+import { LoginFeedback, TestCredentials } from '@/components/auth/SimpleLoginFeedback';
+import { handleAuthError, validateLoginForm } from '@/lib/supabase';
 
 type UserRole = Database['public']['Enums']['user_role'];
 
@@ -23,6 +25,11 @@ const Auth = () => {
   // Sign In Form
   const [signInEmail, setSignInEmail] = useState('');
   const [signInPassword, setSignInPassword] = useState('');
+
+  // Login feedback states
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginErrorType, setLoginErrorType] = useState<'error' | 'warning' | 'info' | null>(null);
+  const [loginSuccess, setLoginSuccess] = useState<string | null>(null);
 
   // Sign Up Form
   const [signUpEmail, setSignUpEmail] = useState('');
@@ -120,12 +127,16 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!signInEmail || !signInPassword) {
-      toast({
-        title: "Erro",
-        description: "Por favor, preencha todos os campos.",
-        variant: "destructive"
-      });
+    // Limpar estados anteriores
+    setLoginError(null);
+    setLoginErrorType(null);
+    setLoginSuccess(null);
+
+    // Validação do formulário
+    const validationErrors = validateLoginForm(signInEmail, signInPassword);
+    if (validationErrors.length > 0) {
+      setLoginError(validationErrors.join('. '));
+      setLoginErrorType('error');
       return;
     }
 
@@ -135,39 +146,51 @@ const Auth = () => {
       const { error } = await signIn(signInEmail, signInPassword);
 
       if (error) {
-        let errorMessage = "Ocorreu um erro inesperado. Tente novamente.";
-
-        if (error.message === 'Invalid login credentials') {
-          errorMessage = "E-mail ou senha incorretos.";
-        } else if (error.message === 'Email not confirmed') {
-          errorMessage = "E-mail não confirmado. Entre em contato com o administrador do sistema.";
-        } else if (error.message.includes('Email not confirmed')) {
-          errorMessage = "E-mail não confirmado. Entre em contato com o administrador do sistema.";
-        } else {
-          errorMessage = error.message;
-        }
-
-        toast({
-          title: "Erro no login",
-          description: errorMessage,
-          variant: "destructive"
-        });
+        const { message, type } = handleAuthError(error);
+        setLoginError(message);
+        setLoginErrorType(type);
       } else {
-        toast({
-          title: "Login realizado!",
-          description: "Bem-vindo ao Sistema Ministerial.",
-        });
-        // Navigation will be handled by useEffect
+        setLoginSuccess('Login realizado com sucesso! Redirecionando...');
+        // O redirecionamento será feito pelo useEffect que monitora o user
       }
     } catch (error) {
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro inesperado. Tente novamente.",
-        variant: "destructive"
-      });
+      const { message, type } = handleAuthError(error);
+      setLoginError(message);
+      setLoginErrorType(type);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Função para preencher credenciais de teste
+  const handleFillTestCredentials = (type: 'instructor' | 'student' | 'simple') => {
+    const credentials = {
+      instructor: {
+        email: 'frankwebber33@hotmail.com',
+        password: 'senha123'
+      },
+      student: {
+        email: 'franklinmarceloferreiradelima@gmail.com',
+        password: 'senha123'
+      },
+      simple: {
+        email: 'teste@sistema.com',
+        password: '123456'
+      }
+    };
+
+    const cred = credentials[type];
+    setSignInEmail(cred.email);
+    setSignInPassword(cred.password);
+
+    // Limpar erros quando preencher credenciais
+    setLoginError(null);
+    setLoginErrorType(null);
+
+    toast({
+      title: "Credenciais preenchidas",
+      description: `Credenciais de ${type === 'instructor' ? 'instrutor' : type === 'student' ? 'estudante' : 'teste'} carregadas.`,
+    });
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -377,6 +400,17 @@ const Auth = () => {
                   {loading ? 'Entrando...' : 'Entrar'}
                 </Button>
               </form>
+
+              {/* Feedback de login */}
+              <LoginFeedback
+                loading={loading}
+                error={loginError}
+                errorType={loginErrorType}
+                success={loginSuccess}
+              />
+
+              {/* Credenciais de teste para desenvolvimento */}
+              <TestCredentials onFillCredentials={handleFillTestCredentials} />
             </TabsContent>
             {/* Sign Up Tab */}
             <TabsContent value="signup" className="space-y-4">
@@ -391,17 +425,15 @@ const Auth = () => {
                       return (
                         <div
                           key={roleOption}
-                          className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                            role === roleOption
+                          className={`border rounded-lg p-4 cursor-pointer transition-all ${role === roleOption
                               ? 'border-jw-blue bg-jw-blue/5'
                               : 'border-gray-200 hover:border-gray-300'
-                          }`}
+                            }`}
                           onClick={() => setRole(roleOption)}
                         >
                           <div className="flex items-start gap-3">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                              role === roleOption ? 'bg-jw-blue text-white' : 'bg-gray-100 text-gray-600'
-                            }`}>
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${role === roleOption ? 'bg-jw-blue text-white' : 'bg-gray-100 text-gray-600'
+                              }`}>
                               <IconComponent className="w-5 h-5" />
                             </div>
                             <div className="flex-1">
