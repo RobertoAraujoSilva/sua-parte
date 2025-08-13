@@ -47,11 +47,26 @@ export const useEstudantes = () => {
         throw error;
       }
       
-      // Filter by congregation on client side to avoid URL encoding issues
-      const filteredData = data?.filter(student => 
-        student.congregacao === userCongregacao ||
-        student.congregacao?.toLowerCase() === userCongregacao?.toLowerCase()
-      ) || [];
+      console.log('📊 Raw data from database:', data?.length || 0, 'total students');
+      console.log('🔍 All congregations found:', [...new Set(data?.map(s => s.congregacao))]);
+      
+      // TEMPORARY: Show all students for debugging
+      const filteredData = data || [];
+      
+      console.log('⚠️ TEMPORARY: Showing all students for debugging');
+      
+      // Original filter (commented for debug)
+      // const filteredData = data?.filter(student => {
+      //   const match = student.congregacao === userCongregacao ||
+      //                student.congregacao?.toLowerCase() === userCongregacao?.toLowerCase() ||
+      //                student.congregacao?.includes(userCongregacao) ||
+      //                userCongregacao?.includes(student.congregacao || '');
+      //   
+      //   if (match) {
+      //     console.log('✅ Student matched:', student.nome, 'from', student.congregacao);
+      //   }
+      //   return match;
+      // }) || [];
       
       console.log('✅ Students fetched and filtered:', filteredData.length, 'students found for', userCongregacao);
 
