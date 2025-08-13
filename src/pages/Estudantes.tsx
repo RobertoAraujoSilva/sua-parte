@@ -255,7 +255,29 @@ const Estudantes = () => {
                 </TabsList>
 
                 <div className="responsive-buttons w-full sm:w-auto">
-
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        console.log('🔄 Iniciando sincronização...');
+                        const { syncStudentsToInstructors } = await import('@/utils/syncStudentsToInstructors');
+                        const success = await syncStudentsToInstructors();
+                        
+                        if (success) {
+                          alert('✅ Sincronização concluída! Recarregando página...');
+                          window.location.reload();
+                        } else {
+                          alert('❌ Erro na sincronização. Verifique o console.');
+                        }
+                      } catch (error) {
+                        console.error('Erro no botão sync:', error);
+                        alert('❌ Erro: ' + error.message);
+                      }
+                    }}
+                  >
+                    🔄 Sync Estudantes
+                  </Button>
                   <Button
                     variant="outline"
                     size="sm"

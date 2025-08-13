@@ -81,9 +81,9 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-jw-navy text-white shadow-lg">
-      <div className="container mx-auto px-2 sm:px-4">
-        <div className="flex items-center justify-between h-16">
+    <header className="sticky top-0 z-50 bg-jw-navy text-white shadow-lg">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-14">
           <div className="flex items-center space-x-2 sm:space-x-8">
             <div className="flex items-center space-x-2 sm:space-x-3">
               <div className="w-8 h-8 bg-jw-blue rounded-lg flex items-center justify-center">
@@ -92,7 +92,7 @@ const Header = () => {
               <h1 className="header-title text-lg sm:text-xl font-semibold">Sistema Ministerial</h1>
             </div>
             
-            <nav className="header-nav hidden xl:flex items-center space-x-6">
+            <nav className="header-nav hidden md:flex items-center space-x-6">
                           {!user && (
                             <>
                               <Link to="/" className="hover:text-jw-gold transition-colors">
@@ -142,7 +142,7 @@ const Header = () => {
           </div>
           
           {/* Mobile Navigation */}
-          <MobileNavigation className="xl:hidden" />
+          <MobileNavigation className="md:hidden" />
           
  <div className="flex items-center space-x-2 sm:space-x-4">
             {/* Language Toggle Button */}

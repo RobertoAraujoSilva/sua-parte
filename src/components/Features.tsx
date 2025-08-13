@@ -38,28 +38,28 @@ const Features = () => {
   ];
 
   return (
-    <section id="funcionalidades" className="py-20 bg-background">
-      <div className="container mx-auto px-4">
+    <section id="funcionalidades" className="py-20 bg-background overflow-x-hidden">
+      <div className="responsive-container">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-balance text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-foreground mb-4">
             {t('Funcionalidades Principais')}
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-balance text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
             {t('Tudo que sua congregação precisa para automatizar e otimizar o processo de designações ministeriais com total conformidade.')}
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="responsive-grid">
           {features.map((feature, index) => (
-            <Card key={index} className="p-6 hover:shadow-lg transition-all duration-300 border-border/50 hover:border-jw-blue/30">
+            <Card key={index} className="p-4 sm:p-6 hover:shadow-lg transition-all duration-300 border-border/50 hover:border-jw-blue/30 min-w-0">
               <div className="flex flex-col items-start space-y-4">
                 <div className="p-3 bg-jw-blue/10 rounded-lg">
                   <feature.icon className="w-6 h-6 text-jw-blue" />
                 </div>
-                <h3 className="text-xl font-semibold text-foreground">
+                <h3 className="text-lg sm:text-xl font-semibold text-foreground">
                   {feature.title}
                 </h3>
-                <p className="text-muted-foreground leading-relaxed">
+                <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                   {feature.description}
                 </p>
               </div>

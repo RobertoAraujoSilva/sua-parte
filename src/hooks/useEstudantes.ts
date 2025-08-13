@@ -33,13 +33,19 @@ export const useEstudantes = () => {
         .eq('id', user.id)
         .single();
       
-      const userCongregacao = userProfile?.congregacao || user.user_metadata?.congregacao || 'Market Harborough';
-      
+      const userCongregacao = userProfile?.congregacao;
       console.log('🔍 Fetching students for congregation:', userCongregacao);
+      
+      if (!userCongregacao) {
+        console.warn('⚠️ No congregation found for user');
+        setEstudantes([]);
+        return;
+      }
       
       const { data, error } = await supabase
         .from("estudantes")
         .select('*')
+        .eq('user_id', user.id)
         .order("nome");
       
       if (error) {
@@ -47,31 +53,10 @@ export const useEstudantes = () => {
         throw error;
       }
       
-      console.log('📊 Raw data from database:', data?.length || 0, 'total students');
-      console.log('🔍 All congregations found:', [...new Set(data?.map(s => s.congregacao))]);
-      
-      // TEMPORARY: Show all students for debugging
-      const filteredData = data || [];
-      
-      console.log('⚠️ TEMPORARY: Showing all students for debugging');
-      
-      // Original filter (commented for debug)
-      // const filteredData = data?.filter(student => {
-      //   const match = student.congregacao === userCongregacao ||
-      //                student.congregacao?.toLowerCase() === userCongregacao?.toLowerCase() ||
-      //                student.congregacao?.includes(userCongregacao) ||
-      //                userCongregacao?.includes(student.congregacao || '');
-      //   
-      //   if (match) {
-      //     console.log('✅ Student matched:', student.nome, 'from', student.congregacao);
-      //   }
-      //   return match;
-      // }) || [];
-      
-      console.log('✅ Students fetched and filtered:', filteredData.length, 'students found for', userCongregacao);
+      console.log('✅ Students fetched:', data?.length || 0, 'students found for user', user.id);
 
       // Simple mapping for now
-      const estudantesWithRelations = filteredData.map((estudante) => ({
+      const estudantesWithRelations = (data || []).map((estudante) => ({
         ...estudante,
         pai_mae: null,
         filhos: [],
