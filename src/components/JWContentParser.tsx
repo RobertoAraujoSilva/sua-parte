@@ -106,26 +106,26 @@ export const JWContentParser: React.FC<JWContentParserProps> = ({
     // Fixed 12-part structure - no dynamic addition
     const completeStructure = [
       // Opening section (2 parts)
-      { numero: 1, titulo: 'Oração de Abertura', tempo: 1, tipo: 'oracao_abertura' },
-      { numero: 2, titulo: 'Comentários Iniciais', tempo: 1, tipo: 'comentarios_iniciais' },
+      { numero: 1, titulo: 'Oração de Abertura', tempo: 1, tipo: 'oracao_abertura', secao: 'ABERTURA' },
+      { numero: 2, titulo: 'Comentários Iniciais', tempo: 1, tipo: 'comentarios_iniciais', secao: 'ABERTURA' },
 
       // Treasures from God's Word section (3 parts)
-      { numero: 3, titulo: 'Tesouros da Palavra de Deus', tempo: 10, tipo: 'tesouros_palavra' },
-      { numero: 4, titulo: 'Joias Espirituais', tempo: 10, tipo: 'joias_espirituais' },
-      { numero: 5, titulo: 'Leitura da Bíblia', tempo: 4, tipo: 'leitura_biblica' },
+      { numero: 3, titulo: 'Tesouros da Palavra de Deus', tempo: 10, tipo: 'tesouros_palavra', secao: 'TESOUROS' },
+      { numero: 4, titulo: 'Joias Espirituais', tempo: 10, tipo: 'joias_espirituais', secao: 'TESOUROS' },
+      { numero: 5, titulo: 'Leitura da Bíblia', tempo: 4, tipo: 'leitura_biblica', secao: 'TESOUROS' },
 
       // Apply Yourself to Ministry section (3 parts)
-      { numero: 6, titulo: 'Primeira Conversa', tempo: 3, tipo: 'parte_ministerio' },
-      { numero: 7, titulo: 'Revisita', tempo: 4, tipo: 'parte_ministerio' },
-      { numero: 8, titulo: 'Estudo Bíblico', tempo: 5, tipo: 'parte_ministerio' },
+      { numero: 6, titulo: 'Primeira Conversa', tempo: 3, tipo: 'parte_ministerio', secao: 'MINISTERIO' },
+      { numero: 7, titulo: 'Revisita', tempo: 4, tipo: 'parte_ministerio', secao: 'MINISTERIO' },
+      { numero: 8, titulo: 'Estudo Bíblico', tempo: 5, tipo: 'parte_ministerio', secao: 'MINISTERIO' },
 
       // Our Christian Life section (2 parts)
-      { numero: 9, titulo: 'Nossa Vida Cristã', tempo: 15, tipo: 'vida_crista' },
-      { numero: 10, titulo: 'Estudo Bíblico da Congregação', tempo: 30, tipo: 'estudo_biblico_congregacao' },
+      { numero: 9, titulo: 'Nossa Vida Cristã', tempo: 15, tipo: 'vida_crista', secao: 'VIDA_CRISTA' },
+      { numero: 10, titulo: 'Estudo Bíblico da Congregação', tempo: 30, tipo: 'estudo_biblico_congregacao', secao: 'VIDA_CRISTA' },
 
       // Closing section (2 parts)
-      { numero: 11, titulo: 'Comentários Finais', tempo: 3, tipo: 'comentarios_finais' },
-      { numero: 12, titulo: 'Oração de Encerramento', tempo: 1, tipo: 'oracao_encerramento' }
+      { numero: 11, titulo: 'Comentários Finais', tempo: 3, tipo: 'comentarios_finais', secao: 'ENCERRAMENTO' },
+      { numero: 12, titulo: 'Oração de Encerramento', tempo: 1, tipo: 'oracao_encerramento', secao: 'ENCERRAMENTO' }
     ];
 
     // Map parsed content to appropriate parts

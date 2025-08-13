@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
-import { Zap, Calendar, FileText, ArrowLeft, Download, Eye, Send, RefreshCw, AlertTriangle } from "lucide-react";
+import { Zap, Calendar, FileText, ArrowLeft, Download, Eye, Send, RefreshCw, AlertTriangle, Clock } from "lucide-react";
 
 // Importar componentes e utilitários do sistema de designações
 import { ModalSelecaoSemana, type DadosSelecaoSemana } from "@/components/ModalSelecaoSemana";

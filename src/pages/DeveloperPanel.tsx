@@ -88,7 +88,16 @@ const DeveloperPanel = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setTemplates(data || []);
+      setTemplates(
+        (data || []).map((tpl: any) => ({
+          ...tpl,
+          parsed_meeting_parts: Array.isArray(tpl.parsed_meeting_parts)
+            ? tpl.parsed_meeting_parts
+            : (typeof tpl.parsed_meeting_parts === 'string'
+                ? (() => { try { return JSON.parse(tpl.parsed_meeting_parts); } catch { return []; } })()
+                : [])
+        }))
+      );
 
     } catch (error) {
       console.error('Error loading templates:', error);
@@ -172,13 +181,14 @@ const DeveloperPanel = () => {
       const { data, error } = await supabase
         .from('programas')
         .insert({
-          semana: parsedContent.semana,
-          data_inicio_semana: parsedContent.data_inicio,
           arquivo: `template_${parsedContent.semana.replace(/\s+/g, '_')}.xlsx`,
+          data_inicio_semana: parsedContent.data_inicio,
           partes: parsedContent.partes.map(p => p.titulo_parte),
+          semana: parsedContent.semana,
+          user_id: profile?.id || '',
           template_status_enum: 'template_ready',
           developer_processed_at: new Date().toISOString(),
-          developer_user_id: profile?.id,
+          developer_user_id: profile?.id || '',
           template_download_url: downloadUrl,
           template_metadata: {
             total_partes: parsedContent.partes.length,
@@ -189,7 +199,7 @@ const DeveloperPanel = () => {
             congregation_name: congregationName
           },
           jw_org_content: jwContent,
-          parsed_meeting_parts: parsedContent.partes,
+          parsed_meeting_parts: JSON.parse(JSON.stringify(parsedContent.partes)),
           processing_notes: processingNotes,
           assignment_status: 'pending'
         })

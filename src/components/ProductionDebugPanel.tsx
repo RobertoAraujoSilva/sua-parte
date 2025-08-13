@@ -48,8 +48,8 @@ export const ProductionDebugPanel: React.FC = () => {
             hasSupabaseKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
           },
           supabase: {
-            url: supabase.supabaseUrl,
-            keyPrefix: supabase.supabaseKey.substring(0, 20) + '...',
+            url: import.meta.env.VITE_SUPABASE_URL ? '[set]' : '[unset]',
+            keyPrefix: import.meta.env.VITE_SUPABASE_ANON_KEY ? '[set]' : '[unset]',
             connected: !error,
             error: error?.message,
           },

@@ -20,14 +20,17 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { MoreVertical, Mail, Phone, Edit, Trash2, Send, UserPlus } from 'lucide-react';
-import { 
+import {
   FamilyMemberWithInvitations,
   getRelationLabel,
   getGenderLabel,
   getInvitationStatusLabel,
   getInvitationStatusColor,
   getInvitationStatusIcon,
-  InviteMethod
+  InviteMethod,
+  parseRelation,
+  parseGender,
+  parseInvitationStatus
 } from '@/types/family';
 
 interface FamilyMembersListProps {
@@ -131,10 +134,10 @@ export const FamilyMembersList: React.FC<FamilyMembersListProps> = ({
                   </CardTitle>
                   <div className="flex items-center space-x-2">
                     <Badge variant="secondary" className="text-xs">
-                      {getRelationLabel(member.relation)}
+                      {getRelationLabel(parseRelation(member.relation))}
                     </Badge>
                     <Badge variant="outline" className="text-xs">
-                      {getGenderLabel(member.gender)}
+                      {getGenderLabel(parseGender(member.gender))}
                     </Badge>
                   </div>
                 </div>
@@ -210,13 +213,13 @@ export const FamilyMembersList: React.FC<FamilyMembersListProps> = ({
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <span className="text-xs">
-                    {getInvitationStatusIcon(member.invitation_status)}
+                    {getInvitationStatusIcon(parseInvitationStatus(member.invitation_status))}
                   </span>
-                  <Badge 
-                    variant="secondary" 
-                    className={`text-xs ${getInvitationStatusColor(member.invitation_status)}`}
+                  <Badge
+                    variant="secondary"
+                    className={`text-xs ${getInvitationStatusColor(parseInvitationStatus(member.invitation_status))}`}
                   >
-                    {getInvitationStatusLabel(member.invitation_status)}
+                    {getInvitationStatusLabel(parseInvitationStatus(member.invitation_status))}
                   </Badge>
                 </div>
 

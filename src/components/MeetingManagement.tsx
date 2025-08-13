@@ -73,10 +73,6 @@ const MeetingManagement = () => {
     const today = new Date();
     return administrativeAssignments.filter(assignment => {
       const assignmentDate = new Date(assignment.assignment_date);
-      if (assignment.end_date) {
-        const endDate = new Date(assignment.end_date);
-        return assignmentDate <= today && today <= endDate;
-      }
       return assignmentDate <= today;
     });
   };

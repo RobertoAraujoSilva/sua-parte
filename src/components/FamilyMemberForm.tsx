@@ -9,13 +9,16 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+
 import {
   FamilyMemberFormData,
   relationOptions,
   genderOptions,
   formatPhone,
   validatePhone,
-  FamilyMember
+  FamilyMember,
+  parseGender,
+  parseRelation
 } from '@/types/family';
 
 // Validation schema
@@ -73,8 +76,8 @@ export const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({
       name: initialData?.name || '',
       email: initialData?.email || '',
       phone: initialData?.phone || '',
-      gender: initialData?.gender || undefined,
-      relation: initialData?.relation || undefined,
+      gender: initialData?.gender ? parseGender(initialData.gender) : undefined,
+      relation: initialData?.relation ? parseRelation(initialData.relation) : undefined,
     }
   });
 
@@ -136,7 +139,7 @@ export const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({
             <Label htmlFor="relation">Parentesco *</Label>
             <Select
               value={watch('relation') || ''}
-              onValueChange={(value) => setValue('relation', value as any)}
+              onValueChange={(value) => setValue('relation', parseRelation(value))}
             >
               <SelectTrigger className={errors.relation ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Selecione o parentesco" />
@@ -159,7 +162,7 @@ export const FamilyMemberForm: React.FC<FamilyMemberFormProps> = ({
             <Label>Gênero *</Label>
             <RadioGroup
               value={watch('gender') || ''}
-              onValueChange={(value) => setValue('gender', value as any)}
+              onValueChange={(value) => setValue('gender', parseGender(value))}
               className="flex space-x-6"
             >
               {genderOptions.map((option) => (
