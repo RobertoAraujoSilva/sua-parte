@@ -13,6 +13,18 @@ export type Cargo = Database["public"]["Enums"]["app_cargo"];
 export interface EstudanteWithParent extends EstudanteRow {
   pai_mae?: EstudanteRow | null;
   filhos?: EstudanteRow[];
+  familia?: string;
+  congregacao?: string;
+  chairman?: boolean;
+  pray?: boolean;
+  tresures?: boolean;
+  gems?: boolean;
+  reading?: boolean;
+  starting?: boolean;
+  following?: boolean;
+  making?: boolean;
+  explaining?: boolean;
+  talk?: boolean;
 }
 
 // S-38-T Speech Types and Qualifications

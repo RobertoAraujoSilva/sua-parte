@@ -7,6 +7,7 @@ import { LogOut, User, Settings, Languages } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { useDebugLogger } from "@/utils/debugLogger";
 import { useTranslation } from "@/hooks/useTranslation";
+import { MobileNavigation } from "@/components/navigation/MobileNavigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -81,17 +82,17 @@ const Header = () => {
 
   return (
     <header className="bg-jw-navy text-white shadow-lg">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-2 sm:px-4">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center space-x-8">
-            <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-8">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <div className="w-8 h-8 bg-jw-blue rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">SM</span>
               </div>
-              <h1 className="text-xl font-semibold">Sistema Ministerial</h1>
+              <h1 className="header-title text-lg sm:text-xl font-semibold">Sistema Ministerial</h1>
             </div>
             
-            <nav className="hidden md:flex items-center space-x-6">
+            <nav className="header-nav hidden xl:flex items-center space-x-6">
                           {!user && (
                             <>
                               <Link to="/" className="hover:text-jw-gold transition-colors">
@@ -140,17 +141,20 @@ const Header = () => {
                         </nav>
           </div>
           
- <div className="flex items-center space-x-4">
+          {/* Mobile Navigation */}
+          <MobileNavigation className="xl:hidden" />
+          
+ <div className="flex items-center space-x-2 sm:space-x-4">
             {/* Language Toggle Button */}
             <Button
               variant="ghost"
               size="sm"
-              className="text-white hover:text-jw-gold"
+              className="text-white hover:text-jw-gold p-2 sm:px-3"
               onClick={toggleLanguage}
               title={language === 'pt' ? t('Alternar para Inglês') : t('Alternar para Português')}
             >
-              <Languages className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">
+              <Languages className="w-4 h-4 sm:mr-2" />
+              <span className="hidden md:inline">
                 {language === 'pt' ? t('Inglês') : t('Português')}
               </span>
             </Button>
@@ -164,19 +168,19 @@ const Header = () => {
                                   }}
                                   variant="outline"
                                   size="sm"
-                                  className="text-xs bg-red-600 text-white hover:bg-red-700"
+                                  className="text-xs bg-red-600 text-white hover:bg-red-700 hidden sm:inline-flex"
                                 >
                                   {t('Test Logout')}
                                 </Button>
 
                 <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="flex items-center gap-2 text-white hover:text-jw-gold">
+                  <Button variant="ghost" className="flex items-center gap-1 sm:gap-2 text-white hover:text-jw-gold p-2 sm:px-3">
                     <User className="w-4 h-4" />
-                    <span className="hidden sm:inline">
+                    <span className="hidden md:inline max-w-32 truncate">
                       {profile?.nome_completo || user.user_metadata?.nome_completo || user.email}
                     </span>
-                    <Badge variant="outline" className="text-xs border-jw-gold text-jw-gold">
+                    <Badge variant="outline" className="text-xs border-jw-gold text-jw-gold hidden sm:inline-flex">
                                           {(profile?.role === 'instrutor' || user.user_metadata?.role === 'instrutor') ? t('Instrutor') : t('Estudante')}
                                                               </Badge>
                   </Button>
@@ -235,17 +239,20 @@ const Header = () => {
                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="text-white hover:text-jw-gold"
+                                  className="text-white hover:text-jw-gold p-2 sm:px-3"
                                   onClick={() => navigate('/auth')}
                                 >
-                                  {t('Entrar')}
+                                  <span className="hidden sm:inline">{t('Entrar')}</span>
+                                  <span className="sm:hidden">Login</span>
                                 </Button>
                                 <Button
                                   variant="hero"
                                   size="sm"
+                                  className="p-2 sm:px-3"
                                   onClick={() => navigate('/auth')}
                                 >
-                                  {t('Começar')}
+                                  <span className="hidden sm:inline">{t('Começar')}</span>
+                                  <span className="sm:hidden">Start</span>
                                 </Button>
               </>
             )}
