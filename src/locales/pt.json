@@ -379,7 +379,33 @@
     "needHelp": "Não encontrou sua resposta?",
     "supportTeam": "Nossa equipe de suporte está pronta para ajudar com qualquer dúvida específica sobre o Sistema Ministerial.",
     "contact": "Entrar em Contato",
-    "viewFeatures": "Ver Funcionalidades"
+    "viewFeatures": "Ver Funcionalidades",
+    "categoryTitles": {
+      "overview": "Visão Geral",
+      "students": "Cadastro de Estudantes",
+      "programs": "Leitura das Apostilas",
+      "algorithm": "Algoritmo de Distribuição",
+      "communication": "Comunicação e Segurança"
+    },
+    "categoryDescriptions": {
+      "overview": "Informações gerais sobre o Sistema Ministerial",
+      "students": "Gestão e organização de estudantes da escola",
+      "programs": "Importação e processamento de programas semanais",
+      "algorithm": "Como funciona a distribuição inteligente de designações",
+      "communication": "Notificações, privacidade e segurança dos dados"
+    },
+    "questions": {
+      "whatIs": "O que é o Sistema Ministerial?",
+      "whoCanUse": "Quem pode usar o sistema?",
+      "cost": "Qual é o custo do sistema?",
+      "requirements": "Quais são os requisitos técnicos?"
+    },
+    "answers": {
+      "whatIs": "O Sistema Ministerial é uma plataforma digital completa desenvolvida especificamente para congregações das Testemunhas de Jeová. Ele automatiza todo o processo de designações da Escola do Ministério Teocrático, desde o cadastro de estudantes até a distribuição inteligente de partes, seguindo rigorosamente as diretrizes S-38-T.",
+      "whoCanUse": "O sistema é destinado a instrutores da Escola do Ministério Teocrático, anciãos, servos ministeriais e coordenadores de congregação. Cada usuário tem acesso a funcionalidades específicas baseadas em seu cargo e responsabilidades na congregação.",
+      "cost": "O Sistema Ministerial é oferecido gratuitamente para todas as congregações. Mantemos o projeto através de doações voluntárias da comunidade, seguindo os princípios bíblicos de contribuição espontânea.",
+      "requirements": "O sistema funciona em qualquer dispositivo com acesso à internet e navegador moderno (Chrome, Firefox, Safari, Edge). É totalmente responsivo, funcionando perfeitamente em computadores, tablets e smartphones."
+    }
   },
   "footer": {
     "appName": "Sistema Ministerial",
