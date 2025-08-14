@@ -273,5 +273,39 @@
     "saved": "Saved successfully!",
     "generated": "Generated successfully!",
     "updated": "Updated successfully!"
+  },
+  "benefits": {
+    "title": "Transform Your Congregation's Organization",
+    "subtitle": "Drastically reduce time spent on administrative tasks and focus on what really matters: spiritual development.",
+    "timeEfficiency": {
+      "title": "Significant Time Savings",
+      "description": "From hours to minutes: what used to take an entire afternoon of work is now resolved in less than 5 minutes per week."
+    },
+    "compliance": {
+      "title": "Guaranteed Compliance",
+      "description": "Intelligent algorithm that automatically respects all congregational rules, gender, position, and family relationships."
+    },
+    "engagement": {
+      "title": "Student Engagement",
+      "description": "Dedicated portal where students track their assignments, confirm participation, and contribute to sustainability."
+    },
+    "sustainability": {
+      "title": "Sustainability via Donations",
+      "description": "Self-funded system through voluntary contributions, ensuring continuity without fixed costs for congregations."
+    },
+    "cta": {
+      "title": "Get Started Today",
+      "description": "Register your congregation and experience the efficiency of ministerial automation. Complete setup in less than 30 minutes.",
+      "button": "Start for Free",
+      "note": "System sustained by voluntary donations"
+    },
+    "features": {
+      "studentManagement": "Student registration",
+      "programImport": "Program import",
+      "notifications": "Automatic notifications",
+      "studentPortal": "Student portal",
+      "reports": "Complete reports",
+      "included": "Included"
+    }
   }
 }

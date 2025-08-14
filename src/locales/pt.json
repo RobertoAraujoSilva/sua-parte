@@ -333,6 +333,40 @@
     "participationConfirmed": "Participação confirmada!",
     "confirmationRegistered": "Sua confirmação foi registrada com sucesso."
   },
+  "benefits": {
+    "title": "Transforme a Organização da Sua Congregação",
+    "subtitle": "Reduza drasticamente o tempo gasto em tarefas administrativas e foque no que realmente importa: o desenvolvimento espiritual.",
+    "timeEfficiency": {
+      "title": "Economia de Tempo Significativa",
+      "description": "De horas para minutos: o que antes tomava uma tarde inteira de trabalho agora é resolvido em menos de 5 minutos por semana."
+    },
+    "compliance": {
+      "title": "Conformidade Garantida",
+      "description": "Algoritmo inteligente que automaticamente respeita todas as regras congregacionais, gênero, cargo e relações familiares."
+    },
+    "engagement": {
+      "title": "Engajamento Estudantil",
+      "description": "Portal dedicado onde estudantes acompanham suas designações, confirmam participação e contribuem para sustentabilidade."
+    },
+    "sustainability": {
+      "title": "Sustentabilidade via Doações",
+      "description": "Sistema autofinanciado através de contribuições voluntárias, garantindo continuidade sem custos fixos para congregações."
+    },
+    "cta": {
+      "title": "Comece Hoje Mesmo",
+      "description": "Cadastre sua congregação e experimente a eficiência da automação ministerial. Setup completo em menos de 30 minutos.",
+      "button": "Começar Gratuitamente",
+      "note": "Sistema sustentado por doações voluntárias"
+    },
+    "features": {
+      "studentManagement": "Cadastro de estudantes",
+      "programImport": "Importação de programas",
+      "notifications": "Notificações automáticas",
+      "studentPortal": "Portal do estudante",
+      "reports": "Relatórios completos",
+      "included": "Incluído"
+    }
+  },
   "footer": {
     "appName": "Sistema Ministerial",
     "description": "Automatização inteligente de designações ministeriais para congregações das Testemunhas de Jeová, com foco em eficiência e conformidade.",
