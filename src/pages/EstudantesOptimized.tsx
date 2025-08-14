@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEstudantes } from "@/hooks/useEstudantes";
 import PageShell from "@/components/layout/PageShell";
-import { EstudantesToolbar } from "@/components/students/EstudantesToolbar";
+import EstudantesToolbar from "@/components/students/EstudantesToolbar";
 import { StudentSpreadsheetOptimized } from "@/components/students/StudentSpreadsheetOptimized";
 import EstudanteForm from "@/components/EstudanteForm";
 import EstudanteCard from "@/components/EstudanteCard";
@@ -11,8 +11,9 @@ import SpreadsheetUpload from "@/components/SpreadsheetUpload";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter, BarChart3 } from "lucide-react";
-import { EstudanteWithParent, EstudanteFilters, CARGO_LABELS } from "@/types/estudantes";
+import { Search, Filter } from "lucide-react";
+import type { EstudanteWithParent, EstudanteFilters, Cargo } from "@/types/estudantes";
+import { CARGO_LABELS } from "@/types/estudantes";
 import { DebugPanel } from '@/components/DebugPanel';
 import { AdaptiveGrid } from "@/components/layout/adaptive-grid";
 
@@ -118,7 +119,15 @@ const EstudantesOptimized = () => {
                       className="pl-10" 
                     />
                   </div>
-                  <Select value={filters.cargo} onValueChange={(value) => setFilters(prev => ({ ...prev, cargo: value }))}>
+                  <Select
+                    value={filters.cargo}
+                    onValueChange={(value) =>
+                      setFilters((prev) => ({
+                        ...prev,
+                        cargo: value as Cargo | "todos",
+                      }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Filtrar por cargo" />
                     </SelectTrigger>
@@ -236,11 +245,11 @@ const EstudantesOptimized = () => {
         hero={false}
         actions={
           <EstudantesToolbar
-            activeTab={activeTab}
+            selectedTab={activeTab}
             onTabChange={setActiveTab}
             onRefresh={refetch}
             onImport={() => setActiveTab('import')}
-            onNew={() => {
+            onAddStudent={() => {
               setEditingEstudante(null);
               setActiveTab('form');
             }}

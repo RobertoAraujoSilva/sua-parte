@@ -27,7 +27,7 @@ import type { DesignacaoGerada } from '@/types/designacoes';
 interface AssignmentPreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   assignments: DesignacaoGerada[];
   programTitle: string;
   isConfirming?: boolean;

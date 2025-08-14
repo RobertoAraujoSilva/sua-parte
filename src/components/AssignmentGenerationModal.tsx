@@ -23,13 +23,15 @@ interface AssignmentGenerationModalProps {
   progress: number;
   currentStep: string;
   programTitle: string;
+  onClose: () => void;
 }
 
 export const AssignmentGenerationModal: React.FC<AssignmentGenerationModalProps> = ({
   isOpen,
   progress,
   currentStep,
-  programTitle
+  programTitle,
+  onClose
 }) => {
   const getStepIcon = (step: string) => {
     if (step.includes('estudantes')) return <Users className="w-5 h-5 text-blue-600" />;
@@ -60,7 +62,7 @@ export const AssignmentGenerationModal: React.FC<AssignmentGenerationModalProps>
   ];
 
   return (
-    <Dialog open={isOpen} onOpenChange={() => {}}>
+    <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md" hideCloseButton>
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
