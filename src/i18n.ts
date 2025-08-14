@@ -21,7 +21,8 @@ i18n
   .init({
     resources,
     fallbackLng: 'pt',
-    debug: false,
+    lng: 'pt', // Set default language explicitly
+    debug: true, // Enable debug to see what's happening
     
     interpolation: {
       escapeValue: false, // React already escapes values

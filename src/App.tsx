@@ -10,6 +10,7 @@ import { TutorialOverlay } from "@/components/tutorial";
 // Debug tools will be loaded conditionally in development only
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import { LanguageDebug } from "@/components/LanguageDebug";
 import Demo from "./pages/Demo";
 import Dashboard from "./pages/Dashboard";
 import Estudantes from "./pages/Estudantes";
@@ -288,6 +289,7 @@ const App = () => (
           {/* Debug Panel - Only shows in development */}
           <ConditionalDebugPanel />
           {import.meta.env.DEV && <DebugFab />}
+          {import.meta.env.DEV && <LanguageDebug />}
         </TutorialProvider>
       </AuthProvider>
     </LanguageProvider>
