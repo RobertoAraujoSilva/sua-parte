@@ -13,6 +13,7 @@ import Auth from "./pages/Auth";
 import Demo from "./pages/Demo";
 import Dashboard from "./pages/Dashboard";
 import Estudantes from "./pages/Estudantes";
+import EstudantesResponsive from "./pages/EstudantesResponsive";
 import Programas from "./pages/Programas";
 import ProgramaPreview from "./pages/ProgramaPreview";
 import ProgramasTest from "./pages/ProgramasTest";
@@ -145,9 +146,19 @@ const App = () => (
                   }
                 />
 
-                {/* Debug Route - Only in development */}
+                {/* Debug Routes - Only in development */}
                 {import.meta.env.DEV && (
-                  <Route path="/debug-dashboard" element={<Dashboard />} />
+                  <>
+                    <Route path="/debug-dashboard" element={<Dashboard />} />
+                    <Route 
+                      path="/estudantes-responsive" 
+                      element={
+                        <ProtectedRoute allowedRoles={['instrutor']}>
+                          <EstudantesResponsive />
+                        </ProtectedRoute>
+                      } 
+                    />
+                  </>
                 )}
 
                 {/* Instrutor Only Routes */}
