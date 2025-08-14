@@ -130,7 +130,10 @@
   - Validate calc() height calculations work correctly across all scenarios
   - _Requirements: 6.1, 6.2, 6.3_
 
-- [ ] 11. Optimize existing responsive components integration
+- [x] 11. Optimize existing responsive components integration
+
+
+
 
 
 
@@ -142,7 +145,7 @@
   - Maintain backward compatibility with existing responsive system
   - _Requirements: 1.3, 2.3, 8.1_
 
-- [ ] 12. Create commit with all page migrations and CSS updates
+- [x] 12. Create commit with all page migrations and CSS updates
   - Commit changes to all three pages (Estudantes, Programas, Designações)
   - Include page-shell.css and PageShell.tsx component
   - Update main.tsx with CSS import
