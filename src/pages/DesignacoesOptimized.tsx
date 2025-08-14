@@ -184,13 +184,17 @@ const DesignacoesOptimized = () => {
       const programaResult = await carregarProgramaPorData(dados.dataInicioSemana);
       if (
         !programaResult.sucesso ||
-        !programaResult.programa?.partes ||
-        !Array.isArray(programaResult.programa.partes)
+        programaResult.programa == null ||
+        programaResult.programa.partes == null
       ) {
         throw new Error("Programa não encontrado ou sem partes definidas");
       }
 
-      const partesPrograma: ParteProgramaS38T[] = programaResult.programa.partes.map((p: any) => ({
+      const rawPartes = programaResult.programa.partes;
+      if (!Array.isArray(rawPartes)) {
+        throw new Error("Programa não encontrado ou sem partes definidas");
+      }
+      const partesPrograma: ParteProgramaS38T[] = (rawPartes as any[]).map((p: any) => ({
         numero_parte: p.numero_parte,
         titulo_parte: p.titulo_parte,
         tipo_parte: p.tipo_parte,
