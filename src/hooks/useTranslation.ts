@@ -1,15 +1,10 @@
-import { useLanguage } from "@/contexts/LanguageContext";
-import { t, Language } from "@/translations";
+import { useTranslation as useI18nTranslation } from 'react-i18next';
 
 export const useTranslation = () => {
-  const { language } = useLanguage();
-  
-  const translate = (key: string): string => {
-    return t(key, language);
-  };
+  const { t, i18n } = useI18nTranslation();
   
   return {
-    t: translate,
-    language
+    t,
+    language: i18n.language as 'pt' | 'en'
   };
 };

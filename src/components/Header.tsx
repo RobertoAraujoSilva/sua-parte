@@ -96,25 +96,25 @@ const Header = () => {
                           {!user && (
                             <>
                               <Link to="/" className="hover:text-jw-gold transition-colors">
-                                                  {t('INÍCIO')}
+                                                  {t('navigation.home')}
                                                 </Link>
                                                 <Link to="/funcionalidades" className="hover:text-jw-gold transition-colors">
-                                                  {t('FUNCIONALIDADES')}
+                                                  {t('navigation.features')}
                                                 </Link>
                                                 <a href="#faq" className="hover:text-jw-gold transition-colors">
-                                                  {t('FAQ')}
+                                                  {t('navigation.faq')}
                                                 </a>
                                                 <Link to="/congregacoes" className="hover:text-jw-gold transition-colors">
-                                                  {t('CONGREGAÇÕES')}
+                                                  {t('navigation.congregations')}
                                                 </Link>
                                                 <Link to="/suporte" className="hover:text-jw-gold transition-colors">
-                                                  {t('SUPORTE')}
+                                                  {t('navigation.support')}
                                                 </Link>
                                                 <Link to="/sobre" className="hover:text-jw-gold transition-colors">
-                                                  {t('SOBRE')}
+                                                  {t('navigation.about')}
                                                 </Link>
                                                 <Link to="/doar" className="hover:text-jw-gold transition-colors font-semibold">
-                                                  {t('DOAR')}
+                                                  {t('navigation.donate')}
                                                 </Link>
                             </>
                           )}
@@ -122,19 +122,19 @@ const Header = () => {
                           {userIsInstrutor && (
                             <>
                               <Link to="/dashboard" className="hover:text-jw-gold transition-colors">
-                                                  {t('DASHBOARD')}
+                                                  {t('navigation.dashboard')}
                                                 </Link>
                                                 <Link to="/estudantes" className="hover:text-jw-gold transition-colors">
-                                                  {t('ESTUDANTES')}
+                                                  {t('navigation.students')}
                                                 </Link>
                                                 <Link to="/programas" className="hover:text-jw-gold transition-colors">
-                                                  {t('PROGRAMAS')}
+                                                  {t('navigation.programs')}
                                                 </Link>
                                                 <Link to="/designacoes" className="hover:text-jw-gold transition-colors">
-                                                  {t('DESIGNAÇÕES')}
+                                                  {t('navigation.assignments')}
                                                 </Link>
                                                 <Link to="/relatorios" className="hover:text-jw-gold transition-colors">
-                                                  {t('RELATÓRIOS')}
+                                                  {t('navigation.reports')}
                                                 </Link>
                             </>
                           )}
@@ -151,11 +151,11 @@ const Header = () => {
               size="sm"
               className="text-white hover:text-jw-gold p-2 sm:px-3"
               onClick={toggleLanguage}
-              title={language === 'pt' ? t('Alternar para Inglês') : t('Alternar para Português')}
+              title={language === 'pt' ? t('language.switchToEnglish') : t('language.switchToPortuguese')}
             >
               <Languages className="w-4 h-4 sm:mr-2" />
               <span className="hidden md:inline">
-                {language === 'pt' ? t('Inglês') : t('Português')}
+                {language === 'pt' ? t('language.english') : t('language.portuguese')}
               </span>
             </Button>
             {user ? (
@@ -181,7 +181,7 @@ const Header = () => {
                       {profile?.nome_completo || user.user_metadata?.nome_completo || user.email}
                     </span>
                     <Badge variant="outline" className="text-xs border-jw-gold text-jw-gold hidden sm:inline-flex">
-                                          {(profile?.role === 'instrutor' || user.user_metadata?.role === 'instrutor') ? t('Instrutor') : t('Estudante')}
+                                          {(profile?.role === 'instrutor' || user.user_metadata?.role === 'instrutor') ? t('navigation.instructor') : t('navigation.student')}
                                                               </Badge>
                   </Button>
                 </DropdownMenuTrigger>
@@ -201,14 +201,14 @@ const Header = () => {
                   {userIsInstrutor && (
                                       <DropdownMenuItem onClick={() => navigate('/dashboard')}>
                                                             <Settings className="w-4 h-4 mr-2" />
-                                                            {t('Dashboard')}
+                                                            {t('navigation.dashboard')}
                                                           </DropdownMenuItem>
                                                         )}
                                       
                                                         {userIsEstudante && (
                                                           <DropdownMenuItem onClick={() => navigate(`/estudante/${user.id}`)}>
                                                             <User className="w-4 h-4 mr-2" />
-                                                            {t('Meu Portal')}
+                                                            {t('navigation.myPortal')}
                                                           </DropdownMenuItem>
                                                         )}
 
@@ -229,7 +229,7 @@ const Header = () => {
                     className="text-red-600 cursor-pointer"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
-                                        {t('Sair')}
+                                        {t('common.logout')}
                                       </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -242,7 +242,7 @@ const Header = () => {
                                   className="text-white hover:text-jw-gold p-2 sm:px-3"
                                   onClick={() => navigate('/auth')}
                                 >
-                                  <span className="hidden sm:inline">{t('Entrar')}</span>
+                                  <span className="hidden sm:inline">{t('navigation.login')}</span>
                                   <span className="sm:hidden">Login</span>
                                 </Button>
                                 <Button
@@ -251,7 +251,7 @@ const Header = () => {
                                   className="p-2 sm:px-3"
                                   onClick={() => navigate('/auth')}
                                 >
-                                  <span className="hidden sm:inline">{t('Começar')}</span>
+                                  <span className="hidden sm:inline">{t('navigation.getStarted')}</span>
                                   <span className="sm:hidden">Start</span>
                                 </Button>
               </>

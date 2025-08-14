@@ -3,6 +3,7 @@ import App from './App.tsx'
 import './index.css'
 import './styles/responsive.css'
 import './styles/page-shell.css'
+import './i18n' // Initialize i18n
 import { ErrorBoundary } from "react-error-boundary";
 import FallbackScreen from "@/components/FallbackScreen";
 import SafeAreaLayout from "@/layouts/SafeAreaLayout";
