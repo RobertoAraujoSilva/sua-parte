@@ -102,20 +102,22 @@ const Estudantes = () => {
     setFilters(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleCreateEstudante = async (data: any) => {
+  const handleCreateEstudante = async (data: any): Promise<boolean> => {
     setFormLoading(true);
     await createEstudante(data);
     setFormLoading(false);
     setActiveTab("list");
+    return true;
   };
 
-  const handleUpdateEstudante = async (data: any) => {
-    if (!editingEstudante) return;
+  const handleUpdateEstudante = async (data: any): Promise<boolean> => {
+    if (!editingEstudante) return false;
     setFormLoading(true);
     await updateEstudante({ id: editingEstudante.id, data });
     setFormLoading(false);
     setEditingEstudante(null);
     setActiveTab("list");
+    return true;
   };
 
   const handleEditEstudante = (estudante: any) => {
@@ -165,12 +167,12 @@ const Estudantes = () => {
     }
 
     return (
-      <section className="py-4 sm:py-8">
-        <div className="responsive-container">
+      <section className="py-4 md:py-8">
+        <div className="responsive-container px-2 md:px-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-4">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 md:mb-6 gap-4 md:gap-6">
                 <ScrollTabs>
-                  <TabsList className="responsive-tabs w-full sm:w-auto" data-tutorial="tabs-navigation">
+                  <TabsList className="responsive-tabs w-full md:w-auto" data-tutorial="tabs-navigation">
                     <TabsTrigger value="list" className="flex items-center gap-2 shrink-0 snap-start">
                       <Users className="w-4 h-4" />
                       {t('Lista')}
@@ -197,31 +199,33 @@ const Estudantes = () => {
                     </TabsTrigger>
                   </TabsList>
                 </ScrollTabs>
-                <div className="responsive-buttons w-full sm:w-auto">
+                <div className="responsive-buttons w-full md:w-auto flex flex-col md:flex-row gap-2 md:gap-3">
                   <Button variant="outline" size="sm" onClick={() => refetch()}>🔄 {t('Atualizar')}</Button>
-                  <Button variant="outline" size="sm" onClick={() => setActiveTab("import")}><Upload className="w-4 h-4 mr-2" />{t('Importar Planilha')}</Button>
-                  <Button variant="hero" size="sm" onClick={() => { setEditingEstudante(null); setActiveTab("form"); }}><Plus className="w-4 h-4 mr-2" />{t('Novo Estudante')}</Button>
+                  <Button variant="outline" size="sm" onClick={() => setActiveTab("import")}> <Upload className="w-4 h-4 mr-2" />{t('Importar Planilha')}</Button>
+                  <Button variant="hero" size="sm" onClick={() => { setEditingEstudante(null); setActiveTab("form"); }}> <Plus className="w-4 h-4 mr-2" />{t('Novo Estudante')}</Button>
                 </div>
               </div>
 
               <TabsContent value="list" className="space-y-6">
                 <Card>
                   <CardHeader><CardTitle className="flex items-center gap-2"><Filter className="w-5 h-5" />{t('Filtros')}</CardTitle></CardHeader>
-                  <CardContent><div className="responsive-form">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input placeholder={t('Buscar por nome...')} value={filters.searchTerm} onChange={(e) => handleFilterChange("searchTerm", e.target.value)} className="pl-10" />
+                  <CardContent>
+                    <div className="responsive-form grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <Input placeholder={t('Buscar por nome...')} value={filters.searchTerm} onChange={(e) => handleFilterChange("searchTerm", e.target.value)} className="pl-10" />
+                      </div>
+                      <Select value={filters.cargo} onValueChange={(value) => handleFilterChange("cargo", value)}>
+                        <SelectTrigger><SelectValue placeholder={t('Filtrar por cargo')} /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="todos">{t('Todos os cargos')}</SelectItem>
+                          {Object.entries(CARGO_LABELS).map(([value, label]) => (<SelectItem key={value} value={value}>{label}</SelectItem>))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <Select value={filters.cargo} onValueChange={(value) => handleFilterChange("cargo", value)}>
-                      <SelectTrigger><SelectValue placeholder={t('Filtrar por cargo')} /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="todos">{t('Todos os cargos')}</SelectItem>
-                        {Object.entries(CARGO_LABELS).map(([value, label]) => (<SelectItem key={value} value={value}>{label}</SelectItem>))}
-                      </SelectContent>
-                    </Select>
-                  </div></CardContent>
+                  </CardContent>
                 </Card>
-                <div className="responsive-grid students-grid">
+                <div className="responsive-grid students-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                   {filteredEstudantes.map((estudante) => (
                     <EstudanteCard key={estudante.id} estudante={estudante} onEdit={() => handleEditEstudante(estudante)} onDelete={() => handleDeleteEstudante(estudante.id)} />
                   ))}
@@ -238,8 +242,8 @@ const Estudantes = () => {
               <TabsContent value="form">
                 <EstudanteForm estudante={editingEstudante || undefined} potentialParents={potentialParents} onSubmit={editingEstudante ? handleUpdateEstudante : handleCreateEstudante} onCancel={handleCancelForm} loading={formLoading} />
               </TabsContent>
-              <TabsContent value="stats" className="space-y-4 sm:space-y-6">
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
+              <TabsContent value="stats" className="space-y-4 md:space-y-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
                   <Card><CardContent className="p-6 text-center"><div className="text-3xl font-bold text-jw-blue mb-2">{statistics.total}</div><div className="text-sm text-gray-600">{t('Total de Estudantes')}</div></CardContent></Card>
                   <Card><CardContent className="p-6 text-center"><div className="text-3xl font-bold text-green-600 mb-2">{statistics.ativos}</div><div className="text-sm text-gray-600">{t('Estudantes Ativos')}</div></CardContent></Card>
                   <Card><CardContent className="p-6 text-center"><div className="text-3xl font-bold text-red-600 mb-2">{statistics.inativos}</div><div className="text-sm text-gray-600">{t('Estudantes Inativos')}</div></CardContent></Card>
@@ -271,8 +275,8 @@ const Estudantes = () => {
           title={t('Gestão de Estudantes')}
           subtitle={t('Cadastre e gerencie alunos da Escola do Ministério, com validações automáticas de qualificações e regras da congregação.')}
           actions={
-            <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" className="text-white hover:text-jw-gold -ml-4" onClick={() => navigate('/dashboard')}>
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+              <Button variant="ghost" size="sm" className="text-white hover:text-jw-gold -ml-0 md:-ml-4" onClick={() => navigate('/dashboard')}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 {t('Voltar ao Dashboard')}
               </Button>
