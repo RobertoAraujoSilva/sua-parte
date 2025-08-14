@@ -179,7 +179,6 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
-    overflow-x: hidden;
   }
   
   /* Prevent horizontal scroll on all elements */
@@ -302,9 +301,10 @@ html, body {
   transform: translateZ(0); /* Force hardware acceleration */
 }
 
-/* Text balance utility for better line breaks */
-.text-balance {
-  text-wrap: balance;
+/* utilitário simples */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+@supports (text-wrap: balance) {
+  .text-balance { text-wrap: balance; }
 }
 
 /* Clamp utility for responsive text */
