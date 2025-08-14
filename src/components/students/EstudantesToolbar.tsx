@@ -4,7 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Search, 
   Filter, 
-  Download, 
+  Download,
+  Upload,
   Plus, 
   MoreHorizontal,
   RefreshCw,
@@ -26,8 +27,9 @@ interface EstudantesToolbarProps {
   activeCount?: number;
   inactiveCount?: number;
   totalCount?: number;
-  selectedTab?: "active" | "inactive" | "all";
-  onTabChange?: (tab: "active" | "inactive" | "all") => void;
+  selectedTab?: string;
+  onTabChange?: (tab: string) => void;
+  onImport?: () => void;
   onAddStudent?: () => void;
   onExport?: () => void;
   onRefresh?: () => void;
@@ -50,13 +52,14 @@ export default function EstudantesToolbar({
   onTabChange,
   onAddStudent,
   onExport,
+  onImport,
   onRefresh,
   onShowFilters,
   hasActiveFilters = false,
   className
 }: EstudantesToolbarProps) {
   return (
-    <>
+    <div className={className}>
       {/* Left side: Tabs and search */}
       <ToolbarTabs>
         <Button 
@@ -135,6 +138,10 @@ export default function EstudantesToolbar({
 
       {/* Secondary actions */}
       <ToolbarButtonGroup variant="compact">
+        <Button variant="outline" size="sm" onClick={onImport}>
+          <Upload className="h-4 w-4 mr-2" />
+          Importar
+        </Button>
         <Button variant="outline" size="sm" onClick={onExport}>
           <Download className="h-4 w-4 mr-2" />
           Exportar
@@ -149,7 +156,7 @@ export default function EstudantesToolbar({
       <Button variant="ghost" size="sm">
         <MoreHorizontal className="h-4 w-4" />
       </Button>
-    </>
+    </div>
   );
 }
 

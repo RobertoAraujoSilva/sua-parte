@@ -9,7 +9,7 @@ interface StudentSpreadsheetOptimizedProps {
 }
 
 export function StudentSpreadsheetOptimized({ className = '' }: StudentSpreadsheetOptimizedProps) {
-  const { estudantes, isLoading, error } = useEstudantes();
+  const { estudantes, isLoading, error, refetch } = useEstudantes('spreadsheet');
   const { density } = useDensity();
 
   const columns = useMemo(() => [
@@ -41,7 +41,7 @@ export function StudentSpreadsheetOptimized({ className = '' }: StudentSpreadshe
       <div className="h-full-viewport flex items-center justify-center">
         <div className="text-center">
           <p className="text-muted-foreground mb-4">Erro ao carregar estudantes</p>
-          <button className="px-4 py-2 bg-primary text-primary-foreground rounded-md">
+          <button onClick={() => refetch()} className="px-4 py-2 bg-primary text-primary-foreground rounded-md">
             Tentar Novamente
           </button>
         </div>

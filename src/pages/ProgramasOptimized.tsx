@@ -825,7 +825,7 @@ const ProgramasOptimized = () => {
           isOpen={showPreviewModal}
           onClose={handleClosePreview}
           assignments={generatedAssignments}
-          programa={selectedProgram}
+          programTitle={selectedProgram.semana}
           onConfirm={handleConfirmAssignments}
           isConfirming={isConfirmingAssignments}
         />
@@ -840,13 +840,14 @@ const ProgramasOptimized = () => {
       )}
 
       {isGenerating && (
-        <AssignmentGenerationModal
-          isOpen={isGenerating}
-          progress={progress}
-          currentStep={currentStep}
-          onClose={() => resetState()}
-        />
-      )}
+          <AssignmentGenerationModal
+            isOpen={isGenerating}
+            progress={progress}
+            currentStep={currentStep}
+            programTitle={selectedProgram?.semana || ''}
+            onClose={() => resetState()}
+          />
+        )}
     </PageShell>
   );
 };
