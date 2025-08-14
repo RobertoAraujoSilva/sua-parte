@@ -54,177 +54,6 @@ interface FAQCategory {
 }
 
 /**
- * FAQ data organized by categories
- */
-const faqData: FAQCategory[] = [
-  {
-    id: 'overview',
-    title: 'faq.categoryTitles.overview',
-    description: 'faq.categoryDescriptions.overview',
-    icon: HelpCircle,
-    color: 'bg-blue-50 text-blue-700 border-blue-200',
-    items: [
-      {
-        id: 'what-is-sistema',
-        question: 'faq.questions.whatIs',
-        answer: 'faq.answers.whatIs',
-        tags: ['plataforma', 'automação', 'S-38-T']
-      },
-      {
-        id: 'who-can-use',
-        question: 'faq.questions.whoCanUse',
-        answer: 'faq.answers.whoCanUse',
-        tags: ['usuários', 'permissões', 'cargos']
-      },
-      {
-        id: 'cost',
-        question: 'faq.questions.cost',
-        answer: 'faq.answers.cost',
-        tags: ['gratuito', 'doações', 'custo']
-      },
-      {
-        id: 'requirements',
-        question: 'faq.questions.requirements',
-        answer: 'faq.answers.requirements',
-        tags: ['requisitos', 'navegador', 'dispositivos']
-      }
-    ]
-  },
-  {
-    id: 'students',
-    title: 'faq.categoryTitles.students',
-    description: 'faq.categoryDescriptions.students',
-    icon: Users,
-    color: 'bg-green-50 text-green-700 border-green-200',
-    items: [
-      {
-        id: 'add-students',
-        question: 'Como cadastrar estudantes no sistema?',
-        answer: 'Existem duas formas: cadastro individual através do formulário detalhado ou importação em lote via planilha Excel. O sistema valida automaticamente as informações e detecta duplicatas, garantindo a integridade dos dados.',
-        tags: ['cadastro', 'importação', 'planilha']
-      },
-      {
-        id: 'student-qualifications',
-        question: 'Como definir as qualificações de cada estudante?',
-        answer: 'O sistema possui um painel interativo onde você pode marcar as qualificações de cada estudante para diferentes tipos de designação (leitura da Bíblia, demonstrações, discursos). As regras S-38-T são aplicadas automaticamente baseadas no gênero e cargo.',
-        tags: ['qualificações', 'S-38-T', 'designações']
-      },
-      {
-        id: 'family-relationships',
-        question: 'Como configurar relacionamentos familiares?',
-        answer: 'No cadastro de cada estudante, você pode definir relacionamentos familiares (pai/mãe, cônjuge, filhos). Isso garante que pares de gêneros diferentes sejam formados apenas entre familiares, conforme as diretrizes organizacionais.',
-        tags: ['família', 'relacionamentos', 'pares']
-      },
-      {
-        id: 'student-progress',
-        question: 'Como acompanhar o progresso dos estudantes?',
-        answer: 'O sistema oferece um quadro Kanban interativo onde você pode mover estudantes entre níveis de progresso (Iniciante, Desenvolvimento, Qualificado, Avançado) usando arrastar-e-soltar. Também inclui estatísticas detalhadas e histórico de participação.',
-        tags: ['progresso', 'kanban', 'estatísticas']
-      }
-    ]
-  },
-  {
-    id: 'programs',
-    title: 'faq.categoryTitles.programs',
-    description: 'faq.categoryDescriptions.programs',
-    icon: BookOpen,
-    color: 'bg-purple-50 text-purple-700 border-purple-200',
-    items: [
-      {
-        id: 'import-pdf',
-        question: 'Como importar programas a partir de PDFs?',
-        answer: 'Basta fazer upload do PDF oficial da apostila "Nossa Vida e Ministério Cristão". O sistema usa tecnologia de OCR avançada para extrair automaticamente todas as partes, incluindo leituras da Bíblia, demonstrações e discursos, organizando tudo de forma estruturada.',
-        tags: ['PDF', 'OCR', 'importação']
-      },
-      {
-        id: 'manual-programs',
-        question: 'Posso criar programas manualmente?',
-        answer: 'Sim! Para casos especiais ou quando o PDF não está disponível, você pode criar programas manualmente usando nosso editor intuitivo. Todas as validações S-38-T são aplicadas automaticamente.',
-        tags: ['manual', 'editor', 'criação']
-      },
-      {
-        id: 'program-validation',
-        question: 'Como o sistema valida os programas importados?',
-        answer: 'O sistema verifica automaticamente se todas as partes foram identificadas corretamente, valida os tipos de designação e alerta sobre possíveis inconsistências. Você pode revisar e ajustar antes de gerar as designações.',
-        tags: ['validação', 'verificação', 'consistência']
-      },
-      {
-        id: 'special-weeks',
-        question: 'Como lidar com semanas especiais (assembleia, visita do superintendente)?',
-        answer: 'O sistema possui configurações especiais para semanas de assembleia, convenção, visita do superintendente de circuito e Memorial. Você pode facilmente cancelar ou modificar programas para essas ocasiões especiais.',
-        tags: ['assembleia', 'superintendente', 'especiais']
-      }
-    ]
-  },
-  {
-    id: 'algorithm',
-    title: 'faq.categoryTitles.algorithm',
-    description: 'faq.categoryDescriptions.algorithm',
-    icon: Settings,
-    color: 'bg-orange-50 text-orange-700 border-orange-200',
-    items: [
-      {
-        id: 'how-algorithm-works',
-        question: 'Como funciona o algoritmo de distribuição?',
-        answer: 'O algoritmo considera múltiplos fatores: qualificações individuais, histórico das últimas 8 semanas, balanceamento de participação, relacionamentos familiares e regras S-38-T. Ele garante distribuição equitativa e conformidade total com as diretrizes organizacionais.',
-        tags: ['algoritmo', 'balanceamento', 'histórico']
-      },
-      {
-        id: 'assignment-rules',
-        question: 'Quais regras S-38-T são aplicadas automaticamente?',
-        answer: 'Todas as regras principais: Parte 3 (Leitura da Bíblia) apenas para homens, discursos apenas para homens qualificados, pares de gêneros diferentes apenas entre familiares, e distribuição adequada baseada na experiência de cada estudante.',
-        tags: ['S-38-T', 'regras', 'gênero']
-      },
-      {
-        id: 'regenerate-assignments',
-        question: 'Posso regenerar as designações se não gostar do resultado?',
-        answer: 'Sim! Você pode regenerar as designações quantas vezes quiser. O algoritmo criará uma nova distribuição mantendo as mesmas regras e critérios de balanceamento. Também é possível fazer ajustes manuais específicos.',
-        tags: ['regeneração', 'ajustes', 'flexibilidade']
-      },
-      {
-        id: 'balancing-participation',
-        question: 'Como o sistema garante participação equilibrada?',
-        answer: 'O algoritmo rastreia a participação de cada estudante nas últimas 8 semanas e prioriza aqueles que participaram menos recentemente. Também considera o tipo de designação para garantir variedade na experiência de cada estudante.',
-        tags: ['balanceamento', 'participação', 'variedade']
-      }
-    ]
-  },
-  {
-    id: 'communication',
-    title: 'faq.categoryTitles.communication',
-    description: 'faq.categoryDescriptions.communication',
-    icon: MessageSquare,
-    color: 'bg-red-50 text-red-700 border-red-200',
-    items: [
-      {
-        id: 'notifications',
-        question: 'Como funcionam as notificações automáticas?',
-        answer: 'O sistema envia notificações por email automaticamente quando as designações são geradas. As notificações incluem todos os detalhes: data, parte, cena, instruções específicas e material de estudo. Integração com WhatsApp está em desenvolvimento.',
-        tags: ['notificações', 'email', 'WhatsApp']
-      },
-      {
-        id: 'data-security',
-        question: 'Como meus dados estão protegidos?',
-        answer: 'Utilizamos criptografia de ponta a ponta, autenticação segura, backups automáticos e servidores certificados. Todos os dados ficam protegidos e apenas usuários autorizados têm acesso às informações da congregação.',
-        tags: ['segurança', 'criptografia', 'privacidade']
-      },
-      {
-        id: 'student-portal',
-        question: 'Os estudantes têm acesso ao sistema?',
-        answer: 'Sim! Existe um portal específico para estudantes onde eles podem visualizar suas designações, confirmar participação, acessar material de estudo e contribuir com doações. O acesso é controlado e limitado às informações relevantes.',
-        tags: ['portal', 'estudantes', 'acesso']
-      },
-      {
-        id: 'backup-recovery',
-        question: 'E se eu perder meus dados?',
-        answer: 'Todos os dados são automaticamente salvos na nuvem com backups diários. Em caso de problemas, podemos recuperar informações de até 30 dias. Também oferecemos exportação de dados para backup local.',
-        tags: ['backup', 'recuperação', 'nuvem']
-      }
-    ]
-  }
-];
-
-/**
  * FAQ Section Component
  */
 const FAQSection: React.FC = () => {
@@ -232,6 +61,105 @@ const FAQSection: React.FC = () => {
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
   const [selectedCategory, setSelectedCategory] = useState<string>('overview');
   const [searchTerm, setSearchTerm] = useState<string>('');
+
+  /**
+   * FAQ data organized by categories - using translations
+   */
+  const faqData: FAQCategory[] = [
+    {
+      id: 'overview',
+      title: t('faq.categoryTitlesHardcoded.overview'),
+      description: t('faq.categoryDescriptions.overview'),
+      icon: HelpCircle,
+      color: 'bg-blue-50 text-blue-700 border-blue-200',
+      items: [
+        {
+          id: 'what-is-sistema',
+          question: t('faq.questions.whatIs'),
+          answer: t('faq.answers.whatIs'),
+          tags: ['plataforma', 'automação', 'S-38-T']
+        },
+        {
+          id: 'who-can-use',
+          question: t('faq.questions.whoCanUse'),
+          answer: t('faq.answers.whoCanUse'),
+          tags: ['usuários', 'permissões', 'cargos']
+        },
+        {
+          id: 'cost',
+          question: t('faq.questions.cost'),
+          answer: t('faq.answers.cost'),
+          tags: ['gratuito', 'doações', 'custo']
+        },
+        {
+          id: 'requirements',
+          question: t('faq.questions.requirements'),
+          answer: t('faq.answers.requirements'),
+          tags: ['requisitos', 'navegador', 'dispositivos']
+        }
+      ]
+    },
+    {
+      id: 'students',
+      title: t('faq.categoryTitlesHardcoded.students'),
+      description: t('faq.categoryDescriptions.students'),
+      icon: Users,
+      color: 'bg-green-50 text-green-700 border-green-200',
+      items: [
+        {
+          id: 'placeholder1',
+          question: t('faqHardcoded.comingSoon'),
+          answer: t('faqHardcoded.moreQuestions'),
+          tags: []
+        }
+      ]
+    },
+    {
+      id: 'programs',
+      title: t('faq.categoryTitlesHardcoded.programs'),
+      description: t('faq.categoryDescriptions.programs'),
+      icon: BookOpen,
+      color: 'bg-purple-50 text-purple-700 border-purple-200',
+      items: [
+        {
+          id: 'placeholder2',
+          question: t('faqHardcoded.comingSoon'),
+          answer: t('faqHardcoded.moreQuestions'),
+          tags: []
+        }
+      ]
+    },
+    {
+      id: 'algorithm',
+      title: t('faq.categoryTitlesHardcoded.algorithm'),
+      description: t('faq.categoryDescriptions.algorithm'),
+      icon: Settings,
+      color: 'bg-orange-50 text-orange-700 border-orange-200',
+      items: [
+        {
+          id: 'placeholder3',
+          question: t('faqHardcoded.comingSoon'),
+          answer: t('faqHardcoded.moreQuestions'),
+          tags: []
+        }
+      ]
+    },
+    {
+      id: 'communication',
+      title: t('faq.categoryTitlesHardcoded.communication'),
+      description: t('faq.categoryDescriptions.communication'),
+      icon: MessageSquare,
+      color: 'bg-red-50 text-red-700 border-red-200',
+      items: [
+        {
+          id: 'placeholder4',
+          question: t('faqHardcoded.comingSoon'),
+          answer: t('faqHardcoded.moreQuestions'),
+          tags: []
+        }
+      ]
+    }
+  ];
 
   /**
    * Toggle FAQ item open/closed state
@@ -310,12 +238,12 @@ const FAQSection: React.FC = () => {
                     >
                       <Icon className="w-5 h-5 flex-shrink-0" />
                       <div>
-                        <div className="font-medium">{t(category.title)}</div>
+                        <div className="font-medium">{category.title}</div>
                         <div className={cn(
                           "text-xs",
                           isSelected ? "text-white/80" : "text-muted-foreground"
                         )}>
-                          {category.items.length} {category.items.length === 1 ? t('faq.question') : t('faq.questions')}
+                          {category.items.length} {category.items.length === 1 ? t('faqHardcoded.question') : t('faqHardcoded.questions')}
                         </div>
                       </div>
                     </button>
@@ -336,11 +264,11 @@ const FAQSection: React.FC = () => {
                       <currentCategory.icon className="w-6 h-6" />
                     </div>
                     <h3 className="text-2xl font-bold text-foreground">
-                      {t(currentCategory.title)}
+                      {currentCategory.title}
                     </h3>
                   </div>
                   <p className="text-muted-foreground">
-                    {t(currentCategory.description)}
+                    {currentCategory.description}
                   </p>
                 </div>
 
@@ -356,7 +284,7 @@ const FAQSection: React.FC = () => {
                             <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
                               <div className="flex items-center justify-between">
                                 <CardTitle className="text-lg font-semibold text-foreground text-left">
-                                  {t(item.question)}
+                                  {item.question}
                                 </CardTitle>
                                 {isOpen ? (
                                   <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
@@ -369,7 +297,7 @@ const FAQSection: React.FC = () => {
                           <CollapsibleContent>
                             <CardContent className="pt-0">
                               <p className="text-muted-foreground leading-relaxed mb-4">
-                                {t(item.answer)}
+                                {item.answer}
                               </p>
                               {item.tags && (
                                 <div className="flex flex-wrap gap-2">

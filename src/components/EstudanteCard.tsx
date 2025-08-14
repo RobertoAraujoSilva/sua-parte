@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
+import { useTranslation } from "@/hooks/useTranslation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,10 +18,9 @@ import {
 import { Edit, Trash2, User, Phone, Mail, Calendar, Users } from "lucide-react";
 import {
   EstudanteWithParent,
-  getCargoLabel,
-  getGeneroLabel,
-  getQualificacoes,
   isMinor,
+  Cargo,
+  Genero,
 } from "@/types/estudantes";
 
 interface EstudanteCardProps {
@@ -31,10 +31,55 @@ interface EstudanteCardProps {
 }
 
 const EstudanteCard = ({ estudante, onEdit, onDelete, loading = false }: EstudanteCardProps) => {
+  const { t } = useTranslation();
   const [deleteLoading, setDeleteLoading] = useState(false);
 
-  const qualificacoes = getQualificacoes(estudante.cargo, estudante.genero, estudante.idade || 18);
   const isMenor = estudante.idade ? isMinor(estudante.idade) : false;
+  
+  // Translation-aware helper functions
+  const getCargoLabel = (cargo: Cargo): string => {
+    const cargoMap: Record<Cargo, string> = {
+      anciao: t('students.roles.elder'),
+      servo_ministerial: t('students.roles.ministerialServant'),
+      pioneiro_regular: t('students.roles.regularPioneer'),
+      publicador_batizado: t('students.roles.publisher'),
+      publicador_nao_batizado: t('students.roles.unbaptizedPublisher'),
+      estudante_novo: t('students.roles.student'),
+    };
+    return cargoMap[cargo];
+  };
+  
+  const getGeneroLabel = (genero: Genero): string => {
+    const generoMap: Record<Genero, string> = {
+      masculino: t('students.genders.male'),
+      feminino: t('students.genders.female'),
+    };
+    return generoMap[genero];
+  };
+  
+  const getQualificacoes = (cargo: Cargo, genero: Genero, idade: number): string[] => {
+    const qualificacoes: string[] = [];
+    
+    // Leitura da Bíblia - todos podem fazer
+    qualificacoes.push(t('terms.bibleReading'));
+    
+    // Primeira conversa e revisita - todos podem fazer
+    qualificacoes.push(t('students.qualificationTypes.initialCall'), t('students.qualificationTypes.returnVisit'));
+    
+    // Estudo bíblico - apenas homens qualificados
+    if (genero === "masculino" && ["anciao", "servo_ministerial", "publicador_batizado"].includes(cargo)) {
+      qualificacoes.push(t('students.qualificationTypes.bibleStudy'));
+    }
+    
+    // Discursos - apenas homens qualificados
+    if (genero === "masculino" && ["anciao", "servo_ministerial", "publicador_batizado"].includes(cargo)) {
+      qualificacoes.push(t('terms.talk'));
+    }
+    
+    return qualificacoes;
+  };
+  
+  const qualificacoes = getQualificacoes(estudante.cargo, estudante.genero, estudante.idade || 18);
 
   const handleDelete = async () => {
     setDeleteLoading(true);
@@ -43,8 +88,8 @@ const EstudanteCard = ({ estudante, onEdit, onDelete, loading = false }: Estudan
   };
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return "Não informado";
-    return new Date(dateString).toLocaleDateString("pt-BR");
+    if (!dateString) return t('common.notInformed');
+    return new Date(dateString).toLocaleDateString();
   };
 
   return (
@@ -63,18 +108,18 @@ const EstudanteCard = ({ estudante, onEdit, onDelete, loading = false }: Estudan
               {estudante.idade && (
                 <>
                   <span>•</span>
-                  <span>{estudante.idade} anos</span>
+                  <span>{estudante.idade} {t('common.years')}</span>
                 </>
               )}
             </CardDescription>
           </div>
           <div className="flex flex-col gap-1">
             <Badge variant={estudante.ativo ? "default" : "secondary"}>
-              {estudante.ativo ? "Ativo" : "Inativo"}
+              {estudante.ativo ? t('common.active') : t('common.inactive')}
             </Badge>
             {isMenor && (
               <Badge variant="outline" className="text-xs">
-                Menor
+                {t('students.minor')}
               </Badge>
             )}
           </div>
@@ -99,7 +144,7 @@ const EstudanteCard = ({ estudante, onEdit, onDelete, loading = false }: Estudan
           {estudante.data_batismo && (
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Calendar className="w-4 h-4" />
-              <span>Batizado em {formatDate(estudante.data_batismo)}</span>
+              <span>{t('students.baptizedOn')} {formatDate(estudante.data_batismo)}</span>
             </div>
           )}
         </div>
@@ -110,14 +155,14 @@ const EstudanteCard = ({ estudante, onEdit, onDelete, loading = false }: Estudan
             {estudante.pai_mae && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Users className="w-4 h-4" />
-                <span>Responsável: {estudante.pai_mae.nome}</span>
+                <span>{t('students.responsible')}: {estudante.pai_mae.nome}</span>
               </div>
             )}
             {estudante.filhos && estudante.filhos.length > 0 && (
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Users className="w-4 h-4" />
                 <span>
-                  Responsável por: {estudante.filhos.map(f => f.nome).join(", ")}
+                  {t('students.responsibleFor')}: {estudante.filhos.map(f => f.nome).join(", ")}
                 </span>
               </div>
             )}
@@ -126,7 +171,7 @@ const EstudanteCard = ({ estudante, onEdit, onDelete, loading = false }: Estudan
 
         {/* Qualifications */}
         <div className="space-y-2">
-          <Label className="text-sm font-medium text-gray-600">Qualificações:</Label>
+          <Label className="text-sm font-medium text-gray-600">{t('students.qualifications')}:</Label>
           <div className="flex flex-wrap gap-1">
             {qualificacoes.map((qual, index) => (
               <Badge key={index} variant="outline" className="text-xs">
@@ -139,7 +184,7 @@ const EstudanteCard = ({ estudante, onEdit, onDelete, loading = false }: Estudan
         {/* Observations */}
         {estudante.observacoes && (
           <div className="space-y-2">
-            <Label className="text-sm font-medium text-gray-600">Observações:</Label>
+            <Label className="text-sm font-medium text-gray-600">{t('students.observations')}:</Label>
             <p className="text-sm text-gray-700 bg-gray-50 p-2 rounded">
               {estudante.observacoes}
             </p>
@@ -156,7 +201,7 @@ const EstudanteCard = ({ estudante, onEdit, onDelete, loading = false }: Estudan
             disabled={loading}
           >
             <Edit className="w-4 h-4 mr-1" />
-            Editar
+            {t('common.edit')}
           </Button>
           
           <AlertDialog>
@@ -172,27 +217,27 @@ const EstudanteCard = ({ estudante, onEdit, onDelete, loading = false }: Estudan
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                <AlertDialogTitle>{t('students.confirmDelete')}</AlertDialogTitle>
                 <AlertDialogDescription>
-                  Tem certeza que deseja excluir o estudante <strong>{estudante.nome}</strong>?
+                  {t('students.deleteConfirmation', { name: estudante.nome })}
                   {estudante.filhos && estudante.filhos.length > 0 && (
                     <span className="block mt-2 text-red-600">
-                      ⚠️ Este estudante é responsável por menores e não pode ser excluído.
+                      ⚠️ {t('students.cannotDeleteParent')}
                     </span>
                   )}
                   <span className="block mt-2">
-                    Esta ação não pode ser desfeita.
+                    {t('students.actionCannotBeUndone')}
                   </span>
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDelete}
                   disabled={deleteLoading || (estudante.filhos && estudante.filhos.length > 0)}
                   className="bg-red-600 hover:bg-red-700"
                 >
-                  {deleteLoading ? "Excluindo..." : "Excluir"}
+                  {deleteLoading ? t('students.deleting') : t('common.delete')}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

@@ -28,6 +28,8 @@ i18n
       escapeValue: false, // React already escapes values
     },
     
+    returnObjects: true, // Enable returning objects for complex translations
+    
     detection: {
       order: ['localStorage', 'navigator', 'htmlTag'],
       caches: ['localStorage'],

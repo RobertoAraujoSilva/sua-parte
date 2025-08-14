@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTranslation } from '@/hooks/useTranslation';
 import { Eye, EyeOff, LogIn, UserPlus, Shield, BookOpen } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
 import { CARGO_LABELS } from '@/types/estudantes';
@@ -48,14 +49,14 @@ const Auth = () => {
   // Age validation function
   const validateAge = (birthDate: string): { isValid: boolean; age: number; message?: string } => {
     if (!birthDate) {
-      return { isValid: false, age: 0, message: "Data de nascimento é obrigatória." };
+      return { isValid: false, age: 0, message: t('auth.validation.birthDateRequired') };
     }
 
     const today = new Date();
     const birth = new Date(birthDate);
 
     if (birth > today) {
-      return { isValid: false, age: 0, message: "Data de nascimento não pode ser no futuro." };
+      return { isValid: false, age: 0, message: t('auth.validation.birthDateFuture') };
     }
 
     let age = today.getFullYear() - birth.getFullYear();
@@ -66,11 +67,11 @@ const Auth = () => {
     }
 
     if (age < 6) {
-      return { isValid: false, age, message: "Idade mínima para participar da Escola do Ministério é 6 anos." };
+      return { isValid: false, age, message: t('auth.validation.ageMinimum') };
     }
 
     if (age > 100) {
-      return { isValid: false, age, message: "Por favor, verifique a data de nascimento informada." };
+      return { isValid: false, age, message: t('auth.validation.ageMaximum') };
     }
 
     return { isValid: true, age };
@@ -151,7 +152,7 @@ const Auth = () => {
         setLoginError(message);
         setLoginErrorType(type);
       } else {
-        setLoginSuccess('Login realizado com sucesso! Redirecionando...');
+        setLoginSuccess(t('auth.loginSuccess'));
         // O redirecionamento será feito pelo useEffect que monitora o user
       }
     } catch (error) {
@@ -188,9 +189,10 @@ const Auth = () => {
     setLoginError(null);
     setLoginErrorType(null);
 
+    const typeTranslation = type === 'instructor' ? 'instrutor' : type === 'student' ? 'estudante' : 'teste';
     toast({
-      title: "Credenciais preenchidas",
-      description: `Credenciais de ${type === 'instructor' ? 'instrutor' : type === 'student' ? 'estudante' : 'teste'} carregadas.`,
+      title: t('auth.messages.credentialsFilled'),
+      description: t('auth.messages.credentialsFilledDesc', { type: typeTranslation }),
     });
   };
 
@@ -200,8 +202,8 @@ const Auth = () => {
     // Validation
     if (!signUpEmail || !signUpPassword || !nomeCompleto || !dateOfBirth || !congregacao) {
       toast({
-        title: "Erro",
-        description: "Por favor, preencha todos os campos obrigatórios.",
+        title: t('forms.error'),
+        description: t('auth.validation.allFieldsRequired'),
         variant: "destructive"
       });
       return;
@@ -211,7 +213,7 @@ const Auth = () => {
     const ageValidation = validateAge(dateOfBirth);
     if (!ageValidation.isValid) {
       toast({
-        title: "Erro",
+        title: t('forms.error'),
         description: ageValidation.message,
         variant: "destructive"
       });
@@ -221,8 +223,8 @@ const Auth = () => {
     // Validate cargo for students
     if (role === 'estudante' && !cargo) {
       toast({
-        title: "Erro",
-        description: "Por favor, selecione seu cargo na congregação.",
+        title: t('forms.error'),
+        description: t('auth.validation.roleRequired'),
         variant: "destructive"
       });
       return;
@@ -230,8 +232,8 @@ const Auth = () => {
 
     if (signUpPassword !== confirmPassword) {
       toast({
-        title: "Erro",
-        description: "As senhas não coincidem.",
+        title: t('forms.error'),
+        description: t('auth.validation.passwordMismatch'),
         variant: "destructive"
       });
       return;
@@ -239,8 +241,8 @@ const Auth = () => {
 
     if (signUpPassword.length < 6) {
       toast({
-        title: "Erro",
-        description: "A senha deve ter pelo menos 6 caracteres.",
+        title: t('forms.error'),
+        description: t('auth.validation.passwordMinLength'),
         variant: "destructive"
       });
       return;
@@ -260,25 +262,25 @@ const Auth = () => {
       });
 
       if (error) {
-        let errorMessage = "Ocorreu um erro inesperado. Tente novamente.";
+        let errorMessage = t('auth.validation.unexpectedError');
 
         if (error.message === 'User already registered') {
-          errorMessage = "Este e-mail já está cadastrado. Tente fazer login.";
+          errorMessage = t('auth.validation.emailAlreadyExists');
         } else if (error.message.includes('already registered')) {
-          errorMessage = "Este e-mail já está cadastrado. Tente fazer login.";
+          errorMessage = t('auth.validation.emailAlreadyExists');
         } else {
           errorMessage = error.message;
         }
 
         toast({
-          title: "Erro no cadastro",
+          title: t('auth.messages.signupError'),
           description: errorMessage,
           variant: "destructive"
         });
       } else {
         toast({
-          title: "Cadastro realizado!",
-          description: "Sua conta foi criada com sucesso. Você já pode fazer login.",
+          title: t('auth.messages.accountCreated'),
+          description: t('auth.messages.accountCreatedDesc'),
         });
         setActiveTab('signin');
         // Clear form
@@ -292,8 +294,8 @@ const Auth = () => {
       }
     } catch (error) {
       toast({
-        title: "Erro",
-        description: "Ocorreu um erro inesperado. Tente novamente.",
+        title: t('forms.error'),
+        description: t('auth.validation.unexpectedError'),
         variant: "destructive"
       });
     } finally {
@@ -305,16 +307,16 @@ const Auth = () => {
     if (role === 'instrutor') {
       return {
         icon: Shield,
-        title: 'Instrutor/Designador',
-        description: 'Acesso completo para gerenciar estudantes, programas e designações',
-        features: ['Gerenciar estudantes', 'Importar programas', 'Gerar designações', 'Relatórios e análises']
+        title: t('auth.roles.instrutor.title'),
+        description: t('auth.roles.instrutor.description'),
+        features: [t('dashboard.manageStudents'), t('programs.importProgram'), t('assignments.generateNew'), t('reports.title')]
       };
     } else {
       return {
         icon: BookOpen,
-        title: 'Estudante',
-        description: 'Acesso ao portal pessoal para visualizar suas designações',
-        features: ['Ver suas designações', 'Confirmar participação', 'Histórico pessoal', 'Contribuições']
+        title: t('auth.roles.estudante.title'),
+        description: t('auth.roles.estudante.description'),
+        features: [t('portal.myAssignments'), t('portal.confirmParticipation'), t('portal.myProgress'), t('benefits.sustainability.title')]
       };
     }
   };
