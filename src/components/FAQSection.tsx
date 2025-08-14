@@ -29,6 +29,7 @@ import {
   Search
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/hooks/useTranslation';
 
 /**
  * FAQ Item interface
@@ -227,6 +228,7 @@ const faqData: FAQCategory[] = [
  * FAQ Section Component
  */
 const FAQSection: React.FC = () => {
+  const { t } = useTranslation();
   const [openItems, setOpenItems] = useState<Set<string>>(new Set());
   const [selectedCategory, setSelectedCategory] = useState<string>('overview');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -244,10 +246,23 @@ const FAQSection: React.FC = () => {
     setOpenItems(newOpenItems);
   };
 
+  // Translate FAQ data
+  const translatedFaqData = faqData.map(category => ({
+    ...category,
+    title: t(category.title),
+    description: t(category.description),
+    items: category.items.map(item => ({
+      ...item,
+      question: t(item.question),
+      answer: t(item.answer),
+      tags: item.tags?.map(tag => t(tag))
+    }))
+  }));
+
   /**
    * Filter FAQ items based on search term
    */
-  const filteredCategories = faqData.map(category => ({
+  const filteredCategories = translatedFaqData.map(category => ({
     ...category,
     items: category.items.filter(item =>
       item.question.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -264,11 +279,10 @@ const FAQSection: React.FC = () => {
         {/* Section Header */}
         <div className="text-center mb-16">
           <h2 className="text-balance text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-foreground mb-4">
-            Perguntas Frequentes
+            {t('Perguntas Frequentes')}
           </h2>
           <p className="text-balance text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
-            Encontre respostas para as dúvidas mais comuns sobre o Sistema Ministerial.
-            Tudo que você precisa saber para começar a usar nossa plataforma.
+            {t('Encontre respostas para as dúvidas mais comuns sobre o Sistema Ministerial. Tudo que você precisa saber para começar a usar nossa plataforma.')}
           </p>
         </div>
 
@@ -278,7 +292,7 @@ const FAQSection: React.FC = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
             <input
               type="text"
-              placeholder="Buscar nas perguntas frequentes..."
+              placeholder={t('Buscar nas perguntas frequentes...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-jw-blue focus:border-transparent"
@@ -290,7 +304,7 @@ const FAQSection: React.FC = () => {
           {/* Category Navigation */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
-              <h3 className="text-lg font-semibold text-foreground mb-4">Categorias</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-4">{t('Categorias')}</h3>
               <div className="space-y-2">
                 {filteredCategories.map((category) => {
                   const Icon = category.icon;
@@ -314,7 +328,7 @@ const FAQSection: React.FC = () => {
                           "text-xs",
                           isSelected ? "text-white/80" : "text-muted-foreground"
                         )}>
-                          {category.items.length} pergunta{category.items.length !== 1 ? 's' : ''}
+                          {category.items.length} {t('pergunta')}{category.items.length !== 1 ? t('s') : ''}
                         </div>
                       </div>
                     </button>
@@ -392,10 +406,10 @@ const FAQSection: React.FC = () => {
                   <div className="text-center py-12">
                     <HelpCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-foreground mb-2">
-                      Nenhum resultado encontrado
+                      {t('Nenhum resultado encontrado')}
                     </h3>
                     <p className="text-muted-foreground">
-                      Tente buscar com outros termos ou navegue pelas categorias.
+                      {t('Tente buscar com outros termos ou navegue pelas categorias.')}
                     </p>
                   </div>
                 )}
@@ -410,11 +424,10 @@ const FAQSection: React.FC = () => {
             <CardContent className="p-8">
               <Shield className="w-12 h-12 text-jw-blue mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-foreground mb-2">
-                Não encontrou sua resposta?
+                {t('Não encontrou sua resposta?')}
               </h3>
               <p className="text-muted-foreground mb-6">
-                Nossa equipe de suporte está pronta para ajudar com qualquer dúvida específica
-                sobre o Sistema Ministerial.
+                {t('Nossa equipe de suporte está pronta para ajudar com qualquer dúvida específica sobre o Sistema Ministerial.')}
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <a
@@ -422,14 +435,14 @@ const FAQSection: React.FC = () => {
                   className="inline-flex items-center justify-center px-6 py-3 bg-jw-blue text-white rounded-lg hover:bg-jw-blue/90 transition-colors font-medium"
                 >
                   <MessageSquare className="w-4 h-4 mr-2" />
-                  Entrar em Contato
+                  {t('Entrar em Contato')}
                 </a>
                 <a
                   href="#funcionalidades"
                   className="inline-flex items-center justify-center px-6 py-3 border border-border rounded-lg hover:bg-muted transition-colors font-medium"
                 >
                   <BookOpen className="w-4 h-4 mr-2" />
-                  Ver Funcionalidades
+                  {t('Ver Funcionalidades')}
                 </a>
               </div>
             </CardContent>
