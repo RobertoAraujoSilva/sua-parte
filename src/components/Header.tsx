@@ -86,10 +86,10 @@ const Header = () => {
         <div className="flex items-center justify-between h-14">
           <div className="flex items-center space-x-2 sm:space-x-8">
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <div className="w-8 h-8 bg-jw-blue rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">SM</span>
-              </div>
-              <h1 className="header-title text-lg sm:text-xl font-semibold">Sistema Ministerial</h1>
+            <div className="w-8 h-8 bg-jw-blue rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">SM</span>
+            </div>
+            <h1 className="header-title text-lg sm:text-xl font-semibold">{t('common.appName')}</h1>
             </div>
             
             <nav className="header-nav hidden md:flex items-center space-x-6">

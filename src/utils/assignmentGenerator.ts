@@ -386,20 +386,26 @@ export class GeradorDesignacoes {
   /**
    * Gera estatísticas de distribuição das designações
    */
-  gerarEstatisticas(designacoes: DesignacaoGerada[]): {
+  async gerarEstatisticas(designacoes: DesignacaoGerada[]): Promise<{
     totalDesignacoes: number;
     distribuicaoPorGenero: { masculino: number; feminino: number };
     distribuicaoPorCargo: Record<string, number>;
     estudantesComAjudante: number;
-  } {
+    paresFormados: number;
+    paresFamiliares: number;
+  }> {
     const stats = {
       totalDesignacoes: designacoes.length,
       distribuicaoPorGenero: { masculino: 0, feminino: 0 },
       distribuicaoPorCargo: {} as Record<string, number>,
-      estudantesComAjudante: 0
+      estudantesComAjudante: 0,
+      paresFormados: 0,
+      paresFamiliares: 0
     };
 
-    designacoes.forEach(designacao => {
+    let familyCount = 0;
+
+    for (const designacao of designacoes) {
       const estudante = this.estudantes.find(e => e.id === designacao.id_estudante);
       if (estudante) {
         stats.distribuicaoPorGenero[estudante.genero]++;
@@ -408,8 +414,16 @@ export class GeradorDesignacoes {
 
       if (designacao.id_ajudante) {
         stats.estudantesComAjudante++;
+        stats.paresFormados++;
+
+        const relacionamento = await getFamilyRelationship(designacao.id_estudante, designacao.id_ajudante);
+        if (relacionamento) {
+          familyCount++;
+        }
       }
-    });
+    }
+
+    stats.paresFamiliares = familyCount;
 
     return stats;
   }

@@ -88,5 +88,67 @@
     "saved": "Saved successfully!",
     "generated": "Generated successfully!",
     "updated": "Updated successfully!"
+  },
+  "header": {
+    "home": "Home",
+    "features": "Features",
+    "faq": "FAQ",
+    "congregations": "Congregations",
+    "support": "Support",
+    "about": "About",
+    "donate": "Donate",
+    "dashboard": "Dashboard",
+    "students": "Students",
+    "programs": "Programs",
+    "assignments": "Assignments",
+    "reports": "Reports",
+    "myPortal": "My Portal",
+    "logout": "Logout",
+    "english": "English",
+    "portuguese": "Portuguese",
+    "login": "Login",
+    "start": "Start"
+  },
+  "INICIO": "Home",
+  "FUNCIONALIDADES": "Features",
+  "FAQ": "FAQ",
+  "CONGREGACOES": "Congregations",
+  "SUPORTE": "Support",
+  "SOBRE": "About",
+  "DOAR": "Donate",
+  "DASHBOARD": "Dashboard",
+  "ESTUDANTES": "Students",
+  "PROGRAMAS": "Programs",
+  "DESIGNACOES": "Assignments",
+  "RELATORIOS": "Reports",
+  "hero": {
+    "title": "Simplify Your Theocratic Ministry School Management",
+    "description": "Efficient tool for elders and ministerial servants to manage students, programs, and assignments.",
+    "getStarted": "Get Started"
+  },
+  "features": {
+    "title": "Key Features",
+    "studentManagement": "Student Management",
+    "studentManagementDesc": "Easily manage student information and progress.",
+    "programScheduling": "Program Scheduling",
+    "programSchedulingDesc": "Create and organize weekly programs effortlessly.",
+    "assignmentGeneration": "Automatic Assignments",
+    "assignmentGenerationDesc": "Intelligent system for generating fair assignments."
+  },
+  "benefits": {
+    "title": "Benefits",
+    "efficiency": "Increased Efficiency",
+    "efficiencyDesc": "Save time on administrative tasks.",
+    "fairness": "Fair Distribution",
+    "fairnessDesc": "Balanced assignment distribution.",
+    "accessibility": "Easy Access",
+    "accessibilityDesc": "Access from any device."
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "q1": "What is Your Part?",
+    "a1": "Your Part is a management system for the Theocratic Ministry School.",
+    "q2": "Who can use it?",
+    "a2": "Elders, ministerial servants, and appointed brothers in Jehovah's Witnesses congregations."
   }
 }

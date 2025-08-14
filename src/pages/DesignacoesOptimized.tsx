@@ -215,16 +215,12 @@ const DesignacoesOptimized = () => {
       // Validate assignments
       const errosValidacao = await gerador.validarDesignacoes(designacoesGeradas);
 
-      const stats = gerador.gerarEstatisticas(designacoesGeradas);
+      const stats = await gerador.gerarEstatisticas(designacoesGeradas);
 
       // Prepare data for preview
       setDesignacoesGeradas(designacoesGeradas);
       setEstudantesCarregados(dadosCompletos.estudantes.estudantes);
-      setEstatisticas({
-        ...(stats as any),
-        paresFormados: (stats as any).paresFormados ?? 0,
-        paresFamiliares: (stats as any).paresFamiliares ?? 0,
-      });
+      setEstatisticas(stats);
       setConflitos(errosValidacao.map(erro => ({
         tipo: 'inelegibilidade' as const,
         estudante_id: '',
