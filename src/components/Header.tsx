@@ -89,7 +89,7 @@ const Header = () => {
               <div className="w-8 h-8 bg-jw-blue rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">SM</span>
               </div>
-              <h1 className="header-title text-lg sm:text-xl font-semibold">Sistema Ministerial</h1>
+              <h1 className="header-title text-lg sm:text-xl font-semibold">{t('common.appName')}</h1>
             </div>
             
             <nav className="header-nav hidden md:flex items-center space-x-6">
@@ -175,7 +175,7 @@ const Header = () => {
                                   size="sm"
                                   className="text-xs bg-red-600 text-white hover:bg-red-700 hidden sm:inline-flex"
                                 >
-                                  {t('Test Logout')}
+                                  {t('common.logout')}
                                 </Button>
 
                 <DropdownMenu>
@@ -197,7 +197,7 @@ const Header = () => {
                         {profile?.nome_completo || user.user_metadata?.nome_completo || user.email}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {profile?.congregacao || user.user_metadata?.congregacao || t('Congregação')}
+                        {profile?.congregacao || user.user_metadata?.congregacao || t('terms.congregation')}
                       </p>
                     </div>
                   </DropdownMenuLabel>

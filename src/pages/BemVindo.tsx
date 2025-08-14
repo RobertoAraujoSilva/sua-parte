@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/hooks/useTranslation";
 import { 
   CheckCircle, 
   ArrowRight, 
@@ -21,6 +22,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const BemVindo = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { profile } = useAuth();
   const { toast } = useToast();
@@ -30,20 +32,20 @@ const BemVindo = () => {
 
   const welcomeSteps = [
     {
-      title: "Bem-vindo ao Sistema Ministerial! 🎉",
-      description: "Você está prestes a descobrir como automatizar e otimizar as designações da sua congregação.",
+      title: t('welcome.title'),
+      description: t('welcome.subtitle'),
       icon: Target,
       color: "text-jw-blue"
     },
     {
-      title: "Como Funciona o Sistema",
-      description: "O Sistema Ministerial segue um fluxo simples e intuitivo para gerar designações automaticamente.",
+      title: t('welcome.howItWorks'),
+      description: t('welcome.howItWorksDesc'),
       icon: Zap,
       color: "text-green-600"
     },
     {
-      title: "Vamos Começar!",
-      description: "Em poucos minutos você terá seu primeiro programa com designações geradas automaticamente.",
+      title: t('welcome.letsStart'),
+      description: t('welcome.letsStartDesc'),
       icon: CheckCircle,
       color: "text-jw-gold"
     }
@@ -52,37 +54,31 @@ const BemVindo = () => {
   const workflowSteps = [
     {
       step: 1,
-      title: "Cadastrar Estudantes",
-      description: "Adicione os estudantes da Escola do Ministério Teocrático",
+      title: t('welcome.step1Title'),
+      description: t('welcome.step1Desc'),
       icon: Users,
       route: "/estudantes",
       estimated: "5-10 min"
     },
     {
       step: 2,
-      title: "Importar Programa",
-      description: "Faça upload do PDF da apostila ou cole conteúdo do JW.org",
+      title: t('welcome.step2Title'),
+      description: t('welcome.step2Desc'),
       icon: Calendar,
       route: "/programas",
       estimated: "2-3 min"
     },
     {
       step: 3,
-      title: "Gerar Designações",
-      description: "O sistema cria automaticamente as 12 designações da reunião",
+      title: t('welcome.step3Title'),
+      description: t('welcome.step3Desc'),
       icon: FileText,
       route: "/designacoes",
       estimated: "1 min"
     }
   ];
 
-  const benefits = [
-    "✅ Economia de 2-3 horas por semana",
-    "✅ Designações balanceadas automaticamente",
-    "✅ Conformidade total com diretrizes S-38-T",
-    "✅ Histórico completo de participações",
-    "✅ Exportação em PDF profissional"
-  ];
+  const benefits = t('welcome.benefits', { returnObjects: true }) as string[];
 
   useEffect(() => {
     // Auto-advance welcome steps
@@ -185,7 +181,7 @@ const BemVindo = () => {
         <div className="text-center mb-12">
           <div className="mb-6">
             <Badge variant="secondary" className="mb-4">
-              Bem-vindo, {profile?.nome_completo || 'Instrutor'}!
+              {t('welcome.welcomeUser', { name: profile?.nome_completo || t('terms.instructor') })}
             </Badge>
             <h1 className="text-4xl font-bold text-jw-navy mb-4">
               {welcomeSteps[currentStep].title}
@@ -215,10 +211,10 @@ const BemVindo = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BookOpen className="w-6 h-6 text-jw-blue" />
-                Como Funciona - 3 Passos Simples
+                {t('welcome.stepsTitle')}
               </CardTitle>
               <CardDescription>
-                O Sistema Ministerial automatiza todo o processo de geração de designações
+                {t('welcome.stepsSubtitle')}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -233,7 +229,7 @@ const BemVindo = () => {
                         </div>
                         <div className="mb-2">
                           <Badge variant="outline" className="mb-2">
-                            Passo {step.step}
+                            {t('common.step')} {step.step}
                           </Badge>
                           <h3 className="font-semibold text-jw-navy mb-2">
                             {step.title}
@@ -266,10 +262,10 @@ const BemVindo = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="text-jw-navy">
-                  Benefícios do Sistema
+                  {t('welcome.benefitsTitle')}
                 </CardTitle>
                 <CardDescription>
-                  Veja como o Sistema Ministerial vai transformar sua rotina
+                  {t('welcome.benefitsSubtitle')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -277,7 +273,7 @@ const BemVindo = () => {
                   {benefits.map((benefit, index) => (
                     <div key={index} className="flex items-center gap-3">
                       <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
-                      <span className="text-gray-700">{benefit}</span>
+                      <span className="text-gray-700">✅ {benefit}</span>
                     </div>
                   ))}
                 </div>
@@ -287,10 +283,10 @@ const BemVindo = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="text-jw-navy">
-                  Conformidade S-38-T
+                  {t('welcome.complianceTitle')}
                 </CardTitle>
                 <CardDescription>
-                  Seguimos rigorosamente as diretrizes organizacionais
+                  {t('welcome.complianceSubtitle')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -298,22 +294,22 @@ const BemVindo = () => {
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-jw-blue rounded-full mt-2 flex-shrink-0"></div>
                     <div>
-                      <p className="font-medium text-sm">Restrições de Gênero</p>
-                      <p className="text-xs text-gray-600">Aplicadas automaticamente conforme S-38-T</p>
+                      <p className="font-medium text-sm">{t('welcome.genderRestrictions')}</p>
+                      <p className="text-xs text-gray-600">{t('welcome.genderRestrictionsDesc')}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-jw-blue rounded-full mt-2 flex-shrink-0"></div>
                     <div>
-                      <p className="font-medium text-sm">Qualificações</p>
-                      <p className="text-xs text-gray-600">Verificação automática de cargos e experiência</p>
+                      <p className="font-medium text-sm">{t('welcome.qualifications')}</p>
+                      <p className="text-xs text-gray-600">{t('welcome.qualificationsDesc')}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
                     <div className="w-2 h-2 bg-jw-blue rounded-full mt-2 flex-shrink-0"></div>
                     <div>
-                      <p className="font-medium text-sm">Relacionamentos Familiares</p>
-                      <p className="text-xs text-gray-600">Identificação automática para partes do ministério</p>
+                      <p className="font-medium text-sm">{t('welcome.familyRelationships')}</p>
+                      <p className="text-xs text-gray-600">{t('welcome.familyRelationshipsDesc')}</p>
                     </div>
                   </div>
                 </div>
@@ -338,7 +334,7 @@ const BemVindo = () => {
                 ) : (
                   <ArrowRight className="w-5 h-5 mr-2" />
                 )}
-                {isLoading ? 'Configurando...' : 'Começar Configuração'}
+                {isLoading ? t('welcome.configuring') : t('welcome.startSetup')}
               </Button>
               
               <Button
@@ -353,13 +349,13 @@ const BemVindo = () => {
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
                 ) : (
-                  "Pular e Ir para Dashboard"
+                  t('welcome.skipToDashboard')
                 )}
               </Button>
             </div>
             
             <p className="text-sm text-gray-500 mt-4">
-              A configuração inicial leva apenas 5-10 minutos
+              {t('welcome.setupTime')}
             </p>
           </div>
         </div>

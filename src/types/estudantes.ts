@@ -185,7 +185,7 @@ export const GENERO_LABELS: Record<Genero, string> = {
   feminino: "Feminino",
 };
 
-// Helper functions
+// Helper functions - these will be replaced with translation-aware versions
 export const getCargoLabel = (cargo: Cargo): string => CARGO_LABELS[cargo];
 export const getGeneroLabel = (genero: Genero): string => GENERO_LABELS[genero];
 
