@@ -12,43 +12,43 @@ const Footer = () => {
               <div className="w-8 h-8 bg-jw-blue rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-sm">SM</span>
               </div>
-              <h3 className="text-xl font-semibold">{t('Sistema Ministerial')}</h3>
+              <h3 className="text-xl font-semibold">{t('footer.appName')}</h3>
             </div>
             <p className="text-white/80 mb-4 max-w-md">
-              {t('Automatização inteligente de designações ministeriais para congregações das Testemunhas de Jeová, com foco em eficiência e conformidade.')}
+              {t('footer.description')}
             </p>
             <p className="text-sm text-white/60">
-              {t('Desenvolvido com dedicação para servir às necessidades congregacionais e apoiar o trabalho ministerial.')}
+              {t('footer.dedication')}
             </p>
           </div>
           
           <div>
-            <h4 className="font-semibold mb-4">{t('Funcionalidades')}</h4>
+            <h4 className="font-semibold mb-4">{t('footer.features')}</h4>
             <ul className="space-y-2 text-sm text-white/80">
-              <li>{t('Gestão de Estudantes')}</li>
-              <li>{t('Importação de Programas')}</li>
-              <li>{t('Designações Automáticas')}</li>
-              <li>{t('Notificações')}</li>
-              <li>{t('Portal do Estudante')}</li>
-              <li>{t('Relatórios')}</li>
+              <li>{t('footer.studentManagement')}</li>
+              <li>{t('footer.programImport')}</li>
+              <li>{t('footer.automaticAssignments')}</li>
+              <li>{t('footer.notifications')}</li>
+              <li>{t('footer.studentPortal')}</li>
+              <li>{t('footer.reports')}</li>
             </ul>
           </div>
           
           <div>
-            <h4 className="font-semibold mb-4">{t('Suporte')}</h4>
+            <h4 className="font-semibold mb-4">{t('footer.support')}</h4>
             <ul className="space-y-2 text-sm text-white/80">
-              <li>{t('Tutorial de Uso')}</li>
-              <li>{t('Documentação')}</li>
-              <li>{t('Contato Técnico')}</li>
-              <li>{t('Atualizações')}</li>
-              <li>{t('Comunidade')}</li>
+              <li>{t('footer.usageTutorial')}</li>
+              <li>{t('footer.documentation')}</li>
+              <li>{t('footer.technicalContact')}</li>
+              <li>{t('footer.updates')}</li>
+              <li>{t('footer.community')}</li>
             </ul>
           </div>
         </div>
         
         <div className="border-t border-white/20 mt-8 pt-8 text-center">
           <p className="text-sm text-white/60">
-            © 2024 {t('Sistema Ministerial')}. {t('Desenvolvido para servir congregações das Testemunhas de Jeová.')}
+            © 2024 {t('footer.appName')}. {t('footer.developedFor')}
           </p>
         </div>
       </div>
