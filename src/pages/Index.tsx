@@ -7,13 +7,22 @@ import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       <Header />
       <Hero />
       <Features />
       <FAQSection />
       <Benefits />
       <Footer />
+      
+      {/* CTA Flutuante */}
+      <button
+        className="floating-cta"
+        onClick={() => window.location.href = '/auth'}
+        aria-label="Começar agora"
+      >
+        Começar
+      </button>
     </div>
   );
 };

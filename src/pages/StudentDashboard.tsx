@@ -78,13 +78,39 @@ const StudentDashboard: React.FC = () => {
     loadStudent();
   }, [id]);
 
-  const handleConfirmarParticipacao = (designacaoId: number) => {
-    // TODO: Implementar confirmação no backend
-    console.log(`Confirmando participação para designação ${designacaoId}`);
-    toast({
-      title: t('Participação confirmada!'),
-      description: t('Sua confirmação foi registrada com sucesso.'),
-    });
+  const handleConfirmarParticipacao = async (designacaoId: string) => {
+    try {
+      const { error } = await supabase
+        .from('designacoes')
+        .update({ confirmado: true })
+        .eq('id', designacaoId);
+
+      if (error) {
+        console.error('Error confirming assignment:', error);
+        toast({
+          title: t('Erro ao confirmar participação'),
+          description: t('Ocorreu um erro ao registrar sua confirmação. Tente novamente.'),
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: t('Participação confirmada!'),
+        description: t('Sua confirmação foi registrada com sucesso.'),
+      });
+
+      // Reload assignments to reflect the change
+      // The StudentAssignmentView component will automatically update
+      // since it's using real-time subscriptions
+    } catch (error) {
+      console.error('Exception confirming assignment:', error);
+      toast({
+        title: t('Erro inesperado'),
+        description: t('Ocorreu um erro inesperado. Tente novamente.'),
+        variant: "destructive"
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {

@@ -1,22 +1,26 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import EstudanteForm from "@/components/EstudanteForm";
 import EstudanteCard from "@/components/EstudanteCard";
 import SpreadsheetUpload from "@/components/SpreadsheetUpload";
-import TemplateDownload from "@/components/TemplateDownload";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Plus, Search, Users, ArrowLeft, Upload, BarChart3, Filter, FileSpreadsheet } from "lucide-react";
+import { Plus, Search, Users, ArrowLeft, Upload, BarChart3, Filter, FileSpreadsheet, Table } from "lucide-react";
+import StudentsSpreadsheet from "@/components/StudentsSpreadsheet";
 import { useEstudantes } from "@/hooks/useEstudantes";
 import { useAuth } from "@/contexts/AuthContext";
 import { TutorialButton } from "@/components/tutorial";
 import { useTranslation } from "@/hooks/useTranslation";
+import Hero from "@/components/Hero";
+import { ScrollTabs } from "@/components/ui/scroll-tabs";
+import QuickActions from "@/components/QuickActions";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 import {
   ProgressBoard,
   SpeechTypeCategories,
@@ -38,36 +42,31 @@ const Estudantes = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const { user } = useAuth();
+
+  const [activeTab, setActiveTab] = useState(() => {
+    const tabParam = searchParams.get('tab');
+    return ['list', 'form', 'import', 'stats', 'instructor', 'spreadsheet'].includes(tabParam || '') ? tabParam : 'list';
+  });
+
   const {
     estudantes,
-    loading,
+    isLoading,
     error,
+    refetch,
     createEstudante,
     updateEstudante,
     deleteEstudante,
     filterEstudantes,
-    getPotentialParents,
     getStatistics,
-  } = useEstudantes();
+  } = useEstudantes(activeTab);
 
-  // Instructor Dashboard Hook
   const {
     data: instructorData,
     loading: instructorLoading,
     error: instructorError,
-    updateQualifications,
-    updateProgress,
-    moveStudent,
     refreshData: refreshInstructorData
   } = useInstructorDashboard();
 
-  // UI State - Initialize from URL parameter
-  const [activeTab, setActiveTab] = useState(() => {
-    const tabParam = searchParams.get('tab');
-    return ['list', 'form', 'import', 'stats', 'instructor'].includes(tabParam || '') ? tabParam : 'list';
-  });
-
-  // Update URL when tab changes
   useEffect(() => {
     if (activeTab !== 'list') {
       setSearchParams({ tab: activeTab });
@@ -75,10 +74,10 @@ const Estudantes = () => {
       setSearchParams({});
     }
   }, [activeTab, setSearchParams]);
+
   const [editingEstudante, setEditingEstudante] = useState<EstudanteWithParent | null>(null);
   const [formLoading, setFormLoading] = useState(false);
 
-  // Filter state
   const [filters, setFilters] = useState<EstudanteFilters>({
     searchTerm: "",
     cargo: "todos",
@@ -86,49 +85,42 @@ const Estudantes = () => {
     ativo: "todos",
   });
 
-  // Filtered students
   const filteredEstudantes = useMemo(() => {
     return filterEstudantes(filters);
   }, [estudantes, filters, filterEstudantes]);
 
-  // Statistics
   const statistics = useMemo(() => {
     return getStatistics();
   }, [estudantes, getStatistics]);
 
-  // Potential parents for form
   const potentialParents = useMemo(() => {
-    return getPotentialParents();
-  }, [estudantes, getPotentialParents]);
+    if (!estudantes) return [];
+    return estudantes.filter(e => e.idade && e.idade >= 18 && e.ativo);
+  }, [estudantes]);
 
-  // Event handlers
   const handleFilterChange = (field: keyof EstudanteFilters, value: any) => {
     setFilters(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleCreateEstudante = async (data: any) => {
+  const handleCreateEstudante = async (data: any): Promise<boolean> => {
     setFormLoading(true);
-    const success = await createEstudante(data);
+    await createEstudante(data);
     setFormLoading(false);
-    if (success) {
-      setActiveTab("list");
-    }
-    return success;
+    setActiveTab("list");
+    return true;
   };
 
-  const handleUpdateEstudante = async (data: any) => {
+  const handleUpdateEstudante = async (data: any): Promise<boolean> => {
     if (!editingEstudante) return false;
     setFormLoading(true);
-    const success = await updateEstudante(editingEstudante.id, data);
+    await updateEstudante({ id: editingEstudante.id, data });
     setFormLoading(false);
-    if (success) {
-      setEditingEstudante(null);
-      setActiveTab("list");
-    }
-    return success;
+    setEditingEstudante(null);
+    setActiveTab("list");
+    return true;
   };
 
-  const handleEditEstudante = (estudante: EstudanteWithParent) => {
+  const handleEditEstudante = (estudante: any) => {
     setEditingEstudante(estudante);
     setActiveTab("form");
   };
@@ -143,408 +135,160 @@ const Estudantes = () => {
   };
 
   const handleImportComplete = () => {
-    // Refresh students list after import
-    window.location.reload();
-  };
-
-  const handleViewList = () => {
+    refetch();
     setActiveTab("list");
   };
+  const handleViewList = () => setActiveTab("list");
 
-  // Show loading state
-  if (loading && estudantes.length === 0) {
+  const renderMainContent = () => {
+    if (isLoading) {
+      return (
+        <div className="space-y-4 p-4">
+          <Skeleton className="h-12 w-full" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="p-4">
+          <EmptyState
+            title="Não foi possível carregar"
+            subtitle={String(error).includes("timeout") ? "Tempo esgotado" : "Ocorreu um erro"}
+            action={<Button onClick={() => refetch()}>Tentar novamente</Button>}
+          />
+        </div>
+      );
+    }
+
     return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="pt-16">
-          <div className="container mx-auto px-4 py-20 text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jw-blue mx-auto mb-4"></div>
-            <p>{t('Carregando estudantes...')}</p>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  // Show error state
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="pt-16">
-          <div className="container mx-auto px-4 py-20 text-center">
-            <p className="text-red-600 mb-4">{t('Erro ao carregar estudantes:')} {error}</p>
-            <Button onClick={() => window.location.reload()}>{t('Tentar Novamente')}</Button>
-          </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="pt-16">
-        {/* Header Section */}
-        <section className="bg-gradient-to-br from-jw-navy via-jw-blue to-jw-blue-dark py-12">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center gap-4 mb-6">
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-white hover:text-jw-gold"
-                onClick={() => navigate('/dashboard')}
-              >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                {t('Voltar ao Dashboard')}
-              </Button>
-            </div>
-
-            <div className="flex items-start justify-between">
-              <div className="text-white">
-                <h1 className="text-4xl font-bold mb-4">
-                  {t('Gestão de Estudantes')} <span className="text-jw-gold">{t('de')}</span> <span className="text-jw-gold">Estudantes</span>
-                </h1>
-                <p className="text-xl opacity-90 max-w-2xl">
-                  {t('Cadastre e gerencie estudantes da Escola do Ministério Teocrático com validação automática de qualificações e regras congregacionais.')}
-                </p>
-              </div>
-              <TutorialButton page="estudantes" variant="secondary" />
-            </div>
-          </div>
-        </section>
-
-        {/* Main Content */}
-        <section className="py-8">
-          <div className="container mx-auto px-4">
+      <section className="py-4 md:py-8">
+        <div className="responsive-container px-2 md:px-6">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-              <div className="flex items-center justify-between mb-6">
-                <TabsList className="grid w-auto grid-cols-5" data-tutorial="tabs-navigation">
-                  <TabsTrigger value="list" className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    {t('Lista')}
-                  </TabsTrigger>
-                  <TabsTrigger value="form" className="flex items-center gap-2">
-                    <Plus className="w-4 h-4" />
-                    {editingEstudante ? t('Editar') : t('Novo')}
-                  </TabsTrigger>
-                  <TabsTrigger value="import" className="flex items-center gap-2">
-                    <FileSpreadsheet className="w-4 h-4" />
-                    {t('Importar')}
-                  </TabsTrigger>
-                  <TabsTrigger value="stats" className="flex items-center gap-2">
-                    <BarChart3 className="w-4 h-4" />
-                    {t('Estatísticas')}
-                  </TabsTrigger>
-                  <TabsTrigger value="instructor" className="flex items-center gap-2">
-                    <Users className="w-4 h-4" />
-                    {t('Painel do Instrutor')}
-                  </TabsTrigger>
-                </TabsList>
-
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setActiveTab("import")}
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    {t('Importar Planilha')}
-                  </Button>
-                  <Button
-                    variant="hero"
-                    size="sm"
-                    onClick={() => {
-                      setEditingEstudante(null);
-                      setActiveTab("form");
-                    }}
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    {t('Novo Estudante')}
-                  </Button>
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 md:mb-6 gap-4 md:gap-6">
+                <ScrollTabs>
+                  <TabsList className="responsive-tabs w-full md:w-auto" data-tutorial="tabs-navigation">
+                    <TabsTrigger value="list" className="flex items-center gap-2 shrink-0 snap-start">
+                      <Users className="w-4 h-4" />
+                      {t('Lista')}
+                    </TabsTrigger>
+                    <TabsTrigger value="form" className="flex items-center gap-2 shrink-0 snap-start">
+                      <Plus className="w-4 h-4" />
+                      {editingEstudante ? t('Editar') : t('Novo')}
+                    </TabsTrigger>
+                    <TabsTrigger value="import" className="flex items-center gap-2 shrink-0 snap-start">
+                      <FileSpreadsheet className="w-4 h-4" />
+                      {t('Importar')}
+                    </TabsTrigger>
+                    <TabsTrigger value="spreadsheet" className="flex items-center gap-2 shrink-0 snap-start">
+                      <Table className="w-4 h-4" />
+                      Planilha
+                    </TabsTrigger>
+                    <TabsTrigger value="stats" className="flex items-center gap-2 shrink-0 snap-start">
+                      <BarChart3 className="w-4 h-4" />
+                      {t('Estatísticas')}
+                    </TabsTrigger>
+                    <TabsTrigger value="instructor" className="flex items-center gap-2 shrink-0 snap-start">
+                      <Users className="w-4 h-4" />
+                      {t('Painel do Instrutor')}
+                    </TabsTrigger>
+                  </TabsList>
+                </ScrollTabs>
+                <div className="responsive-buttons w-full md:w-auto flex flex-col md:flex-row gap-2 md:gap-3">
+                  <Button variant="outline" size="sm" onClick={() => refetch()}>🔄 {t('Atualizar')}</Button>
+                  <Button variant="outline" size="sm" onClick={() => setActiveTab("import")}> <Upload className="w-4 h-4 mr-2" />{t('Importar Planilha')}</Button>
+                  <Button variant="hero" size="sm" onClick={() => { setEditingEstudante(null); setActiveTab("form"); }}> <Plus className="w-4 h-4 mr-2" />{t('Novo Estudante')}</Button>
                 </div>
               </div>
 
-              {/* Students List Tab */}
               <TabsContent value="list" className="space-y-6">
-                {/* Filters */}
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Filter className="w-5 h-5" />
-                      {t('Filtros')}
-                    </CardTitle>
-                  </CardHeader>
+                  <CardHeader><CardTitle className="flex items-center gap-2"><Filter className="w-5 h-5" />{t('Filtros')}</CardTitle></CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="responsive-form grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                        <Input
-                          placeholder={t('Buscar por nome...')}
-                          value={filters.searchTerm}
-                          onChange={(e) => handleFilterChange("searchTerm", e.target.value)}
-                          className="pl-10"
-                        />
+                        <Input placeholder={t('Buscar por nome...')} value={filters.searchTerm} onChange={(e) => handleFilterChange("searchTerm", e.target.value)} className="pl-10" />
                       </div>
-
-                      <Select
-                        value={filters.cargo}
-                        onValueChange={(value) => handleFilterChange("cargo", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('Filtrar por cargo')} />
-                        </SelectTrigger>
+                      <Select value={filters.cargo} onValueChange={(value) => handleFilterChange("cargo", value)}>
+                        <SelectTrigger><SelectValue placeholder={t('Filtrar por cargo')} /></SelectTrigger>
                         <SelectContent>
                           <SelectItem value="todos">{t('Todos os cargos')}</SelectItem>
-                          {Object.entries(CARGO_LABELS).map(([value, label]) => (
-                            <SelectItem key={value} value={value}>
-                              {label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-
-                      <Select
-                        value={filters.genero}
-                        onValueChange={(value) => handleFilterChange("genero", value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('Filtrar por gênero')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="todos">{t('Todos os gêneros')}</SelectItem>
-                          {Object.entries(GENERO_LABELS).map(([value, label]) => (
-                            <SelectItem key={value} value={value}>
-                              {label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-
-                      <Select
-                        value={filters.ativo?.toString() || "todos"}
-                        onValueChange={(value) => handleFilterChange("ativo", value === "todos" ? "todos" : value === "true")}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder={t('Filtrar por status')} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="todos">{t('Todos os status')}</SelectItem>
-                          <SelectItem value="true">{t('Apenas ativos')}</SelectItem>
-                          <SelectItem value="false">{t('Apenas inativos')}</SelectItem>
+                          {Object.entries(CARGO_LABELS).map(([value, label]) => (<SelectItem key={value} value={value}>{label}</SelectItem>))}
                         </SelectContent>
                       </Select>
                     </div>
                   </CardContent>
                 </Card>
-
-                {/* Students Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="responsive-grid students-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                   {filteredEstudantes.map((estudante) => (
-                    <EstudanteCard
-                      key={estudante.id}
-                      estudante={estudante}
-                      onEdit={handleEditEstudante}
-                      onDelete={handleDeleteEstudante}
-                      loading={loading}
-                    />
+                    <EstudanteCard key={estudante.id} estudante={estudante} onEdit={() => handleEditEstudante(estudante)} onDelete={() => handleDeleteEstudante(estudante.id)} />
                   ))}
                 </div>
-
-                {/* Empty State */}
                 {filteredEstudantes.length === 0 && (
                   <div className="text-center py-12">
                     <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-600 mb-2">
-                      {filters.searchTerm || filters.cargo !== "todos" || filters.genero !== "todos" || filters.ativo !== "todos"
-                        ? t('Nenhum estudante encontrado')
-                        : t('Nenhum estudante cadastrado')
-                      }
-                    </h3>
-                    <p className="text-gray-500 mb-4">
-                      {filters.searchTerm || filters.cargo !== "todos" || filters.genero !== "todos" || filters.ativo !== "todos"
-                        ? t('Tente ajustar os filtros de busca')
-                        : t('Comece cadastrando seu primeiro estudante')
-                      }
-                    </p>
-                    <Button
-                      variant="hero"
-                      onClick={() => {
-                        setEditingEstudante(null);
-                        setActiveTab("form");
-                      }}
-                    >
-                      <Plus className="w-4 h-4 mr-2" />
-                      {t('Cadastrar Primeiro Estudante')}
-                    </Button>
+                    <h3 className="text-lg font-medium text-gray-600 mb-2">{t('Nenhum estudante encontrado')}</h3>
+                    <p className="text-gray-500 mb-4">{t('Tente ajustar os filtros ou cadastre um novo estudante.')}</p>
+                    <Button variant="hero" onClick={() => setActiveTab("form")}><Plus className="w-4 h-4 mr-2" />{t('Cadastrar Novo Estudante')}</Button>
                   </div>
                 )}
               </TabsContent>
-
-              {/* Form Tab */}
               <TabsContent value="form">
-                <EstudanteForm
-                  estudante={editingEstudante || undefined}
-                  potentialParents={potentialParents}
-                  onSubmit={editingEstudante ? handleUpdateEstudante : handleCreateEstudante}
-                  onCancel={handleCancelForm}
-                  loading={formLoading}
-                />
+                <EstudanteForm estudante={editingEstudante || undefined} potentialParents={potentialParents} onSubmit={editingEstudante ? handleUpdateEstudante : handleCreateEstudante} onCancel={handleCancelForm} loading={formLoading} />
               </TabsContent>
-
-              {/* Statistics Tab */}
-              <TabsContent value="stats" className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                  <Card>
-                    <CardContent className="p-6 text-center">
-                      <div className="text-3xl font-bold text-jw-blue mb-2">{statistics.total}</div>
-                      <div className="text-sm text-gray-600">{t('Total de Estudantes')}</div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-6 text-center">
-                      <div className="text-3xl font-bold text-green-600 mb-2">{statistics.ativos}</div>
-                      <div className="text-sm text-gray-600">{t('Estudantes Ativos')}</div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-6 text-center">
-                      <div className="text-3xl font-bold text-red-600 mb-2">{statistics.inativos}</div>
-                      <div className="text-sm text-gray-600">{t('Estudantes Inativos')}</div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-6 text-center">
-                      <div className="text-3xl font-bold text-orange-600 mb-2">{statistics.menores}</div>
-                      <div className="text-sm text-gray-600">{t('Menores de Idade')}</div>
-                    </CardContent>
-                  </Card>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Gender Distribution */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>{t('Distribuição por Gênero')}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                          <span>{t('Homens')}</span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-32 bg-gray-200 rounded-full h-2">
-                              <div
-                                className="bg-blue-600 h-2 rounded-full"
-                                style={{ width: `${statistics.total > 0 ? (statistics.homens / statistics.total) * 100 : 0}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-sm font-medium">{statistics.homens}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span>{t('Mulheres')}</span>
-                          <div className="flex items-center gap-2">
-                            <div className="w-32 bg-gray-200 rounded-full h-2">
-                              <div
-                                className="bg-pink-600 h-2 rounded-full"
-                                style={{ width: `${statistics.total > 0 ? (statistics.mulheres / statistics.total) * 100 : 0}%` }}
-                              ></div>
-                            </div>
-                            <span className="text-sm font-medium">{statistics.mulheres}</span>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* Role Distribution */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>{t('Distribuição por Cargo')}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-3">
-                        {Object.entries(statistics.cargoStats).map(([cargo, count]) => (
-                          <div key={cargo} className="flex items-center justify-between">
-                            <span className="text-sm">{CARGO_LABELS[cargo as Cargo]}</span>
-                            <div className="flex items-center gap-2">
-                              <div className="w-24 bg-gray-200 rounded-full h-2">
-                                <div
-                                  className="bg-jw-blue h-2 rounded-full"
-                                  style={{ width: `${statistics.total > 0 ? (count / statistics.total) * 100 : 0}%` }}
-                                ></div>
-                              </div>
-                              <span className="text-sm font-medium w-6 text-right">{count}</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+              <TabsContent value="stats" className="space-y-4 md:space-y-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                  <Card><CardContent className="p-6 text-center"><div className="text-3xl font-bold text-jw-blue mb-2">{statistics.total}</div><div className="text-sm text-gray-600">{t('Total de Estudantes')}</div></CardContent></Card>
+                  <Card><CardContent className="p-6 text-center"><div className="text-3xl font-bold text-green-600 mb-2">{statistics.ativos}</div><div className="text-sm text-gray-600">{t('Estudantes Ativos')}</div></CardContent></Card>
+                  <Card><CardContent className="p-6 text-center"><div className="text-3xl font-bold text-red-600 mb-2">{statistics.inativos}</div><div className="text-sm text-gray-600">{t('Estudantes Inativos')}</div></CardContent></Card>
+                  <Card><CardContent className="p-6 text-center"><div className="text-3xl font-bold text-orange-600 mb-2">{statistics.menores}</div><div className="text-sm text-gray-600">{t('Menores de Idade')}</div></CardContent></Card>
                 </div>
               </TabsContent>
-
-              {/* Instructor Dashboard Tab */}
               <TabsContent value="instructor" className="space-y-6">
-                {instructorLoading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-jw-blue mx-auto mb-4"></div>
-                      <p className="text-gray-600">{t('Carregando painel do instrutor...')}</p>
-                    </div>
-                  </div>
-                ) : instructorError ? (
-                  <div className="text-center py-12">
-                    <p className="text-red-600 mb-4">{t('Erro ao carregar painel do instrutor:')} {instructorError}</p>
-                    <Button onClick={refreshInstructorData}>{t('Tentar Novamente')}</Button>
-                  </div>
-                ) : (
-                  <div className="space-y-8">
-                    {/* Dashboard Statistics */}
-                    <div data-tutorial="instructor-stats">
-                      <InstructorDashboardStats data={instructorData} />
-                    </div>
-
-                    {/* Progress Board */}
-                    <div data-tutorial="progress-board">
-                      <ProgressBoard
-                        studentsByProgress={instructorData.students_by_progress}
-                        onMoveStudent={moveStudent}
-                        onUpdateQualifications={updateQualifications}
-                        onUpdateProgress={updateProgress}
-                        isLoading={instructorLoading}
-                      />
-                    </div>
-
-                    {/* Speech Type Categories */}
-                    <div data-tutorial="speech-categories">
-                      <SpeechTypeCategories
-                        studentsBySpeechType={instructorData.students_by_speech_type}
-                        onUpdateQualifications={updateQualifications}
-                        onUpdateProgress={updateProgress}
-                      />
-                    </div>
-                  </div>
+                {instructorLoading ? <p>Loading...</p> : instructorError ? <p>Error</p> : (
+                  <InstructorDashboardStats data={instructorData} />
                 )}
               </TabsContent>
-
-              {/* Import Tab */}
               <TabsContent value="import" className="space-y-6">
-                <SpreadsheetUpload
-                  onImportComplete={handleImportComplete}
-                  onViewList={handleViewList}
-                />
+                <SpreadsheetUpload onImportComplete={handleImportComplete} onViewList={handleViewList} />
+              </TabsContent>
+              <TabsContent value="spreadsheet" className="space-y-4 sm:space-y-6 w-full overflow-x-auto">
+                <StudentsSpreadsheet estudantes={estudantes || []} onRefresh={() => refetch()} />
               </TabsContent>
             </Tabs>
-          </div>
-        </section>
-      </main>
+        </div>
+      </section>
+    );
+  };
 
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main className="pt-16">
+        <Hero
+          title={t('Gestão de Estudantes')}
+          subtitle={t('Cadastre e gerencie alunos da Escola do Ministério, com validações automáticas de qualificações e regras da congregação.')}
+          actions={
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-2 md:gap-4">
+              <Button variant="ghost" size="sm" className="text-white hover:text-jw-gold -ml-0 md:-ml-4" onClick={() => navigate('/dashboard')}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                {t('Voltar ao Dashboard')}
+              </Button>
+              <TutorialButton page="estudantes" variant="secondary" />
+              <QuickActions />
+            </div>
+          }
+        />
+        {renderMainContent()}
+      </main>
       <Footer />
-      <DebugPanel />
+      {import.meta.env.DEV && <DebugPanel />}
     </div>
   );
 };

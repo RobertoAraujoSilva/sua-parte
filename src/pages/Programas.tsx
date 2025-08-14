@@ -19,6 +19,7 @@ import { ProgramDetailModal } from "@/components/ProgramDetailModal";
 import { TemplateLibrary } from "@/components/TemplateLibrary";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
+import { generateProgramPDF } from "@/utils/pdfGenerator";
 
 const Programas = () => {
   const navigate = useNavigate();
@@ -200,8 +201,10 @@ const Programas = () => {
           "Faça Seu Melhor no Ministério",
           "Nossa Vida Cristã"
         ],
-        status: 'ativo',
-        assignment_status: 'pending'
+        status: "ativo" as "ativo",
+        assignment_status: 'pending',
+        arquivo: uploadData.file?.name || `programa-${dataInicio}.pdf`,
+        semana: uploadData.extractedData?.semana || (mesApostila ? mesApostila : `Semana de ${dataInicio}`)
       };
 
       console.log('💾 Saving program to database:', programData);
@@ -231,6 +234,11 @@ const Programas = () => {
         title: "Programa Salvo!",
         description: `O programa "${uploadData.extractedData?.semana || 'Programa Importado'}" foi salvo e está pronto para gerar designações.`,
       });
+
+      // Automate assignment generation for the new program
+      if (data) {
+        await handleGenerateAssignments(data);
+      }
 
     } catch (error) {
       console.error('❌ Exception saving program:', error);
@@ -411,7 +419,7 @@ const Programas = () => {
       }
 
       // If no file in storage, generate a PDF from program data
-      await generateProgramPDF(programa);
+      await handleGenerateProgramPDF(programa);
 
     } catch (error) {
       console.error('Download error:', error);
@@ -423,80 +431,13 @@ const Programas = () => {
     }
   };
 
-  // Generate PDF from program data
-  const generateProgramPDF = async (programa: any) => {
+  // Generate PDF from program data using utility
+  const handleGenerateProgramPDF = async (programa: any) => {
     try {
-      // Create a simple HTML content for the PDF
-      const htmlContent = `
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="UTF-8">
-          <title>${programa.semana}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .title { font-size: 24px; font-weight: bold; color: #1e40af; }
-            .subtitle { font-size: 16px; color: #666; margin-top: 10px; }
-            .section { margin: 20px 0; }
-            .section-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
-            .part { margin: 10px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid #1e40af; }
-            .part-number { font-weight: bold; color: #1e40af; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <div class="title">${programa.semana}</div>
-            <div class="subtitle">Semana de ${new Date(programa.data_inicio_semana).toLocaleDateString('pt-BR')}</div>
-          </div>
-
-          <div class="section">
-            <div class="section-title">Partes do Programa:</div>
-            ${programa.partes.map((parte: string, index: number) => `
-              <div class="part">
-                <span class="part-number">${index + 1}.</span> ${parte}
-              </div>
-            `).join('')}
-          </div>
-
-          <div class="section">
-            <div class="section-title">Status:</div>
-            <p>${programa.status}</p>
-          </div>
-
-          <div class="section">
-            <div class="section-title">Data de Importação:</div>
-            <p>${new Date(programa.dataImportacao).toLocaleDateString('pt-BR')}</p>
-          </div>
-        </body>
-        </html>
-      `;
-
-      // Create a blob with the HTML content
-      const blob = new Blob([htmlContent], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-
-      // Create download link
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${programa.semana.replace(/[^a-zA-Z0-9]/g, '_')}.html`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      toast({
-        title: "Download Iniciado",
-        description: `Gerando arquivo para: ${programa.semana}`,
-      });
-
+      await generateProgramPDF(programa);
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast({
-        title: "Erro na Geração",
-        description: "Não foi possível gerar o arquivo do programa.",
-        variant: "destructive"
-      });
+      // Error handling is done in the utility function
+      console.error('PDF generation failed:', error);
     }
   };
 
@@ -571,60 +512,72 @@ const Programas = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pt-16">
+      <main className="pt-12 sm:pt-14 md:pt-16">
         {/* Header Section */}
-        <section className="bg-gradient-to-br from-jw-navy via-jw-blue to-jw-blue-dark py-12">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center gap-4 mb-6">
+        <section className="bg-gradient-to-br from-jw-navy via-jw-blue to-jw-blue-dark py-4 sm:py-6 md:py-8 lg:py-12 px-3 sm:px-4 md:px-6">
+          <div className="container mx-auto max-w-7xl">
+            {/* Navigation Bar */}
+            <div className="flex flex-col xs:flex-row items-center justify-between gap-2 sm:gap-4 mb-6 sm:mb-8">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-white hover:text-jw-gold"
+                className="text-white hover:text-jw-gold w-full xs:w-auto justify-center xs:justify-start text-sm sm:text-base"
                 onClick={() => navigate('/dashboard')}
               >
-                <ArrowLeft className="w-4 h-4 mr-2" />
+                <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2 flex-shrink-0" />
                 Voltar ao Dashboard
               </Button>
+              <TutorialButton 
+                page="programas" 
+                variant="secondary" 
+                className="w-full xs:w-auto text-sm sm:text-base" 
+              />
             </div>
 
-            <div className="flex items-start justify-between">
+            {/* Header Content */}
+            <div className="flex flex-col gap-4 sm:gap-6 md:gap-8">
               <div className="text-white">
-                <h1 className="text-4xl font-bold mb-4">
+                <h1 className="text-2xl xs:text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 text-center xs:text-left">
                   Gestão de <span className="text-jw-gold">Programas</span>
                 </h1>
-                <p className="text-xl opacity-90 max-w-2xl">
+                <p className="text-base xs:text-lg sm:text-xl opacity-90 max-w-3xl text-center xs:text-left">
                   Importe e gerencie programas semanais da apostila Vida e Ministério Cristão
                   com parsing automático e validação inteligente.
                 </p>
-                <div className="mt-4">
+              </div>
+
+              {/* Action Button */}
+              {import.meta.env.DEV && (
+                <div className="flex justify-center xs:justify-start">
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-white border-white hover:bg-white hover:text-jw-navy"
+                    className="text-white border-white hover:bg-white hover:text-jw-navy text-sm sm:text-base w-full xs:w-auto"
                     onClick={() => navigate('/pdf-parsing-test')}
                   >
                     🧪 Testar Parser Aprimorado
                   </Button>
                 </div>
-              </div>
-              <TutorialButton page="programas" variant="secondary" />
+              )}
             </div>
           </div>
         </section>
 
         {/* Upload Section */}
-        <section className="py-8 bg-white border-b">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section className="py-6 md:py-8 bg-white border-b">
+          <div className="container mx-auto px-4 sm:px-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               {/* PDF Upload */}
               <PdfUpload
                 onUploadComplete={handlePdfUploadComplete}
                 onUploadStart={handlePdfUploadStart}
+                className="w-full"
               />
 
               {/* JW.org Content Parser */}
               <JWContentParser
                 onParseComplete={handlePdfUploadComplete}
+                className="w-full"
               />
             </div>
           </div>
@@ -632,15 +585,16 @@ const Programas = () => {
 
         {/* Programs List */}
         <section className="py-8">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-jw-navy">
+          <div className="container mx-auto px-2 md:px-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 sm:mb-6 gap-3">
+              <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-jw-navy">
                 {showTemplateLibrary ? 'Biblioteca de Templates' : 'Programas Importados'}
               </h2>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <Button
                   variant={showTemplateLibrary ? "default" : "outline"}
                   onClick={() => setShowTemplateLibrary(!showTemplateLibrary)}
+                  className="w-full sm:w-auto justify-center"
                 >
                   <FileText className="w-4 h-4 mr-2" />
                   {showTemplateLibrary ? 'Ver Meus Programas' : 'Templates Prontos'}
@@ -648,7 +602,7 @@ const Programas = () => {
                 {!showTemplateLibrary && (
                   <Input
                     placeholder="Buscar programas..."
-                    className="w-64"
+                    className="w-full sm:w-64"
                   />
                 )}
               </div>
@@ -722,38 +676,42 @@ const Programas = () => {
                 {programas.map((programa) => (
                 <Card
                   key={programa.id}
-                  className="hover:shadow-lg transition-shadow"
+                  className="hover:shadow-lg transition-shadow overflow-hidden"
                   data-cy="program-card"
                   data-testid={`program-card-${programa.id}`}
                 >
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
+                  <CardHeader className="p-4 sm:p-6">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-3">
                       <div>
-                        <CardTitle className="text-lg">{programa.semana}</CardTitle>
-                        <CardDescription>
+                        <CardTitle className="text-sm sm:text-base md:text-lg">{programa.semana}</CardTitle>
+                        <CardDescription className="text-xs sm:text-sm">
                           Importado em {new Date(programa.dataImportacao).toLocaleDateString('pt-BR')}
                         </CardDescription>
                       </div>
-                      <Badge className={getStatusColor(programa.status)}>
+                      <Badge className={`whitespace-nowrap ${getStatusColor(programa.status)}`}>
                         {programa.status}
                       </Badge>
                     </div>
                   </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div>
-                        <h4 className="font-medium text-gray-700 mb-2">Arquivo:</h4>
-                        <p className="text-sm text-gray-600 mb-3">{programa.arquivo}</p>
+                  <CardContent className="p-3 xs:p-4 sm:p-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-medium text-gray-700 mb-2 text-sm sm:text-base">Arquivo:</h4>
+                          <p className="text-xs sm:text-sm text-gray-600 break-all">{programa.arquivo}</p>
+                        </div>
                         
-                        <h4 className="font-medium text-gray-700 mb-2">Partes do Programa:</h4>
-                        <ul className="space-y-1">
-                          {programa.partes.map((parte, index) => (
-                            <li key={index} className="text-sm text-gray-600 flex items-center">
-                              <div className="w-2 h-2 bg-jw-blue rounded-full mr-2"></div>
-                              {parte}
-                            </li>
-                          ))}
-                        </ul>
+                        <div>
+                          <h4 className="font-medium text-gray-700 mb-2">Partes do Programa:</h4>
+                          <ul className="space-y-2">
+                            {programa.partes.map((parte, index) => (
+                              <li key={index} className="text-xs sm:text-sm text-gray-600 flex items-center">
+                                <div className="w-2 h-2 bg-jw-blue rounded-full mr-2 flex-shrink-0"></div>
+                                <span className="flex-1">{parte}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       </div>
                       
                       <div>
@@ -783,11 +741,12 @@ const Programas = () => {
                           )}
                         </div>
                         
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-2 xs:gap-3">
                           {/* Visualizar Button - For all programs */}
                           <Button
                             variant="outline"
                             size="sm"
+                            className="w-full xs:w-auto text-xs sm:text-sm"
                             onClick={() => handleVisualizarPrograma(programa)}
                           >
                             <Eye className="w-4 h-4 mr-1" />
@@ -874,56 +833,56 @@ const Programas = () => {
         </section>
 
         {/* Statistics */}
-        <section className="py-8 bg-gray-50">
-          <div className="container mx-auto px-4">
-            <h2 className="text-2xl font-bold text-jw-navy mb-6">Estatísticas</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-jw-blue mb-2">
+        <section className="py-6 sm:py-8 bg-gray-50">
+          <div className="container mx-auto px-3 xs:px-4 sm:px-6 max-w-7xl">
+            <h2 className="text-lg xs:text-xl sm:text-2xl font-bold text-jw-navy mb-4 sm:mb-6">Estatísticas</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 xs:gap-3 sm:gap-4 md:gap-6">
+              <Card className="p-2 sm:p-3">
+                <CardContent className="p-3 sm:p-4 text-center">
+                  <div className="text-2xl sm:text-3xl font-bold text-jw-blue mb-1 sm:mb-2">
                     {loadingPrograms ? (
-                      <div className="animate-pulse bg-gray-200 h-9 w-8 rounded mx-auto"></div>
+                      <div className="animate-pulse bg-gray-200 h-8 sm:h-9 w-8 rounded mx-auto"></div>
                     ) : (
                       programStats.total
                     )}
                   </div>
-                  <div className="text-sm text-gray-600">Programas Importados</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Programas Importados</div>
                 </CardContent>
               </Card>
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-green-600 mb-2">
+              <Card className="p-2 sm:p-3">
+                <CardContent className="p-3 sm:p-4 text-center">
+                  <div className="text-2xl sm:text-3xl font-bold text-green-600 mb-1 sm:mb-2">
                     {loadingPrograms ? (
-                      <div className="animate-pulse bg-gray-200 h-9 w-8 rounded mx-auto"></div>
+                      <div className="animate-pulse bg-gray-200 h-8 sm:h-9 w-8 rounded mx-auto"></div>
                     ) : (
                       programStats.approved
                     )}
                   </div>
-                  <div className="text-sm text-gray-600">Programas Aprovados</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Programas Aprovados</div>
                 </CardContent>
               </Card>
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">
+              <Card className="p-2 sm:p-3">
+                <CardContent className="p-3 sm:p-4 text-center">
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-600 mb-1 sm:mb-2">
                     {loadingPrograms ? (
-                      <div className="animate-pulse bg-gray-200 h-9 w-8 rounded mx-auto"></div>
+                      <div className="animate-pulse bg-gray-200 h-8 sm:h-9 w-8 rounded mx-auto"></div>
                     ) : (
                       programStats.draft
                     )}
                   </div>
-                  <div className="text-sm text-gray-600">Rascunhos para Revisão</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Rascunhos para Revisão</div>
                 </CardContent>
               </Card>
-              <Card>
-                <CardContent className="p-6 text-center">
-                  <div className="text-3xl font-bold text-purple-600 mb-2">
+              <Card className="p-2 sm:p-3">
+                <CardContent className="p-3 sm:p-4 text-center">
+                  <div className="text-2xl sm:text-3xl font-bold text-purple-600 mb-1 sm:mb-2">
                     {loadingPrograms ? (
-                      <div className="animate-pulse bg-gray-200 h-9 w-8 rounded mx-auto"></div>
+                      <div className="animate-pulse bg-gray-200 h-8 sm:h-9 w-8 rounded mx-auto"></div>
                     ) : (
                       programStats.totalAssignments
                     )}
                   </div>
-                  <div className="text-sm text-gray-600">Designações Geradas</div>
+                  <div className="text-xs sm:text-sm text-gray-600">Designações Geradas</div>
                 </CardContent>
               </Card>
             </div>
