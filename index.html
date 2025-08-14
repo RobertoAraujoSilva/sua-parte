@@ -8,7 +8,7 @@
     <meta name="author" content="Sistema Ministerial" />
 
     <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#1f2937" />
+    <meta name="theme-color" content="#0b2a4a" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Sistema Ministerial" />
@@ -32,6 +32,15 @@
 
   <body>
     <div id="root"></div>
+    <script>
+      // Recarrega se um chunk de lazy split falhar (evita “tela branca”)
+      window.addEventListener('error', function (e) {
+        if (/ChunkLoadError|Loading chunk \d+ failed/.test(e.message || '')) {
+          if (caches && caches.keys) { caches.keys().then(keys => keys.forEach(k => caches.delete(k))); }
+          location.reload();
+        }
+      });
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
