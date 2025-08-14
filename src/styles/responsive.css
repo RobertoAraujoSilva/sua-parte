@@ -1,9 +1,12 @@
 /* Responsive Layout Utilities */
+/* Integration with PageShell CSS Variables */
 
-/* Container width utilities */
+/* Container width utilities - now compatible with PageShell */
 .responsive-container {
   @apply mx-auto;
   width: min(95%, 1920px);
+  /* Use PageShell variables when available */
+  width: var(--shell-max-w, min(95%, 1920px));
 }
 
 @screen xs {
@@ -48,10 +51,10 @@
   }
 }
 
-/* Adaptive Grid */
+/* Adaptive Grid - now compatible with PageShell */
 .adaptive-grid {
   display: grid;
-  gap: 1rem;
+  gap: var(--content-gap, 1rem);
   grid-template-columns: repeat(auto-fit, minmax(var(--min-item-width, 300px), 1fr));
 }
 
@@ -75,9 +78,11 @@
   }
 }
 
-/* Responsive Table */
+/* Responsive Table - now compatible with PageShell */
 .responsive-table {
   @apply w-full overflow-x-auto;
+  /* Use PageShell height calculation when available */
+  height: var(--table-height, auto);
 }
 
 .responsive-table table {
@@ -113,29 +118,29 @@
   }
 }
 
-/* Density Classes */
+/* Density Classes - now compatible with PageShell CSS variables */
 .density-compact {
-  --spacing: 0.5rem;
+  --spacing: var(--content-gap, 0.5rem);
   --text-size: 0.875rem;
-  --padding: 0.5rem;
+  --padding: var(--cell-px, 0.5rem);
   --button-size: 2rem;
-  --header-height: 2.5rem;
+  --header-height: var(--toolbar-h, 2.5rem);
 }
 
 .density-comfortable {
-  --spacing: 1rem;
+  --spacing: var(--content-gap, 1rem);
   --text-size: 1rem;
-  --padding: 1rem;
+  --padding: var(--cell-px, 1rem);
   --button-size: 2.5rem;
-  --header-height: 3rem;
+  --header-height: var(--toolbar-h, 3rem);
 }
 
 .density-spacious {
-  --spacing: 1.5rem;
+  --spacing: var(--section-gap, 1.5rem);
   --text-size: 1.125rem;
-  --padding: 1.5rem;
+  --padding: var(--cell-px, 1.5rem);
   --button-size: 3rem;
-  --header-height: 3.5rem;
+  --header-height: var(--toolbar-h, 3.5rem);
 }
 
 /* Responsive Text Utilities */
@@ -291,4 +296,260 @@
 
 .scrollbar-none::-webkit-scrollbar {
   display: none;
+}
+
+/* PageShell Integration Classes */
+/* These classes ensure backward compatibility with existing responsive components */
+
+/* Legacy responsive container integration */
+.responsive-container.page-shell-integrated {
+  width: var(--shell-max-w);
+  padding: 0 var(--shell-gutter);
+}
+
+/* Legacy adaptive grid integration */
+.adaptive-grid.page-shell-integrated {
+  gap: var(--content-gap);
+}
+
+.adaptive-grid.page-shell-integrated[data-density="compact"] {
+  gap: calc(var(--content-gap) * 0.75);
+}
+
+.adaptive-grid.page-shell-integrated[data-density="comfortable"] {
+  gap: var(--content-gap);
+}
+
+/* Legacy responsive table integration */
+.responsive-table.page-shell-integrated {
+  height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 2));
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.responsive-table.page-shell-integrated table {
+  font-size: calc(var(--text-size, 1rem) * 0.9);
+}
+
+.responsive-table.page-shell-integrated th,
+.responsive-table.page-shell-integrated td {
+  height: var(--row-h);
+  padding: var(--cell-py) var(--cell-px);
+}
+
+/* Legacy density class integration with PageShell */
+[data-density="compact"] .density-compact {
+  --spacing: calc(var(--content-gap) * 0.75);
+  --padding: var(--cell-px);
+  --header-height: var(--toolbar-h);
+}
+
+[data-density="comfortable"] .density-comfortable {
+  --spacing: var(--content-gap);
+  --padding: var(--cell-px);
+  --header-height: var(--toolbar-h);
+}
+
+/* Responsive header integration with PageShell */
+.responsive-header.page-shell-integrated {
+  height: var(--hero-h);
+  backdrop-filter: var(--toolbar-blur);
+}
+
+/* Touch target adjustments for PageShell */
+.page-shell .touch-target {
+  min-height: var(--row-h);
+  min-width: var(--row-h);
+}
+
+/* Grid responsive classes with PageShell variables */
+.page-shell .grid-responsive-1 {
+  gap: var(--content-gap);
+}
+
+.page-shell .grid-responsive-2 {
+  gap: var(--content-gap);
+}
+
+.page-shell .grid-responsive-3 {
+  gap: var(--content-gap);
+}
+
+.page-shell .grid-responsive-4 {
+  gap: var(--content-gap);
+}
+
+.page-shell .grid-responsive-6 {
+  gap: var(--content-gap);
+}
+
+/* Responsive padding integration */
+.page-shell .p-responsive {
+  padding: var(--shell-gutter);
+}
+
+.page-shell .px-responsive {
+  padding-left: var(--shell-gutter);
+  padding-right: var(--shell-gutter);
+}
+
+.page-shell .py-responsive {
+  padding-top: calc(var(--content-gap) * 2);
+  padding-bottom: calc(var(--content-gap) * 2);
+}
+
+/* Responsive margins integration */
+.page-shell .m-responsive {
+  margin: var(--content-gap);
+}
+
+.page-shell .mx-responsive {
+  margin-left: var(--shell-gutter);
+  margin-right: var(--shell-gutter);
+}
+
+.page-shell .my-responsive {
+  margin-top: var(--content-gap);
+  margin-bottom: var(--content-gap);
+}
+
+/* Gap responsive integration */
+.page-shell .gap-responsive {
+  gap: var(--content-gap);
+}
+
+/* Scrollbar integration with PageShell theme */
+.page-shell .scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.page-shell .scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.page-shell .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.page-shell .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode integration */
+@media (prefers-color-scheme: dark) {
+  .page-shell .scrollbar-thin::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .page-shell .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .page-shell .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  .responsive-table.page-shell-integrated {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Transition integration for smooth density changes */
+.page-shell * {
+  transition: 
+    height 0.2s ease-in-out,
+    padding 0.2s ease-in-out,
+    margin 0.2s ease-in-out,
+    font-size 0.2s ease-in-out,
+    gap 0.2s ease-in-out;
+}
+
+/* Prevent transitions on initial load */
+.page-shell.preload * {
+  transition: none !important;
+}
+
+/* Responsive breakpoint adjustments for PageShell integration */
+@media (max-width: 768px) {
+  .responsive-container.page-shell-integrated {
+    width: 100vw;
+    padding: 0 var(--shell-gutter);
+  }
+  
+  .adaptive-grid.page-shell-integrated {
+    gap: calc(var(--content-gap) * 0.75);
+  }
+  
+  .responsive-table.page-shell-integrated {
+    height: calc(100svh - var(--toolbar-h) - var(--footer-h) - var(--shell-gutter));
+    border-radius: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-table.page-shell-integrated {
+    height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 0.5));
+    border-radius: 4px;
+  }
+}
+
+/* Large screen optimizations for PageShell integration */
+@media (min-width: 1920px) {
+  .responsive-container.page-shell-integrated {
+    width: var(--shell-max-w);
+  }
+  
+  .responsive-table.page-shell-integrated {
+    height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 2.5));
+  }
+}
+
+/* Utility classes for manual integration */
+.integrate-with-pageshell {
+  /* Apply PageShell integration automatically */
+}
+
+.integrate-with-pageshell.responsive-container {
+  width: var(--shell-max-w);
+  padding: 0 var(--shell-gutter);
+}
+
+.integrate-with-pageshell.adaptive-grid {
+  gap: var(--content-gap);
+}
+
+.integrate-with-pageshell.responsive-table {
+  height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 2));
+}
+
+/* Hook integration classes */
+.use-responsive-shell {
+  /* Marker class for components using useResponsiveShell hook */
+}
+
+.use-responsive-shell .container {
+  width: var(--shell-max-w);
+  margin: 0 auto;
+  padding: 0 var(--shell-gutter);
+}
+
+.use-responsive-shell .table-container {
+  height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 2));
+  overflow: auto;
+}
+
+.use-responsive-shell .grid-container {
+  display: grid;
+  gap: var(--content-gap);
+}
+
+.use-responsive-shell .toolbar-container {
+  height: var(--toolbar-h);
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: var(--content-gap);
+  align-items: center;
+  padding: 0 var(--shell-gutter);
 }

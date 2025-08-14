@@ -1,5 +1,6 @@
 import React from 'react';
 import { useResponsive, useGridColumns } from '@/hooks/use-responsive';
+import { useDensity as useContextDensity } from '@/contexts/DensityContext';
 import { useDensity } from '@/components/ui/density-provider';
 
 interface AdaptiveGridProps {
@@ -18,7 +19,16 @@ export function AdaptiveGrid({
   className = ''
 }: AdaptiveGridProps) {
   const { currentBreakpoint } = useResponsive();
-  const { gridGap } = useDensity();
+  
+  // Try to use new density context first, fallback to old provider
+  let densityConfig;
+  try {
+    densityConfig = useContextDensity();
+  } catch {
+    densityConfig = useDensity();
+  }
+  
+  const { gridGap } = densityConfig;
   const calculatedColumns = useGridColumns(minItemWidth);
 
   // Use provided gap or auto-detect from density
@@ -102,7 +112,16 @@ export function StatsGrid({ children, className = '' }: { children: React.ReactN
 // Hook for getting responsive grid classes
 export function useResponsiveGrid(minItemWidth: number = 300) {
   const { currentBreakpoint } = useResponsive();
-  const { gridGap } = useDensity();
+  
+  // Try to use new density context first, fallback to old provider
+  let densityConfig;
+  try {
+    densityConfig = useContextDensity();
+  } catch {
+    densityConfig = useDensity();
+  }
+  
+  const { gridGap } = densityConfig;
   
   const gridClasses = {
     mobile: `grid grid-cols-1 ${gridGap}`,

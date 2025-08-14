@@ -1,0 +1,643 @@
+/* Page Shell Layout System - CSS Variables Foundation */
+
+:root {
+  /* Layout dimensions with responsive clamp() functions */
+  --shell-max-w: min(1600px, 95vw);
+  --shell-gutter: clamp(12px, 1.6vw, 24px);
+  
+  /* Component heights using viewport units for zoom stability */
+  --hero-h: clamp(56px, 8svh, 120px);
+  --hero-h-compact: clamp(56px, 8svh, 120px);
+  --hero-h-normal: clamp(120px, 15svh, 200px);
+  --toolbar-h: clamp(44px, 6svh, 64px);
+  --footer-h: clamp(56px, 7svh, 96px);
+  
+  /* Density system - comfortable mode (default) */
+  --row-h: 44px;
+  --cell-px: 12px;
+  --cell-py: 8px;
+  --section-gap: 16px;
+  --content-gap: 12px;
+  
+  /* Z-index layers */
+  --z-toolbar: 40;
+  --z-backdrop: 35;
+  --z-overlay: 50;
+  
+  /* Backdrop and visual effects */
+  --toolbar-backdrop: rgba(255, 255, 255, 0.8);
+  --toolbar-backdrop-dark: rgba(0, 0, 0, 0.8);
+  --toolbar-blur: blur(8px);
+  
+  /* Transition timing */
+  --layout-transition: all 0.2s ease-in-out;
+}
+
+/* Compact density mode */
+[data-density="compact"] {
+  --row-h: 36px;
+  --cell-px: 8px;
+  --cell-py: 6px;
+  --section-gap: 12px;
+  --content-gap: 8px;
+}
+
+/* Comfortable density mode (explicit) */
+[data-density="comfortable"] {
+  --row-h: 44px;
+  --cell-px: 12px;
+  --cell-py: 8px;
+  --section-gap: 16px;
+  --content-gap: 12px;
+}
+
+/* Page Shell Base Styles */
+.page-shell {
+  width: 100%;
+  max-width: var(--shell-max-w);
+  margin: 0 auto;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-shell__header {
+  flex-shrink: 0;
+  height: var(--hero-h-compact);
+  transition: var(--layout-transition);
+  display: flex;
+  align-items: center;
+}
+
+.page-shell__header--normal {
+  height: var(--hero-h-normal);
+}
+
+.page-shell__header--compact {
+  height: var(--hero-h-compact);
+}
+
+.page-shell__toolbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-toolbar);
+  height: var(--toolbar-h);
+  backdrop-filter: var(--toolbar-blur);
+  background: var(--toolbar-backdrop);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  transition: var(--layout-transition);
+  flex-shrink: 0;
+}
+
+@supports (backdrop-filter: blur(8px)) {
+  .page-shell__toolbar {
+    background: rgba(255, 255, 255, 0.6);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .page-shell__toolbar {
+    background: var(--toolbar-backdrop-dark);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  @supports (backdrop-filter: blur(8px)) {
+    .page-shell__toolbar {
+      background: rgba(0, 0, 0, 0.6);
+    }
+  }
+}
+
+.page-shell__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--content-gap);
+}
+
+.page-shell__footer {
+  flex-shrink: 0;
+  height: var(--footer-h);
+  margin-top: auto;
+}
+
+/* Responsive Table Container */
+.responsive-table-container {
+  /* Default height calculation using CSS variables */
+  height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 2) - var(--content-gap));
+  
+  /* Overflow handling - vertical auto, horizontal as needed */
+  overflow-y: auto;
+  overflow-x: auto;
+  
+  /* Visual styling */
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  
+  /* Smooth scrolling for better UX */
+  scroll-behavior: smooth;
+  
+  /* Optimize scrolling performance */
+  will-change: scroll-position;
+  
+  /* Ensure proper stacking context */
+  position: relative;
+  z-index: 1;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .responsive-table-container {
+    border-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+}
+
+/* Responsive height adjustments for different breakpoints */
+@media (max-width: 768px) {
+  .responsive-table-container {
+    /* Adjust height calculation for mobile */
+    height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 1.5) - var(--content-gap));
+    
+    /* Optimize for touch scrolling */
+    -webkit-overflow-scrolling: touch;
+    
+    /* Reduce border radius on mobile */
+    border-radius: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-table-container {
+    /* Further height optimization for small screens */
+    height: calc(100svh - var(--toolbar-h) - var(--footer-h) - var(--shell-gutter) - (var(--content-gap) * 0.5));
+    border-radius: 4px;
+  }
+}
+
+/* Large screen optimizations */
+@media (min-width: 1920px) {
+  .responsive-table-container {
+    /* Ensure maximum utilization on large screens */
+    height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 2.5) - var(--content-gap));
+  }
+}
+
+/* Density-specific table container adjustments */
+.responsive-table-container[data-density="compact"] {
+  /* Compact mode - slightly reduce padding to maximize content */
+  height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 1.8) - (var(--content-gap) * 0.8));
+}
+
+.responsive-table-container[data-density="comfortable"] {
+  /* Comfortable mode - add more breathing room */
+  height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 2.2) - (var(--content-gap) * 1.2));
+}
+
+/* Scrollbar styling for better UX */
+.responsive-table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.responsive-table-container::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.responsive-table-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.responsive-table-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode scrollbar */
+@media (prefers-color-scheme: dark) {
+  .responsive-table-container::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .responsive-table-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .responsive-table-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+/* Firefox scrollbar styling */
+.responsive-table-container {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05);
+}
+
+@media (prefers-color-scheme: dark) {
+  .responsive-table-container {
+    scrollbar-color: rgba(255, 255, 255, 0.2) rgba(255, 255, 255, 0.05);
+  }
+}
+
+/* Intelligent Toolbar Grid Layout */
+.intelligent-toolbar__grid {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: var(--content-gap);
+  align-items: center;
+  height: 100%;
+  padding: 0 var(--shell-gutter);
+  min-height: var(--toolbar-h);
+}
+
+/* Left column: Filters and tabs */
+.intelligent-toolbar__filters {
+  display: flex;
+  gap: var(--content-gap);
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0; /* Allow shrinking */
+  overflow: hidden;
+}
+
+/* Right columns: Action buttons */
+.intelligent-toolbar__primary-actions,
+.intelligent-toolbar__secondary-actions,
+.intelligent-toolbar__tertiary-actions {
+  display: flex;
+  gap: calc(var(--content-gap) * 0.75);
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Toolbar section components */
+.toolbar-filters {
+  display: flex;
+  gap: var(--content-gap);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.toolbar-actions {
+  display: flex;
+  gap: calc(var(--content-gap) * 0.75);
+  align-items: center;
+}
+
+.toolbar-tabs {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+/* Button groups */
+.toolbar-button-group {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--content-gap) * 0.5);
+}
+
+.toolbar-button-group--compact {
+  gap: calc(var(--content-gap) * 0.25);
+}
+
+.toolbar-button-group--spaced {
+  gap: var(--content-gap);
+}
+
+/* Responsive behavior for smaller screens */
+@media (max-width: 1024px) {
+  .intelligent-toolbar__grid {
+    grid-template-columns: 1fr auto auto;
+    gap: calc(var(--content-gap) * 0.75);
+  }
+  
+  .intelligent-toolbar__secondary-actions {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .intelligent-toolbar__grid {
+    grid-template-columns: 1fr auto;
+    gap: calc(var(--content-gap) * 0.75);
+  }
+  
+  .intelligent-toolbar__filters {
+    gap: calc(var(--content-gap) * 0.75);
+  }
+  
+  /* Combine all action columns into one on mobile */
+  .intelligent-toolbar__secondary-actions,
+  .intelligent-toolbar__tertiary-actions {
+    display: none;
+  }
+  
+  .intelligent-toolbar__primary-actions {
+    gap: calc(var(--content-gap) * 0.5);
+  }
+  
+  /* Show overflow menu or dropdown for hidden actions */
+  .intelligent-toolbar__tertiary-actions {
+    display: flex;
+  }
+}
+
+@media (max-width: 480px) {
+  .intelligent-toolbar__grid {
+    grid-template-columns: 1fr auto;
+    gap: calc(var(--content-gap) * 0.5);
+    padding: 0 calc(var(--shell-gutter) * 0.75);
+  }
+  
+  .intelligent-toolbar__filters {
+    gap: calc(var(--content-gap) * 0.5);
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .intelligent-toolbar__filters::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .toolbar-button-group {
+    gap: calc(var(--content-gap) * 0.25);
+  }
+}
+
+/* Legacy toolbar grid support (for backward compatibility) */
+.toolbar-grid {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: var(--content-gap);
+  align-items: center;
+  height: 100%;
+  padding: 0 var(--shell-gutter);
+}
+
+.toolbar-grid__filters {
+  display: flex;
+  gap: var(--content-gap);
+  align-items: center;
+}
+
+.toolbar-grid__actions {
+  display: flex;
+  gap: var(--content-gap);
+  align-items: center;
+}
+
+/* Density-aware table styles */
+.density-table {
+  width: 100%;
+  min-width: 100%;
+  border-collapse: collapse;
+}
+
+.density-table th,
+.density-table td {
+  height: var(--row-h);
+  padding: var(--cell-py) var(--cell-px);
+  transition: var(--layout-transition);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  vertical-align: middle;
+}
+
+.density-table th {
+  background-color: rgba(0, 0, 0, 0.02);
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Dark mode table styles */
+@media (prefers-color-scheme: dark) {
+  .density-table th,
+  .density-table td {
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .density-table th {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+}
+
+/* Density-specific row and cell adjustments */
+.density-table[data-density="compact"] th,
+.density-table[data-density="compact"] td {
+  height: var(--row-h);
+  padding: var(--cell-py) var(--cell-px);
+  font-size: 0.875rem; /* 14px */
+  line-height: 1.25;
+}
+
+.density-table[data-density="comfortable"] th,
+.density-table[data-density="comfortable"] td {
+  height: var(--row-h);
+  padding: var(--cell-py) var(--cell-px);
+  font-size: 0.9375rem; /* 15px */
+  line-height: 1.4;
+}
+
+/* Hover effects for table rows */
+.density-table tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+  transition: background-color 0.15s ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  .density-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+}
+
+/* Responsive table cell adjustments */
+@media (max-width: 768px) {
+  .density-table th,
+  .density-table td {
+    padding: calc(var(--cell-py) * 0.8) calc(var(--cell-px) * 0.8);
+    font-size: 0.8125rem; /* 13px */
+  }
+  
+  .density-table th {
+    font-size: 0.75rem; /* 12px */
+    font-weight: 700;
+  }
+}
+
+@media (max-width: 480px) {
+  .density-table th,
+  .density-table td {
+    padding: calc(var(--cell-py) * 0.6) calc(var(--cell-px) * 0.6);
+    font-size: 0.75rem; /* 12px */
+  }
+  
+  .density-table th {
+    font-size: 0.6875rem; /* 11px */
+  }
+}
+
+/* Responsive breakpoint adjustments */
+@media (max-width: 768px) {
+  :root {
+    --shell-max-w: 100vw;
+    --shell-gutter: clamp(8px, 2vw, 16px);
+    --toolbar-h: clamp(48px, 8svh, 56px);
+  }
+  
+  .toolbar-grid {
+    grid-template-columns: 1fr auto;
+    gap: var(--content-gap);
+  }
+  
+  .toolbar-grid__actions {
+    flex-wrap: wrap;
+  }
+}
+
+/* Zoom stability enhancements */
+@media (min-resolution: 1.25dppx) {
+  :root {
+    --toolbar-blur: blur(6px);
+  }
+}
+
+@media (min-resolution: 1.5dppx) {
+  :root {
+    --toolbar-blur: blur(4px);
+  }
+}
+
+/* Utility classes for layout */
+.fluid-width {
+  width: 100%;
+  max-width: var(--shell-max-w);
+  margin: 0 auto;
+}
+
+.shell-container {
+  width: 100%;
+  max-width: var(--shell-max-w);
+  margin: 0 auto;
+  padding: 0 var(--shell-gutter);
+}
+
+.sticky-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-toolbar);
+}
+
+.full-height-content {
+  height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 2));
+}
+
+/* Animation for density changes */
+.density-transition * {
+  transition: height 0.2s ease-in-out, padding 0.2s ease-in-out;
+}
+
+/* Smooth transitions for density mode changes */
+* {
+  transition: 
+    height 0.2s ease-in-out,
+    padding 0.2s ease-in-out,
+    margin 0.2s ease-in-out,
+    font-size 0.2s ease-in-out,
+    line-height 0.2s ease-in-out;
+}
+
+/* Ensure tables and their children transition smoothly */
+.density-table,
+.density-table th,
+.density-table td,
+.responsive-table-container,
+.page-shell__main,
+.intelligent-toolbar__grid {
+  transition: 
+    height 0.2s ease-in-out,
+    padding 0.2s ease-in-out,
+    margin 0.2s ease-in-out,
+    font-size 0.2s ease-in-out,
+    line-height 0.2s ease-in-out;
+}
+
+/* Prevent transition on initial load */
+.preload * {
+  transition: none !important;
+}
+
+/* Toolbar component specific styles */
+.intelligent-toolbar input,
+.intelligent-toolbar select {
+  height: 36px;
+  font-size: 0.875rem;
+}
+
+.intelligent-toolbar button {
+  height: 36px;
+  font-size: 0.875rem;
+}
+
+/* Ensure proper alignment of toolbar elements */
+.intelligent-toolbar__filters > *,
+.intelligent-toolbar__primary-actions > *,
+.intelligent-toolbar__secondary-actions > *,
+.intelligent-toolbar__tertiary-actions > * {
+  flex-shrink: 0;
+}
+
+/* Badge positioning within toolbar buttons */
+.intelligent-toolbar button .badge {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+/* Toolbar search input specific styling */
+.intelligent-toolbar .relative input {
+  padding-left: 2.5rem;
+}
+
+/* Toolbar select styling */
+.intelligent-toolbar select {
+  background-color: white;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: hsl(var(--foreground));
+}
+
+.intelligent-toolbar select:focus {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .intelligent-toolbar select {
+    background-color: hsl(var(--background));
+    border-color: hsl(var(--border));
+    color: hsl(var(--foreground));
+  }
+}
+
+/* Responsive text hiding for smaller screens */
+@media (max-width: 640px) {
+  .intelligent-toolbar .hidden-sm {
+    display: none;
+  }
+  
+  .intelligent-toolbar button span:not(.sr-only) {
+    display: none;
+  }
+  
+  .intelligent-toolbar button .lucide {
+    margin-right: 0;
+  }
+}

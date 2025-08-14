@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from 'react';
 import { useResponsive } from '@/hooks/use-responsive';
+import { useDensity as useContextDensity } from '@/contexts/DensityContext';
 import { useDensity, useResponsiveText } from '@/components/ui/density-provider';
 import { FullWidthContainer } from '@/components/layout/responsive-container';
 
@@ -31,7 +32,16 @@ export function ResponsiveTable({
   className = ''
 }: ResponsiveTableProps) {
   const { isDesktop, isLarge, isMobile } = useResponsive();
-  const { textSize, spacing } = useDensity();
+  
+  // Try to use new density context first, fallback to old provider
+  let densityConfig;
+  try {
+    densityConfig = useContextDensity();
+  } catch {
+    densityConfig = useDensity();
+  }
+  
+  const { textSize, spacing } = densityConfig;
   const textClasses = useResponsiveText();
   const containerRef = useRef<HTMLDivElement>(null);
 

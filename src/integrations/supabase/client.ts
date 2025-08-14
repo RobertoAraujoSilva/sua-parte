@@ -90,3 +90,20 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
     reconnectAfterMs: (tries) => Math.min(tries * 1000, 10000),
   },
 });
+
+// Add global error handler for network requests to help debug 404s
+if (typeof window !== 'undefined' && shouldLog) {
+  const originalFetch = window.fetch;
+  window.fetch = async (...args) => {
+    const response = await originalFetch(...args);
+    if (!response.ok && (response.status === 404 || response.status === 409)) {
+      console.warn(`🌐 Network ${response.status} Error:`, {
+        url: args[0],
+        status: response.status,
+        statusText: response.statusText,
+        timestamp: new Date().toISOString()
+      });
+    }
+    return response;
+  };
+}
