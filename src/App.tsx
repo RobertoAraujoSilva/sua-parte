@@ -14,11 +14,11 @@ import Demo from "./pages/Demo";
 import Dashboard from "./pages/Dashboard";
 import Estudantes from "./pages/Estudantes";
 import EstudantesResponsive from "./pages/EstudantesResponsive";
-import Programas from "./pages/Programas";
+import ProgramasOptimized from "./pages/ProgramasOptimized";
 import ProgramaPreview from "./pages/ProgramaPreview";
 import ProgramasTest from "./pages/ProgramasTest";
 import PdfParsingTest from "./pages/PdfParsingTest";
-import Designacoes from "./pages/Designacoes";
+import DesignacoesOptimized from "./pages/DesignacoesOptimized";
 import Relatorios from "./pages/Relatorios";
 import Reunioes from "./pages/Reunioes";
 import EstudantePortal from "./pages/EstudantePortal";
@@ -35,6 +35,8 @@ import DeveloperPanel from "./pages/DeveloperPanel";
 import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
+import DensityToggleTestPage from "./pages/DensityToggleTest";
+import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DebugFab from "./components/DebugFab";
 
@@ -158,6 +160,14 @@ const App = () => (
                         </ProtectedRoute>
                       } 
                     />
+                    <Route 
+                      path="/density-toggle-test" 
+                      element={<DensityToggleTestPage />} 
+                    />
+                    <Route 
+                      path="/zoom-responsiveness-test" 
+                      element={<ZoomResponsivenessTestPage />} 
+                    />
                   </>
                 )}
 
@@ -182,7 +192,7 @@ const App = () => (
                   path="/programas"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Programas />
+                      <ProgramasOptimized />
                     </ProtectedRoute>
                   }
                 />
@@ -219,7 +229,7 @@ const App = () => (
                   path="/designacoes"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Designacoes />
+                      <DesignacoesOptimized />
                     </ProtectedRoute>
                   }
                 />

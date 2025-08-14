@@ -7,10 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Plus, Search, Users, ArrowLeft, Upload, BarChart3, Filter, FileSpreadsheet, Table } from "lucide-react";
 
-// New responsive components
-import { ResponsiveContainer, ContentContainer } from "@/components/layout/responsive-container";
+// PageShell and optimized components
+import PageShell from "@/components/layout/PageShell";
+import EstudantesToolbar from "@/components/students/EstudantesToolbar";
+import { ResponsiveTableWrapper } from "@/components/layout/ResponsiveTableWrapper";
+import { StudentSpreadsheetOptimized } from "@/components/students/StudentSpreadsheetOptimized";
+
+// Legacy responsive components (for backward compatibility)
 import { StudentsGrid } from "@/components/layout/adaptive-grid";
-import { ResponsiveHeader, PageHeader } from "@/components/layout/responsive-header";
 import { DensityProvider, useDensity, useResponsiveText } from "@/components/ui/density-provider";
 import { StudentsSpreadsheetTable } from "@/components/ui/responsive-table";
 import { useResponsive } from "@/hooks/use-responsive";
@@ -144,33 +148,31 @@ const EstudantesResponsive = () => {
   const renderMainContent = () => {
     if (isLoading) {
       return (
-        <ContentContainer>
-          <div className="space-y-4">
-            <Skeleton className="h-12 w-full" />
-            <StudentsGrid>
-              {[...Array(6)].map((_, i) => (
-                <Skeleton key={i} className="h-32 w-full" />
-              ))}
-            </StudentsGrid>
-          </div>
-        </ContentContainer>
+        <div className="shell-container space-y-4">
+          <Skeleton className="h-12 w-full" />
+          <StudentsGrid>
+            {[...Array(6)].map((_, i) => (
+              <Skeleton key={i} className="h-32 w-full" />
+            ))}
+          </StudentsGrid>
+        </div>
       );
     }
 
     if (error) {
       return (
-        <ContentContainer>
+        <div className="shell-container">
           <EmptyState
             title="Não foi possível carregar"
             description={String(error).includes("timeout") ? "Tempo esgotado" : "Ocorreu um erro"}
             action={<Button onClick={() => refetch()}>Tentar novamente</Button>}
           />
-        </ContentContainer>
+        </div>
       );
     }
 
     return (
-      <ContentContainer>
+      <div className="shell-container">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           {/* Responsive Tabs */}
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
@@ -311,57 +313,67 @@ const EstudantesResponsive = () => {
           </TabsContent>
 
           <TabsContent value="spreadsheet" className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Planilha de Estudantes</h3>
               <p className="text-sm text-muted-foreground">
                 {filteredEstudantes.length} de {estudantes?.length || 0} estudantes
               </p>
             </div>
-            <StudentsSpreadsheetTable
-              students={filteredEstudantes}
-              onStudentClick={handleEditEstudante}
-            />
+            <ResponsiveTableWrapper
+              density="comfortable"
+              className="border-0"
+            >
+              <StudentSpreadsheetOptimized />
+            </ResponsiveTableWrapper>
           </TabsContent>
         </Tabs>
-      </ContentContainer>
+      </div>
     );
   };
 
+  // Create toolbar content for PageShell
+  const toolbarContent = (
+    <EstudantesToolbar
+      searchValue={filters.searchTerm}
+      onSearchChange={(value) => handleFilterChange("searchTerm", value)}
+      activeCount={statistics.ativos}
+      inactiveCount={statistics.inativos}
+      totalCount={statistics.total}
+      selectedTab={filters.ativo === "true" ? "active" : filters.ativo === "false" ? "inactive" : "all"}
+      onTabChange={(tab) => {
+        if (tab === 'active') handleFilterChange("ativo", "true");
+        else if (tab === 'inactive') handleFilterChange("ativo", "false");
+        else handleFilterChange("ativo", "todos");
+      }}
+      onAddStudent={() => {
+        setEditingEstudante(null);
+        setActiveTab("form");
+      }}
+      onExport={() => {
+        // TODO: Implement export functionality
+        console.log("Export clicked");
+      }}
+      onRefresh={() => refetch()}
+      onShowFilters={() => {
+        // TODO: Implement filters panel
+        console.log("Show filters clicked");
+      }}
+      hasActiveFilters={filters.searchTerm !== "" || filters.cargo !== "todos" || filters.genero !== "todos" || filters.ativo !== "todos"}
+    />
+  );
+
   return (
     <DensityProvider>
-      <div className="min-h-screen bg-background">
-        <ResponsiveHeader 
-          user={user ? {
-            name: user.email?.split('@')[0] || 'Usuário',
-            role: 'Instrutor'
-          } : undefined}
-        />
-        
-        <main className="pt-0">
-          <PageHeader
-            title={t('Gestão de Estudantes')}
-            subtitle={t('Cadastre e gerencie alunos da Escola do Ministério, com validações automáticas de qualificações e regras da congregação.')}
-            breadcrumbs={
-              <Button variant="ghost" size="sm" className="text-white/80 hover:text-white" onClick={() => navigate('/dashboard')}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                {t('Voltar ao Dashboard')}
-              </Button>
-            }
-            actions={
-              <div className="flex flex-wrap gap-2">
-                <TutorialButton page="estudantes" variant="secondary" />
-                <Button variant="outline" className="text-white border-white hover:bg-white hover:text-jw-navy">
-                  Ações Rápidas
-                </Button>
-              </div>
-            }
-          />
-          
-          {renderMainContent()}
-        </main>
+      <PageShell
+        title={t('Gestão de Estudantes')}
+        hero={false}
+        toolbar={toolbarContent}
+        idToolbar="estudantes-toolbar"
+      >
+        {renderMainContent()}
         
         {import.meta.env.DEV && <DebugPanel />}
-      </div>
+      </PageShell>
     </DensityProvider>
   );
 };

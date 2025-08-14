@@ -28,10 +28,12 @@ export default {
 				sm: '2rem',
 				lg: '4rem',
 				xl: '5rem',
-				'2xl': '6rem'
+				'2xl': '6rem',
+				'3xl': '8rem'
 			},
 			screens: {
-				'2xl': '1400px'
+				'2xl': '1400px',
+				'3xl': '1600px'
 			}
 		},
 		extend: {

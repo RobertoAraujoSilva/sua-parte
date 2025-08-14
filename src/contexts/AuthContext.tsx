@@ -128,22 +128,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Ensure we always have a valid role
       const role = (metadata.role as UserRole) || 'instrutor';
 
-      // Try to insert profile in database with validated data
+      // Try to insert profile in database with validated data using UPSERT to avoid conflicts
       const { data, error } = await supabase
         .from('profiles')
-        .insert({
+        .upsert({
           id: userId,
           nome_completo,
           congregacao: metadata.congregacao || '',
           cargo: metadata.cargo || 'instrutor',
           role
+        }, {
+          onConflict: 'id',
+          ignoreDuplicates: false
         })
         .select()
         .single();
 
       if (error) {
-        console.error('❌ Error creating profile in database:', error);
-        // Return profile from metadata even if DB insert fails (with validated data)
+        console.error('❌ Error upserting profile in database:', error);
+        // If upsert fails, try to fetch existing profile first
+        const { data: existingProfile, error: fetchError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        if (!fetchError && existingProfile) {
+          logAuthEvent('✅ Found existing profile after upsert failure');
+          return {
+            ...existingProfile,
+            email: user.email || ''
+          } as UserProfile;
+        }
+
+        // Return profile from metadata as last resort
         const email = user.email || '';
         const fallbackProfile = {
           id: userId,
@@ -364,6 +382,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (error) {
           console.error('❌ Error getting initial session:', error);
+          // Don't fail completely on session error, continue with null session
+          setSession(null);
+          setUser(null);
+          setProfile(null);
           setLoading(false);
           return;
         }

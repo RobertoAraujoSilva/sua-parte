@@ -11,7 +11,9 @@
       "disabled": false,
       "autoApprove": [
         "list_projects",
-        "list_tables"
+        "list_tables",
+        "execute_sql",
+        "apply_migration"
       ]
     },
     "context7": {

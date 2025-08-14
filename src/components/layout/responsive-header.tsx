@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useResponsive } from '@/hooks/use-responsive';
+import { useDensity as useContextDensity } from '@/contexts/DensityContext';
 import { useDensity, useResponsiveText } from '@/components/ui/density-provider';
 import { ResponsiveContainer } from './responsive-container';
 import { Menu, User } from 'lucide-react';
@@ -22,7 +23,16 @@ export function ResponsiveHeader({
   className = ''
 }: ResponsiveHeaderProps) {
   const { isMobile, isTablet } = useResponsive();
-  const { headerHeight, buttonSize, spacing } = useDensity();
+  
+  // Try to use new density context first, fallback to old provider
+  let densityConfig;
+  try {
+    densityConfig = useContextDensity();
+  } catch {
+    densityConfig = useDensity();
+  }
+  
+  const { headerHeight, buttonSize, spacing } = densityConfig;
   const textClasses = useResponsiveText();
 
   const spacingClass = spacing === 'tight' ? 'gap-2' : spacing === 'normal' ? 'gap-4' : 'gap-6';
@@ -129,7 +139,16 @@ export function PageHeader({
   className?: string;
 }) {
   const { isMobile } = useResponsive();
-  const { spacing } = useDensity();
+  
+  // Try to use new density context first, fallback to old provider
+  let densityConfig;
+  try {
+    densityConfig = useContextDensity();
+  } catch {
+    densityConfig = useDensity();
+  }
+  
+  const { spacing } = densityConfig;
   const textClasses = useResponsiveText();
 
   return (
