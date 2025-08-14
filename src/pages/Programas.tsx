@@ -201,8 +201,10 @@ const Programas = () => {
           "Faça Seu Melhor no Ministério",
           "Nossa Vida Cristã"
         ],
-        status: 'ativo',
-        assignment_status: 'pending'
+        status: "ativo" as "ativo",
+        assignment_status: 'pending',
+        arquivo: uploadData.file?.name || `programa-${dataInicio}.pdf`,
+        semana: uploadData.extractedData?.semana || (mesApostila ? mesApostila : `Semana de ${dataInicio}`)
       };
 
       console.log('💾 Saving program to database:', programData);
@@ -232,6 +234,11 @@ const Programas = () => {
         title: "Programa Salvo!",
         description: `O programa "${uploadData.extractedData?.semana || 'Programa Importado'}" foi salvo e está pronto para gerar designações.`,
       });
+
+      // Automate assignment generation for the new program
+      if (data) {
+        await handleGenerateAssignments(data);
+      }
 
     } catch (error) {
       console.error('❌ Exception saving program:', error);
@@ -507,9 +514,9 @@ const Programas = () => {
 
       <main className="pt-16">
         {/* Header Section */}
-        <section className="bg-gradient-to-br from-jw-navy via-jw-blue to-jw-blue-dark py-12">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center gap-4 mb-6">
+        <section className="bg-gradient-to-br from-jw-navy via-jw-blue to-jw-blue-dark py-8 md:py-12">
+          <div className="container mx-auto px-2 md:px-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
               <Button
                 variant="ghost"
                 size="sm"
@@ -519,14 +526,16 @@ const Programas = () => {
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar ao Dashboard
               </Button>
+              <div className="ml-0 md:ml-auto">
+                <TutorialButton page="programas" variant="secondary" />
+              </div>
             </div>
-
-            <div className="flex items-start justify-between">
-              <div className="text-white">
-                <h1 className="text-4xl font-bold mb-4">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="text-white flex-1">
+                <h1 className="text-3xl md:text-4xl font-bold mb-3 md:mb-4">
                   Gestão de <span className="text-jw-gold">Programas</span>
                 </h1>
-                <p className="text-xl opacity-90 max-w-2xl">
+                <p className="text-lg md:text-xl opacity-90 max-w-2xl">
                   Importe e gerencie programas semanais da apostila Vida e Ministério Cristão
                   com parsing automático e validação inteligente.
                 </p>
@@ -541,15 +550,14 @@ const Programas = () => {
                   </Button>
                 </div>
               </div>
-              <TutorialButton page="programas" variant="secondary" />
             </div>
           </div>
         </section>
 
         {/* Upload Section */}
-        <section className="py-8 bg-white border-b">
-          <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section className="py-6 md:py-8 bg-white border-b">
+          <div className="container mx-auto px-2 md:px-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               {/* PDF Upload */}
               <PdfUpload
                 onUploadComplete={handlePdfUploadComplete}
@@ -566,12 +574,12 @@ const Programas = () => {
 
         {/* Programs List */}
         <section className="py-8">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-jw-navy">
+          <div className="container mx-auto px-2 md:px-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-3">
+              <h2 className="text-xl md:text-2xl font-bold text-jw-navy">
                 {showTemplateLibrary ? 'Biblioteca de Templates' : 'Programas Importados'}
               </h2>
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full md:w-auto">
                 <Button
                   variant={showTemplateLibrary ? "default" : "outline"}
                   onClick={() => setShowTemplateLibrary(!showTemplateLibrary)}
@@ -582,7 +590,7 @@ const Programas = () => {
                 {!showTemplateLibrary && (
                   <Input
                     placeholder="Buscar programas..."
-                    className="w-64"
+                    className="w-full md:w-64"
                   />
                 )}
               </div>
@@ -661,10 +669,10 @@ const Programas = () => {
                   data-testid={`program-card-${programa.id}`}
                 >
                   <CardHeader>
-                    <div className="flex items-start justify-between">
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 md:gap-0">
                       <div>
-                        <CardTitle className="text-lg">{programa.semana}</CardTitle>
-                        <CardDescription>
+                        <CardTitle className="text-base md:text-lg">{programa.semana}</CardTitle>
+                        <CardDescription className="text-xs md:text-sm">
                           Importado em {new Date(programa.dataImportacao).toLocaleDateString('pt-BR')}
                         </CardDescription>
                       </div>
@@ -674,15 +682,15 @@ const Programas = () => {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                       <div>
                         <h4 className="font-medium text-gray-700 mb-2">Arquivo:</h4>
-                        <p className="text-sm text-gray-600 mb-3">{programa.arquivo}</p>
+                        <p className="text-xs md:text-sm text-gray-600 mb-3">{programa.arquivo}</p>
                         
                         <h4 className="font-medium text-gray-700 mb-2">Partes do Programa:</h4>
                         <ul className="space-y-1">
                           {programa.partes.map((parte, index) => (
-                            <li key={index} className="text-sm text-gray-600 flex items-center">
+                            <li key={index} className="text-xs md:text-sm text-gray-600 flex items-center">
                               <div className="w-2 h-2 bg-jw-blue rounded-full mr-2"></div>
                               {parte}
                             </li>

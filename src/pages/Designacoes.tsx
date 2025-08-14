@@ -22,8 +22,8 @@ import type {
   DesignacaoGerada,
   EstatisticasDesignacao,
   ConflitosDesignacao,
-  ParteProgramaS38T
 } from "@/types/designacoes";
+import type { ParteProgramaS38T } from "@/utils/assignmentGenerator";
 import type { EstudanteRow } from "@/types/estudantes";
 import { supabase } from "@/integrations/supabase/client";
 import { TutorialButton } from "@/components/tutorial";
@@ -156,78 +156,30 @@ const Designacoes = () => {
       // Criar gerador de designações
       const gerador = new GeradorDesignacoes(dadosCompletos.estudantes.estudantes);
 
-      // Extrair partes do programa real e converter para o tipo correto
-      let partesPrograma: import('@/utils/assignmentGenerator').ParteProgramaS38T[] = [];
-      if (dados.programa.partes && Array.isArray(dados.programa.partes)) {
-        // Tentar converter as partes do programa para o tipo correto
-        try {
-          partesPrograma = dados.programa.partes
-            .filter((parte: any) => 
-              parte.tipo_parte === 'leitura_biblica' || 
-              parte.tipo_parte === 'discurso' || 
-              parte.tipo_parte === 'demonstracao'
-            )
-            .map((parte: any) => ({
-              numero_parte: parte.numero_parte,
-              titulo_parte: parte.titulo_parte,
-              tipo_parte: parte.tipo_parte,
-              tempo_minutos: parte.tempo_minutos,
-              cena: parte.cena,
-              requer_ajudante: parte.requer_ajudante
-            }));
-        } catch (error) {
-          console.error('Erro ao converter partes do programa:', error);
-          // Usar partes padrão se houver erro na conversão
-          partesPrograma = [
-            {
-              numero_parte: 3,
-              titulo_parte: "Leitura da Bíblia",
-              tipo_parte: 'leitura_biblica',
-              tempo_minutos: 4,
-              requer_ajudante: false
-            },
-            {
-              numero_parte: 4,
-              titulo_parte: "Primeira Conversa",
-              tipo_parte: 'demonstracao',
-              tempo_minutos: 3,
-              requer_ajudante: true
-            },
-            {
-              numero_parte: 5,
-              titulo_parte: "Revisita",
-              tipo_parte: 'demonstracao',
-              tempo_minutos: 4,
-              requer_ajudante: true
-            }
-          ];
+      // Extrair partes do programa (simulado para demonstração)
+      const partesPrograma: ParteProgramaS38T[] = [
+        {
+          numero_parte: 3,
+          titulo_parte: "Leitura da Bíblia",
+          tipo_parte: 'leitura_biblica',
+          tempo_minutos: 4,
+          requer_ajudante: false
+        },
+        {
+          numero_parte: 4,
+          titulo_parte: "Primeira Conversa",
+          tipo_parte: 'demonstracao',
+          tempo_minutos: 3,
+          requer_ajudante: true
+        },
+        {
+          numero_parte: 5,
+          titulo_parte: "Revisita",
+          tipo_parte: 'demonstracao',
+          tempo_minutos: 4,
+          requer_ajudante: true
         }
-      } else {
-        // Usar partes padrão se não houver partes válidas
-        partesPrograma = [
-          {
-            numero_parte: 3,
-            titulo_parte: "Leitura da Bíblia",
-            tipo_parte: 'leitura_biblica',
-            tempo_minutos: 4,
-            requer_ajudante: false
-          },
-          {
-            numero_parte: 4,
-            titulo_parte: "Primeira Conversa",
-            tipo_parte: 'demonstracao',
-            tempo_minutos: 3,
-            requer_ajudante: true
-          },
-          {
-            numero_parte: 5,
-            titulo_parte: "Revisita",
-            tipo_parte: 'demonstracao',
-            tempo_minutos: 4,
-            requer_ajudante: true
-          }
-        ];
-      }
+      ];
 
       // Gerar designações
       const opcoes = {
@@ -363,9 +315,9 @@ const Designacoes = () => {
       
       <main className="pt-16">
         {/* Header Section */}
-        <section className="bg-gradient-to-br from-jw-navy via-jw-blue to-jw-blue-dark py-12">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center gap-4 mb-6">
+        <section className="bg-gradient-to-br from-jw-navy via-jw-blue to-jw-blue-dark py-8 md:py-12">
+          <div className="container mx-auto px-2 md:px-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 mb-6">
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -375,36 +327,37 @@ const Designacoes = () => {
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Voltar ao Dashboard
               </Button>
+              <div className="ml-0 md:ml-auto">
+                <TutorialButton page="designacoes" variant="secondary" />
+              </div>
             </div>
-            
-            <div className="flex items-start justify-between">
-              <div className="text-white">
-                <h1 className="text-4xl font-bold mb-4">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 md:gap-6">
+              <div className="text-white flex-1">
+                <h1 className="text-3xl md:text-4xl font-bold mb-3 md:mb-4">
                   Gestão de <span className="text-jw-gold">Designações</span>
                 </h1>
-                <p className="text-xl opacity-90 max-w-2xl">
+                <p className="text-lg md:text-xl opacity-90 max-w-2xl">
                   Gere e gerencie designações automáticas com algoritmo inteligente que
                   respeita todas as regras da Escola do Ministério Teocrático.
                 </p>
               </div>
-              <TutorialButton page="designacoes" variant="secondary" />
             </div>
           </div>
         </section>
 
         {/* Quick Actions */}
-        <section className="py-8 bg-white border-b">
-          <div className="container mx-auto px-4">
-            <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+        <section className="py-6 md:py-8 bg-white border-b">
+          <div className="container mx-auto px-2 md:px-6">
+            <div className="flex flex-col md:flex-row gap-4 md:gap-6 justify-between items-start md:items-center">
               <div>
-                <h2 className="text-xl font-semibold text-jw-navy mb-2">Ações Rápidas</h2>
-                <p className="text-gray-600">Gerencie designações de forma eficiente</p>
+                <h2 className="text-lg md:text-xl font-semibold text-jw-navy mb-2">Ações Rápidas</h2>
+                <p className="text-gray-600 text-sm md:text-base">Gerencie designações de forma eficiente</p>
               </div>
-              
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 md:gap-3">
                 <Button
                   variant="hero"
                   size="sm"
+                  className="min-w-[180px] md:min-w-[200px]"
                   onClick={handleAbrirModalSelecao}
                   disabled={carregandoGeracao || carregandoSalvamento}
                   data-tutorial="generate-assignments"
@@ -424,13 +377,14 @@ const Designacoes = () => {
                 <Button
                   variant="outline"
                   size="sm"
+                  className="min-w-[160px] md:min-w-[180px]"
                   onClick={handleAbrirModalSelecao}
                   disabled={carregandoGeracao || carregandoSalvamento}
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Regenerar Semana
                 </Button>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="min-w-[140px] md:min-w-[160px]">
                   <Download className="w-4 h-4 mr-2" />
                   Exportar PDF
                 </Button>
@@ -442,8 +396,8 @@ const Designacoes = () => {
         {/* Generated Assignments from Programs */}
         {assignmentPrograms.length > 0 && (
           <section className="py-8 bg-green-50">
-            <div className="container mx-auto px-4">
-              <div className="flex items-center justify-between mb-6">
+            <div className="container mx-auto px-4 md:px-6">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4 md:gap-6">
                 <div>
                   <h2 className="text-2xl font-bold text-jw-navy">Designações Geradas Recentemente</h2>
                   <p className="text-gray-600">Designações criadas através do sistema de geração automática</p>
@@ -457,17 +411,17 @@ const Designacoes = () => {
                 {assignmentPrograms.map((program) => (
                   <Card key={program.id} className="border-l-4 border-l-green-500">
                     <CardHeader>
-                      <div className="flex items-start justify-between">
+                      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-2 md:gap-0">
                         <div>
-                          <CardTitle className="text-lg flex items-center gap-2">
+                          <CardTitle className="text-base md:text-lg flex items-center gap-2">
                             <Calendar className="w-5 h-5 text-green-600" />
                             {program.mes_apostila || `Semana de ${new Date(program.data_inicio_semana).toLocaleDateString('pt-BR')}`}
                           </CardTitle>
-                          <CardDescription>
+                          <CardDescription className="text-xs md:text-sm">
                             Geradas em {new Date(program.assignments_generated_at).toLocaleDateString('pt-BR')} às {new Date(program.assignments_generated_at).toLocaleTimeString('pt-BR')}
                           </CardDescription>
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 mt-2 md:mt-0">
                           <Badge className="bg-green-100 text-green-800">
                             {program.total_assignments_generated} designações
                           </Badge>
@@ -480,7 +434,7 @@ const Designacoes = () => {
                     <CardContent>
                       {program.designacoes && program.designacoes.length > 0 ? (
                         <div className="space-y-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
                             {program.designacoes.map((assignment, index) => (
                               <Card key={assignment.id} className="border border-gray-200">
                                 <CardHeader className="pb-2">
@@ -492,10 +446,10 @@ const Designacoes = () => {
                                       {assignment.confirmado ? 'Confirmado' : 'Pendente'}
                                     </Badge>
                                   </div>
-                                  <CardTitle className="text-sm">{assignment.tipo_parte}</CardTitle>
+                                  <CardTitle className="text-xs md:text-sm">{assignment.tipo_parte}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="pt-0">
-                                  <div className="space-y-2 text-sm">
+                                  <div className="space-y-2 text-xs md:text-sm">
                                     <div>
                                       <span className="font-medium text-gray-600">Estudante:</span>
                                       <p className="text-gray-900">
@@ -528,14 +482,12 @@ const Designacoes = () => {
                               </Card>
                             ))}
                           </div>
-                          <div className="flex gap-2 pt-4 border-t">
+                          <div className="flex flex-wrap gap-2 md:gap-3 pt-4 border-t">
                             <Button variant="outline" size="sm">
                               <Eye className="w-4 h-4 mr-2" />
                               Ver Detalhes
                             </Button>
                             <Button variant="outline" size="sm">
-                              <Send className="w-4 h-4 mr-2" />
-                              Enviar Notificações
                               <Send className="w-4 h-4 mr-2" />
                               Enviar Notificações
                             </Button>
@@ -561,12 +513,12 @@ const Designacoes = () => {
 
         {/* Designations Overview */}
         <section className="py-8">
-          <div className="container mx-auto px-4">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold text-jw-navy">Designações por Semana</h2>
-              <div className="flex gap-2">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-3 md:gap-6">
+              <h2 className="text-xl md:text-2xl font-bold text-jw-navy">Designações por Semana</h2>
+              <div className="flex gap-2 md:gap-3 w-full md:w-auto">
                 <Select>
-                  <SelectTrigger className="w-48">
+                  <SelectTrigger className="w-full md:w-48">
                     <SelectValue placeholder="Filtrar por status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -605,7 +557,7 @@ const Designacoes = () => {
 
         {/* Current Week Details - Now shows real data only */}
         <section className="py-8 bg-gray-50">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto px-4 md:px-6">
             <h2 className="text-2xl font-bold text-jw-navy mb-6">Designações da Semana Atual</h2>
 
             <Card>
@@ -629,7 +581,7 @@ const Designacoes = () => {
         <section className="py-8">
           <div className="container mx-auto px-4">
             <h2 className="text-2xl font-bold text-jw-navy mb-6">Estatísticas</h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               <Card>
                 <CardContent className="p-6 text-center">
                   <div className="text-3xl font-bold text-jw-blue mb-2">36</div>
