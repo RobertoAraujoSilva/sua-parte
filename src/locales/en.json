@@ -286,7 +286,33 @@
     "needHelp": "Didn't find your answer?",
     "supportTeam": "Our support team is ready to help with any specific questions about the Ministerial System.",
     "contact": "Contact Us",
-    "viewFeatures": "View Features"
+    "viewFeatures": "View Features",
+    "categoryTitles": {
+      "overview": "Overview",
+      "students": "Student Registration",
+      "programs": "Program Import",
+      "algorithm": "Assignment Algorithm",
+      "communication": "Communication & Security"
+    },
+    "categoryDescriptions": {
+      "overview": "General information about the Ministerial System",
+      "students": "Student management and organization",
+      "programs": "Weekly program import and processing",
+      "algorithm": "How intelligent assignment distribution works",
+      "communication": "Notifications, privacy and data security"
+    },
+    "questions": {
+      "whatIs": "What is the Ministerial System?",
+      "whoCanUse": "Who can use the system?",
+      "cost": "What is the cost of the system?",
+      "requirements": "What are the technical requirements?"
+    },
+    "answers": {
+      "whatIs": "The Ministerial System is a complete digital platform developed specifically for Jehovah's Witnesses congregations. It automates the entire process of Theocratic Ministry School assignments, from student registration to intelligent distribution of parts, strictly following S-38-T guidelines.",
+      "whoCanUse": "The system is intended for Theocratic Ministry School instructors, elders, ministerial servants, and congregation coordinators. Each user has access to specific functionalities based on their position and responsibilities in the congregation.",
+      "cost": "The Ministerial System is offered free of charge to all congregations. We maintain the project through voluntary donations from the community, following biblical principles of spontaneous contribution.",
+      "requirements": "The system works on any device with internet access and a modern browser (Chrome, Firefox, Safari, Edge). It is fully responsive, working perfectly on computers, tablets, and smartphones."
+    }
   },
   "benefits": {
     "title": "Transform Your Congregation's Organization",

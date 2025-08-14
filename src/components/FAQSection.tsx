@@ -59,41 +59,41 @@ interface FAQCategory {
 const faqData: FAQCategory[] = [
   {
     id: 'overview',
-    title: 'Visão Geral',
-    description: 'Informações gerais sobre o Sistema Ministerial',
+    title: 'faq.categoryTitles.overview',
+    description: 'faq.categoryDescriptions.overview',
     icon: HelpCircle,
     color: 'bg-blue-50 text-blue-700 border-blue-200',
     items: [
       {
         id: 'what-is-sistema',
-        question: 'O que é o Sistema Ministerial?',
-        answer: 'O Sistema Ministerial é uma plataforma digital completa desenvolvida especificamente para congregações das Testemunhas de Jeová. Ele automatiza todo o processo de designações da Escola do Ministério Teocrático, desde o cadastro de estudantes até a distribuição inteligente de partes, seguindo rigorosamente as diretrizes S-38-T.',
+        question: 'faq.questions.whatIs',
+        answer: 'faq.answers.whatIs',
         tags: ['plataforma', 'automação', 'S-38-T']
       },
       {
         id: 'who-can-use',
-        question: 'Quem pode usar o sistema?',
-        answer: 'O sistema é destinado a instrutores da Escola do Ministério Teocrático, anciãos, servos ministeriais e coordenadores de congregação. Cada usuário tem acesso a funcionalidades específicas baseadas em seu cargo e responsabilidades na congregação.',
+        question: 'faq.questions.whoCanUse',
+        answer: 'faq.answers.whoCanUse',
         tags: ['usuários', 'permissões', 'cargos']
       },
       {
         id: 'cost',
-        question: 'Qual é o custo do sistema?',
-        answer: 'O Sistema Ministerial é oferecido gratuitamente para todas as congregações. Mantemos o projeto através de doações voluntárias da comunidade, seguindo os princípios bíblicos de contribuição espontânea.',
+        question: 'faq.questions.cost',
+        answer: 'faq.answers.cost',
         tags: ['gratuito', 'doações', 'custo']
       },
       {
         id: 'requirements',
-        question: 'Quais são os requisitos técnicos?',
-        answer: 'O sistema funciona em qualquer dispositivo com acesso à internet e navegador moderno (Chrome, Firefox, Safari, Edge). É totalmente responsivo, funcionando perfeitamente em computadores, tablets e smartphones.',
+        question: 'faq.questions.requirements',
+        answer: 'faq.answers.requirements',
         tags: ['requisitos', 'navegador', 'dispositivos']
       }
     ]
   },
   {
     id: 'students',
-    title: 'Cadastro de Estudantes',
-    description: 'Gestão e organização de estudantes da escola',
+    title: 'faq.categoryTitles.students',
+    description: 'faq.categoryDescriptions.students',
     icon: Users,
     color: 'bg-green-50 text-green-700 border-green-200',
     items: [
@@ -125,8 +125,8 @@ const faqData: FAQCategory[] = [
   },
   {
     id: 'programs',
-    title: 'Leitura das Apostilas',
-    description: 'Importação e processamento de programas semanais',
+    title: 'faq.categoryTitles.programs',
+    description: 'faq.categoryDescriptions.programs',
     icon: BookOpen,
     color: 'bg-purple-50 text-purple-700 border-purple-200',
     items: [
@@ -158,8 +158,8 @@ const faqData: FAQCategory[] = [
   },
   {
     id: 'algorithm',
-    title: 'Algoritmo de Distribuição',
-    description: 'Como funciona a distribuição inteligente de designações',
+    title: 'faq.categoryTitles.algorithm',
+    description: 'faq.categoryDescriptions.algorithm',
     icon: Settings,
     color: 'bg-orange-50 text-orange-700 border-orange-200',
     items: [
@@ -191,8 +191,8 @@ const faqData: FAQCategory[] = [
   },
   {
     id: 'communication',
-    title: 'Comunicação e Segurança',
-    description: 'Notificações, privacidade e segurança dos dados',
+    title: 'faq.categoryTitles.communication',
+    description: 'faq.categoryDescriptions.communication',
     icon: MessageSquare,
     color: 'bg-red-50 text-red-700 border-red-200',
     items: [
@@ -310,7 +310,7 @@ const FAQSection: React.FC = () => {
                     >
                       <Icon className="w-5 h-5 flex-shrink-0" />
                       <div>
-                        <div className="font-medium">{category.title}</div>
+                        <div className="font-medium">{t(category.title)}</div>
                         <div className={cn(
                           "text-xs",
                           isSelected ? "text-white/80" : "text-muted-foreground"
@@ -336,11 +336,11 @@ const FAQSection: React.FC = () => {
                       <currentCategory.icon className="w-6 h-6" />
                     </div>
                     <h3 className="text-2xl font-bold text-foreground">
-                      {currentCategory.title}
+                      {t(currentCategory.title)}
                     </h3>
                   </div>
                   <p className="text-muted-foreground">
-                    {currentCategory.description}
+                    {t(currentCategory.description)}
                   </p>
                 </div>
 
@@ -356,7 +356,7 @@ const FAQSection: React.FC = () => {
                             <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
                               <div className="flex items-center justify-between">
                                 <CardTitle className="text-lg font-semibold text-foreground text-left">
-                                  {item.question}
+                                  {t(item.question)}
                                 </CardTitle>
                                 {isOpen ? (
                                   <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" />
@@ -369,7 +369,7 @@ const FAQSection: React.FC = () => {
                           <CollapsibleContent>
                             <CardContent className="pt-0">
                               <p className="text-muted-foreground leading-relaxed mb-4">
-                                {item.answer}
+                                {t(item.answer)}
                               </p>
                               {item.tags && (
                                 <div className="flex flex-wrap gap-2">
