@@ -180,30 +180,24 @@ const DesignacoesOptimized = () => {
       // Create assignment generator
       const gerador = new GeradorDesignacoes(dadosCompletos.estudantes.estudantes);
 
-      // Extract program parts (simulated for demonstration)
-      const partesPrograma: ParteProgramaS38T[] = [
-        {
-          numero_parte: 3,
-          titulo_parte: "Leitura da Bíblia",
-          tipo_parte: 'leitura_biblica',
-          tempo_minutos: 4,
-          requer_ajudante: false
-        },
-        {
-          numero_parte: 4,
-          titulo_parte: "Primeira Conversa",
-          tipo_parte: 'demonstracao',
-          tempo_minutos: 3,
-          requer_ajudante: true
-        },
-        {
-          numero_parte: 5,
-          titulo_parte: "Revisita",
-          tipo_parte: 'demonstracao',
-          tempo_minutos: 4,
-          requer_ajudante: true
-        }
-      ];
+      // Load actual program parts
+      const programaResult = await carregarProgramaPorData(dados.dataInicioSemana);
+      if (
+        !programaResult.sucesso ||
+        !programaResult.programa?.partes ||
+        !Array.isArray(programaResult.programa.partes)
+      ) {
+        throw new Error("Programa não encontrado ou sem partes definidas");
+      }
+
+      const partesPrograma: ParteProgramaS38T[] = programaResult.programa.partes.map((p: any) => ({
+        numero_parte: p.numero_parte,
+        titulo_parte: p.titulo_parte,
+        tipo_parte: p.tipo_parte,
+        tempo_minutos: p.tempo_minutos,
+        cena: p.cena,
+        requer_ajudante: p.requer_ajudante,
+      }));
 
       // Generate assignments
       const opcoes = {

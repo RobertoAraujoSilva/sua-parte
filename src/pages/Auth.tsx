@@ -18,6 +18,7 @@ import { handleAuthError, validateLoginForm } from '@/lib/supabase';
 type UserRole = Database['public']['Enums']['user_role'];
 
 const Auth = () => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('signin');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -321,30 +322,30 @@ const Auth = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-jw-navy via-jw-navy to-jw-blue flex items-center justify-center p-4">
       <Card className="w-full max-w-lg">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-12 h-12 bg-jw-blue rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">SM</span>
-            </div>
-          </div>
-          <CardTitle className="text-2xl text-jw-navy">
-            Sistema Ministerial
-          </CardTitle>
-          <CardDescription>
-            Plataforma para gestão de designações da Escola do Ministério Teocrático
-          </CardDescription>
-        </CardHeader>
+      <CardHeader className="text-center">
+      <div className="flex items-center justify-center mb-4">
+      <div className="w-12 h-12 bg-jw-blue rounded-lg flex items-center justify-center">
+      <span className="text-white font-bold text-lg">SM</span>
+      </div>
+      </div>
+      <CardTitle className="text-2xl text-jw-navy">
+      {t('common.appName')}
+      </CardTitle>
+      <CardDescription>
+      {t('terms.theocraticMinistrySchool')}
+      </CardDescription>
+      </CardHeader>
 
         <CardContent>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="signin" className="flex items-center gap-2">
                 <LogIn className="w-4 h-4" />
-                Entrar
+                {t('auth.login')}
               </TabsTrigger>
               <TabsTrigger value="signup" className="flex items-center gap-2">
                 <UserPlus className="w-4 h-4" />
-                Criar Conta
+                {t('auth.signUp')}
               </TabsTrigger>
             </TabsList>
 
@@ -352,19 +353,19 @@ const Auth = () => {
             <TabsContent value="signin" className="space-y-4">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email">E-mail</Label>
+                  <Label htmlFor="signin-email">{t('auth.email')}</Label>
                   <Input
                     id="signin-email"
                     type="email"
                     value={signInEmail}
                     onChange={(e) => setSignInEmail(e.target.value)}
-                    placeholder="seu@email.com"
+                    placeholder="your@email.com"
                     required
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password">Senha</Label>
+                  <Label htmlFor="signin-password">{t('auth.password')}</Label>
                   <div className="relative">
                     <Input
                       id="signin-password"
@@ -397,7 +398,7 @@ const Auth = () => {
                   variant="hero"
                   disabled={loading}
                 >
-                  {loading ? 'Entrando...' : 'Entrar'}
+                  {loading ? t('auth.loggingIn') : t('auth.signIn')}
                 </Button>
               </form>
 
@@ -417,7 +418,7 @@ const Auth = () => {
               <form onSubmit={handleSignUp} className="space-y-4">
                 {/* Role Selection */}
                 <div className="space-y-3">
-                  <Label>Tipo de Conta *</Label>
+                  <Label>{t('auth.accountType')} *</Label>
                   <div className="grid grid-cols-1 gap-3">
                     {(['instrutor', 'estudante'] as UserRole[]).map((roleOption) => {
                       const roleInfo = getRoleInfo(roleOption);
@@ -438,12 +439,12 @@ const Auth = () => {
                             </div>
                             <div className="flex-1">
                               <div className="flex items-center gap-2">
-                                <h3 className="font-medium">{roleInfo.title}</h3>
+                                <h3 className="font-medium">{t(`auth.roles.${roleOption}.title`)}</h3>
                                 {role === roleOption && (
-                                  <Badge variant="default" className="text-xs">Selecionado</Badge>
+                                  <Badge variant="default" className="text-xs">{t('auth.selected')}</Badge>
                                 )}
                               </div>
-                              <p className="text-sm text-gray-600 mt-1">{roleInfo.description}</p>
+                              <p className="text-sm text-gray-600 mt-1">{t(`auth.roles.${roleOption}.description`)}</p>
                             </div>
                           </div>
                         </div>
@@ -455,19 +456,19 @@ const Auth = () => {
                 {/* Personal Information */}
                 <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-nome">Nome Completo *</Label>
+                    <Label htmlFor="signup-nome">{t('auth.fullName')} *</Label>
                     <Input
                       id="signup-nome"
                       type="text"
                       value={nomeCompleto}
                       onChange={(e) => setNomeCompleto(e.target.value)}
-                      placeholder="Seu nome completo"
+                      placeholder={t('auth.fullNamePlaceholder')}
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-birth-date">Data de Nascimento *</Label>
+                    <Label htmlFor="signup-birth-date">{t('auth.birthDate')} *</Label>
                     <Input
                       id="signup-birth-date"
                       type="date"
@@ -482,8 +483,8 @@ const Auth = () => {
                       return (
                         <p className={`text-sm ${ageValidation.isValid ? 'text-green-600' : 'text-red-600'}`}>
                           {ageValidation.isValid
-                            ? `Idade: ${ageValidation.age} anos`
-                            : ageValidation.message
+                            ? `${t('auth.age')}: ${ageValidation.age} ${t('auth.years')}`
+                            : t(ageValidation.message)
                           }
                         </p>
                       );
@@ -491,27 +492,27 @@ const Auth = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-congregacao">Congregação *</Label>
+                    <Label htmlFor="signup-congregacao">{t('terms.congregation')} *</Label>
                     <Input
                       id="signup-congregacao"
                       type="text"
                       value={congregacao}
                       onChange={(e) => setCongregacao(e.target.value)}
-                      placeholder="Nome da congregação"
+                      placeholder={t('auth.congregationPlaceholder')}
                       required
                     />
                   </div>
 
                   {role === 'instrutor' && (
                     <div className="space-y-2">
-                      <Label htmlFor="signup-cargo">Cargo (Opcional)</Label>
+                      <Label htmlFor="signup-cargo">{t('auth.roleOptional')}</Label>
                       <Select value={cargo} onValueChange={setCargo}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione seu cargo" />
+                          <SelectValue placeholder={t('auth.selectRole')} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="superintendente_escola">Superintendente da Escola</SelectItem>
-                          <SelectItem value="conselheiro_assistente">Conselheiro Assistente</SelectItem>
+                          <SelectItem value="superintendente_escola">{t('auth.roles.superintendent')}</SelectItem>
+                          <SelectItem value="conselheiro_assistente">{t('auth.roles.assistantCounselor')}</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -519,15 +520,15 @@ const Auth = () => {
 
                   {role === 'estudante' && (
                     <div className="space-y-2">
-                      <Label htmlFor="signup-cargo-estudante">Cargo na Congregação *</Label>
+                      <Label htmlFor="signup-cargo-estudante">{t('auth.congregationRole')} *</Label>
                       <Select value={cargo} onValueChange={setCargo}>
                         <SelectTrigger>
-                          <SelectValue placeholder="Selecione seu cargo" />
+                          <SelectValue placeholder={t('auth.selectRole')} />
                         </SelectTrigger>
                         <SelectContent>
                           {Object.entries(CARGO_LABELS).map(([value, label]) => (
                             <SelectItem key={value} value={value}>
-                              {label}
+                              {t(`terms.${value}`)}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -539,19 +540,19 @@ const Auth = () => {
                 {/* Account Information */}
                 <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">E-mail *</Label>
+                    <Label htmlFor="signup-email">{t('auth.email')} *</Label>
                     <Input
                       id="signup-email"
                       type="email"
                       value={signUpEmail}
                       onChange={(e) => setSignUpEmail(e.target.value)}
-                      placeholder="seu@email.com"
+                      placeholder="your@email.com"
                       required
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="signup-password">Senha *</Label>
+                    <Label htmlFor="signup-password">{t('auth.password')} *</Label>
                     <div className="relative">
                       <Input
                         id="signup-password"
@@ -576,11 +577,11 @@ const Auth = () => {
                         )}
                       </Button>
                     </div>
-                    <p className="text-xs text-gray-500">Mínimo de 6 caracteres</p>
+                    <p className="text-xs text-gray-500">{t('auth.passwordMinLength')}</p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirmar Senha *</Label>
+                    <Label htmlFor="confirm-password">{t('auth.confirmPassword')} *</Label>
                     <Input
                       id="confirm-password"
                       type={showPassword ? "text" : "password"}
@@ -599,7 +600,7 @@ const Auth = () => {
                   variant="hero"
                   disabled={loading}
                 >
-                  {loading ? 'Criando conta...' : 'Criar Conta'}
+                  {loading ? t('auth.creatingAccount') : t('auth.createAccount')}
                 </Button>
               </form>
             </TabsContent>

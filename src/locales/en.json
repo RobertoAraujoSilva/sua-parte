@@ -1,0 +1,92 @@
+{
+  "common": {
+    "appName": "Your Part",
+    "welcome": "Welcome",
+    "dashboard": "Dashboard",
+    "students": "Students",
+    "programs": "Programs",
+    "assignments": "Assignments",
+    "logout": "Logout",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "refresh": "Refresh",
+    "export": "Export",
+    "generate": "Generate",
+    "regenerate": "Regenerate",
+    "preview": "Preview",
+    "sendNotifications": "Send Notifications"
+  },
+  "auth": {
+    "login": "Login",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign In",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account? Sign up"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "totalStudents": "Total Students",
+    "upcomingPrograms": "Upcoming Programs",
+    "pendingAssignments": "Pending Assignments",
+    "recentActivity": "Recent Activity"
+  },
+  "students": {
+    "management": "Student Management",
+    "addStudent": "Add Student",
+    "name": "Name",
+    "gender": "Gender",
+    "role": "Role",
+    "active": "Active",
+    "lastAssignment": "Last Assignment"
+  },
+  "programs": {
+    "management": "Program Management",
+    "addProgram": "Add Program",
+    "weekStarting": "Week Starting",
+    "workbookMonth": "Workbook Month",
+    "status": "Status",
+    "parts": "Parts"
+  },
+  "assignments": {
+    "management": "Assignment Management",
+    "generateAutomatic": "Generate Automatic Assignments",
+    "regenerateWeek": "Regenerate Week",
+    "exportPDF": "Export PDF",
+    "viewDetails": "View Details",
+    "sendNotifications": "Send Notifications",
+    "totalAssignments": "Total Assignments",
+    "pending": "Pending",
+    "confirmed": "Confirmed",
+    "student": "Student",
+    "assistant": "Assistant",
+    "scenario": "Scenario",
+    "timeMinutes": "Time (minutes)"
+  },
+  "terms": {
+    "theocraticMinistrySchool": "Theocratic Ministry School",
+    "jehovahsWitnesses": "Jehovah's Witnesses",
+    "congregation": "Congregation",
+    "elder": "Elder",
+    "ministerialServant": "Ministerial Servant",
+    "assignments": "Assignments",
+    "bibleReading": "Bible Reading",
+    "demonstration": "Demonstration",
+    "talk": "Talk",
+    "assistant": "Assistant"
+  },
+  "errors": {
+    "loadingFailed": "Failed to load data. Please try again.",
+    "noData": "No data available.",
+    "validationError": "Invalid input. Please check the fields."
+  },
+  "success": {
+    "saved": "Saved successfully!",
+    "generated": "Generated successfully!",
+    "updated": "Updated successfully!"
+  }
+}
