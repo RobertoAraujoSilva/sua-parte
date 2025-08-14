@@ -367,22 +367,37 @@
       "included": "Incluído"
     }
   },
+  "faq": {
+    "title": "Perguntas Frequentes",
+    "subtitle": "Encontre respostas para as dúvidas mais comuns sobre o Sistema Ministerial. Tudo que você precisa saber para começar a usar nossa plataforma.",
+    "searchPlaceholder": "Buscar nas perguntas frequentes...",
+    "categories": "Categorias",
+    "question": "pergunta",
+    "questions": "perguntas",
+    "noResults": "Nenhum resultado encontrado",
+    "tryOtherTerms": "Tente buscar com outros termos ou navegue pelas categorias.",
+    "needHelp": "Não encontrou sua resposta?",
+    "supportTeam": "Nossa equipe de suporte está pronta para ajudar com qualquer dúvida específica sobre o Sistema Ministerial.",
+    "contact": "Entrar em Contato",
+    "viewFeatures": "Ver Funcionalidades"
+  },
   "footer": {
     "appName": "Sistema Ministerial",
     "description": "Automatização inteligente de designações ministeriais para congregações das Testemunhas de Jeová, com foco em eficiência e conformidade.",
     "dedication": "Desenvolvido com dedicação para servir às necessidades congregacionais e apoiar o trabalho ministerial.",
     "features": "Funcionalidades",
+    "studentManagement": "Gestão de Estudantes",
     "programImport": "Importação de Programas",
     "automaticAssignments": "Designações Automáticas",
     "notifications": "Notificações",
+    "studentPortal": "Portal do Estudante",
     "reports": "Relatórios",
     "support": "Suporte",
     "usageTutorial": "Tutorial de Uso",
-    "updates": "Atualizações",
-    "community": "Comunidade",
-    "resources": "Recursos",
     "documentation": "Documentação",
     "technicalContact": "Contato Técnico",
+    "updates": "Atualizações",
+    "community": "Comunidade",
     "developedFor": "Desenvolvido para servir congregações das Testemunhas de Jeová."
   }
 }
