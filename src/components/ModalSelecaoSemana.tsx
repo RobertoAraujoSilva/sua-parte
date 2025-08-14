@@ -96,7 +96,7 @@ export const ModalSelecaoSemana: React.FC<ModalSelecaoSemanaProps> = ({
         .select('*')
         .gte('data_inicio_semana', dataInicio.toISOString().split('T')[0])
         .lte('data_inicio_semana', dataFim.toISOString().split('T')[0])
-        .eq('status', 'ativo')
+        .in('assignment_status', ['pending', 'approved'])
         .order('data_inicio_semana', { ascending: true });
 
       if (programasError) {

@@ -4,19 +4,19 @@ import { Clock, CheckCircle, Users2, Heart } from "lucide-react";
 
 const Benefits = () => {
   return (
-    <section className="py-20 bg-gradient-to-br from-jw-blue/5 to-jw-navy/5">
-      <div className="container mx-auto px-4">
+    <section className="py-20 bg-gradient-to-br from-jw-blue/5 to-jw-navy/5 overflow-x-hidden">
+      <div className="responsive-container">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          <h2 className="text-balance text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-foreground mb-4">
             Transforme a Organização da Sua Congregação
           </h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-balance text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
             Reduza drasticamente o tempo gasto em tarefas administrativas e 
             foque no que realmente importa: o desenvolvimento espiritual.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <div className="space-y-8">
             <div className="flex items-start space-x-4">
               <div className="p-3 bg-jw-blue/10 rounded-lg shrink-0">

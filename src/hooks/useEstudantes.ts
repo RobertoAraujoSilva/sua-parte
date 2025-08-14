@@ -1,9 +1,7 @@
-import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import {
-  EstudanteRow,
   EstudanteInsert,
   EstudanteUpdate,
   EstudanteWithParent,
@@ -11,309 +9,118 @@ import {
   EstudanteFormData,
   validateEstudante,
 } from "@/types/estudantes";
+import { useAuth } from "@/contexts/AuthContext";
 
-export const useEstudantes = () => {
+function withTimeout<T>(p: Promise<T>, ms = 10000) {
+  return Promise.race([p, new Promise<never>((_, r) => setTimeout(() => r(new Error("timeout")), ms))]);
+}
+
+export function useEstudantes(scope: string) {
   const { user } = useAuth();
-  const [estudantes, setEstudantes] = useState<EstudanteWithParent[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const queryKey = ["estudantes", scope];
 
-  // Fetch all students for the current user
-  const fetchEstudantes = async () => {
-    if (!user) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const { data, error } = await supabase
-        .from("estudantes")
-        .select(`
-          *,
-          pai_mae:id_pai_mae(*)
-        `)
-        .eq("user_id", user.id)
-        .order("nome");
-
+  const { data: estudantes, isLoading, error, refetch } = useQuery({
+    queryKey: queryKey,
+    queryFn: async () => {
+      const { data, error } = await withTimeout(
+        supabase.from("estudantes").select("*").limit(200)
+      );
       if (error) throw error;
+      return data || [];
+    },
+    retry: 2,
+    staleTime: 5 * 60_000,
+  });
 
-      // Process data to include children relationships
-      const estudantesWithRelations = data.map((estudante) => ({
-        ...estudante,
-        pai_mae: estudante.pai_mae,
-        filhos: data.filter((e) => e.id_pai_mae === estudante.id),
-      }));
+  const createEstudanteMutation = useMutation({
+    mutationFn: async (data: EstudanteFormData) => {
+      if (!user) throw new Error("User not authenticated");
+      const errors = validateEstudante(data);
+      if (Object.keys(errors).length > 0) throw new Error(Object.values(errors)[0]);
 
-      setEstudantes(estudantesWithRelations);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Erro ao carregar estudantes";
-      setError(errorMessage);
-      toast({
-        title: "Erro",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Create a new student
-  const createEstudante = async (data: EstudanteFormData): Promise<boolean> => {
-    if (!user) return false;
-
-    // Validate data
-    const errors = validateEstudante(data);
-    if (Object.keys(errors).length > 0) {
-      const firstError = Object.values(errors)[0];
-      toast({
-        title: "Erro de validação",
-        description: firstError,
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    try {
       const insertData: EstudanteInsert = {
         ...data,
         user_id: user.id,
-        data_batismo: data.data_batismo || null,
-        email: data.email || null,
-        telefone: data.telefone || null,
-        id_pai_mae: data.id_pai_mae || null,
-        observacoes: data.observacoes || null,
+        congregacao: user.user_metadata?.congregacao || 'Default',
       };
-
-      const { error } = await supabase
-        .from("estudantes")
-        .insert(insertData);
-
+      const { error } = await supabase.from("estudantes").insert(insertData);
       if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: "Sucesso", description: "Estudante cadastrado." });
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (err) => {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    },
+  });
 
-      toast({
-        title: "Sucesso",
-        description: "Estudante cadastrado com sucesso!",
-      });
-
-      await fetchEstudantes();
-      return true;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Erro ao cadastrar estudante";
-      toast({
-        title: "Erro",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      return false;
-    }
-  };
-
-  // Update an existing student
-  const updateEstudante = async (id: string, data: Partial<EstudanteFormData>): Promise<boolean> => {
-    if (!user) return false;
-
-    try {
-      const updateData: EstudanteUpdate = {
-        ...data,
-        updated_at: new Date().toISOString(),
-      };
-
-      const { error } = await supabase
-        .from("estudantes")
-        .update(updateData)
-        .eq("id", id)
-        .eq("user_id", user.id);
-
+  const updateEstudanteMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string, data: Partial<EstudanteFormData> }) => {
+      if (!user) throw new Error("User not authenticated");
+      const updateData: EstudanteUpdate = { ...data, updated_at: new Date().toISOString() };
+      const { error } = await supabase.from("estudantes").update(updateData).eq("id", id);
       if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: "Sucesso", description: "Estudante atualizado." });
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (err) => {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    },
+  });
 
-      toast({
-        title: "Sucesso",
-        description: "Estudante atualizado com sucesso!",
-      });
-
-      await fetchEstudantes();
-      return true;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Erro ao atualizar estudante";
-      toast({
-        title: "Erro",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      return false;
-    }
-  };
-
-  // Delete a student
-  const deleteEstudante = async (id: string): Promise<boolean> => {
-    if (!user) return false;
-
-    try {
-      // Check if student has children
-      const hasChildren = estudantes.some(e => e.id_pai_mae === id);
-      if (hasChildren) {
-        toast({
-          title: "Erro",
-          description: "Não é possível excluir um estudante que é responsável por menores",
-          variant: "destructive",
-        });
-        return false;
-      }
-
-      const { error } = await supabase
-        .from("estudantes")
-        .delete()
-        .eq("id", id)
-        .eq("user_id", user.id);
-
+  const deleteEstudanteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!user) throw new Error("User not authenticated");
+      const { error } = await supabase.from("estudantes").delete().eq("id", id);
       if (error) throw error;
+    },
+    onSuccess: () => {
+      toast({ title: "Sucesso", description: "Estudante removido." });
+      queryClient.invalidateQueries({ queryKey });
+    },
+    onError: (err) => {
+      toast({ title: "Erro", description: err.message, variant: "destructive" });
+    },
+  });
 
-      toast({
-        title: "Sucesso",
-        description: "Estudante removido com sucesso!",
-      });
-
-      await fetchEstudantes();
-      return true;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Erro ao remover estudante";
-      toast({
-        title: "Erro",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      return false;
-    }
-  };
-
-  // Filter students based on criteria
   const filterEstudantes = (filters: EstudanteFilters): EstudanteWithParent[] => {
+    if (!estudantes) return [];
     return estudantes.filter((estudante) => {
-      // Search term filter
-      if (filters.searchTerm) {
-        const searchLower = filters.searchTerm.toLowerCase();
-        if (!estudante.nome.toLowerCase().includes(searchLower)) {
-          return false;
-        }
-      }
-
-      // Cargo filter
-      if (filters.cargo && filters.cargo !== "todos") {
-        if (estudante.cargo !== filters.cargo) {
-          return false;
-        }
-      }
-
-      // Genero filter
-      if (filters.genero && filters.genero !== "todos") {
-        if (estudante.genero !== filters.genero) {
-          return false;
-        }
-      }
-
-      // Ativo filter
-      if (filters.ativo !== undefined && filters.ativo !== "todos") {
-        if (estudante.ativo !== filters.ativo) {
-          return false;
-        }
-      }
-
-      // Age range filter
-      if (filters.idade_min !== undefined && estudante.idade && estudante.idade < filters.idade_min) {
-        return false;
-      }
-      if (filters.idade_max !== undefined && estudante.idade && estudante.idade > filters.idade_max) {
-        return false;
-      }
-
+      if (filters.searchTerm && !estudante.nome.toLowerCase().includes(filters.searchTerm.toLowerCase())) return false;
+      if (filters.cargo && filters.cargo !== "todos" && estudante.cargo !== filters.cargo) return false;
+      if (filters.genero && filters.genero !== "todos" && estudante.genero !== filters.genero) return false;
+      if (filters.ativo !== undefined && filters.ativo !== "todos" && estudante.ativo !== filters.ativo) return false;
       return true;
     });
   };
 
-  // Get students that can be parents (adults)
-  const getPotentialParents = (): EstudanteWithParent[] => {
-    return estudantes.filter(e => e.idade && e.idade >= 18 && e.ativo);
-  };
-
-  // Get statistics
   const getStatistics = () => {
+    if (!estudantes) return { total: 0, ativos: 0, inativos: 0, menores: 0, homens: 0, mulheres: 0, cargoStats: {} };
     const total = estudantes.length;
     const ativos = estudantes.filter(e => e.ativo).length;
     const menores = estudantes.filter(e => e.idade && e.idade < 18).length;
     const homens = estudantes.filter(e => e.genero === "masculino").length;
     const mulheres = estudantes.filter(e => e.genero === "feminino").length;
-
     const cargoStats = estudantes.reduce((acc, e) => {
       acc[e.cargo] = (acc[e.cargo] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
-
-    return {
-      total,
-      ativos,
-      inativos: total - ativos,
-      menores,
-      homens,
-      mulheres,
-      cargoStats,
-    };
-  };
-
-  // Load data on mount and when user changes
-  useEffect(() => {
-    if (user) {
-      fetchEstudantes();
-    }
-  }, [user]);
-
-  // Bulk import students
-  const bulkImportEstudantes = async (estudantesData: EstudanteInsert[]): Promise<boolean> => {
-    if (!user) {
-      toast({
-        title: "Erro",
-        description: "Usuário não autenticado",
-        variant: "destructive",
-      });
-      return false;
-    }
-
-    try {
-      const { error } = await supabase
-        .from("estudantes")
-        .insert(estudantesData);
-
-      if (error) throw error;
-
-      toast({
-        title: "Sucesso",
-        description: `${estudantesData.length} estudantes importados com sucesso!`,
-      });
-
-      await fetchEstudantes();
-      return true;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Erro na importação em massa";
-      toast({
-        title: "Erro",
-        description: errorMessage,
-        variant: "destructive",
-      });
-      return false;
-    }
+    return { total, ativos, inativos: total - ativos, menores, homens, mulheres, cargoStats };
   };
 
   return {
     estudantes,
-    loading,
+    isLoading,
     error,
-    fetchEstudantes,
-    createEstudante,
-    updateEstudante,
-    deleteEstudante,
+    refetch,
+    createEstudante: createEstudanteMutation.mutateAsync,
+    updateEstudante: updateEstudanteMutation.mutateAsync,
+    deleteEstudante: deleteEstudanteMutation.mutateAsync,
     filterEstudantes,
-    getPotentialParents,
     getStatistics,
-    bulkImportEstudantes,
   };
-};
+}
