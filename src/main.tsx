@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import './styles/responsive.css'
 import { ErrorBoundary } from "react-error-boundary";
 import FallbackScreen from "@/components/FallbackScreen";
 import SafeAreaLayout from "@/layouts/SafeAreaLayout";
