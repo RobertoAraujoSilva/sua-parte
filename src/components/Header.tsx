@@ -150,13 +150,18 @@ const Header = () => {
               variant="ghost"
               size="sm"
               className="text-white hover:text-jw-gold p-2 sm:px-3"
-              onClick={toggleLanguage}
+              onClick={() => {
+                console.log('🌐 Language toggle clicked. Current:', language);
+                toggleLanguage();
+                console.log('🌐 Language after toggle:', language === 'pt' ? 'en' : 'pt');
+              }}
               title={language === 'pt' ? t('language.switchToEnglish') : t('language.switchToPortuguese')}
             >
               <Languages className="w-4 h-4 sm:mr-2" />
               <span className="hidden md:inline">
                 {language === 'pt' ? t('language.english') : t('language.portuguese')}
               </span>
+              <span className="ml-1 text-xs opacity-75">({language})</span>
             </Button>
             {user ? (
               <>
