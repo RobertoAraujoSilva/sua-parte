@@ -1,0 +1,14 @@
+
+    SMSistema MinisterialDashboardEstudantesProgramasDesignaçõesRelatóriosEnglish(pt)Sair🚨 LogoutMauro Frank Lima de LimaInstrutorBem-vindo, Mauro Frank Lima de Lima!Como funcionaUm fluxo simples em três passos para colocar tudo em funcionamento.Etapas iniciaisSiga este passo a passo para começarPasso 1Cadastre os EstudantesAdicione estudantes com dados básicos e relacionamentos.5-10 minPasso 2Importe um ProgramaFaça upload do PDF da apostila ou cole o conteúdo.2-3 minPasso 3Gere as DesignaçõesCrie automaticamente as designações a partir do programa.1 minBenefícios do OnboardingCompletar essas etapas traz as seguintes vantagens:✅ Configuração guiada e mais rápida✅ Menos erros nas primeiras designações✅ Experiência consistente para a congregaçãoConformidade desde o inícioO sistema já aplica as regras da EMT durante a configuração.Restrições de gêneroAs designações respeitam as diretrizes de participação por gênero.Qualificações congregacionaisRegras e qualificações são validadas automaticamente.Relacionamentos familiaresEvita combinações indevidas em partes conjuntas.Iniciar ConfiguraçãoPular e ir para o DashboardConfiguração completa em menos de 10 minutos.SMSistema MinisterialAutomação inteligente de designações ministeriais para congregações das Testemunhas de Jeová, focada em eficiência e conformidade.Desenvolvido com dedicação para servir às necessidades congregacionais e apoiar o trabalho ministerial.FuncionalidadesGestão de EstudantesImportação de ProgramasDesignações AutomáticasNotificaçõesPortal do EstudanteRelatóriosSuporteTutorial de UsoDocumentaçãoContato TécnicoAtualizaçõesComunidade© 2024 Sistema Ministerial. Desenvolvido para servir às congregações das Testemunhas de Jeová.Debug🌐 Language DebugHook Language: ptContext Language: ptTest PT: Bem-vindoTest EN: InícioToggle Language
+    
+      // Recarrega se um chunk de lazy split falhar (evita “tela branca”)
+      window.addEventListener('error', function (e) {
+        if (/ChunkLoadError|Loading chunk \d+ failed/.test(e.message || '')) {
+          if (caches && caches.keys) { caches.keys().then(keys => keys.forEach(k => caches.delete(k))); }
+          location.reload();
+        }
+      });
+    
+    
+  
+
