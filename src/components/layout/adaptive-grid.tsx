@@ -1,7 +1,7 @@
 import React from 'react';
 import { useResponsive, useGridColumns } from '@/hooks/use-responsive';
 import { useDensity as useContextDensity } from '@/contexts/DensityContext';
-import { useDensity } from '@/components/ui/density-provider';
+import { useDensity } from '@/contexts/DensityContext';
 
 interface AdaptiveGridProps {
   children: React.ReactNode;

@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useResponsive } from '@/hooks/use-responsive';
 import { useDensity as useContextDensity } from '@/contexts/DensityContext';
-import { useDensity, useResponsiveText } from '@/components/ui/density-provider';
+import { useDensity } from '@/contexts/DensityContext';
 import { ResponsiveContainer } from './responsive-container';
 import { Menu, User } from 'lucide-react';
 
@@ -33,7 +33,7 @@ export function ResponsiveHeader({
   }
   
   const { headerHeight, buttonSize, spacing } = densityConfig;
-  const textClasses = useResponsiveText();
+  // Using standard text classes since useResponsiveText was removed
 
   const spacingClass = spacing === 'tight' ? 'gap-2' : spacing === 'normal' ? 'gap-4' : 'gap-6';
 
@@ -63,8 +63,7 @@ export function ResponsiveHeader({
             
             <div className="flex items-center gap-2">
               <h1 className={`
-                font-bold text-jw-navy
-                ${textClasses.heading}
+                font-bold text-jw-navy text-lg font-semibold
               `}>
                 {isMobile ? 'SM' : title}
               </h1>
@@ -101,10 +100,10 @@ export function ResponsiveHeader({
           <div className="flex items-center gap-2">
             {user && !isMobile && (
               <div className="text-right mr-2">
-                <div className={textClasses.caption}>
+                <div className="text-sm text-muted-foreground">
                   {user.name}
                 </div>
-                <div className={`${textClasses.caption} text-xs`}>
+                <div className="text-xs text-muted-foreground">
                   {user.role}
                 </div>
               </div>
@@ -149,7 +148,7 @@ export function PageHeader({
   }
   
   const { spacing } = densityConfig;
-  const textClasses = useResponsiveText();
+  // Using standard text classes since useResponsiveText was removed
 
   return (
     <div className={`
@@ -177,8 +176,7 @@ export function PageHeader({
             </h1>
             {subtitle && (
               <p className={`
-                opacity-90 max-w-3xl
-                ${textClasses.body}
+                opacity-90 max-w-3xl text-base
               `}>
                 {subtitle}
               </p>
