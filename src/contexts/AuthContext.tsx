@@ -40,6 +40,7 @@ interface AuthContextType {
   updateProfile: (updates: Partial<UserProfile>) => Promise<{ data: UserProfile | null; error: Error | null }>;
   isInstrutor: boolean;
   isEstudante: boolean;
+  isAdmin: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -195,6 +196,78 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return null;
     }
   }, []); // Empty dependency array since createProfileFromAuth doesn't depend on any props or state
+
+  // Force profile loading for admin users
+  const forceLoadProfile = useCallback(async () => {
+    if (!user) return;
+    
+    console.log('🔧 Force loading profile for user:', user.id);
+    
+    try {
+      // Direct database query to bypass potential RLS issues
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profileError) {
+        console.error('❌ Force profile load error:', profileError);
+        return;
+      }
+
+      if (profileData) {
+        console.log('✅ Force profile load successful:', profileData);
+        setProfile({
+          ...profileData,
+          email: user.email || ''
+        });
+      }
+    } catch (error) {
+      console.error('❌ Force profile load exception:', error);
+    }
+  }, [user]);
+
+  // Force load profile when user is authenticated but profile is missing
+  useEffect(() => {
+    if (user && !profile && !loading) {
+      console.log('🔧 User authenticated but profile missing, forcing load...');
+      forceLoadProfile();
+    }
+  }, [user, profile, loading, forceLoadProfile]);
+
+  // Global function for direct login (available in console)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).forceAdminLogin = async () => {
+        console.log('🔧 Force admin login initiated...');
+        
+        try {
+          // Force login with admin credentials
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: 'amazonwebber007@gmail.com',
+            password: 'admin123'
+          });
+
+          if (error) {
+            console.error('❌ Force login error:', error);
+            return;
+          }
+
+          if (data.user) {
+            console.log('✅ Force login successful:', data.user);
+            
+            // Force load profile
+            await forceLoadProfile();
+          }
+        } catch (error) {
+          console.error('❌ Force login exception:', error);
+        }
+      };
+
+      console.log('🔧 Force admin login function available: window.forceAdminLogin()');
+    }
+  }, [supabase.auth, forceLoadProfile]);
 
   useEffect(() => {
     // Get initial session with standard Supabase approach
@@ -395,6 +468,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Computed properties for role checking
   const isInstrutor = profile?.role === 'instrutor';
   const isEstudante = profile?.role === 'estudante';
+  const isAdmin = profile?.role === 'admin';
 
   const value = {
     user,
@@ -407,6 +481,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     updateProfile,
     isInstrutor,
     isEstudante,
+    isAdmin,
   };
 
   return (

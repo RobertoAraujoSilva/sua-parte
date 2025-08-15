@@ -898,6 +898,10 @@ const Programas = () => {
         progress={progress}
         currentStep={currentStep}
         programTitle={selectedProgram?.semana || ''}
+        onClose={() => {
+          setSelectedProgram(null);
+          resetState();
+        }}
       />
 
       {/* Assignment Preview Modal */}
