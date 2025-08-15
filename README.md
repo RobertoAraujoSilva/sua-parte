@@ -7,117 +7,138 @@
 [![Supabase](https://img.shields.io/badge/Supabase-2.53.0-green.svg)](https://supabase.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4.17-blue.svg)](https://tailwindcss.com/)
 [![Vite](https://img.shields.io/badge/Vite-5.4.19-purple.svg)](https://vitejs.dev/)
+[![Cypress](https://img.shields.io/badge/Cypress-13.15.0-brightgreen.svg)](https://www.cypress.io/)
+
+---
 
 ## 🎯 Visão Geral
 
-O **Sistema Ministerial** é uma aplicação web moderna desenvolvida para automatizar e otimizar a gestão de designações da Escola do Ministério Teocrático. O sistema oferece uma solução completa que respeita todas as diretrizes organizacionais e facilita o trabalho dos superintendentes e estudantes.
+O **Sistema Ministerial** é uma aplicação web moderna desenvolvida para automatizar e otimizar a gestão de designações da Escola do Ministério Teocrático.
+Inclui **ferramentas exclusivas para administradores congregacionais** realizarem download automático dos materiais oficiais da [jw.org](https://www.jw.org) (Apostila, S-38, arquivos DAISY, JWPUB e PDF) e disponibilizá-los para os instrutores organizarem seus estudantes.
 
-### 🌟 Principais Características
+---
 
-- **🔐 Autenticação Dual**: Sistema de roles para instrutores e estudantes
-- **👥 Gestão Completa de Estudantes**: Cadastro manual e importação em massa via Excel
-- **📊 Dashboard Inteligente**: Estatísticas em tempo real e ações rápidas
-- **👨‍👩‍👧‍👦 Gestão Familiar**: Sistema de convites e relacionamentos familiares
-- **📱 Portal do Estudante**: Interface dedicada para visualização de designações
-- **🎯 Conformidade S-38-T**: Algoritmo que respeita todas as regras congregacionais
-- **📈 Relatórios Avançados**: Métricas de participação e engajamento
+## 🌟 Principais Características
 
-## 📚 Documentação
+* **🔐 Autenticação Dual**: Admin, Instrutores e Estudantes
+* **📥 Download Automático**: Apostilas e arquivos auxiliares direto da JW\.org
+* **👥 Gestão de Estudantes**: Cadastro manual ou importação via Excel
+* **📊 Dashboard Inteligente**: Estatísticas em tempo real
+* **👨‍👩‍👧‍👦 Gestão Familiar**: Relacionamentos e convites
+* **📱 Portal do Estudante**: Área dedicada para designações
+* **🎯 Conformidade S-38-T**: Respeita regras congregacionais
+* **📈 Relatórios Avançados**: Participação e engajamento
 
-A documentação completa do projeto está disponível no diretório [`docs/`](docs/). Alguns documentos importantes incluem:
+---
 
-- [Product Requirements Document (PRD)](docs/PRD.md)
-- [Plano de Implementação](docs/PLANO.md)
-- [Próximas Tarefas](docs/PROXIMAS_TAREFAS.md)
-- [Sistema de Designações S-38-T](docs/SISTEMA_DESIGNACOES_S38T.md)
+## 🖥️ Como usar o **Painel do Administrador** (`http://localhost:8080/admin`)
+
+> **Acesso restrito** — necessário login de Administrador.
+
+1. **Inicie o servidor backend**:
+
+   ```bash
+   npm run server
+   ```
+
+   *(ou `node server/index.js` dependendo do setup)*
+
+2. **Acesse no navegador**:
+
+   ```
+   http://localhost:8080/admin
+   ```
+
+3. **Faça login** com credenciais de Administrador:
+
+   * **Email**: `amazonwebber007@gmail.com`
+   * **Senha**: `Admin123!@#`
+
+4. **Baixando materiais da JW\.org**:
+
+   * Escolha o idioma (**PT** ou **EN**)
+   * Clique em **"Buscar Apostila"** — o sistema acessa:
+
+     * `https://www.jw.org/pt/biblioteca/jw-apostila-do-mes/`
+     * `https://www.jw.org/en/library/jw-meeting-workbook/`
+   * Clique em **"Baixar PDF / JWPUB / DAISY"**
+   * Arquivos serão salvos automaticamente em:
+
+     ```
+     ./docs/Oficial/
+     ```
+
+5. **Atualização Automática**:
+
+   * Botão **"Verificar Atualizações"** busca novas apostilas e substitui as antigas
+   * Registro de log das atualizações na aba **"Histórico"**
+
+---
+
+## 📷 Exemplo Visual
+
+**Tela de Login Admin**
+![login](docs/screenshots/admin-login.png)
+
+**Painel com Opção de Download**
+![painel](docs/screenshots/admin-panel.png)
+
+---
 
 ## 🚀 Início Rápido
 
 ### Pré-requisitos
-- Node.js 18+
-- npm ou yarn
-- Conta no Supabase
 
-### Instalação
+* Node.js 18+
+* npm ou yarn
+* Conta no Supabase
 
 ```bash
-# Clone o repositório
 git clone https://github.com/RobertoAraujoSilva/sua-parte.git
-
-# Navegue para o diretório
 cd sua-parte
-
-# Instale as dependências
 npm install
-
-# Configure as variáveis de ambiente
 cp .env.example .env.local
-# Edite .env.local com suas credenciais do Supabase
-
-# Execute as migrações do banco
+# Configure suas credenciais no .env.local
 npx supabase db push
-
-# Inicie o servidor de desenvolvimento
 npm run dev
 ```
 
-## 📁 Estrutura do Projeto
+---
 
-```
-sua-parte/
-├── 📁 src/                    # Código-fonte da aplicação
-│   ├── 📁 components/         # Componentes reutilizáveis
-│   ├── 📁 contexts/            # Contextos React
-│   ├── 📁 hooks/              # Custom hooks
-│   ├── 📁 pages/              # Páginas da aplicação
-│   ├── 📁 types/              # Definições TypeScript
-│   └── 📁 utils/              # Utilitários
-├── 📁 supabase/               # Configuração do Supabase
-│   ├── 📁 migrations/         # Migrações do banco
-│   └── config.toml           # Configuração Supabase
-├── 📁 docs/                   # Documentação técnica
-├── 📁 cypress/                # Testes E2E
-└── 📁 scripts/                # Scripts de automação
-```
+## ⚙️ Variáveis de Ambiente (.env.local)
 
-## 🧪 Testes e Qualidade
+| Variável             | Descrição                           |
+| -------------------- | ----------------------------------- |
+| `SUPABASE_URL`       | URL do projeto Supabase             |
+| `SUPABASE_ANON_KEY`  | Chave pública do Supabase           |
+| `DOCS_DIR`           | Pasta para salvar arquivos baixados |
+| `JW_URL_PT`          | URL JW\.org Apostila PT             |
+| `JW_URL_EN`          | URL JW\.org Apostila EN             |
+| `CYPRESS_RECORD_KEY` | Chave Cypress Cloud                 |
 
-### Cypress E2E Testing
+---
+
+## 🧪 Testes
+
 ```bash
-# Instalar Cypress
-npm run cypress:install
-
-# Executar testes em modo interativo
 npm run cypress:open
-
-# Executar todos os testes
 npm run cypress:run
 ```
 
-## 🔧 Scripts Disponíveis
+---
 
-| Script | Descrição |
-|--------|-----------|
-| `npm run dev` | Inicia servidor de desenvolvimento |
-| `npm run build` | Build para produção |
-| `npm run preview` | Preview do build de produção |
-| `npm run lint` | Executa ESLint |
-| `npm run cypress:open` | Abre Cypress em modo interativo |
-| `npm run cypress:run` | Executa todos os testes Cypress |
+## 📞 Suporte
 
-## 📞 Suporte e Contato
-
-### Canais de Suporte
-- 📧 **Email**: amazonwebber007@gmail.com
-- 🐛 **Issues**: [GitHub Issues](https://github.com/RobertoAraujoSilva/sua-parte/issues)
-- 📖 **Documentação**: Pasta `docs/` do projeto
+* 📧 **Email**: [amazonwebber007@gmail.com](mailto:amazonwebber007@gmail.com)
+* 🐛 **Issues**: [GitHub Issues](https://github.com/RobertoAraujoSilva/sua-parte/issues)
+* 📖 **Documentação**: Pasta `docs/`
 
 ---
 
 <div align="center">
 
 **🙏 Desenvolvido com dedicação para servir às congregações das Testemunhas de Jeová**
-
 *"Tudo o que fizerem, façam de todo o coração, como para Jeová, e não para homens." - Colossenses 3:23*
 
 </div>
+
