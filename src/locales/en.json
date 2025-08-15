@@ -801,6 +801,34 @@
     "technicalContact": "Technical Contact",
     "updates": "Updates",
     "community": "Community",
-    "developedFor": "Developed to serve Jehovah's Witnesses congregations."
+    "developedFor": "Developed to serve Jehovah's Witnesses congregations.",
+    "testimonialQuote": "\"{testimonial}\"",
+    "testimonialAuthor": "— {author}",
+    "checkmark": "✅"
+  },
+  "configuracaoInicial": {
+    "toast": {
+      "success": {
+        "title": "Setup Complete!",
+        "description": "Your profile has been configured successfully. Let's go to the first program!"
+      },
+      "error": {
+        "title": "Configuration Error",
+        "description": "Could not save settings. Please try again."
+      }
+    }
+  },
+  "congregacoes": {
+    "stats": {
+      "activeCongregationsValue": "100+",
+      "registeredStudentsValue": "2,500+",
+      "generatedAssignmentsValue": "50,000+",
+      "satisfactionValue": "98%"
+    },
+    "successStories": {
+      "timeReductionValue": "95%",
+      "engagementValue": "87%",
+      "complianceValue": "100%"
+    }
   }
 }
