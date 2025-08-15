@@ -42,8 +42,8 @@ O **Sistema Ministerial** é uma plataforma completa para gerenciamento de mater
 npm run dev:all
 ```
 **Resultado:** Inicia **ambos** os servidores simultaneamente
-- **Backend:** Porta 3001
-- **Frontend:** Porta 8081
+- **Backend:** Porta 3000
+- **Frontend:** Porta 8080
 
 ### **🔧 Opção 2 - Iniciar Separadamente**
 ```bash
@@ -56,7 +56,7 @@ npm run dev:frontend-only
 
 ### **📱 Acessar o Admin Dashboard**
 ```
-URL: http://localhost:8081/admin
+URL: http://localhost:8080/admin
 Login: amazonwebber007@gmail.com / admin123
 ```
 
@@ -89,8 +89,8 @@ sua-parte/
 
 ### **🎯 Scripts Unificados (NOVO!)**
 - **`npm run dev:all`** - Inicia backend e frontend simultaneamente
-- **`npm run dev:backend-only`** - Apenas o backend (porta 3001)
-- **`npm run dev:frontend-only`** - Apenas o frontend (porta 8081)
+- **`npm run dev:backend-only`** - Apenas o backend (porta 3000)
+- **`npm run dev:frontend-only`** - Apenas o frontend (porta 8080)
 - **Desenvolvimento simplificado** com um único comando
 
 ### **✅ Admin Dashboard**
@@ -142,8 +142,8 @@ npm run cypress:run --spec "cypress/e2e/admin-dashboard-integration.cy.ts"
 ```bash
 # 🎯 Comandos Principais
 npm run dev:all              # Inicia backend + frontend simultaneamente
-npm run dev:backend-only     # Apenas o backend (porta 3001)
-npm run dev:frontend-only    # Apenas o frontend (porta 8081)
+npm run dev:backend-only     # Apenas o backend (porta 3000)
+npm run dev:frontend-only    # Apenas o frontend (porta 8080)
 
 # 🔧 Comandos Originais
 npm run dev                  # Frontend apenas (como antes)
@@ -154,7 +154,7 @@ npm run cypress:run          # Testes automatizados
 ### **Variáveis de Ambiente**
 ```env
 # Backend (.env)
-PORT=3001
+PORT=3000
 NODE_ENV=development
 DOCS_PATH=../docs/Oficial
 SUPABASE_URL=your_supabase_url
@@ -228,7 +228,7 @@ npm run dev
 ### **Frontend não conecta ao backend**
 ```bash
 # Verificar se backend está rodando
-curl http://localhost:3001/api/status
+curl http://localhost:3000/api/status
 ```
 
 ### **Problemas de autenticação**
