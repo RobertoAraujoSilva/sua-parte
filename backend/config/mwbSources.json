@@ -1,0 +1,32 @@
+{
+  "pt-BR": {
+    "name": "Português (Brasil)",
+    "url": "https://www.jw.org/pt/biblioteca/jw-apostila-do-mes/",
+    "downloadPath": "docs/Oficial/PT-BR",
+    "active": true
+  },
+  "en-US": {
+    "name": "English (US)",
+    "url": "https://www.jw.org/en/library/jw-meeting-workbook/",
+    "downloadPath": "docs/Oficial/EN-US",
+    "active": true
+  },
+  "es-ES": {
+    "name": "Español",
+    "url": "https://www.jw.org/es/biblioteca/libro-de-reuniones-de-la-vida-cristiana-y-del-ministerio/",
+    "downloadPath": "docs/Oficial/ES-ES",
+    "active": false
+  },
+  "fr-FR": {
+    "name": "Français",
+    "url": "https://www.jw.org/fr/bibliotheque/livre-de-reunions-de-la-vie-chretienne-et-du-ministere/",
+    "downloadPath": "docs/Oficial/FR-FR",
+    "active": false
+  },
+  "de-DE": {
+    "name": "Deutsch",
+    "url": "https://www.jw.org/de/bibliothek/buch-fur-das-christliche-leben-und-den-dienst/",
+    "downloadPath": "docs/Oficial/DE-DE",
+    "active": false
+  }
+}

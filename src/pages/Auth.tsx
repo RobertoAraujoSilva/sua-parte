@@ -101,6 +101,10 @@ const Auth = () => {
           console.log('👨‍🎓 Redirecting student to portal:', `/estudante/${user.id}`);
           navigate(`/estudante/${user.id}`);
           return;
+        } else if (profile.role === 'admin') {
+          console.log('👑 Redirecting admin to admin dashboard');
+          navigate('/admin');
+          return;
         } else {
           console.log('⚠️ User has unknown role:', profile.role);
         }
@@ -116,6 +120,10 @@ const Auth = () => {
         } else if (metadataRole === 'estudante') {
           console.log('👨‍🎓 Redirecting student to portal (via metadata):', `/estudante/${user.id}`);
           navigate(`/estudante/${user.id}`);
+          return;
+        } else if (metadataRole === 'admin') {
+          console.log('👑 Redirecting admin to admin dashboard (via metadata)');
+          navigate('/admin');
           return;
         } else {
           console.log('⏳ Waiting for profile data to load... (metadata role:', metadataRole, ')');
