@@ -21,15 +21,15 @@ export default defineConfig({
       
       // Credenciais de teste - Instrutor (Admin completo)
       INSTRUCTOR_EMAIL: process.env.CYPRESS_INSTRUCTOR_EMAIL || 'frankwebber33@hotmail.com',
-      INSTRUCTOR_PASSWORD: process.env.CYPRESS_INSTRUCTOR_PASSWORD || '13a21r15',
+      INSTRUCTOR_PASSWORD: process.env.CYPRESS_INSTRUCTOR_PASSWORD || 'senha123',
 
       // Credenciais de teste - Estudante (Acesso limitado)
       STUDENT_EMAIL: process.env.CYPRESS_STUDENT_EMAIL || 'franklinmarceloferreiradelima@gmail.com',
-      STUDENT_PASSWORD: process.env.CYPRESS_STUDENT_PASSWORD || '13a21r15',
+      STUDENT_PASSWORD: process.env.CYPRESS_STUDENT_PASSWORD || 'senha123',
 
       // Credenciais de teste (Franklin - Legacy)
       FRANKLIN_EMAIL: process.env.FRANKLIN_EMAIL || 'franklinmarceloferreiradelima@gmail.com',
-      FRANKLIN_PASSWORD: process.env.FRANKLIN_PASSWORD || '13a21r15',
+      FRANKLIN_PASSWORD: process.env.FRANKLIN_PASSWORD || 'senha123',
       FRANKLIN_USER_ID: '77c99e53-500b-4140-b7fc-a69f96b216e1',
 
       // Credenciais de teste (Sarah)
