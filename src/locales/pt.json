@@ -773,6 +773,34 @@
     "technicalContact": "Contato Técnico",
     "updates": "Atualizações",
     "community": "Comunidade",
-    "developedFor": "Desenvolvido para servir às congregações das Testemunhas de Jeová."
+    "developedFor": "Desenvolvido para servir às congregações das Testemunhas de Jeová.",
+    "testimonialQuote": "\"{testimonial}\"",
+    "testimonialAuthor": "— {author}",
+    "checkmark": "✅"
+  },
+  "configuracaoInicial": {
+    "toast": {
+      "success": {
+        "title": "Configuração Concluída!",
+        "description": "Seu perfil foi configurado com sucesso. Vamos ao primeiro programa!"
+      },
+      "error": {
+        "title": "Erro na Configuração",
+        "description": "Não foi possível salvar as configurações. Tente novamente."
+      }
+    }
+  },
+  "congregacoes": {
+    "stats": {
+      "activeCongregationsValue": "100+",
+      "registeredStudentsValue": "2.500+",
+      "generatedAssignmentsValue": "50.000+",
+      "satisfactionValue": "98%"
+    },
+    "successStories": {
+      "timeReductionValue": "95%",
+      "engagementValue": "87%",
+      "complianceValue": "100%"
+    }
   }
 }
