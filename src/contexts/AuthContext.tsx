@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
+import { smartLogout } from '@/utils/forceLogout';
 
 // Types
 type UserRole = Database['public']['Enums']['user_role'];
@@ -338,79 +339,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       sessionStorage.clear();
     };
 
-    // CRITICAL FIX: Use aggressive timeout to prevent hanging
-    const CRITICAL_TIMEOUT = 1500; // 1.5 seconds max wait
-
     try {
-      console.log('🔄 Calling supabase.auth.signOut()...');
-      console.log('🔄 Supabase client status:', !!supabase);
-
-      // Log current auth state before signOut
-      try {
-        const { data: currentSession } = await supabase.auth.getSession();
-        console.log('🔄 Current session before signOut:', {
-          hasSession: !!currentSession?.session,
-          userId: currentSession?.session?.user?.id,
-          expiresAt: currentSession?.session?.expires_at
-        });
-      } catch (sessionCheckError) {
-        console.log('⚠️ Could not check current session:', sessionCheckError);
-      }
-
-      // CRITICAL FIX: Aggressive timeout to prevent hanging
-      const timeoutPromise = new Promise((resolve) =>
-        setTimeout(() => {
-          console.log('⏰ CRITICAL TIMEOUT - Supabase signOut hanging, forcing completion');
-          resolve({ error: { message: 'Critical signOut timeout', code: 'CRITICAL_TIMEOUT' } });
-        }, CRITICAL_TIMEOUT)
-      );
-
-      // CRITICAL FIX: Single attempt with immediate fallback
-      let result;
-      try {
-        console.log('🔄 Attempting signOut with critical timeout...');
-        result = await Promise.race([
-          supabase.auth.signOut(),
-          timeoutPromise
-        ]);
-
-        console.log('🔄 SignOut attempt completed:', result);
-      } catch (signOutError) {
-        console.log('⚠️ SignOut attempt failed immediately:', signOutError);
-        result = { error: { message: 'SignOut immediate failure', code: 'IMMEDIATE_FAILURE', details: signOutError } };
-      }
-
-      console.log('🔄 Supabase signOut result:', result);
-      console.log('🔄 Supabase signOut result type:', typeof result);
-
-      const { error } = result;
-      if (error) {
-        console.error('❌ SignOut error from Supabase:', error);
-        console.error('❌ SignOut error details:', JSON.stringify(error, null, 2));
-        console.error('❌ SignOut error type:', typeof error);
-        console.error('❌ SignOut error message:', error?.message);
-        console.error('❌ SignOut error code:', error?.code);
-        console.error('❌ SignOut error status:', error?.status);
-
-        // Log additional context
-        console.error('❌ Current user before signOut:', user?.id, user?.email);
-        console.error('❌ Current session before signOut:', session?.access_token ? 'exists' : 'none');
-
-        // Still proceed with local cleanup
-        clearLocalState();
-        return { error: null }; // Return success to UI since local cleanup worked
-      } else {
-        console.log('✅ Supabase signOut successful');
-        clearLocalState();
-        return { error: null };
-      }
-
+      console.log('🔄 Using smartLogout for robust logout...');
+      
+      // Use smartLogout which handles timeouts and fallbacks
+      await smartLogout(async () => {
+        console.log('🔄 Attempting Supabase signOut...');
+        return await supabase.auth.signOut();
+      });
+      
+      // If we reach here, logout was successful
+      console.log('✅ Smart logout completed successfully');
+      clearLocalState();
+      return { error: null };
+      
     } catch (error) {
       console.error('❌ SignOut exception:', error);
-
+      
       // Always clear local state on any error
       clearLocalState();
-
+      
       // Return success to UI since local cleanup is what matters for UX
       return { error: null };
     }

@@ -36,6 +36,8 @@ import DeveloperPanel from "./pages/DeveloperPanel";
 import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
+import Equidade from "./pages/Equidade";
+import AdminDashboard from "./pages/AdminDashboard";
 import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -247,6 +249,22 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
                       <Reunioes />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/equidade"
+                  element={
+                    <ProtectedRoute allowedRoles={['instrutor']}>
+                      <Equidade />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <AdminDashboard />
                     </ProtectedRoute>
                   }
                 />

@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { useResponsive } from '@/hooks/use-responsive';
 import { useDensity as useContextDensity } from '@/contexts/DensityContext';
-import { useDensity, useResponsiveText } from '@/components/ui/density-provider';
+import { useDensity } from '@/contexts/DensityContext';
 import { FullWidthContainer } from '@/components/layout/responsive-container';
 
 interface ResponsiveTableColumn {
@@ -42,7 +42,7 @@ export function ResponsiveTable({
   }
   
   const { textSize, spacing } = densityConfig;
-  const textClasses = useResponsiveText();
+  // Using standard text classes since useResponsiveText was removed
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to show more content on mobile
@@ -111,7 +111,7 @@ export function ResponsiveTable({
                   className={`
                     ${getCellPadding()}
                     text-left font-medium uppercase tracking-wider
-                    ${textClasses.caption}
+                    text-xs text-muted-foreground
                     ${column.sticky ? 'sticky left-0 bg-background z-20 border-r' : ''}
                     ${column.sortable ? 'cursor-pointer hover:bg-muted/50' : ''}
                   `.trim()}
@@ -166,7 +166,7 @@ export function ResponsiveTable({
 
         {data.length === 0 && (
           <div className="text-center py-8">
-            <p className={textClasses.body}>Nenhum dado encontrado</p>
+                            <p className="text-base">Nenhum dado encontrado</p>
           </div>
         )}
       </div>

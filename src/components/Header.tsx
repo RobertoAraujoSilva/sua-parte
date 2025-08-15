@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { useDebugLogger } from "@/utils/debugLogger";
 import { useTranslation } from "@/hooks/useTranslation";
 import { MobileNavigation } from "@/components/navigation/MobileNavigation";
+import { forceLogout } from "@/utils/forceLogout";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,11 +48,15 @@ const Header = () => {
         logLogoutResult(false, error, user);
         logError(error, 'Header handleSignOut', user);
 
+        // Use force logout as fallback
+        console.log('🔄 Using force logout as fallback...');
         toast({
-          title: t("Erro"),
-          description: t("Erro ao sair. Tente novamente."),
-          variant: "destructive"
+          title: t("Logout Forçado"),
+          description: t("Usando logout de emergência..."),
         });
+        
+        forceLogout();
+        return;
       } else {
         console.log('✅ SignOut successful, navigating to home...');
         logLogoutResult(true, null, user);
@@ -72,11 +77,14 @@ const Header = () => {
       logLogoutResult(false, error, user);
       logError(error, 'Header handleSignOut Exception', user);
 
+      // Use force logout as fallback
+      console.log('🔄 Using force logout as fallback due to exception...');
       toast({
-        title: t("Erro"),
-        description: t("Erro inesperado ao sair. Tente novamente."),
-        variant: "destructive"
+        title: t("Logout de Emergência"),
+        description: t("Usando logout forçado..."),
       });
+      
+      forceLogout();
     }
   };
 
@@ -176,6 +184,19 @@ const Header = () => {
                                   className="text-xs bg-red-600 text-white hover:bg-red-700 hidden sm:inline-flex"
                                 >
                                   {t('common.logout')}
+                                </Button>
+                                
+                                {/* Emergency Logout Button */}
+                                <Button
+                                  onClick={() => {
+                                    console.log('🚨 Emergency logout button clicked');
+                                    forceLogout();
+                                  }}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-xs bg-orange-600 text-white hover:bg-orange-700 hidden sm:inline-flex"
+                                >
+                                  🚨 Logout
                                 </Button>
 
                 <DropdownMenu>
