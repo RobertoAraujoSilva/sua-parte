@@ -108,8 +108,8 @@ const ConfiguracaoInicial = () => {
       localStorage.setItem('onboarding_completed', 'true');
 
       toast({
-        title: "Configuração Concluída!",
-        description: "Seu perfil foi configurado com sucesso. Vamos ao primeiro programa!",
+        title: t('configuracaoInicial.toast.success.title'),
+        description: t('configuracaoInicial.toast.success.description'),
       });
 
       navigate('/primeiro-programa');
@@ -117,8 +117,8 @@ const ConfiguracaoInicial = () => {
     } catch (error) {
       console.error('Error saving configuration:', error);
       toast({
-        title: "Erro na Configuração",
-        description: "Não foi possível salvar as configurações. Tente novamente.",
+        title: t('configuracaoInicial.toast.error.title'),
+        description: t('configuracaoInicial.toast.error.description'),
         variant: "destructive"
       });
     } finally {

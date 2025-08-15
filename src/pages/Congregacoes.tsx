@@ -51,10 +51,10 @@ const Congregacoes = () => {
   ];
 
   const stats = [
-    { label: t('congregationsPage.stats.activeCongregations'), value: "100+", icon: Users },
-    { label: t('congregationsPage.stats.registeredStudents'), value: "2.500+", icon: Users },
-    { label: t('congregationsPage.stats.generatedAssignments'), value: "50.000+", icon: Calendar },
-    { label: t('congregationsPage.stats.satisfaction'), value: "98%", icon: Star }
+    { label: t('congregationsPage.stats.activeCongregations'), value: t('congregacoes.stats.activeCongregationsValue'), icon: Users },
+    { label: t('congregationsPage.stats.registeredStudents'), value: t('congregacoes.stats.registeredStudentsValue'), icon: Users },
+    { label: t('congregationsPage.stats.generatedAssignments'), value: t('congregacoes.stats.generatedAssignmentsValue'), icon: Calendar },
+    { label: t('congregationsPage.stats.satisfaction'), value: t('congregacoes.stats.satisfactionValue'), icon: Star }
   ];
 
   return (
@@ -124,10 +124,10 @@ const Congregacoes = () => {
                   </CardHeader>
                   <CardContent>
                     <blockquote className="text-sm mb-4 italic">
-                      "{testimonial.testimonial}"
+                      {t('footer.testimonialQuote', { testimonial: testimonial.testimonial })}
                     </blockquote>
                     <div className="flex justify-between items-center text-xs text-muted-foreground">
-                      <span>— {testimonial.coordinator}</span>
+                      <span>{t('footer.testimonialAuthor', { author: testimonial.coordinator })}</span>
                       <span>{t('congregationsPage.testimonials.usingFor')} {testimonial.monthsUsing} {t('congregationsPage.testimonials.months')}</span>
                     </div>
                   </CardContent>
@@ -144,7 +144,7 @@ const Congregacoes = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <Card className="text-center">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-jw-blue">95%</CardTitle>
+                  <CardTitle className="text-2xl text-jw-blue">{t('congregacoes.successStories.timeReductionValue')}</CardTitle>
                   <CardDescription>{t('congregationsPage.successStories.timeReduction.title')}</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -156,7 +156,7 @@ const Congregacoes = () => {
 
               <Card className="text-center">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-jw-blue">87%</CardTitle>
+                  <CardTitle className="text-2xl text-jw-blue">{t('congregacoes.successStories.engagementValue')}</CardTitle>
                   <CardDescription>{t('congregationsPage.successStories.engagement.title')}</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -168,7 +168,7 @@ const Congregacoes = () => {
 
               <Card className="text-center">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-jw-blue">100%</CardTitle>
+                  <CardTitle className="text-2xl text-jw-blue">{t('congregacoes.successStories.complianceValue')}</CardTitle>
                   <CardDescription>{t('congregationsPage.successStories.compliance.title')}</CardDescription>
                 </CardHeader>
                 <CardContent>
