@@ -13,6 +13,32 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
+// Elegant loading component
+const LoadingScreen = ({ 
+  message, 
+  subMessage, 
+  spinnerSize = "h-12 w-12" 
+}: { 
+  message: string; 
+  subMessage?: string; 
+  spinnerSize?: string;
+}) => (
+  <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+    <div className="text-center bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+      <div className={`animate-spin rounded-full ${spinnerSize} border-4 border-blue-200 border-t-blue-600 mx-auto mb-6`}></div>
+      <h2 className="text-xl font-semibold text-gray-800 mb-2">{message}</h2>
+      {subMessage && (
+        <p className="text-gray-600 text-sm">{subMessage}</p>
+      )}
+      <div className="mt-4 flex justify-center space-x-2">
+        <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+        <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+        <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+      </div>
+    </div>
+  </div>
+);
+
 const ProtectedRoute = ({
   children,
   allowedRoles = ['instrutor', 'estudante'],
@@ -22,15 +48,16 @@ const ProtectedRoute = ({
   const { user, profile, loading } = useAuth();
   const navigate = useNavigate();
   const [profileTimeout, setProfileTimeout] = useState(false);
+  const [accessCheckComplete, setAccessCheckComplete] = useState(false);
 
-  // Set up profile timeout - simplified without redundant session check
+  // Set up profile timeout - reduced to 1 second for better UX
   useEffect(() => {
     if (user && !profile && !loading) {
-      console.log('⏰ Setting profile timeout - will fallback to metadata in 3 seconds');
+      console.log('⏰ Setting profile timeout - will fallback to metadata in 1 second');
       const timeout = setTimeout(() => {
         console.log('⏰ Profile timeout reached, using metadata fallback');
         setProfileTimeout(true);
-      }, 3000); // Reduced to 3 seconds and removed redundant session check
+      }, 1000); // Reduced to 1 second for faster fallback
 
       return () => clearTimeout(timeout);
     }
@@ -47,12 +74,12 @@ const ProtectedRoute = ({
       allowedRoles,
       requireAuth,
       redirectTo,
-      userMetadata: user?.user_metadata // Add full metadata for debugging
+      userMetadata: user?.user_metadata
     });
 
     if (loading) {
       console.log('⏳ ProtectedRoute waiting for auth to load...');
-      return; // Just return, don't render JSX in useEffect
+      return;
     }
 
     // If authentication is required but user is not logged in
@@ -72,7 +99,6 @@ const ProtectedRoute = ({
         console.log('✅ ProtectedRoute: Using profile role:', userRole);
       } else if (user.user_metadata?.role) {
         userRole = user.user_metadata?.role as UserRole;
-        // Only show warning if we've been waiting for a while
         if (profileTimeout) {
           console.log('⚠️ ProtectedRoute: Using metadata role fallback:', userRole, '(profile loading timed out)');
         } else {
@@ -87,11 +113,11 @@ const ProtectedRoute = ({
             userRole,
             allowedRoles
           });
+          
           // Redirect based on user role
           if (redirectTo) {
             navigate(redirectTo);
           } else if (userRole === 'instrutor') {
-            // Check if first-time user needs onboarding
             const onboardingCompleted = localStorage.getItem('onboarding_completed');
             const currentPath = window.location.pathname;
             const isOnboardingRoute = ['/bem-vindo', '/configuracao-inicial', '/primeiro-programa'].includes(currentPath);
@@ -111,6 +137,7 @@ const ProtectedRoute = ({
           return;
         } else {
           console.log('✅ ProtectedRoute: Access granted for role:', userRole);
+          setAccessCheckComplete(true);
 
           // Additional check for instructors accessing main app without onboarding
           if (userRole === 'instrutor' && allowedRoles.includes('instrutor')) {
@@ -130,26 +157,24 @@ const ProtectedRoute = ({
         // No role found - check if we should wait or timeout
         if (!profileTimeout) {
           console.log('⏳ ProtectedRoute: No role found, waiting for profile...');
-          return; // Just return, don't render JSX in useEffect
+          return;
         } else {
           console.log('❌ ProtectedRoute: Profile timeout reached, no role available, redirecting to auth');
           navigate('/auth');
-          return; // Just return, don't render JSX in useEffect
+          return;
         }
       }
     }
   }, [user, profile, loading, allowedRoles, requireAuth, redirectTo, navigate, profileTimeout]);
 
-  // Show loading state
+  // Show loading state while auth is loading
   if (loading) {
     console.log('🔄 ProtectedRoute: Showing loading state');
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jw-blue mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando...</p>
-        </div>
-      </div>
+      <LoadingScreen 
+        message="Carregando Sistema Ministerial" 
+        subMessage="Inicializando autenticação e permissões..."
+      />
     );
   }
 
@@ -168,7 +193,6 @@ const ProtectedRoute = ({
       console.log('✅ ProtectedRoute: Using profile role:', userRole);
     } else if (user.user_metadata?.role) {
       userRole = user.user_metadata?.role as UserRole;
-      // Only show warning if we've been waiting for a while
       if (profileTimeout) {
         console.log('⚠️ ProtectedRoute: Using metadata role fallback:', userRole, '(profile loading timed out)');
       } else {
@@ -177,32 +201,37 @@ const ProtectedRoute = ({
     }
 
     if (!userRole) {
-      // No role available - check if we should wait or timeout
+      // No role available - show appropriate loading state
       if (!profileTimeout) {
-        // Still waiting for profile, show loading
+        // Still waiting for profile, show profile loading
         return (
-          <div className="min-h-screen bg-background flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jw-blue mx-auto mb-4"></div>
-              <p className="text-gray-600">Carregando perfil...</p>
-            </div>
-          </div>
+          <LoadingScreen 
+            message="Verificando Permissões" 
+            subMessage="Carregando perfil do usuário..."
+          />
         );
       } else {
         // Timeout reached, show redirect message
         return (
-          <div className="min-h-screen bg-background flex items-center justify-center">
-            <div className="text-center">
-              <p className="text-gray-600">Redirecionando...</p>
-            </div>
-          </div>
+          <LoadingScreen 
+            message="Redirecionando" 
+            subMessage="Configurando acesso ao sistema..."
+            spinnerSize="h-8 w-8"
+          />
         );
       }
     }
 
     // Check if user's role is allowed
     if (!allowedRoles.includes(userRole)) {
-      return null; // Will redirect in useEffect
+      // Show loading while redirecting instead of "Acesso Negado"
+      return (
+        <LoadingScreen 
+          message="Redirecionando" 
+          subMessage="Direcionando para área apropriada..."
+          spinnerSize="h-8 w-8"
+        />
+      );
     }
   }
 
