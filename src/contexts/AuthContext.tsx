@@ -232,7 +232,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (user && !profile && !loading) {
       console.log('🔧 User authenticated but profile missing, forcing load...');
+      
+      // Immediate profile load attempt
       forceLoadProfile();
+      
+      // Fallback timeout for faster UX
+      const timeout = setTimeout(() => {
+        if (!profile) {
+          console.log('⏰ Profile load timeout, using metadata fallback');
+          // Profile will be handled by ProtectedRoute timeout
+        }
+      }, 500); // Reduced to 500ms for faster fallback
+      
+      return () => clearTimeout(timeout);
     }
   }, [user, profile, loading, forceLoadProfile]);
 
