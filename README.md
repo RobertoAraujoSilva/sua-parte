@@ -37,20 +37,24 @@ O **Sistema Ministerial** é uma plataforma completa para gerenciamento de mater
 
 ## 🚀 **Como Usar o Sistema**
 
-### **1. Iniciar o Backend**
+### **🎯 Opção 1 - Iniciar Tudo de Uma Vez (RECOMENDADO)**
 ```bash
-cd backend
-npm run dev
+npm run dev:all
 ```
-**Resultado:** `🎯 Sistema Ministerial Backend rodando na porta 3001`
+**Resultado:** Inicia **ambos** os servidores simultaneamente
+- **Backend:** Porta 3001
+- **Frontend:** Porta 8081
 
-### **2. Iniciar o Frontend**
+### **🔧 Opção 2 - Iniciar Separadamente**
 ```bash
-npm run dev
-```
-**Resultado:** `Local: http://localhost:8081/`
+# Terminal 1 - Backend
+npm run dev:backend-only
 
-### **3. Acessar o Admin Dashboard**
+# Terminal 2 - Frontend  
+npm run dev:frontend-only
+```
+
+### **📱 Acessar o Admin Dashboard**
 ```
 URL: http://localhost:8081/admin
 Login: amazonwebber007@gmail.com / admin123
@@ -82,6 +86,12 @@ sua-parte/
 ---
 
 ## 🔍 **Funcionalidades Detalhadas**
+
+### **🎯 Scripts Unificados (NOVO!)**
+- **`npm run dev:all`** - Inicia backend e frontend simultaneamente
+- **`npm run dev:backend-only`** - Apenas o backend (porta 3001)
+- **`npm run dev:frontend-only`** - Apenas o frontend (porta 8081)
+- **Desenvolvimento simplificado** com um único comando
 
 ### **✅ Admin Dashboard**
 - **Visão Geral:** Estatísticas do sistema e ações rápidas
@@ -127,6 +137,19 @@ npm run cypress:run --spec "cypress/e2e/admin-dashboard-integration.cy.ts"
 ---
 
 ## 🔧 **Configuração e Desenvolvimento**
+
+### **📋 Scripts Disponíveis**
+```bash
+# 🎯 Comandos Principais
+npm run dev:all              # Inicia backend + frontend simultaneamente
+npm run dev:backend-only     # Apenas o backend (porta 3001)
+npm run dev:frontend-only    # Apenas o frontend (porta 8081)
+
+# 🔧 Comandos Originais
+npm run dev                  # Frontend apenas (como antes)
+npm run build                # Build de produção
+npm run cypress:run          # Testes automatizados
+```
 
 ### **Variáveis de Ambiente**
 ```env
@@ -181,8 +204,22 @@ VITE_SUPABASE_ANON_KEY=your_supabase_key
 
 ## 🚨 **Troubleshooting**
 
+### **🎯 Problemas com o Sistema Unificado**
+```bash
+# Se o comando unificado não funcionar
+npm run dev:all
+
+# Alternativa: iniciar separadamente
+npm run dev:backend-only    # Terminal 1
+npm run dev:frontend-only   # Terminal 2
+```
+
 ### **Backend não inicia**
 ```bash
+# Opção 1: Usar o script unificado
+npm run dev:backend-only
+
+# Opção 2: Comando tradicional
 cd backend
 npm install
 npm run dev
@@ -218,6 +255,7 @@ curl http://localhost:3001/api/status
 - [x] Sistema de downloads automático
 - [x] Testes automatizados
 - [x] Documentação completa
+- [x] **Scripts unificados** para desenvolvimento
 
 ### **🚀 Em Desenvolvimento**
 - [ ] Interface mais polida
@@ -237,8 +275,9 @@ curl http://localhost:3001/api/status
 - **✅ Testes automatizados** funcionando
 - **✅ Documentação completa** criada
 - **✅ Código versionado** e sincronizado no GitHub
+- **✅ Scripts unificados** para desenvolvimento simplificado
 
-**🚀 Sistema pronto para uso em produção!**
+**🚀 Sistema pronto para uso em produção com desenvolvimento otimizado!**
 
 ---
 
