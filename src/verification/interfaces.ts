@@ -37,6 +37,7 @@ import {
   WorkflowResult,
   UserRole
 } from './types';
+export type { UserRole } from './types';
 
 export enum VerificationModule {
   INFRASTRUCTURE = 'infrastructure',

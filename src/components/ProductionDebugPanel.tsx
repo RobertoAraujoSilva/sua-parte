@@ -72,8 +72,9 @@ export const ProductionDebugPanel: React.FC = () => {
     loadDebugInfo();
   }, [user, session, profile, loading]);
 
-  // Only show in production for debugging
-  if (!import.meta.env.PROD) {
+  // Don't render anything if not in development mode
+  // This allows hooks to be called consistently but prevents rendering
+  if (!import.meta.env.DEV) {
     return null;
   }
 
