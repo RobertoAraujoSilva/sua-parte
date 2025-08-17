@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Report - report-2025-08-17T14-20-49-376Z-5iqjvs</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f9fafb; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .header { border-bottom: 2px solid #e5e7eb; padding-bottom: 20px; margin-bottom: 20px; }
+        .status-badge { padding: 4px 12px; border-radius: 20px; color: white; font-weight: bold; }
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin: 20px 0; }
+        .summary-card { background: #f3f4f6; padding: 15px; border-radius: 8px; text-align: center; }
+        .module-result { margin: 15px 0; padding: 15px; border: 1px solid #e5e7eb; border-radius: 8px; }
+        .details-list { margin: 10px 0; }
+        .detail-item { padding: 5px 0; border-bottom: 1px solid #f3f4f6; }
+        .recommendations { background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Sistema Ministerial Verification Report</h1>
+            <p><strong>Report ID:</strong> report-2025-08-17T14-20-49-376Z-5iqjvs</p>
+            <p><strong>Generated:</strong> 17/08/2025, 15:20:49</p>
+            <p><strong>Environment:</strong> test</p>
+            <span class="status-badge" style="background-color: #6b7280">
+                CRITICAL_FAILURES
+            </span>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <h3>Total Tests</h3>
+                <div style="font-size: 2em; font-weight: bold;">5</div>
+            </div>
+            <div class="summary-card">
+                <h3>Passed</h3>
+                <div style="font-size: 2em; font-weight: bold; color: #22c55e;">3</div>
+            </div>
+            <div class="summary-card">
+                <h3>Failed</h3>
+                <div style="font-size: 2em; font-weight: bold; color: #ef4444;">1</div>
+            </div>
+            <div class="summary-card">
+                <h3>Warnings</h3>
+                <div style="font-size: 2em; font-weight: bold; color: #f59e0b;">1</div>
+            </div>
+        </div>
+
+        <h2>Module Results</h2>
+        
+            <div class="module-result">
+                <h3>infrastructure 
+                    <span class="status-badge" style="background-color: #22c55e; font-size: 0.8em;">
+                        PASS
+                    </span>
+                </h3>
+                <p><strong>Duration:</strong> 1500ms</p>
+                
+                
+                    <div class="details-list">
+                        <h4>Test Details:</h4>
+                        
+                            <div class="detail-item">
+                                <span style="color: #22c55e;">●</span>
+                                <strong>dependencies:</strong> package.json validation - All dependencies are properly configured
+                            </div>
+                        
+                            <div class="detail-item">
+                                <span style="color: #22c55e;">●</span>
+                                <strong>environment:</strong> environment variables check - All required environment variables are set
+                            </div>
+                        
+                    </div>
+                
+                
+                
+            </div>
+        
+            <div class="module-result">
+                <h3>backend 
+                    <span class="status-badge" style="background-color: #f59e0b; font-size: 0.8em;">
+                        WARNING
+                    </span>
+                </h3>
+                <p><strong>Duration:</strong> 3200ms</p>
+                
+                
+                    <div class="details-list">
+                        <h4>Test Details:</h4>
+                        
+                            <div class="detail-item">
+                                <span style="color: #22c55e;">●</span>
+                                <strong>server:</strong> server startup - Server started successfully on port 3000
+                            </div>
+                        
+                            <div class="detail-item">
+                                <span style="color: #f59e0b;">●</span>
+                                <strong>api:</strong> API endpoints - Some endpoints have slow response times
+                            </div>
+                        
+                    </div>
+                
+                
+                
+            </div>
+        
+            <div class="module-result">
+                <h3>frontend 
+                    <span class="status-badge" style="background-color: #ef4444; font-size: 0.8em;">
+                        FAIL
+                    </span>
+                </h3>
+                <p><strong>Duration:</strong> 2800ms</p>
+                
+                
+                    <div class="details-list">
+                        <h4>Test Details:</h4>
+                        
+                            <div class="detail-item">
+                                <span style="color: #ef4444;">●</span>
+                                <strong>build:</strong> application build - Build failed due to TypeScript errors
+                            </div>
+                        
+                    </div>
+                
+                
+                
+                    <div style="color: #ef4444; margin-top: 10px;">
+                        <h4>Errors:</h4>
+                        <div>• undefined</div>
+                    </div>
+                
+            </div>
+        
+
+        
+            <div class="recommendations">
+                <h2>Recommendations</h2>
+                
+                    <div style="margin: 10px 0;">
+                        <strong style="color: #6b7280;">[LOW]</strong>
+                        <strong>backend:</strong> API response time exceeds 2 seconds for some endpoints
+                        <br><em>Solution:</em> Review the warning details and consider addressing to improve system reliability
+                    </div>
+                
+                    <div style="margin: 10px 0;">
+                        <strong style="color: #6b7280;">[HIGH]</strong>
+                        <strong>frontend:</strong> Module failure: TypeScript compilation failed: Property "xyz" does not exist on type "ABC"
+                        <br><em>Solution:</em> Check React application build, routing configuration, and component rendering.
+                    </div>
+                
+                    <div style="margin: 10px 0;">
+                        <strong style="color: #6b7280;">[MEDIUM]</strong>
+                        <strong>build:</strong> Test failure: application build
+                        <br><em>Solution:</em> Build failed due to TypeScript errors
+                    </div>
+                
+            </div>
+        
+
+        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 0.9em;">
+            <p>Generated by Sistema Ministerial Verification System</p>
+            <p>Total execution time: 7500ms</p>
+        </div>
+    </div>
+</body>
+</html>

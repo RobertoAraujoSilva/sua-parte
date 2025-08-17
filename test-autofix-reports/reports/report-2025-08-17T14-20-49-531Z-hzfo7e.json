@@ -1,0 +1,23 @@
+{
+  "id": "report-2025-08-17T14-20-49-531Z-hzfo7e",
+  "timestamp": "2025-08-17T14:20:49.531Z",
+  "report": {
+    "overallStatus": "HEALTHY",
+    "timestamp": "2025-08-17T14:20:49.531Z",
+    "totalDuration": 1000,
+    "summary": {
+      "totalTests": 1,
+      "passed": 1,
+      "failed": 0,
+      "warnings": 0,
+      "criticalIssues": 0
+    },
+    "moduleResults": [],
+    "recommendations": []
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "environment": "development",
+    "tags": []
+  }
+}
