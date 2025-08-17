@@ -19,6 +19,7 @@ export * from './download-verifier';
 export * from './database-verifier';
 export * from './script-verifier';
 export * from './test-suite-verifier';
+export * from './auth-verifier';
 
 // Export helper modules
 export * from './routing-tester';
@@ -34,6 +35,7 @@ import { DownloadVerifier } from './download-verifier';
 import { DatabaseVerifierImpl } from './database-verifier';
 import { ScriptVerifierImpl } from './script-verifier';
 import { TestSuiteVerifierImpl } from './test-suite-verifier';
+import { AuthVerifier } from './auth-verifier';
 
 /**
  * Initialize the verification system with all available verifiers
@@ -45,6 +47,45 @@ export function initializeVerificationSystem(): SystemVerificationController {
   controller.registerVerifier(VerificationModule.INFRASTRUCTURE, new InfrastructureVerifierImpl());
   controller.registerVerifier(VerificationModule.BACKEND, new BackendVerifierImpl());
   controller.registerVerifier(VerificationModule.FRONTEND, new FrontendVerifierImpl());
+
+  // Register Authentication verifier with default configuration (overridable via env)
+  controller.registerVerifier(VerificationModule.AUTHENTICATION, new AuthVerifier({
+    testCredentials: {
+      admin: {
+        email: process.env.VERIFY_ADMIN_EMAIL || 'admin@test.com',
+        password: process.env.VERIFY_ADMIN_PASSWORD || 'test123',
+        expectedRole: 'admin',
+        expectedDashboard: '/admin'
+      },
+      instructor: {
+        email: process.env.VERIFY_INSTRUCTOR_EMAIL || 'instructor@test.com',
+        password: process.env.VERIFY_INSTRUCTOR_PASSWORD || 'test123',
+        expectedRole: 'instructor',
+        expectedDashboard: '/instructor'
+      },
+      student: {
+        email: process.env.VERIFY_STUDENT_EMAIL || 'student@test.com',
+        password: process.env.VERIFY_STUDENT_PASSWORD || 'test123',
+        expectedRole: 'student',
+        expectedDashboard: '/student'
+      }
+    },
+    timeouts: { login: 5000, dashboard: 3000, session: 10000 },
+    rbacConfig: {
+      adminFeatures: ['admin-dashboard', 'user-management', 'system-settings'],
+      instructorFeatures: ['instructor-dashboard', 'program-management', 'student-assignments'],
+      studentFeatures: ['student-portal', 'assignments', 'materials'],
+      restrictedEndpoints: {
+        adminOnly: ['/api/admin', '/api/users', '/api/system'],
+        instructorOnly: ['/api/instructor', '/api/programs'],
+        studentOnly: ['/api/student', '/api/assignments']
+      }
+    },
+    sessionConfig: {
+      timeouts: { sessionCheck: 5000, refreshToken: 10000, persistence: 15000 },
+      testDuration: { shortSession: 30000, longSession: 300000 }
+    }
+  }));
   controller.registerVerifier(VerificationModule.DOWNLOAD_SYSTEM, new DownloadVerifier());
   controller.registerVerifier(VerificationModule.DATABASE, new DatabaseVerifierImpl());
   controller.registerVerifier(VerificationModule.SCRIPTS, new ScriptVerifierImpl());
