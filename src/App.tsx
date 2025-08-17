@@ -67,27 +67,10 @@ if (import.meta.env.DEV) {
   });
 }
 
-// Conditional Debug Panel Component - Only renders in development
+// Conditional Debug Panel Component - Temporarily disabled to fix hooks issue
 const ConditionalDebugPanel: React.FC = () => {
-  const [DebugPanel, setDebugPanel] = React.useState<React.ComponentType | null>(null);
-
-  React.useEffect(() => {
-    if (import.meta.env.DEV) {
-      // Dynamically import ProductionDebugPanel only in development
-      import("@/components/ProductionDebugPanel").then(module => {
-        setDebugPanel(() => module.ProductionDebugPanel);
-      }).catch(error => {
-        console.warn('⚠️ Debug panel failed to load:', error);
-      });
-    }
-  }, []);
-
-  // Only render in development and if component is loaded
-  if (!import.meta.env.DEV || !DebugPanel) {
-    return null;
-  }
-
-  return <DebugPanel />;
+  // Temporarily disabled to fix React hooks issue
+  return null;
 };
 
 const App = () => (
