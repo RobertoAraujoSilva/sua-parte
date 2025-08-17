@@ -1,0 +1,110 @@
+{
+  "id": "report-2025-08-17T14-20-49-493Z-9me78i",
+  "timestamp": "2025-08-17T14:20:49.493Z",
+  "report": {
+    "overallStatus": "CRITICAL_FAILURES",
+    "timestamp": "2025-08-17T14:20:49.493Z",
+    "totalDuration": 8905.133006252749,
+    "summary": {
+      "totalTests": 5,
+      "passed": 3,
+      "failed": 1,
+      "warnings": 1,
+      "criticalIssues": 1
+    },
+    "moduleResults": [
+      {
+        "module": "infrastructure",
+        "status": "PASS",
+        "timestamp": "2025-08-16T14:20:49.493Z",
+        "duration": 1786.8859840175578,
+        "details": [
+          {
+            "component": "dependencies",
+            "test": "package.json validation",
+            "result": "PASS",
+            "message": "All dependencies are properly configured"
+          },
+          {
+            "component": "environment",
+            "test": "environment variables check",
+            "result": "PASS",
+            "message": "All required environment variables are set"
+          }
+        ]
+      },
+      {
+        "module": "backend",
+        "status": "WARNING",
+        "timestamp": "2025-08-16T14:20:49.493Z",
+        "duration": 3768.0871855669548,
+        "details": [
+          {
+            "component": "server",
+            "test": "server startup",
+            "result": "PASS",
+            "message": "Server started successfully on port 3000"
+          },
+          {
+            "component": "api",
+            "test": "API endpoints",
+            "result": "WARNING",
+            "message": "Some endpoints have slow response times"
+          }
+        ],
+        "warnings": [
+          {
+            "message": "API response time exceeds 2 seconds for some endpoints"
+          }
+        ]
+      },
+      {
+        "module": "frontend",
+        "status": "FAIL",
+        "timestamp": "2025-08-16T14:20:49.493Z",
+        "duration": 3350.1598366682347,
+        "details": [
+          {
+            "component": "build",
+            "test": "application build",
+            "result": "FAIL",
+            "message": "Build failed due to TypeScript errors"
+          }
+        ],
+        "errors": [
+          {}
+        ]
+      }
+    ],
+    "recommendations": [
+      {
+        "severity": "LOW",
+        "component": "backend",
+        "issue": "API response time exceeds 2 seconds for some endpoints",
+        "solution": "Review the warning details and consider addressing to improve system reliability",
+        "documentation": "https://github.com/your-repo/sistema-ministerial/docs/backend-troubleshooting.md"
+      },
+      {
+        "severity": "HIGH",
+        "component": "frontend",
+        "issue": "Module failure: TypeScript compilation failed: Property \"xyz\" does not exist on type \"ABC\"",
+        "solution": "Check React application build, routing configuration, and component rendering.",
+        "documentation": "https://github.com/your-repo/sistema-ministerial/docs/frontend-troubleshooting.md"
+      },
+      {
+        "severity": "MEDIUM",
+        "component": "build",
+        "issue": "Test failure: application build",
+        "solution": "Build failed due to TypeScript errors",
+        "documentation": "https://github.com/your-repo/sistema-ministerial/docs/frontend-troubleshooting.md"
+      }
+    ]
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "environment": "test",
+    "tags": [
+      "trend-test-1"
+    ]
+  }
+}
