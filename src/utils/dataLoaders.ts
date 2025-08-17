@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { EstudanteRow } from '@/types/estudantes';
 import type { DesignacaoRow, ProgramaRow, HistoricoDesignacao } from '@/types/designacoes';
 import type { FamilyMember } from '@/types/family';
+import { listOffline } from '@/utils/offlineLocalDB';
 
 /**
  * Carrega todos os estudantes ativos da congregação do usuário logado
@@ -27,7 +28,16 @@ export const carregarEstudantesAtivos = async (): Promise<{
       .order('nome');
 
     if (error) {
-      console.error('Erro ao carregar estudantes ativos:', error);
+      console.error('Erro ao carregar estudantes ativos (online):', error);
+      // Fallback offline
+      try {
+        const offline = await listOffline('estudantes');
+        if (offline && offline.length > 0) {
+          return { sucesso: true, estudantes: offline as EstudanteRow[] };
+        }
+      } catch (e) {
+        console.error('Falha ao carregar estudantes do cache offline:', e);
+      }
       return {
         sucesso: false,
         estudantes: [],
@@ -41,6 +51,15 @@ export const carregarEstudantesAtivos = async (): Promise<{
     };
   } catch (error) {
     console.error('Exceção ao carregar estudantes ativos:', error);
+    // Fallback offline na exceção
+    try {
+      const offline = await listOffline('estudantes');
+      if (offline && offline.length > 0) {
+        return { sucesso: true, estudantes: offline as EstudanteRow[] };
+      }
+    } catch (e) {
+      console.error('Falha ao carregar estudantes do cache offline:', e);
+    }
     return {
       sucesso: false,
       estudantes: [],
@@ -79,7 +98,68 @@ export const carregarHistoricoDesignacoes = async (
       .gte('programas.data_inicio_semana', dataCorte.toISOString().split('T')[0]);
 
     if (error) {
-      console.error('Erro ao carregar histórico de designações:', error);
+      console.error('Erro ao carregar histórico de designações (online):', error);
+      // Fallback offline
+      try {
+        const offlineDesignacoes = await listOffline('designacoes');
+        const offlineProgramas = await listOffline('programas');
+        const progById = new Map<string, any>(offlineProgramas.map((p: any) => [p.id, p]));
+
+        const historicoMap = new Map<string, HistoricoDesignacao>();
+        (offlineDesignacoes || []).forEach((d: any) => {
+          const prog = progById.get(d.programa_id);
+          if (!prog) return;
+          const dataPrograma = prog.data_inicio_semana;
+          if (!dataPrograma) return;
+          if (new Date(dataPrograma) < dataCorte) return; // respeita a janela
+
+          // principal
+          if (!historicoMap.has(d.id_estudante)) {
+            historicoMap.set(d.id_estudante, {
+              estudante_id: d.id_estudante,
+              designacoes_recentes: [],
+              total_designacoes_8_semanas: 0
+            });
+          }
+          const histEst = historicoMap.get(d.id_estudante)!;
+          histEst.designacoes_recentes.push({
+            data_inicio_semana: dataPrograma,
+            numero_parte: d.numero_parte,
+            tipo_parte: d.tipo_parte,
+            foi_ajudante: false
+          });
+          histEst.total_designacoes_8_semanas++;
+          if (!histEst.ultima_designacao || dataPrograma > histEst.ultima_designacao) {
+            histEst.ultima_designacao = dataPrograma;
+          }
+
+          // ajudante
+          if (d.id_ajudante) {
+            if (!historicoMap.has(d.id_ajudante)) {
+              historicoMap.set(d.id_ajudante, {
+                estudante_id: d.id_ajudante,
+                designacoes_recentes: [],
+                total_designacoes_8_semanas: 0
+              });
+            }
+            const histAj = historicoMap.get(d.id_ajudante)!;
+            histAj.designacoes_recentes.push({
+              data_inicio_semana: dataPrograma,
+              numero_parte: d.numero_parte,
+              tipo_parte: d.tipo_parte,
+              foi_ajudante: true
+            });
+            histAj.total_designacoes_8_semanas++;
+            if (!histAj.ultima_designacao || dataPrograma > histAj.ultima_designacao) {
+              histAj.ultima_designacao = dataPrograma;
+            }
+          }
+        });
+
+        return { sucesso: true, historico: historicoMap };
+      } catch (e) {
+        console.error('Falha ao reconstruir histórico offline:', e);
+      }
       return {
         sucesso: false,
         historico: new Map(),
@@ -146,6 +226,67 @@ export const carregarHistoricoDesignacoes = async (
     };
   } catch (error) {
     console.error('Exceção ao carregar histórico de designações:', error);
+    // Fallback offline na exceção
+    try {
+      const offlineDesignacoes = await listOffline('designacoes');
+      const offlineProgramas = await listOffline('programas');
+      const progById = new Map<string, any>(offlineProgramas.map((p: any) => [p.id, p]));
+      const dataCorte = new Date();
+      dataCorte.setDate(dataCorte.getDate() - (semanasAtras * 7));
+
+      const historicoMap = new Map<string, HistoricoDesignacao>();
+      (offlineDesignacoes || []).forEach((d: any) => {
+        const prog = progById.get(d.programa_id);
+        if (!prog) return;
+        const dataPrograma = prog.data_inicio_semana;
+        if (!dataPrograma) return;
+        if (new Date(dataPrograma) < dataCorte) return;
+
+        if (!historicoMap.has(d.id_estudante)) {
+          historicoMap.set(d.id_estudante, {
+            estudante_id: d.id_estudante,
+            designacoes_recentes: [],
+            total_designacoes_8_semanas: 0
+          });
+        }
+        const histEst = historicoMap.get(d.id_estudante)!;
+        histEst.designacoes_recentes.push({
+          data_inicio_semana: dataPrograma,
+          numero_parte: d.numero_parte,
+          tipo_parte: d.tipo_parte,
+          foi_ajudante: false
+        });
+        histEst.total_designacoes_8_semanas++;
+        if (!histEst.ultima_designacao || dataPrograma > histEst.ultima_designacao) {
+          histEst.ultima_designacao = dataPrograma;
+        }
+
+        if (d.id_ajudante) {
+          if (!historicoMap.has(d.id_ajudante)) {
+            historicoMap.set(d.id_ajudante, {
+              estudante_id: d.id_ajudante,
+              designacoes_recentes: [],
+              total_designacoes_8_semanas: 0
+            });
+          }
+          const histAj = historicoMap.get(d.id_ajudante)!;
+          histAj.designacoes_recentes.push({
+            data_inicio_semana: dataPrograma,
+            numero_parte: d.numero_parte,
+            tipo_parte: d.tipo_parte,
+            foi_ajudante: true
+          });
+          histAj.total_designacoes_8_semanas++;
+          if (!histAj.ultima_designacao || dataPrograma > histAj.ultima_designacao) {
+            histAj.ultima_designacao = dataPrograma;
+          }
+        }
+      });
+
+      return { sucesso: true, historico: historicoMap };
+    } catch (e) {
+      console.error('Falha ao reconstruir histórico offline:', e);
+    }
     return {
       sucesso: false,
       historico: new Map(),

@@ -175,6 +175,15 @@ export const generateAssignmentsPDF = async (
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text('DESIGNACOES DA REUNIAO', 20, 75);
+
+    // Simple table header for better readability
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('PARTE/SECAO', 20, 82);
+    doc.text('TITULO', 60, 82);
+    doc.text('HORARIO', 130, 82);
+    doc.text('TEMPO', 160, 82);
+    doc.line(20, 84, 190, 84);
     
     // Helper functions
     const getSectionInfo = (numeroParte: number) => {
@@ -213,11 +222,50 @@ export const generateAssignmentsPDF = async (
         : { restriction: 'Ambos os Generos', icon: 'M/F', color: 'text-green-600' };
     };
     
+    // Compute simple sequential timeline (default start 19:00)
+    const computeTimeline = (items: AssignmentData[], start: string = '19:00') => {
+      const [hStr, mStr] = start.split(':');
+      let minutes = (parseInt(hStr || '19', 10) * 60) + (parseInt(mStr || '0', 10));
+      const timeline = new Map<string, string>();
+      const sorted = [...items].sort((a, b) => (a.numero_parte || 0) - (b.numero_parte || 0));
+      for (const it of sorted) {
+        const startH = Math.floor(minutes / 60);
+        const startM = minutes % 60;
+        const endMin = minutes + (it.tempo_minutos || 0);
+        const endH = Math.floor(endMin / 60);
+        const endM = endMin % 60;
+        const fmt = (h: number, m: number) => `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+        timeline.set(it.id, `${fmt(startH, startM)}-${fmt(endH, endM)}`);
+        minutes = endMin;
+      }
+      return timeline;
+    };
+
+    const timeline = computeTimeline(assignments, '19:00');
+
     // Add assignments
-    let yPosition = 85;
+    let yPosition = 88;
     doc.setFontSize(10);
+
+    let lastSection = '';
     
     assignments.forEach((assignment, index) => {
+      const sectionInfo = getSectionInfo(assignment.numero_parte);
+      if (sectionInfo.section !== lastSection) {
+        // Add section header row
+        if (yPosition > 240) {
+          doc.addPage();
+          yPosition = 20;
+        }
+        doc.setFontSize(11);
+        doc.setFont(undefined, 'bold');
+        doc.text(sectionInfo.section.toUpperCase(), 20, yPosition);
+        doc.line(20, yPosition + 2, 190, yPosition + 2);
+        yPosition += 8;
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        lastSection = sectionInfo.section;
+      }
       // Check if we need a new page
       if (yPosition > 240) {
         doc.addPage();
@@ -226,65 +274,60 @@ export const generateAssignmentsPDF = async (
       
       // Add assignment header with number and section
       doc.setFont(undefined, 'bold');
-      doc.setFontSize(12);
+      doc.setFontSize(11);
       const numeroFormatado = assignment.numero_parte.toString().padStart(2, '0');
-      const sectionInfo = getSectionInfo(assignment.numero_parte);
-      
-      doc.text(`${numeroFormatado} - ${sectionInfo.section}`, 20, yPosition);
+
+      doc.text(`${numeroFormatado}`, 20, yPosition);
+      const timeLabel = timeline.get(assignment.id) || '';
+      doc.text(`${timeLabel}`, 130, yPosition);
       doc.text(`${assignment.tempo_minutos} min`, 160, yPosition);
-      yPosition += 8;
       
       // Add assignment title
-      doc.setFontSize(11);
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(10);
       const titulo = assignment.titulo_parte || getAssignmentTypeLabel(assignment.tipo_parte);
-      doc.text(titulo, 20, yPosition);
+      doc.text(titulo, 30, yPosition);
       yPosition += 6;
       
       // Add assignment details if different from title
       doc.setFont(undefined, 'normal');
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       const detalhes = getAssignmentTypeLabel(assignment.tipo_parte);
       if (titulo !== detalhes) {
-        doc.text(detalhes, 20, yPosition);
-        yPosition += 6;
+        doc.text(detalhes, 30, yPosition);
+        yPosition += 5;
       }
       
       // Add student information - THIS IS THE KEY PART
       if (assignment.estudante?.nome) {
         doc.setFont(undefined, 'bold');
-        doc.setFontSize(11);
-        doc.text(`ESTUDANTE: ${assignment.estudante.nome}`, 20, yPosition);
-        yPosition += 6;
-        
+        doc.setFontSize(10);
+        doc.text(`Estudante:`, 20, yPosition);
         doc.setFont(undefined, 'normal');
-        doc.setFontSize(9);
-        doc.text(`Cargo: ${assignment.estudante.cargo}`, 25, yPosition);
+        doc.text(`${assignment.estudante.nome}`, 45, yPosition);
         
-        // Add gender restriction info
         const genderInfo = getGenderRestrictionInfo(assignment.tipo_parte);
         doc.text(`Restricao: ${genderInfo.restriction}`, 120, yPosition);
-        yPosition += 6;
+        yPosition += 5;
         
-        // Add helper if exists
+        // Helper if exists
         if (assignment.ajudante?.nome) {
           doc.setFont(undefined, 'bold');
-          doc.text(`AJUDANTE: ${assignment.ajudante.nome}`, 20, yPosition);
-          yPosition += 6;
-          
+          doc.text(`Ajudante:`, 20, yPosition);
           doc.setFont(undefined, 'normal');
-          doc.text(`Cargo: ${assignment.ajudante.cargo}`, 25, yPosition);
-          yPosition += 6;
+          doc.text(`${assignment.ajudante.nome}`, 45, yPosition);
+          yPosition += 5;
         }
-        
-        // Add confirmation status
+
+        // Confirmation
         if (assignment.confirmado) {
           doc.setFont(undefined, 'bold');
-          doc.text('STATUS: Confirmado', 20, yPosition);
-          yPosition += 6;
+          doc.text('Status: Confirmado', 20, yPosition);
+          yPosition += 5;
         }
       }
       
-      yPosition += 8;
+      yPosition += 6;
       
       // Add separator line
       if (index < assignments.length - 1) {
