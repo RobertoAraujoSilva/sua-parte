@@ -2,7 +2,7 @@ import React from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TutorialProvider } from "@/contexts/TutorialContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -42,6 +42,9 @@ import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DebugFab from "./components/DebugFab";
+import { Header } from '@/components/Header';
+import { ConnectionStatusBanner } from '@/components/ConnectionStatusBanner';
+import { SyncButton } from '@/components/SyncButton';
 
 const queryClient = new QueryClient();
 
@@ -298,3 +301,22 @@ const App = () => (
 );
 
 export default App;
+
+// Add SyncButton to Header or create a dedicated sync area
+<div className="min-h-screen bg-background">
+  <Header />
+  <ConnectionStatusBanner />
+  
+  {/* Optional: Add sync controls in a dedicated area */}
+  <div className="container mx-auto px-4 py-2 border-b">
+    <div className="flex justify-end">
+      <SyncButton />
+    </div>
+  </div>
+  
+  <main className="container mx-auto px-4 py-8">
+    <Routes>
+      {/* ... existing routes ... */}
+    </Routes>
+  </main>
+</div>
