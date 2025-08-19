@@ -10,68 +10,68 @@ const Funcionalidades = () => {
   const detailedFeatures = [
     {
       icon: Users,
-      title: t('Gestão Completa de Estudantes'),
-      description: t('Cadastro detalhado com validação de cargos, parentesco e qualificações congregacionais para designações precisas.'),
+      title: t('featuresPage.studentManagement.title'),
+      description: t('featuresPage.studentManagement.description'),
       benefits: [
-        t('Controle de qualificações ministeriais'),
-        t('Gestão de relações familiares'),
-        t('Histórico de participações'),
-        t('Validação automática de regras')
+        t('featuresPage.studentManagement.benefits.qualifications'),
+        t('featuresPage.studentManagement.benefits.family'),
+        t('featuresPage.studentManagement.benefits.history'),
+        t('featuresPage.studentManagement.benefits.validation')
       ]
     },
     {
       icon: Clock,
-      title: t('Importação de Programas Semanais'),
-      description: t('Importação automática a partir de PDFs oficiais da apostila Vida e Ministério Cristão com parsing inteligente.'),
+      title: t('featuresPage.programImport.title'),
+      description: t('featuresPage.programImport.description'),
       benefits: [
-        t('Reconhecimento automático de PDFs'),
-        t('Extração inteligente de dados'),
-        t('Sincronização com calendário'),
-        t('Validação de conteúdo')
+        t('featuresPage.programImport.benefits.recognition'),
+        t('featuresPage.programImport.benefits.extraction'),
+        t('featuresPage.programImport.benefits.sync'),
+        t('featuresPage.programImport.benefits.validation')
       ]
     },
     {
       icon: Smartphone,
-      title: t('Notificações Automáticas'),
-      description: t('Envio por e-mail e WhatsApp com detalhes da designação, cena e instruções específicas para cada estudante.'),
+      title: t('featuresPage.notifications.title'),
+      description: t('featuresPage.notifications.description'),
       benefits: [
-        t('E-mail personalizado'),
-        t('Integração WhatsApp'),
-        t('Lembretes automáticos'),
-        t('Confirmação de recebimento')
+        t('featuresPage.notifications.benefits.email'),
+        t('featuresPage.notifications.benefits.whatsapp'),
+        t('featuresPage.notifications.benefits.reminders'),
+        t('featuresPage.notifications.benefits.confirmation')
       ]
     },
     {
       icon: BarChart,
-      title: t('Relatórios e Análises'),
-      description: t('Dashboard completo com histórico de participação, métricas de engajamento e relatórios para coordenadores.'),
+      title: t('featuresPage.reports.title'),
+      description: t('featuresPage.reports.description'),
       benefits: [
-        t('Métricas de participação'),
-        t('Relatórios personalizados'),
-        t('Análise de desempenho'),
-        t('Exportação de dados')
+        t('featuresPage.reports.benefits.metrics'),
+        t('featuresPage.reports.benefits.custom'),
+        t('featuresPage.reports.benefits.performance'),
+        t('featuresPage.reports.benefits.export')
       ]
     },
     {
       icon: Shield,
-      title: t('Conformidade com Regras'),
-      description: t('Algoritmo inteligente que respeita todas as diretrizes da Escola do Ministério Teocrático e regulamentos congregacionais.'),
+      title: t('featuresPage.compliance.title'),
+      description: t('featuresPage.compliance.description'),
       benefits: [
-        t('Validação de regras automática'),
-        t('Respeito às diretrizes'),
-        t('Controle de gênero'),
-        t('Gestão de privilégios')
+        t('featuresPage.compliance.benefits.automatic'),
+        t('featuresPage.compliance.benefits.guidelines'),
+        t('featuresPage.compliance.benefits.gender'),
+        t('featuresPage.compliance.benefits.privileges')
       ]
     },
     {
       icon: CheckCircle,
-      title: t('Portal do Estudante'),
-      description: t('Interface responsiva para estudantes visualizarem designações, confirmarem participação e contribuírem via doações.'),
+      title: t('featuresPage.studentPortal.title'),
+      description: t('featuresPage.studentPortal.description'),
       benefits: [
-        t('Acesso móvel otimizado'),
-        t('Confirmação de participação'),
-        t('Histórico pessoal'),
-        t('Sistema de doações')
+        t('featuresPage.studentPortal.benefits.mobile'),
+        t('featuresPage.studentPortal.benefits.confirmation'),
+        t('featuresPage.studentPortal.benefits.history'),
+        t('featuresPage.studentPortal.benefits.donations')
       ]
     }
   ];
@@ -85,10 +85,10 @@ const Funcionalidades = () => {
         <section className="bg-gradient-to-br from-jw-navy via-jw-blue to-jw-blue-dark py-20">
           <div className="container mx-auto px-4 text-center text-white">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              {t('Funcionalidades')} <span className="text-jw-gold">{t('Completas')}</span>
+              {t('featuresPage.title')} <span className="text-jw-gold">{t('featuresPage.titleHighlight')}</span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-90">
-              {t('Tudo que sua congregação precisa para automatizar e otimizar o processo de designações ministeriais com total conformidade.')}
+              {t('featuresPage.subtitle')}
             </p>
           </div>
         </section>
@@ -134,46 +134,46 @@ const Funcionalidades = () => {
         {/* Technical Specifications */}
         <section className="py-20 bg-muted/50">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">{t('Especificações Técnicas')}</h2>
+            <h2 className="text-3xl font-bold text-center mb-12">{t('featuresPage.technical.title')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <Card>
                 <CardHeader>
-                  <CardTitle>{t('Performance')}</CardTitle>
+                  <CardTitle>{t('featuresPage.technical.performance.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm">
-                    <li>• {t('Processamento em tempo real')}</li>
-                    <li>• {t('99.9% de disponibilidade')}</li>
-                    <li>• {t('Backup automático diário')}</li>
-                    <li>• {t('Sincronização instantânea')}</li>
+                    <li>• {t('featuresPage.technical.performance.realTime')}</li>
+                    <li>• {t('featuresPage.technical.performance.availability')}</li>
+                    <li>• {t('featuresPage.technical.performance.backup')}</li>
+                    <li>• {t('featuresPage.technical.performance.sync')}</li>
                   </ul>
                 </CardContent>
               </Card>
               
               <Card>
                 <CardHeader>
-                  <CardTitle>{t('Segurança')}</CardTitle>
+                  <CardTitle>{t('featuresPage.technical.security.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm">
-                    <li>• {t('Criptografia end-to-end')}</li>
-                    <li>• {t('Autenticação segura')}</li>
-                    <li>• {t('Controle de acesso')}</li>
-                    <li>• {t('Auditoria completa')}</li>
+                    <li>• {t('featuresPage.technical.security.encryption')}</li>
+                    <li>• {t('featuresPage.technical.security.auth')}</li>
+                    <li>• {t('featuresPage.technical.security.access')}</li>
+                    <li>• {t('featuresPage.technical.security.audit')}</li>
                   </ul>
                 </CardContent>
               </Card>
               
               <Card>
                 <CardHeader>
-                  <CardTitle>{t('Compatibilidade')}</CardTitle>
+                  <CardTitle>{t('featuresPage.technical.compatibility.title')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-2 text-sm">
-                    <li>• {t('Acesso web e mobile')}</li>
-                    <li>• {t('Integração WhatsApp')}</li>
-                    <li>• {t('Importação PDF')}</li>
-                    <li>• {t('Exportação de dados')}</li>
+                    <li>• {t('featuresPage.technical.compatibility.webMobile')}</li>
+                    <li>• {t('featuresPage.technical.compatibility.whatsapp')}</li>
+                    <li>• {t('featuresPage.technical.compatibility.pdf')}</li>
+                    <li>• {t('featuresPage.technical.compatibility.export')}</li>
                   </ul>
                 </CardContent>
               </Card>

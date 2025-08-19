@@ -11,10 +11,10 @@ const Benefits = () => {
       <div className="responsive-container">
         <div className="text-center mb-16">
           <h2 className="text-balance text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-foreground mb-4">
-            {t('Transforme a Organização da Sua Congregação')}
+            {t('benefits.title')}
           </h2>
           <p className="text-balance text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
-            {t('Reduza drasticamente o tempo gasto em tarefas administrativas e foque no que realmente importa: o desenvolvimento espiritual.')}
+            {t('benefits.subtitle')}
           </p>
         </div>
 
@@ -25,9 +25,9 @@ const Benefits = () => {
                 <Clock className="w-6 h-6 text-jw-blue" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">{t('Economia de Tempo Significativa')}</h3>
+                <h3 className="text-xl font-semibold mb-2">{t('benefits.timeEfficiency.title')}</h3>
                 <p className="text-muted-foreground">
-                  {t('De horas para minutos: o que antes tomava uma tarde inteira de trabalho agora é resolvido em menos de 5 minutos por semana.')}
+                  {t('benefits.timeEfficiency.description')}
                 </p>
               </div>
             </div>
@@ -37,9 +37,9 @@ const Benefits = () => {
                 <CheckCircle className="w-6 h-6 text-jw-blue" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">{t('Conformidade Garantida')}</h3>
+                <h3 className="text-xl font-semibold mb-2">{t('benefits.compliance.title')}</h3>
                 <p className="text-muted-foreground">
-                  {t('Algoritmo inteligente que automaticamente respeita todas as regras congregacionais, gênero, cargo e relações familiares.')}
+                  {t('benefits.compliance.description')}
                 </p>
               </div>
             </div>
@@ -49,9 +49,9 @@ const Benefits = () => {
                 <Users2 className="w-6 h-6 text-jw-blue" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">{t('Engajamento Estudantil')}</h3>
+                <h3 className="text-xl font-semibold mb-2">{t('benefits.engagement.title')}</h3>
                 <p className="text-muted-foreground">
-                  {t('Portal dedicado onde estudantes acompanham suas designações, confirmam participação e contribuem para sustentabilidade.')}
+                  {t('benefits.engagement.description')}
                 </p>
               </div>
             </div>
@@ -61,9 +61,9 @@ const Benefits = () => {
                 <Heart className="w-6 h-6 text-jw-blue" />
               </div>
               <div>
-                <h3 className="text-xl font-semibold mb-2">{t('Sustentabilidade via Doações')}</h3>
+                <h3 className="text-xl font-semibold mb-2">{t('benefits.sustainability.title')}</h3>
                 <p className="text-muted-foreground">
-                  {t('Sistema autofinanciado através de contribuições voluntárias, garantindo continuidade sem custos fixos para congregações.')}
+                  {t('benefits.sustainability.description')}
                 </p>
               </div>
             </div>
@@ -72,42 +72,42 @@ const Benefits = () => {
           <Card className="p-8 bg-card border-border/50">
             <div className="text-center space-y-6">
               <h3 className="text-2xl font-bold text-foreground">
-                {t('Comece Hoje Mesmo')}
+                {t('benefits.cta.title')}
               </h3>
               <p className="text-muted-foreground">
-                {t('Cadastre sua congregação e experimente a eficiência da automação ministerial. Setup completo em menos de 30 minutos.')}
+                {t('benefits.cta.description')}
               </p>
               
               <div className="space-y-4">
                 <div className="text-sm text-muted-foreground space-y-2">
                   <div className="flex justify-between">
-                    <span>✓ {t('Cadastro de estudantes')}</span>
-                    <span className="font-medium">{t('Incluído')}</span>
+                    <span>✓ {t('benefits.features.studentManagement')}</span>
+                    <span className="font-medium">{t('benefits.features.included')}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>✓ {t('Importação de programas')}</span>
-                    <span className="font-medium">{t('Incluído')}</span>
+                    <span>✓ {t('benefits.features.programImport')}</span>
+                    <span className="font-medium">{t('benefits.features.included')}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>✓ {t('Notificações automáticas')}</span>
-                    <span className="font-medium">{t('Incluído')}</span>
+                    <span>✓ {t('benefits.features.notifications')}</span>
+                    <span className="font-medium">{t('benefits.features.included')}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>✓ {t('Portal do estudante')}</span>
-                    <span className="font-medium">{t('Incluído')}</span>
+                    <span>✓ {t('benefits.features.studentPortal')}</span>
+                    <span className="font-medium">{t('benefits.features.included')}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>✓ {t('Relatórios completos')}</span>
-                    <span className="font-medium">{t('Incluído')}</span>
+                    <span>✓ {t('benefits.features.reports')}</span>
+                    <span className="font-medium">{t('benefits.features.included')}</span>
                   </div>
                 </div>
                 
                 <Button variant="hero" size="lg" className="w-full">
-                  {t('Começar Gratuitamente')}
+                  {t('benefits.cta.button')}
                 </Button>
                 
                 <p className="text-xs text-muted-foreground">
-                  {t('Sistema sustentado por doações voluntárias')}
+                  {t('benefits.cta.note')}
                 </p>
               </div>
             </div>

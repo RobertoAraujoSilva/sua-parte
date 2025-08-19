@@ -1,73 +1,118 @@
 /**
- * Force Logout Utility
- * Provides emergency logout functionality when Supabase auth fails
+ * Force Logout Utility - Sistema Ministerial
+ * Logout forçado quando o Supabase não responde
  */
 
 export const forceLogout = () => {
-  console.log('🚨 Force logout initiated');
+  console.log('🚨 FORCE LOGOUT INITIATED - Sistema Ministerial');
   
   try {
-    // Clear all possible authentication storage
+    // 1. Limpar localStorage
+    console.log('🧹 Clearing localStorage...');
     localStorage.clear();
+    
+    // 2. Limpar sessionStorage
+    console.log('🧹 Clearing sessionStorage...');
     sessionStorage.clear();
     
-    // Clear specific Supabase keys that might exist
-    const supabaseKeys = [
+    // 3. Limpar cookies específicos do Supabase
+    console.log('🧹 Clearing Supabase cookies...');
+    const cookies = document.cookie.split(";");
+    cookies.forEach(cookie => {
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+      
+      if (name.includes('supabase') || name.includes('sb-') || name.includes('auth')) {
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;
+        document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;domain=${window.location.hostname}`;
+      }
+    });
+    
+    // 4. Limpar tokens específicos
+    const tokenKeys = [
       'supabase.auth.token',
       'sb-nwpuurgwnnuejqinkvrh-auth-token',
       'sb-auth-token',
-      'supabase-auth-token'
+      'supabase-auth-token',
+      'supabase.session',
+      'sb-session',
+      'auth-token',
+      'session-token'
     ];
     
-    supabaseKeys.forEach(key => {
-      localStorage.removeItem(key);
-      sessionStorage.removeItem(key);
+    tokenKeys.forEach(key => {
+      try {
+        localStorage.removeItem(key);
+        sessionStorage.removeItem(key);
+      } catch (e) {
+        console.log(`⚠️ Could not remove ${key}:`, e);
+      }
     });
     
-    // Clear any cookies related to auth
-    document.cookie.split(";").forEach((c) => {
-      const eqPos = c.indexOf("=");
-      const name = eqPos > -1 ? c.substr(0, eqPos) : c;
-      document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
-    });
+    // 5. Forçar limpeza do estado do React
+    console.log('🔄 Force logout completed - redirecting to home');
     
-    console.log('✅ Force logout completed - all storage cleared');
-    
-    // Force page reload to reset application state
+    // Redirecionar para home page
     setTimeout(() => {
-      window.location.href = '/auth';
+      window.location.href = '/';
     }, 100);
     
   } catch (error) {
     console.error('❌ Force logout error:', error);
-    // Last resort - hard reload
+    // Último recurso - reload da página
+    console.log('🚨 Last resort - hard page reload');
     window.location.reload();
   }
 };
 
-// Emergency logout function that can be called from console
-(window as any).emergencyLogout = forceLogout;
+// Logout imediato para situações críticas
+export const immediateLogout = () => {
+  console.log('⚡ IMMEDIATE LOGOUT - Sistema Ministerial');
+  
+  // Limpeza imediata
+  localStorage.clear();
+  sessionStorage.clear();
+  
+  // Redirecionamento imediato
+  window.location.href = '/';
+};
 
-// Add to debug logger if available
-if (typeof window !== 'undefined') {
-  (window as any).debugLogout = {
-    force: forceLogout,
-    clearStorage: () => {
+// Logout inteligente que tenta Supabase primeiro, depois força
+export const smartLogout = async (supabaseSignOut: () => Promise<any>) => {
+  console.log('🧠 SMART LOGOUT - Sistema Ministerial');
+  
+  try {
+    // Tentar Supabase com timeout muito curto
+    const timeoutPromise = new Promise((resolve) => 
+      setTimeout(() => {
+        console.log('⏰ Smart logout timeout - switching to force logout');
+        resolve({ error: { message: 'Smart logout timeout', code: 'SMART_TIMEOUT' } });
+      }, 800) // Apenas 800ms timeout
+    );
+    
+    const result = await Promise.race([supabaseSignOut(), timeoutPromise]) as any;
+    
+    if (result?.error) {
+      console.log('⚠️ Supabase signOut failed or timed out, using force logout');
+      forceLogout();
+    } else {
+      console.log('✅ Supabase signOut successful');
+      // Ainda limpar estado local para garantir
       localStorage.clear();
       sessionStorage.clear();
-      console.log('🧹 All storage cleared');
-    },
-    checkAuth: () => {
-      console.log('🔍 Auth storage check:');
-      console.log('localStorage:', Object.keys(localStorage));
-      console.log('sessionStorage:', Object.keys(sessionStorage));
-      console.log('cookies:', document.cookie);
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 300);
     }
-  };
-  
-  console.log('🔧 Debug logout tools available:');
-  console.log('  window.emergencyLogout() - Force logout');
-  console.log('  window.debugLogout.force() - Force logout');
-  console.log('  window.debugLogout.clearStorage() - Clear all storage');
-  console.log('  window.debugLogout.checkAuth() - Check auth storage');
+  } catch (error) {
+    console.error('❌ Smart logout error, falling back to force logout:', error);
+    forceLogout();
+  }
+};
+
+// Adicionar ao window para acesso via console
+if (typeof window !== 'undefined') {
+  (window as any).forceLogout = forceLogout;
+  (window as any).immediateLogout = immediateLogout;
+  (window as any).smartLogout = smartLogout;
 }

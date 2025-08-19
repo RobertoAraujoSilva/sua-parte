@@ -7,33 +7,33 @@ const Features = () => {
   const features = [
     {
       icon: Users,
-      title: t('Gestão Completa de Estudantes'),
-      description: t('Cadastro detalhado com validação de cargos, parentesco e qualificações congregacionais para designações precisas.')
+      titleKey: 'features.studentManagement.title',
+      descriptionKey: 'features.studentManagement.description'
     },
     {
       icon: BookOpen,
-      title: t('Importação de Programas Semanais'),
-      description: t('Importação automática a partir de PDFs oficiais da apostila Vida e Ministério Cristão com parsing inteligente.')
+      titleKey: 'features.programImport.title',
+      descriptionKey: 'features.programImport.description'
     },
     {
       icon: Bell,
-      title: t('Notificações Automáticas'),
-      description: t('Envio por e-mail e WhatsApp com detalhes da designação, cena e instruções específicas para cada estudante.')
+      titleKey: 'features.notifications.title',
+      descriptionKey: 'features.notifications.description'
     },
     {
       icon: BarChart3,
-      title: t('Relatórios e Análises'),
-      description: t('Dashboard completo com histórico de participação, métricas de engajamento e relatórios para coordenadores.')
+      titleKey: 'features.reports.title',
+      descriptionKey: 'features.reports.description'
     },
     {
       icon: Shield,
-      title: t('Conformidade com Regras'),
-      description: t('Algoritmo inteligente que respeita todas as diretrizes da Escola do Ministério Teocrático e regulamentos congregacionais.')
+      titleKey: 'features.compliance.title',
+      descriptionKey: 'features.compliance.description'
     },
     {
       icon: Smartphone,
-      title: t('Portal do Estudante'),
-      description: t('Interface responsiva para estudantes visualizarem designações, confirmarem participação e contribuírem via doações.')
+      titleKey: 'features.studentPortal.title',
+      descriptionKey: 'features.studentPortal.description'
     }
   ];
 
@@ -42,10 +42,10 @@ const Features = () => {
       <div className="responsive-container">
         <div className="text-center mb-16">
           <h2 className="text-balance text-[clamp(1.5rem,4vw,2.5rem)] font-bold text-foreground mb-4">
-            {t('Funcionalidades Principais')}
+            {t('features.title')}
           </h2>
           <p className="text-balance text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
-            {t('Tudo que sua congregação precisa para automatizar e otimizar o processo de designações ministeriais com total conformidade.')}
+            {t('features.subtitle')}
           </p>
         </div>
         
@@ -57,10 +57,10 @@ const Features = () => {
                   <feature.icon className="w-6 h-6 text-jw-blue" />
                 </div>
                 <h3 className="text-lg sm:text-xl font-semibold text-foreground">
-                  {feature.title}
+                  {t(feature.titleKey)}
                 </h3>
                 <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
-                  {feature.description}
+                  {t(feature.descriptionKey)}
                 </p>
               </div>
             </Card>

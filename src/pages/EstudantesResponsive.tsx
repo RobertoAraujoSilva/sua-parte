@@ -15,7 +15,7 @@ import { StudentSpreadsheetOptimized } from "@/components/students/StudentSpread
 
 // Legacy responsive components (for backward compatibility)
 import { StudentsGrid } from "@/components/layout/adaptive-grid";
-import { DensityProvider, useDensity, useResponsiveText } from "@/components/ui/density-provider";
+import { DensityProvider, useDensity } from "@/contexts/DensityContext";
 import { StudentsSpreadsheetTable } from "@/components/ui/responsive-table";
 import { useResponsive } from "@/hooks/use-responsive";
 

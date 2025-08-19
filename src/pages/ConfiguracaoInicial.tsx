@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useTranslation } from "@/hooks/useTranslation";
 import { 
   ArrowRight, 
   ArrowLeft, 
@@ -24,6 +25,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const ConfiguracaoInicial = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { profile, updateProfile } = useAuth();
   const [currentStep, setCurrentStep] = useState(1);
@@ -43,17 +45,17 @@ const ConfiguracaoInicial = () => {
   });
 
   const steps = [
-    { id: 1, title: "Informações Pessoais", icon: User },
-    { id: 2, title: "Congregação", icon: Building },
-    { id: 3, title: "Preferências", icon: Settings }
+    { id: 1, title: t('initialSetup.steps.personalInfo'), icon: User },
+    { id: 2, title: t('initialSetup.steps.congregation'), icon: Building },
+    { id: 3, title: t('initialSetup.steps.preferences'), icon: Settings }
   ];
 
   const cargos = [
-    { value: 'anciao', label: 'Ancião' },
-    { value: 'servo_ministerial', label: 'Servo Ministerial' },
-    { value: 'instrutor', label: 'Instrutor da EMT' },
-    { value: 'pioneiro_regular', label: 'Pioneiro Regular' },
-    { value: 'publicador_batizado', label: 'Publicador Batizado' }
+    { value: 'anciao', label: t('initialSetup.roles.anciao') },
+    { value: 'servo_ministerial', label: t('initialSetup.roles.servo_ministerial') },
+    { value: 'instrutor', label: t('initialSetup.roles.instrutor') },
+    { value: 'pioneiro_regular', label: t('initialSetup.roles.pioneiro_regular') },
+    { value: 'publicador_batizado', label: t('initialSetup.roles.publicador_batizado') }
   ];
 
   const handleInputChange = (field: string, value: string) => {
@@ -106,8 +108,8 @@ const ConfiguracaoInicial = () => {
       localStorage.setItem('onboarding_completed', 'true');
 
       toast({
-        title: "Configuração Concluída!",
-        description: "Seu perfil foi configurado com sucesso. Vamos ao primeiro programa!",
+        title: t('configuracaoInicial.toast.success.title'),
+        description: t('configuracaoInicial.toast.success.description'),
       });
 
       navigate('/primeiro-programa');
@@ -115,8 +117,8 @@ const ConfiguracaoInicial = () => {
     } catch (error) {
       console.error('Error saving configuration:', error);
       toast({
-        title: "Erro na Configuração",
-        description: "Não foi possível salvar as configurações. Tente novamente.",
+        title: t('configuracaoInicial.toast.error.title'),
+        description: t('configuracaoInicial.toast.error.description'),
         variant: "destructive"
       });
     } finally {
@@ -148,10 +150,10 @@ const ConfiguracaoInicial = () => {
           {/* Header */}
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-jw-navy mb-2">
-              Configuração Inicial
+              {t('initialSetup.title')}
             </h1>
             <p className="text-gray-600">
-              Vamos configurar seu perfil para começar a usar o sistema
+              {t('initialSetup.subtitle')}
             </p>
           </div>
 
@@ -196,9 +198,9 @@ const ConfiguracaoInicial = () => {
                 {steps[currentStep - 1].title}
               </CardTitle>
               <CardDescription>
-                {currentStep === 1 && "Informe seus dados pessoais"}
-                {currentStep === 2 && "Dados da sua congregação"}
-                {currentStep === 3 && "Configure suas preferências do sistema"}
+                {currentStep === 1 && t('initialSetup.stepDescriptions.personalInfo')}
+                {currentStep === 2 && t('initialSetup.stepDescriptions.congregation')}
+                {currentStep === 3 && t('initialSetup.stepDescriptions.preferences')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -206,39 +208,39 @@ const ConfiguracaoInicial = () => {
               {currentStep === 1 && (
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="nome">Nome Completo *</Label>
+                    <Label htmlFor="nome">{t('initialSetup.fields.fullName')} *</Label>
                     <Input
                       id="nome"
                       value={formData.nome_completo}
                       onChange={(e) => handleInputChange('nome_completo', e.target.value)}
-                      placeholder="Seu nome completo"
+                      placeholder={t('initialSetup.fields.fullNamePlaceholder')}
                       required
                     />
                   </div>
                   
                   <div>
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor="email">{t('initialSetup.fields.email')}</Label>
                     <Input
                       id="email"
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
-                      placeholder="seu.email@exemplo.com"
+                      placeholder={t('initialSetup.fields.emailPlaceholder')}
                       disabled
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Email não pode ser alterado após o cadastro
+                      {t('initialSetup.fields.emailNote')}
                     </p>
                   </div>
 
                   <div>
-                    <Label htmlFor="cargo">Cargo/Privilégio</Label>
+                    <Label htmlFor="cargo">{t('initialSetup.fields.role')}</Label>
                     <Select
                       value={formData.cargo}
                       onValueChange={(value) => handleInputChange('cargo', value)}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione seu cargo" />
+                        <SelectValue placeholder={t('initialSetup.fields.selectRole')} />
                       </SelectTrigger>
                       <SelectContent>
                         {cargos.map((cargo) => (
@@ -256,12 +258,12 @@ const ConfiguracaoInicial = () => {
               {currentStep === 2 && (
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="congregacao">Nome da Congregação *</Label>
+                    <Label htmlFor="congregacao">{t('initialSetup.fields.congregationName')} *</Label>
                     <Input
                       id="congregacao"
                       value={formData.congregacao}
                       onChange={(e) => handleInputChange('congregacao', e.target.value)}
-                      placeholder="Ex: Congregação Central"
+                      placeholder={t('initialSetup.fields.congregationPlaceholder')}
                       required
                     />
                   </div>
@@ -269,7 +271,7 @@ const ConfiguracaoInicial = () => {
                   <Alert>
                     <Info className="h-4 w-4" />
                     <AlertDescription>
-                      O nome da congregação será usado nos relatórios e documentos gerados pelo sistema.
+                      {t('initialSetup.fields.congregationNote')}
                     </AlertDescription>
                   </Alert>
                 </div>
@@ -288,7 +290,7 @@ const ConfiguracaoInicial = () => {
                         }
                       />
                       <Label htmlFor="autoGenerate" className="text-sm">
-                        Gerar designações automaticamente após importar programa
+                        {t('initialSetup.preferences.autoGenerate')}
                       </Label>
                     </div>
 
@@ -301,7 +303,7 @@ const ConfiguracaoInicial = () => {
                         }
                       />
                       <Label htmlFor="emailNotifications" className="text-sm">
-                        Receber notificações por email
+                        {t('initialSetup.preferences.emailNotifications')}
                       </Label>
                     </div>
 
@@ -314,7 +316,7 @@ const ConfiguracaoInicial = () => {
                         }
                       />
                       <Label htmlFor="showTutorials" className="text-sm">
-                        Mostrar tutoriais e dicas do sistema
+                        {t('initialSetup.preferences.showTutorials')}
                       </Label>
                     </div>
                   </div>
@@ -322,7 +324,7 @@ const ConfiguracaoInicial = () => {
                   <Alert>
                     <Info className="h-4 w-4" />
                     <AlertDescription>
-                      Você pode alterar essas preferências a qualquer momento nas configurações.
+                      {t('initialSetup.preferences.note')}
                     </AlertDescription>
                   </Alert>
                 </div>
@@ -338,7 +340,7 @@ const ConfiguracaoInicial = () => {
               disabled={currentStep === 1}
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Anterior
+              {t('initialSetup.navigation.previous')}
             </Button>
 
             {currentStep < steps.length ? (
@@ -346,7 +348,7 @@ const ConfiguracaoInicial = () => {
                 onClick={handleNext}
                 disabled={!isStepValid()}
               >
-                Próximo
+                {t('initialSetup.navigation.next')}
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             ) : (
@@ -358,12 +360,12 @@ const ConfiguracaoInicial = () => {
                 {loading ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                    Salvando...
+                    {t('initialSetup.navigation.saving')}
                   </>
                 ) : (
                   <>
                     <CheckCircle className="w-4 h-4 mr-2" />
-                    Finalizar Configuração
+                    {t('initialSetup.navigation.finish')}
                   </>
                 )}
               </Button>

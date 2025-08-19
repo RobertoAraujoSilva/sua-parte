@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useTranslation } from "@/hooks/useTranslation";
 import { 
   ArrowRight, 
   CheckCircle, 
@@ -20,64 +21,53 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
 const PrimeiroPrograma = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { profile } = useAuth();
   const [currentDemo, setCurrentDemo] = useState(0);
 
   const demoSteps = [
     {
-      title: "1. Cadastre os Estudantes",
-      description: "Primeiro, vamos adicionar os estudantes da Escola do Ministério Teocrático",
+      title: t('firstProgram.steps.step1.title'),
+      description: t('firstProgram.steps.step1.description'),
       icon: Users,
-      action: "Ir para Estudantes",
+      action: t('firstProgram.steps.step1.action'),
       route: "/estudantes",
-      tips: [
-        "Adicione nome completo e cargo de cada estudante",
-        "Marque relacionamentos familiares para partes do ministério",
-        "Configure qualificações conforme diretrizes S-38-T"
-      ]
+      tips: t('firstProgram.steps.step1.tips', { returnObjects: true }) as string[]
     },
     {
-      title: "2. Importe um Programa",
-      description: "Agora vamos importar o programa da apostila Vida e Ministério Cristão",
+      title: t('firstProgram.steps.step2.title'),
+      description: t('firstProgram.steps.step2.description'),
       icon: Calendar,
-      action: "Ir para Programas",
+      action: t('firstProgram.steps.step2.action'),
       route: "/programas",
-      tips: [
-        "Faça upload do PDF oficial da apostila",
-        "Ou cole o conteúdo diretamente do JW.org",
-        "O sistema identifica automaticamente as 12 partes da reunião"
-      ]
+      tips: t('firstProgram.steps.step2.tips', { returnObjects: true }) as string[]
     },
     {
-      title: "3. Gere as Designações",
-      description: "Por fim, o sistema criará automaticamente todas as designações",
+      title: t('firstProgram.steps.step3.title'),
+      description: t('firstProgram.steps.step3.description'),
       icon: FileText,
-      action: "Ver Como Funciona",
+      action: t('firstProgram.steps.step3.action'),
       route: "/programas",
-      tips: [
-        "Clique em 'Gerar Designações' no programa importado",
-        "Revise as designações na página de preview",
-        "Aprove quando estiver satisfeito com o resultado"
-      ]
+      tips: t('firstProgram.steps.step3.tips', { returnObjects: true }) as string[]
     }
   ];
 
   const features = [
     {
       icon: Target,
-      title: "Conformidade S-38-T",
-      description: "Todas as designações seguem rigorosamente as diretrizes organizacionais"
+      title: t('firstProgram.features.compliance.title'),
+      description: t('firstProgram.features.compliance.description')
     },
     {
       icon: Lightbulb,
-      title: "Inteligência Artificial",
-      description: "Algoritmo inteligente distribui designações de forma balanceada"
+      title: t('firstProgram.features.ai.title'),
+      description: t('firstProgram.features.ai.description')
     },
     {
       icon: BookOpen,
-      title: "Estrutura Completa",
-      description: "Suporte total à estrutura de 12 partes da reunião semanal"
+      title: t('firstProgram.features.structure.title'),
+      description: t('firstProgram.features.structure.description')
     }
   ];
 
@@ -106,13 +96,13 @@ const PrimeiroPrograma = () => {
           {/* Header */}
           <div className="text-center mb-12">
             <Badge variant="secondary" className="mb-4">
-              Último Passo - Tutorial Prático
+              {t('firstProgram.badge')}
             </Badge>
             <h1 className="text-4xl font-bold text-jw-navy mb-4">
-              Vamos Criar Seu Primeiro Programa! 🎯
+              {t('firstProgram.title')}
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Siga este tutorial prático para criar seu primeiro programa com designações automáticas
+              {t('firstProgram.subtitle')}
             </p>
           </div>
 
@@ -158,7 +148,7 @@ const PrimeiroPrograma = () => {
                   {isActive && (
                     <CardContent>
                       <div className="bg-jw-blue/5 rounded-lg p-4">
-                        <h4 className="font-medium text-jw-navy mb-3">Dicas importantes:</h4>
+                        <h4 className="font-medium text-jw-navy mb-3">{t('firstProgram.tipsTitle')}</h4>
                         <ul className="space-y-2">
                           {step.tips.map((tip, tipIndex) => (
                             <li key={tipIndex} className="flex items-start gap-2 text-sm">
@@ -179,7 +169,7 @@ const PrimeiroPrograma = () => {
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="text-center text-jw-navy">
-                Por que o Sistema Ministerial é Especial?
+                {t('firstProgram.featuresTitle')}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -208,8 +198,7 @@ const PrimeiroPrograma = () => {
           <Alert className="mb-8">
             <Lightbulb className="h-4 w-4" />
             <AlertDescription>
-              <strong>Dica:</strong> Se você já tem estudantes cadastrados, pode começar diretamente 
-              importando um programa. O sistema funciona melhor com pelo menos 8-10 estudantes cadastrados.
+              <strong>{t('common.tip')}:</strong> {t('firstProgram.tip')}
             </AlertDescription>
           </Alert>
 
@@ -222,7 +211,7 @@ const PrimeiroPrograma = () => {
                 onClick={handleSkipToStudents}
               >
                 <Users className="w-5 h-5 mr-2" />
-                Começar com Estudantes
+                {t('firstProgram.startWithStudents')}
               </Button>
               
               <Button
@@ -230,13 +219,13 @@ const PrimeiroPrograma = () => {
                 size="lg"
                 onClick={handleFinishOnboarding}
               >
-                Ir para Dashboard
+                {t('firstProgram.goToDashboard')}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
             
             <p className="text-sm text-gray-500 mt-4">
-              Você pode acessar este tutorial novamente a qualquer momento no menu Ajuda
+              {t('firstProgram.helpNote')}
             </p>
           </div>
         </div>

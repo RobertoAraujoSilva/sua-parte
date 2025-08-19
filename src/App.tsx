@@ -2,7 +2,7 @@ import React from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TutorialProvider } from "@/contexts/TutorialContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -10,6 +10,7 @@ import { TutorialOverlay } from "@/components/tutorial";
 // Debug tools will be loaded conditionally in development only
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import { LanguageDebug } from "@/components/LanguageDebug";
 import Demo from "./pages/Demo";
 import Dashboard from "./pages/Dashboard";
 import Estudantes from "./pages/Estudantes";
@@ -35,10 +36,15 @@ import DeveloperPanel from "./pages/DeveloperPanel";
 import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
+import Equidade from "./pages/Equidade";
+import AdminDashboard from "./pages/AdminDashboard";
 import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DebugFab from "./components/DebugFab";
+import { Header } from '@/components/Header';
+import { ConnectionStatusBanner } from '@/components/ConnectionStatusBanner';
+import { SyncButton } from '@/components/SyncButton';
 
 const queryClient = new QueryClient();
 
@@ -64,27 +70,10 @@ if (import.meta.env.DEV) {
   });
 }
 
-// Conditional Debug Panel Component - Only renders in development
+// Conditional Debug Panel Component - Temporarily disabled to fix hooks issue
 const ConditionalDebugPanel: React.FC = () => {
-  const [DebugPanel, setDebugPanel] = React.useState<React.ComponentType | null>(null);
-
-  React.useEffect(() => {
-    if (import.meta.env.DEV) {
-      // Dynamically import ProductionDebugPanel only in development
-      import("@/components/ProductionDebugPanel").then(module => {
-        setDebugPanel(() => module.ProductionDebugPanel);
-      }).catch(error => {
-        console.warn('⚠️ Debug panel failed to load:', error);
-      });
-    }
-  }, []);
-
-  // Only render in development and if component is loaded
-  if (!import.meta.env.DEV || !DebugPanel) {
-    return null;
-  }
-
-  return <DebugPanel />;
+  // Temporarily disabled to fix React hooks issue
+  return null;
 };
 
 const App = () => (
@@ -249,6 +238,22 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                <Route
+                  path="/equidade"
+                  element={
+                    <ProtectedRoute allowedRoles={['instrutor']}>
+                      <Equidade />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Estudante Only Routes */}
                 <Route
@@ -288,6 +293,7 @@ const App = () => (
           {/* Debug Panel - Only shows in development */}
           <ConditionalDebugPanel />
           {import.meta.env.DEV && <DebugFab />}
+          {import.meta.env.DEV && <LanguageDebug />}
         </TutorialProvider>
       </AuthProvider>
     </LanguageProvider>
@@ -295,3 +301,22 @@ const App = () => (
 );
 
 export default App;
+
+// Add SyncButton to Header or create a dedicated sync area
+<div className="min-h-screen bg-background">
+  <Header />
+  <ConnectionStatusBanner />
+  
+  {/* Optional: Add sync controls in a dedicated area */}
+  <div className="container mx-auto px-4 py-2 border-b">
+    <div className="flex justify-end">
+      <SyncButton />
+    </div>
+  </div>
+  
+  <main className="container mx-auto px-4 py-8">
+    <Routes>
+      {/* ... existing routes ... */}
+    </Routes>
+  </main>
+</div>

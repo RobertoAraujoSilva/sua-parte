@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 
 type Language = 'pt' | 'en';
 
@@ -11,25 +12,26 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [language, setLanguageState] = useState<Language>('pt');
-
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem('language') as Language | null;
-    if (savedLanguage) {
-      setLanguageState(savedLanguage);
-    }
-  }, []);
+  const { i18n } = useTranslation();
+  
+  const language = (i18n.language || 'pt') as Language;
 
   const toggleLanguage = () => {
     const newLanguage = language === 'pt' ? 'en' : 'pt';
-    setLanguageState(newLanguage);
-    localStorage.setItem('language', newLanguage);
+    console.log('🌐 LanguageContext: Changing from', language, 'to', newLanguage);
+    i18n.changeLanguage(newLanguage);
   };
 
   const setLanguage = (lang: Language) => {
-    setLanguageState(lang);
-    localStorage.setItem('language', lang);
+    console.log('🌐 LanguageContext: Setting language to', lang);
+    i18n.changeLanguage(lang);
   };
+
+  // Debug current language
+  React.useEffect(() => {
+    console.log('🌐 LanguageContext: Current language is', language);
+    console.log('🌐 LanguageContext: Available resources:', Object.keys(i18n.options.resources || {}));
+  }, [language, i18n]);
 
   return (
     <LanguageContext.Provider value={{ language, toggleLanguage, setLanguage }}>

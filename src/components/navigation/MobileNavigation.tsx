@@ -54,42 +54,42 @@ export const MobileNavigation = ({ className = "" }: MobileNavigationProps) => {
                   className="w-full justify-start text-white hover:text-jw-gold hover:bg-jw-blue/20"
                   onClick={() => handleNavigation('/')}
                 >
-                  {t('INÍCIO')}
+                  {t('navigation.home')}
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-white hover:text-jw-gold hover:bg-jw-blue/20"
                   onClick={() => handleNavigation('/funcionalidades')}
                 >
-                  {t('FUNCIONALIDADES')}
+                  {t('navigation.features')}
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-white hover:text-jw-gold hover:bg-jw-blue/20"
                   onClick={() => handleNavigation('/congregacoes')}
                 >
-                  {t('CONGREGAÇÕES')}
+                  {t('navigation.congregations')}
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-white hover:text-jw-gold hover:bg-jw-blue/20"
                   onClick={() => handleNavigation('/suporte')}
                 >
-                  {t('SUPORTE')}
+                  {t('navigation.support')}
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-white hover:text-jw-gold hover:bg-jw-blue/20"
                   onClick={() => handleNavigation('/sobre')}
                 >
-                  {t('SOBRE')}
+                  {t('navigation.about')}
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-white hover:text-jw-gold hover:bg-jw-blue/20 font-semibold"
                   onClick={() => handleNavigation('/doar')}
                 >
-                  {t('DOAR')}
+                  {t('navigation.donate')}
                 </Button>
               </>
             )}
@@ -101,35 +101,35 @@ export const MobileNavigation = ({ className = "" }: MobileNavigationProps) => {
                   className="w-full justify-start text-white hover:text-jw-gold hover:bg-jw-blue/20"
                   onClick={() => handleNavigation('/dashboard')}
                 >
-                  {t('DASHBOARD')}
+                  {t('navigation.dashboard')}
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-white hover:text-jw-gold hover:bg-jw-blue/20"
                   onClick={() => handleNavigation('/estudantes')}
                 >
-                  {t('ESTUDANTES')}
+                  {t('navigation.students')}
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-white hover:text-jw-gold hover:bg-jw-blue/20"
                   onClick={() => handleNavigation('/programas')}
                 >
-                  {t('PROGRAMAS')}
+                  {t('navigation.programs')}
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-white hover:text-jw-gold hover:bg-jw-blue/20"
                   onClick={() => handleNavigation('/designacoes')}
                 >
-                  {t('DESIGNAÇÕES')}
+                  {t('navigation.assignments')}
                 </Button>
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-white hover:text-jw-gold hover:bg-jw-blue/20"
                   onClick={() => handleNavigation('/relatorios')}
                 >
-                  {t('RELATÓRIOS')}
+                  {t('navigation.reports')}
                 </Button>
               </>
             )}
@@ -140,7 +140,7 @@ export const MobileNavigation = ({ className = "" }: MobileNavigationProps) => {
                 className="w-full justify-start text-white hover:text-jw-gold hover:bg-jw-blue/20"
                 onClick={() => handleNavigation(`/estudante/${user?.id}`)}
               >
-                {t('Meu Portal')}
+                {t('navigation.myPortal')}
               </Button>
             )}
           </nav>

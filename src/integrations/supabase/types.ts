@@ -864,7 +864,7 @@ export type Database = {
         | "template_ready"
         | "published"
         | "archived"
-      user_role: "instrutor" | "estudante" | "family_member" | "developer"
+      user_role: "instrutor" | "estudante" | "family_member" | "developer" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never

@@ -5,54 +5,56 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useNavigate } from "react-router-dom";
 import { MapPin, Users, Calendar, Star } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const Congregacoes = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const testimonials = [
     {
-      congregation: "Congregação Central",
-      city: "São Paulo, SP",
+      congregation: t('congregationsPage.testimonials.congregations.central.name'),
+      city: t('congregationsPage.testimonials.congregations.central.city'),
       members: 120,
-      coordinator: "Irmão Silva",
-      testimonial: "O Sistema Ministerial revolucionou nossa organização. Reduzimos o tempo de preparação das designações de 3 horas para 15 minutos!",
+      coordinator: t('congregationsPage.testimonials.congregations.central.coordinator'),
+      testimonial: t('congregationsPage.testimonials.congregations.central.testimonial'),
       rating: 5,
       monthsUsing: 18
     },
     {
-      congregation: "Congregação Norte",
-      city: "Rio de Janeiro, RJ", 
+      congregation: t('congregationsPage.testimonials.congregations.north.name'),
+      city: t('congregationsPage.testimonials.congregations.north.city'), 
       members: 85,
-      coordinator: "Irmão Santos",
-      testimonial: "Excelente ferramenta! Os estudantes agora recebem suas designações automaticamente e podem confirmar participação pelo celular.",
+      coordinator: t('congregationsPage.testimonials.congregations.north.coordinator'),
+      testimonial: t('congregationsPage.testimonials.congregations.north.testimonial'),
       rating: 5,
       monthsUsing: 12
     },
     {
-      congregation: "Congregação Oeste",
-      city: "Belo Horizonte, MG",
+      congregation: t('congregationsPage.testimonials.congregations.west.name'),
+      city: t('congregationsPage.testimonials.congregations.west.city'),
       members: 95,
-      coordinator: "Irmão Oliveira",
-      testimonial: "A conformidade com as regras congregacionais é perfeita. Nunca mais tivemos problemas com designações inadequadas.",
+      coordinator: t('congregationsPage.testimonials.congregations.west.coordinator'),
+      testimonial: t('congregationsPage.testimonials.congregations.west.testimonial'),
       rating: 5,
       monthsUsing: 8
     },
     {
-      congregation: "Congregação Sul",
-      city: "Porto Alegre, RS",
+      congregation: t('congregationsPage.testimonials.congregations.south.name'),
+      city: t('congregationsPage.testimonials.congregations.south.city'),
       members: 110,
-      coordinator: "Irmão Costa",
-      testimonial: "O portal do estudante é fantástico. Os jovens estão mais engajados e organizados com suas participações ministeriais.",
+      coordinator: t('congregationsPage.testimonials.congregations.south.coordinator'),
+      testimonial: t('congregationsPage.testimonials.congregations.south.testimonial'),
       rating: 5,
       monthsUsing: 15
     }
   ];
 
   const stats = [
-    { label: "Congregações Ativas", value: "100+", icon: Users },
-    { label: "Estudantes Cadastrados", value: "2.500+", icon: Users },
-    { label: "Designações Geradas", value: "50.000+", icon: Calendar },
-    { label: "Satisfação", value: "98%", icon: Star }
+    { label: t('congregationsPage.stats.activeCongregations'), value: t('congregacoes.stats.activeCongregationsValue'), icon: Users },
+    { label: t('congregationsPage.stats.registeredStudents'), value: t('congregacoes.stats.registeredStudentsValue'), icon: Users },
+    { label: t('congregationsPage.stats.generatedAssignments'), value: t('congregacoes.stats.generatedAssignmentsValue'), icon: Calendar },
+    { label: t('congregationsPage.stats.satisfaction'), value: t('congregacoes.stats.satisfactionValue'), icon: Star }
   ];
 
   return (
@@ -64,11 +66,10 @@ const Congregacoes = () => {
         <section className="bg-gradient-to-br from-jw-navy via-jw-blue to-jw-blue-dark py-20">
           <div className="container mx-auto px-4 text-center text-white">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              Congregações <span className="text-jw-gold">Parceiras</span>
+              {t('congregationsPage.title')} <span className="text-jw-gold">{t('congregationsPage.titleHighlight')}</span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 max-w-3xl mx-auto opacity-90">
-              Mais de 100 congregações já experimentam a eficiência da automação ministerial.
-              Junte-se a esta comunidade crescente de servos organizados.
+              {t('congregationsPage.subtitle')}
             </p>
           </div>
         </section>
@@ -96,7 +97,7 @@ const Congregacoes = () => {
         {/* Testimonials */}
         <section className="py-20 bg-muted/50">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">Depoimentos das Congregações</h2>
+            <h2 className="text-3xl font-bold text-center mb-12">{t('congregationsPage.testimonials.title')}</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {testimonials.map((testimonial, index) => (
                 <Card key={index} className="border-2 hover:border-jw-blue/20 transition-all duration-300">
@@ -111,7 +112,7 @@ const Congregacoes = () => {
                       </div>
                       <div className="text-right">
                         <Badge variant="secondary" className="mb-2">
-                          {testimonial.members} membros
+                          {testimonial.members} {t('congregationsPage.testimonials.members')}
                         </Badge>
                         <div className="flex items-center gap-1">
                           {[...Array(testimonial.rating)].map((_, i) => (
@@ -123,11 +124,11 @@ const Congregacoes = () => {
                   </CardHeader>
                   <CardContent>
                     <blockquote className="text-sm mb-4 italic">
-                      "{testimonial.testimonial}"
+                      {t('footer.testimonialQuote', { testimonial: testimonial.testimonial })}
                     </blockquote>
                     <div className="flex justify-between items-center text-xs text-muted-foreground">
-                      <span>— {testimonial.coordinator}</span>
-                      <span>Usando há {testimonial.monthsUsing} meses</span>
+                      <span>{t('footer.testimonialAuthor', { author: testimonial.coordinator })}</span>
+                      <span>{t('congregationsPage.testimonials.usingFor')} {testimonial.monthsUsing} {t('congregationsPage.testimonials.months')}</span>
                     </div>
                   </CardContent>
                 </Card>
@@ -139,43 +140,40 @@ const Congregacoes = () => {
         {/* Success Stories */}
         <section className="py-20">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">Histórias de Sucesso</h2>
+            <h2 className="text-3xl font-bold text-center mb-12">{t('congregationsPage.successStories.title')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <Card className="text-center">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-jw-blue">95%</CardTitle>
-                  <CardDescription>Redução no Tempo de Preparação</CardDescription>
+                  <CardTitle className="text-2xl text-jw-blue">{t('congregacoes.successStories.timeReductionValue')}</CardTitle>
+                  <CardDescription>{t('congregationsPage.successStories.timeReduction.title')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm">
-                    Coordenadores relatam que o tempo gasto organizando designações 
-                    reduziu drasticamente, permitindo mais foco no desenvolvimento espiritual.
+                    {t('congregationsPage.successStories.timeReduction.description')}
                   </p>
                 </CardContent>
               </Card>
 
               <Card className="text-center">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-jw-blue">87%</CardTitle>
-                  <CardDescription>Aumento no Engajamento</CardDescription>
+                  <CardTitle className="text-2xl text-jw-blue">{t('congregacoes.successStories.engagementValue')}</CardTitle>
+                  <CardDescription>{t('congregationsPage.successStories.engagement.title')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm">
-                    Estudantes demonstram maior participação e pontualidade nas 
-                    designações após implementação do sistema de notificações.
+                    {t('congregationsPage.successStories.engagement.description')}
                   </p>
                 </CardContent>
               </Card>
 
               <Card className="text-center">
                 <CardHeader>
-                  <CardTitle className="text-2xl text-jw-blue">100%</CardTitle>
-                  <CardDescription>Conformidade com Regras</CardDescription>
+                  <CardTitle className="text-2xl text-jw-blue">{t('congregacoes.successStories.complianceValue')}</CardTitle>
+                  <CardDescription>{t('congregationsPage.successStories.compliance.title')}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm">
-                    Zero erros de designação inadequada desde a implementação, 
-                    garantindo total conformidade com as diretrizes congregacionais.
+                    {t('congregationsPage.successStories.compliance.description')}
                   </p>
                 </CardContent>
               </Card>
@@ -187,11 +185,10 @@ const Congregacoes = () => {
         <section className="py-20 bg-gradient-to-r from-jw-blue to-jw-blue-light">
           <div className="container mx-auto px-4 text-center text-white">
             <h2 className="text-3xl font-bold mb-6">
-              Sua Congregação Pode Ser a Próxima!
+              {t('congregationsPage.cta.title')}
             </h2>
             <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-              Junte-se às congregações que já descobriram como a tecnologia pode 
-              auxiliar na organização ministerial de forma simples e eficiente.
+              {t('congregationsPage.cta.subtitle')}
             </p>
             <Button
               variant="hero"
@@ -199,7 +196,7 @@ const Congregacoes = () => {
               className="text-lg px-8 py-4 bg-white text-jw-blue hover:bg-white/90"
               onClick={() => navigate('/auth')}
             >
-              Começar Gratuitamente
+              {t('congregationsPage.cta.button')}
             </Button>
           </div>
         </section>

@@ -20,6 +20,7 @@ import { TemplateLibrary } from "@/components/TemplateLibrary";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { generateProgramPDF } from "@/utils/pdfGenerator";
+import { listOffline } from "@/utils/offlineLocalDB";
 
 const Programas = () => {
   const navigate = useNavigate();
@@ -77,23 +78,14 @@ const Programas = () => {
       const { data, error } = await supabase
         .rpc('get_programs_complete', { user_uuid: user.id });
 
-      if (error) {
-        console.error('❌ Error loading programs:', error);
-        setProgramsError(`Erro ao carregar programas: ${error.message}`);
-        return;
-      }
-
-      console.log('✅ Programs loaded:', data?.length || 0);
-
-      // Transform database data to match UI expectations
-      const transformedPrograms = (data || []).map(program => ({
+      const mapToUI = (program: any) => ({
         id: program.id,
         semana: program.semana || program.mes_apostila || `Semana de ${new Date(program.data_inicio_semana).toLocaleDateString('pt-BR')}`,
         arquivo: program.arquivo || `programa-${program.data_inicio_semana}.pdf`,
         status: program.assignment_status === 'generated' ? 'Designações Geradas' :
                 program.assignment_status === 'generating' ? 'Gerando Designações' :
                 'Aguardando Designações',
-        dataImportacao: new Date(program.created_at).toISOString().split('T')[0],
+        dataImportacao: (program.created_at ? new Date(program.created_at).toISOString().split('T')[0] : new Date(program.updated_at || Date.now()).toISOString().split('T')[0]),
         designacoesGeradas: program.assignment_status === 'generated',
         data_inicio_semana: program.data_inicio_semana,
         mes_apostila: program.mes_apostila,
@@ -103,7 +95,45 @@ const Programas = () => {
           "Faça Seu Melhor no Ministério",
           "Nossa Vida Cristã"
         ]
-      }));
+      });
+
+      if (error) {
+        console.error('❌ Error loading programs (online):', error);
+        // Offline fallback
+        try {
+          const offlinePrograms = await listOffline('programas');
+          if (offlinePrograms && offlinePrograms.length > 0) {
+            console.log('📦 Loaded programs from offline cache:', offlinePrograms.length);
+            const transformedOffline = offlinePrograms.map(mapToUI);
+            setProgramas(transformedOffline);
+            return;
+          }
+        } catch (offlineErr) {
+          console.error('���️ Failed to load programs from offline cache:', offlineErr);
+        }
+        setProgramsError(`Erro ao carregar programas: ${error.message}`);
+        return;
+      }
+
+      // If data is empty, attempt offline cache
+      if (!data || data.length === 0) {
+        try {
+          const offlinePrograms = await listOffline('programas');
+          if (offlinePrograms && offlinePrograms.length > 0) {
+            console.log('📦 Loaded programs from offline cache (no online data):', offlinePrograms.length);
+            const transformedOffline = offlinePrograms.map(mapToUI);
+            setProgramas(transformedOffline);
+            return;
+          }
+        } catch (offlineErr) {
+          console.error('⚠️ Failed to load programs from offline cache:', offlineErr);
+        }
+      }
+
+      console.log('✅ Programs loaded:', data?.length || 0);
+
+      // Transform database data to match UI expectations
+      const transformedPrograms = (data || []).map(mapToUI);
 
       setProgramas(transformedPrograms);
 
@@ -898,6 +928,10 @@ const Programas = () => {
         progress={progress}
         currentStep={currentStep}
         programTitle={selectedProgram?.semana || ''}
+        onClose={() => {
+          setSelectedProgram(null);
+          resetState();
+        }}
       />
 
       {/* Assignment Preview Modal */}

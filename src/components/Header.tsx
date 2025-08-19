@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { useDebugLogger } from "@/utils/debugLogger";
 import { useTranslation } from "@/hooks/useTranslation";
 import { MobileNavigation } from "@/components/navigation/MobileNavigation";
+import { forceLogout } from "@/utils/forceLogout";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,11 +48,15 @@ const Header = () => {
         logLogoutResult(false, error, user);
         logError(error, 'Header handleSignOut', user);
 
+        // Use force logout as fallback
+        console.log('🔄 Using force logout as fallback...');
         toast({
-          title: t("Erro"),
-          description: t("Erro ao sair. Tente novamente."),
-          variant: "destructive"
+          title: t("Logout Forçado"),
+          description: t("Usando logout de emergência..."),
         });
+        
+        forceLogout();
+        return;
       } else {
         console.log('✅ SignOut successful, navigating to home...');
         logLogoutResult(true, null, user);
@@ -72,11 +77,14 @@ const Header = () => {
       logLogoutResult(false, error, user);
       logError(error, 'Header handleSignOut Exception', user);
 
+      // Use force logout as fallback
+      console.log('🔄 Using force logout as fallback due to exception...');
       toast({
-        title: t("Erro"),
-        description: t("Erro inesperado ao sair. Tente novamente."),
-        variant: "destructive"
+        title: t("Logout de Emergência"),
+        description: t("Usando logout forçado..."),
       });
+      
+      forceLogout();
     }
   };
 
@@ -86,35 +94,35 @@ const Header = () => {
         <div className="flex items-center justify-between h-14">
           <div className="flex items-center space-x-2 sm:space-x-8">
             <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="w-8 h-8 bg-jw-blue rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-sm">SM</span>
-            </div>
-            <h1 className="header-title text-lg sm:text-xl font-semibold">{t('common.appName')}</h1>
+              <div className="w-8 h-8 bg-jw-blue rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">SM</span>
+              </div>
+              <h1 className="header-title text-lg sm:text-xl font-semibold">{t('common.appName')}</h1>
             </div>
             
             <nav className="header-nav hidden md:flex items-center space-x-6">
                           {!user && (
                             <>
                               <Link to="/" className="hover:text-jw-gold transition-colors">
-                                                  {t('INÍCIO')}
+                                                  {t('navigation.home')}
                                                 </Link>
                                                 <Link to="/funcionalidades" className="hover:text-jw-gold transition-colors">
-                                                  {t('FUNCIONALIDADES')}
+                                                  {t('navigation.features')}
                                                 </Link>
                                                 <a href="#faq" className="hover:text-jw-gold transition-colors">
-                                                  {t('FAQ')}
+                                                  {t('navigation.faq')}
                                                 </a>
                                                 <Link to="/congregacoes" className="hover:text-jw-gold transition-colors">
-                                                  {t('CONGREGAÇÕES')}
+                                                  {t('navigation.congregations')}
                                                 </Link>
                                                 <Link to="/suporte" className="hover:text-jw-gold transition-colors">
-                                                  {t('SUPORTE')}
+                                                  {t('navigation.support')}
                                                 </Link>
                                                 <Link to="/sobre" className="hover:text-jw-gold transition-colors">
-                                                  {t('SOBRE')}
+                                                  {t('navigation.about')}
                                                 </Link>
                                                 <Link to="/doar" className="hover:text-jw-gold transition-colors font-semibold">
-                                                  {t('DOAR')}
+                                                  {t('navigation.donate')}
                                                 </Link>
                             </>
                           )}
@@ -122,19 +130,19 @@ const Header = () => {
                           {userIsInstrutor && (
                             <>
                               <Link to="/dashboard" className="hover:text-jw-gold transition-colors">
-                                                  {t('DASHBOARD')}
+                                                  {t('navigation.dashboard')}
                                                 </Link>
                                                 <Link to="/estudantes" className="hover:text-jw-gold transition-colors">
-                                                  {t('ESTUDANTES')}
+                                                  {t('navigation.students')}
                                                 </Link>
                                                 <Link to="/programas" className="hover:text-jw-gold transition-colors">
-                                                  {t('PROGRAMAS')}
+                                                  {t('navigation.programs')}
                                                 </Link>
                                                 <Link to="/designacoes" className="hover:text-jw-gold transition-colors">
-                                                  {t('DESIGNAÇÕES')}
+                                                  {t('navigation.assignments')}
                                                 </Link>
                                                 <Link to="/relatorios" className="hover:text-jw-gold transition-colors">
-                                                  {t('RELATÓRIOS')}
+                                                  {t('navigation.reports')}
                                                 </Link>
                             </>
                           )}
@@ -150,13 +158,18 @@ const Header = () => {
               variant="ghost"
               size="sm"
               className="text-white hover:text-jw-gold p-2 sm:px-3"
-              onClick={toggleLanguage}
-              title={language === 'pt' ? t('Alternar para Inglês') : t('Alternar para Português')}
+              onClick={() => {
+                console.log('🌐 Language toggle clicked. Current:', language);
+                toggleLanguage();
+                console.log('🌐 Language after toggle:', language === 'pt' ? 'en' : 'pt');
+              }}
+              title={language === 'pt' ? t('language.switchToEnglish') : t('language.switchToPortuguese')}
             >
               <Languages className="w-4 h-4 sm:mr-2" />
               <span className="hidden md:inline">
-                {language === 'pt' ? t('Inglês') : t('Português')}
+                {language === 'pt' ? t('language.english') : t('language.portuguese')}
               </span>
+              <span className="ml-1 text-xs opacity-75">({language})</span>
             </Button>
             {user ? (
               <>
@@ -170,7 +183,20 @@ const Header = () => {
                                   size="sm"
                                   className="text-xs bg-red-600 text-white hover:bg-red-700 hidden sm:inline-flex"
                                 >
-                                  {t('Test Logout')}
+                                  {t('common.logout')}
+                                </Button>
+                                
+                                {/* Emergency Logout Button */}
+                                <Button
+                                  onClick={() => {
+                                    console.log('🚨 Emergency logout button clicked');
+                                    forceLogout();
+                                  }}
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-xs bg-orange-600 text-white hover:bg-orange-700 hidden sm:inline-flex"
+                                >
+                                  🚨 Logout
                                 </Button>
 
                 <DropdownMenu>
@@ -181,7 +207,7 @@ const Header = () => {
                       {profile?.nome_completo || user.user_metadata?.nome_completo || user.email}
                     </span>
                     <Badge variant="outline" className="text-xs border-jw-gold text-jw-gold hidden sm:inline-flex">
-                                          {(profile?.role === 'instrutor' || user.user_metadata?.role === 'instrutor') ? t('Instrutor') : t('Estudante')}
+                                          {(profile?.role === 'instrutor' || user.user_metadata?.role === 'instrutor') ? t('navigation.instructor') : t('navigation.student')}
                                                               </Badge>
                   </Button>
                 </DropdownMenuTrigger>
@@ -192,7 +218,7 @@ const Header = () => {
                         {profile?.nome_completo || user.user_metadata?.nome_completo || user.email}
                       </p>
                       <p className="text-sm text-gray-500">
-                        {profile?.congregacao || user.user_metadata?.congregacao || t('Congregação')}
+                        {profile?.congregacao || user.user_metadata?.congregacao || t('terms.congregation')}
                       </p>
                     </div>
                   </DropdownMenuLabel>
@@ -201,14 +227,14 @@ const Header = () => {
                   {userIsInstrutor && (
                                       <DropdownMenuItem onClick={() => navigate('/dashboard')}>
                                                             <Settings className="w-4 h-4 mr-2" />
-                                                            {t('Dashboard')}
+                                                            {t('navigation.dashboard')}
                                                           </DropdownMenuItem>
                                                         )}
                                       
                                                         {userIsEstudante && (
                                                           <DropdownMenuItem onClick={() => navigate(`/estudante/${user.id}`)}>
                                                             <User className="w-4 h-4 mr-2" />
-                                                            {t('Meu Portal')}
+                                                            {t('navigation.myPortal')}
                                                           </DropdownMenuItem>
                                                         )}
 
@@ -229,7 +255,7 @@ const Header = () => {
                     className="text-red-600 cursor-pointer"
                   >
                     <LogOut className="w-4 h-4 mr-2" />
-                                        {t('Sair')}
+                                        {t('common.logout')}
                                       </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -242,7 +268,7 @@ const Header = () => {
                                   className="text-white hover:text-jw-gold p-2 sm:px-3"
                                   onClick={() => navigate('/auth')}
                                 >
-                                  <span className="hidden sm:inline">{t('Entrar')}</span>
+                                  <span className="hidden sm:inline">{t('navigation.login')}</span>
                                   <span className="sm:hidden">Login</span>
                                 </Button>
                                 <Button
@@ -251,7 +277,7 @@ const Header = () => {
                                   className="p-2 sm:px-3"
                                   onClick={() => navigate('/auth')}
                                 >
-                                  <span className="hidden sm:inline">{t('Começar')}</span>
+                                  <span className="hidden sm:inline">{t('navigation.getStarted')}</span>
                                   <span className="sm:hidden">Start</span>
                                 </Button>
               </>

@@ -120,13 +120,10 @@ const EstudanteForm = ({ estudante, potentialParents, onSubmit, onCancel, loadin
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Save className="w-5 h-5" />
-          {isEditing ? t('Editar Estudante') : t('Novo Estudante Form')}
+          {isEditing ? `${t('common.edit')} ${t('navigation.students')}` : t('students.newStudent')}
         </CardTitle>
         <CardDescription>
-          {isEditing
-            ? t('Atualize as informações do estudante')
-            : t('Cadastre um novo estudante da Escola do Ministério Teocrático')
-          }
+          {t('students.subtitle')}
         </CardDescription>
       </CardHeader>
       
@@ -135,19 +132,19 @@ const EstudanteForm = ({ estudante, potentialParents, onSubmit, onCancel, loadin
           {/* Basic Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="nome">{t('Nome Completo *')}</Label>
+              <Label htmlFor="nome">{t('auth.fullName')} *</Label>
               <Input
                 id="nome"
                 value={formData.nome}
                 onChange={(e) => handleInputChange("nome", e.target.value)}
-                placeholder={t('Digite o nome completo')}
+                placeholder={t('auth.fullNamePlaceholder')}
                 className={errors.nome ? "border-red-500" : ""}
               />
               {errors.nome && <p className="text-sm text-red-500">{errors.nome}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="idade">{t('Idade *')}</Label>
+              <Label htmlFor="idade">{t('common.age')} *</Label>
               <Input
                 id="idade"
                 type="number"
@@ -164,32 +161,29 @@ const EstudanteForm = ({ estudante, potentialParents, onSubmit, onCancel, loadin
           {/* Gender and Role */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="genero">{t('Gênero *')}</Label>
+              <Label htmlFor="genero">{t('common.gender')} *</Label>
               <Select value={formData.genero} onValueChange={(value: Genero) => handleInputChange("genero", value)}>
                 <SelectTrigger className={errors.genero ? "border-red-500" : ""}>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(GENERO_LABELS).map(([value, label]) => (
-                    <SelectItem key={value} value={value}>
-                      {label}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="masculino">{t('students.genders.male')}</SelectItem>
+                  <SelectItem value="feminino">{t('students.genders.female')}</SelectItem>
                 </SelectContent>
               </Select>
               {errors.genero && <p className="text-sm text-red-500">{errors.genero}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="cargo">{t('Cargo *')}</Label>
+              <Label htmlFor="cargo">{t('common.role')} *</Label>
               <Select value={formData.cargo} onValueChange={(value: Cargo) => handleInputChange("cargo", value)}>
                 <SelectTrigger className={errors.cargo ? "border-red-500" : ""}>
-                  <SelectValue placeholder={t('Selecione o cargo')} />
+                  <SelectValue placeholder={t('auth.selectRole')} />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(CARGO_LABELS).map(([value, label]) => (
+                  {Object.entries(CARGO_LABELS).map(([value]) => (
                     <SelectItem key={value} value={value}>
-                      {label}
+                      {t(`terms.${value}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -201,20 +195,20 @@ const EstudanteForm = ({ estudante, potentialParents, onSubmit, onCancel, loadin
           {/* Contact Information */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="email">{t('Email')}</Label>
+              <Label htmlFor="email">{t('common.email')}</Label>
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                placeholder={t('email@exemplo.com')}
+                placeholder={t('initialSetup.fields.emailPlaceholder')}
                 className={errors.email ? "border-red-500" : ""}
               />
               {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="telefone">{t('Telefone')}</Label>
+              <Label htmlFor="telefone">{t('common.phone')}</Label>
               <Input
                 id="telefone"
                 value={formData.telefone}
@@ -228,7 +222,7 @@ const EstudanteForm = ({ estudante, potentialParents, onSubmit, onCancel, loadin
 
           {/* Baptism Date */}
           <div className="space-y-2">
-            <Label htmlFor="data_batismo">{t('Data do Batismo')}</Label>
+            <Label htmlFor="data_batismo">{t('students.baptizedOn')}</Label>
             <Input
               id="data_batismo"
               type="date"
@@ -240,10 +234,10 @@ const EstudanteForm = ({ estudante, potentialParents, onSubmit, onCancel, loadin
           {/* Parent/Guardian for minors */}
           {showParentField && (
             <div className="space-y-2">
-              <Label htmlFor="id_pai_mae">{t('Responsável *')}</Label>
+              <Label htmlFor="id_pai_mae">{t('students.responsible')} *</Label>
               <Select value={formData.id_pai_mae} onValueChange={(value) => handleInputChange("id_pai_mae", value)}>
                 <SelectTrigger className={errors.id_pai_mae ? "border-red-500" : ""}>
-                  <SelectValue placeholder={t('Selecione o responsável')} />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {potentialParents.map((parent) => (
@@ -255,7 +249,7 @@ const EstudanteForm = ({ estudante, potentialParents, onSubmit, onCancel, loadin
               </Select>
               {errors.id_pai_mae && <p className="text-sm text-red-500">{errors.id_pai_mae}</p>}
               <p className="text-sm text-gray-500">
-                {t('Menores de 18 anos devem ter um responsável cadastrado')}
+                {t('students.minor')}: {t('students.responsible')}
               </p>
             </div>
           )}
@@ -267,12 +261,12 @@ const EstudanteForm = ({ estudante, potentialParents, onSubmit, onCancel, loadin
               checked={formData.ativo}
               onCheckedChange={(checked) => handleInputChange("ativo", checked)}
             />
-            <Label htmlFor="ativo">{t('Estudante ativo')}</Label>
+            <Label htmlFor="ativo">{t('common.active')}</Label>
           </div>
 
           {/* Qualifications Display */}
           <div className="space-y-2">
-            <Label>{t('Qualificações Ministeriais')}</Label>
+            <Label>{t('students.qualifications')}</Label>
             <div className="flex flex-wrap gap-2">
               {qualificacoes.map((qual) => (
                 <Badge key={qual} variant="outline">
@@ -281,18 +275,18 @@ const EstudanteForm = ({ estudante, potentialParents, onSubmit, onCancel, loadin
               ))}
             </div>
             <p className="text-sm text-gray-500">
-              {t('Qualificações são determinadas automaticamente com base no cargo, gênero e idade')}
+              {t('forms.pleaseWait')}
             </p>
           </div>
 
           {/* Observations */}
           <div className="space-y-2">
-            <Label htmlFor="observacoes">{t('Observações')}</Label>
+            <Label htmlFor="observacoes">{t('students.observations')}</Label>
             <Textarea
               id="observacoes"
               value={formData.observacoes}
               onChange={(e) => handleInputChange("observacoes", e.target.value)}
-              placeholder={t('Observações adicionais sobre o estudante...')}
+              placeholder={t('students.observations')}
               rows={3}
             />
           </div>
@@ -300,11 +294,11 @@ const EstudanteForm = ({ estudante, potentialParents, onSubmit, onCancel, loadin
           {/* Form Actions */}
           <div className="flex gap-4 pt-4">
             <Button type="submit" disabled={loading} className="flex-1">
-              {loading ? t('Salvando...') : isEditing ? t('Atualizar') : t('Cadastrar')}
+              {loading ? t('common.saving') : t('common.save')}
             </Button>
             <Button type="button" variant="outline" onClick={onCancel}>
               <X className="w-4 h-4 mr-2" />
-              {t('Cancelar')}
+              {t('common.cancel')}
             </Button>
           </div>
         </form>

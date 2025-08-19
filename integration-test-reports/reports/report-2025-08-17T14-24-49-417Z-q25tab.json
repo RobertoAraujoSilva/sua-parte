@@ -1,0 +1,73 @@
+{
+  "id": "report-2025-08-17T14-24-49-417Z-q25tab",
+  "timestamp": "2025-08-17T14:24:49.417Z",
+  "report": {
+    "overallStatus": "ISSUES_FOUND",
+    "timestamp": "2025-08-17T14:24:49.417Z",
+    "totalDuration": 4231.403866994395,
+    "summary": {
+      "totalTests": 3,
+      "passed": 2,
+      "failed": 0,
+      "warnings": 1,
+      "criticalIssues": 0
+    },
+    "moduleResults": [
+      {
+        "module": "infrastructure",
+        "status": "PASS",
+        "timestamp": "2025-08-17T14:24:49.416Z",
+        "duration": 1629.0622953769187,
+        "details": [
+          {
+            "component": "dependencies",
+            "test": "package.json validation",
+            "result": "PASS",
+            "message": "All dependencies are properly configured"
+          }
+        ]
+      },
+      {
+        "module": "backend",
+        "status": "WARNING",
+        "timestamp": "2025-08-17T14:24:49.416Z",
+        "duration": 2602.3415716174763,
+        "details": [
+          {
+            "component": "server",
+            "test": "server startup",
+            "result": "PASS",
+            "message": "Server started successfully"
+          },
+          {
+            "component": "api",
+            "test": "API response time",
+            "result": "WARNING",
+            "message": "Some endpoints are slow"
+          }
+        ],
+        "warnings": [
+          {
+            "message": "API response time exceeds recommended threshold"
+          }
+        ]
+      }
+    ],
+    "recommendations": [
+      {
+        "severity": "LOW",
+        "component": "backend",
+        "issue": "API response time exceeds recommended threshold",
+        "solution": "Review the warning details and consider addressing to improve system reliability",
+        "documentation": "https://github.com/your-repo/sistema-ministerial/docs/backend-troubleshooting.md"
+      }
+    ]
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "environment": "integration-test",
+    "tags": [
+      "trend-0"
+    ]
+  }
+}

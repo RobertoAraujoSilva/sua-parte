@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Users, Calendar, FileText, Settings, Plus, CalendarDays, Upload } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEstudantes } from '@/hooks/useEstudantes';
+import { useTranslation } from '@/hooks/useTranslation';
 import TemplateDownload from '@/components/TemplateDownload';
 import Header from '@/components/Header';
 import { DebugPanel } from '@/components/DebugPanel';
@@ -12,6 +13,7 @@ import { TutorialButton } from '@/components/tutorial';
 import { supabase } from '@/integrations/supabase/client';
 
 const Dashboard = () => {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const navigate = useNavigate();
   const { getStatistics } = useEstudantes();
@@ -87,39 +89,39 @@ const Dashboard = () => {
 
   const dashboardCards = [
     {
-      title: "Estudantes",
-      description: "Gerenciar estudantes da escola ministerial",
+      title: t('navigation.students'),
+      description: t('dashboard.manageStudentsDesc'),
       icon: Users,
       href: "/estudantes",
-      action: "Gerenciar Estudantes"
+      action: t('dashboard.manageStudents')
     },
     {
-      title: "Programas",
-      description: "Importar e gerenciar programas semanais",
+      title: t('navigation.programs'),
+      description: t('dashboard.manageProgramsDesc'),
       icon: Calendar,
       href: "/programas",
-      action: "Ver Programas"
+      action: t('dashboard.viewPrograms')
     },
     {
-      title: "Designações",
-      description: "Gerar e visualizar designações automáticas",
+      title: t('navigation.assignments'),
+      description: t('dashboard.manageAssignmentsDesc'),
       icon: FileText,
       href: "/designacoes",
-      action: "Ver Designações"
+      action: t('dashboard.viewAssignments')
     },
     {
-      title: "Reuniões",
-      description: "Gerenciar reuniões, eventos especiais e designações administrativas",
+      title: t('dashboard.meetings'),
+      description: t('dashboard.manageMeetingsDesc'),
       icon: CalendarDays,
       href: "/reunioes",
-      action: "Gerenciar Reuniões"
+      action: t('dashboard.manageMeetings')
     },
     {
-      title: "Relatórios",
-      description: "Relatórios de participação e engajamento",
+      title: t('navigation.reports'),
+      description: t('dashboard.reportsDesc'),
       icon: Settings,
       href: "/relatorios",
-      action: "Ver Relatórios"
+      action: t('dashboard.viewReports')
     }
   ];
 
@@ -133,8 +135,8 @@ const Dashboard = () => {
           <div className="mb-8">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-jw-navy mb-2">Painel de Controle</h2>
-                <p className="text-muted-foreground text-base md:text-lg">Gerencie designações ministeriais de forma inteligente e eficiente</p>
+                <h2 className="text-2xl md:text-3xl font-bold text-jw-navy mb-2">{t('dashboard.title')}</h2>
+                <p className="text-muted-foreground text-base md:text-lg">{t('dashboard.subtitle')}</p>
               </div>
               <TutorialButton page="dashboard" />
             </div>
@@ -142,7 +144,7 @@ const Dashboard = () => {
 
           {/* Quick Actions */}
           <div className="mb-8" data-tutorial="quick-actions">
-            <h3 className="text-base md:text-lg font-semibold text-jw-navy mb-4">Ações Rápidas</h3>
+            <h3 className="text-base md:text-lg font-semibold text-jw-navy mb-4">{t('dashboard.quickActions')}</h3>
             <div className="flex flex-wrap gap-2 md:gap-4">
               <Button
                 variant="hero"
@@ -151,7 +153,7 @@ const Dashboard = () => {
                 onClick={() => navigate('/estudantes')}
               >
                 <Plus className="w-4 h-4" />
-                Novo Estudante
+                {t('dashboard.newStudent')}
               </Button>
               <Button
                 variant="ministerial"
@@ -160,7 +162,7 @@ const Dashboard = () => {
                 onClick={() => navigate('/programas')}
               >
                 <Calendar className="w-4 h-4" />
-                Importar Programa
+                {t('dashboard.importProgram')}
               </Button>
               <Button
                 variant="outline"
@@ -169,7 +171,7 @@ const Dashboard = () => {
                 onClick={() => navigate('/designacoes')}
               >
                 <FileText className="w-4 h-4" />
-                Gerar Designações
+                {t('dashboard.generateAssignments')}
               </Button>
               <Button
                 variant="outline"
@@ -178,7 +180,7 @@ const Dashboard = () => {
                 onClick={() => navigate('/estudantes?tab=import')}
               >
                 <Upload className="w-4 h-4" />
-                Importar Planilha
+                {t('dashboard.importSpreadsheet')}
               </Button>
               <TemplateDownload
                 variant="outline"
@@ -229,13 +231,13 @@ const Dashboard = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
-                  Total de Estudantes
+                  {t('dashboard.totalStudents')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-xl md:text-2xl font-bold text-jw-navy">{statistics.total}</div>
                 <p className="text-xs text-muted-foreground">
-                  Cadastrados no sistema
+                  {t('dashboard.registeredInSystem')}
                 </p>
               </CardContent>
             </Card>
@@ -243,7 +245,7 @@ const Dashboard = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
-                  Programas Ativos
+                  {t('dashboard.activePrograms')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -255,7 +257,7 @@ const Dashboard = () => {
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Semanas programadas
+                  {t('dashboard.scheduledWeeks')}
                 </p>
               </CardContent>
             </Card>
@@ -263,7 +265,7 @@ const Dashboard = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
-                  Designações Geradas
+                  {t('dashboard.generatedAssignments')}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -275,7 +277,7 @@ const Dashboard = () => {
                   )}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Neste mês
+                  {t('dashboard.thisMonth')}
                 </p>
               </CardContent>
             </Card>

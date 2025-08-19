@@ -28,6 +28,8 @@ import type { EstudanteRow } from "@/types/estudantes";
 import { supabase } from "@/integrations/supabase/client";
 import { TutorialButton } from "@/components/tutorial";
 import { DebugPanel } from '@/components/DebugPanel';
+import { generateAssignmentsPDF } from "@/utils/pdfGenerator";
+import { downloadDataForOffline, listOffline } from "@/utils/offlineLocalDB";
 
 const Designacoes = () => {
   const navigate = useNavigate();
@@ -107,8 +109,119 @@ const Designacoes = () => {
         .order('data_inicio_semana', { ascending: false });
 
       if (programsError) {
-        console.error('Error loading programs:', programsError);
+        console.error('Error loading programs (online):', programsError);
+        // Offline fallback
+        try {
+          const [offlinePrograms, offlineDesignacoes, offlineEstudantes] = await Promise.all([
+            listOffline('programas'),
+            listOffline('designacoes'),
+            listOffline('estudantes')
+          ]);
+
+          if (offlinePrograms && offlinePrograms.length > 0) {
+            const estById = new Map<string, any>((offlineEstudantes || []).map((e: any) => [e.id, e]));
+
+            // Only consider generated programs, fallback to any if missing
+            const generatedPrograms = offlinePrograms.filter((p: any) => p.assignment_status === 'generated');
+            const basePrograms = (generatedPrograms.length > 0 ? generatedPrograms : offlinePrograms)
+              .sort((a: any, b: any) => new Date(b.data_inicio_semana).getTime() - new Date(a.data_inicio_semana).getTime());
+
+            const built = basePrograms.map((p: any) => {
+              const designacoes = (offlineDesignacoes || [])
+                .filter((d: any) => d.programa_id === p.id)
+                .map((d: any) => {
+                  const est = estById.get(d.id_estudante);
+                  const aj = d.id_ajudante ? estById.get(d.id_ajudante) : null;
+                  return {
+                    id: d.id,
+                    id_estudante: d.id_estudante,
+                    numero_parte: d.numero_parte,
+                    titulo_parte: d.titulo_parte,
+                    tipo_parte: d.tipo_parte,
+                    cena: d.cena || null,
+                    tempo_minutos: d.tempo_minutos,
+                    id_ajudante: d.id_ajudante,
+                    confirmado: !!d.confirmado,
+                    estudantes: est ? { id: est.id, nome: est.nome, cargo: est.cargo, genero: est.genero } : null,
+                    ajudante: aj ? { id: aj.id, nome: aj.nome, cargo: aj.cargo, genero: aj.genero } : null,
+                  };
+                });
+
+              return {
+                id: p.id,
+                data_inicio_semana: p.data_inicio_semana,
+                mes_apostila: p.mes_apostila,
+                partes: p.partes || [],
+                status: p.status || 'ativo',
+                assignment_status: p.assignment_status || 'generated',
+                assignments_generated_at: p.updated_at || p.created_at || null,
+                total_assignments_generated: designacoes.length,
+                designacoes,
+              };
+            });
+
+            setAssignmentPrograms(built);
+            return;
+          }
+        } catch (offlineErr) {
+          console.error('Failed to load offline assignments:', offlineErr);
+        }
         return;
+      }
+
+      // If online data is empty, try offline
+      if (!programs || programs.length === 0) {
+        try {
+          const [offlinePrograms, offlineDesignacoes, offlineEstudantes] = await Promise.all([
+            listOffline('programas'),
+            listOffline('designacoes'),
+            listOffline('estudantes')
+          ]);
+          if (offlinePrograms && offlinePrograms.length > 0) {
+            const estById = new Map<string, any>((offlineEstudantes || []).map((e: any) => [e.id, e]));
+            const basePrograms = offlinePrograms
+              .sort((a: any, b: any) => new Date(b.data_inicio_semana).getTime() - new Date(a.data_inicio_semana).getTime());
+
+            const built = basePrograms.map((p: any) => {
+              const designacoes = (offlineDesignacoes || [])
+                .filter((d: any) => d.programa_id === p.id)
+                .map((d: any) => {
+                  const est = estById.get(d.id_estudante);
+                  const aj = d.id_ajudante ? estById.get(d.id_ajudante) : null;
+                  return {
+                    id: d.id,
+                    id_estudante: d.id_estudante,
+                    numero_parte: d.numero_parte,
+                    titulo_parte: d.titulo_parte,
+                    tipo_parte: d.tipo_parte,
+                    cena: d.cena || null,
+                    tempo_minutos: d.tempo_minutos,
+                    id_ajudante: d.id_ajudante,
+                    confirmado: !!d.confirmado,
+                    estudantes: est ? { id: est.id, nome: est.nome, cargo: est.cargo, genero: est.genero } : null,
+                    ajudante: aj ? { id: aj.id, nome: aj.nome, cargo: aj.cargo, genero: aj.genero } : null,
+                  };
+                });
+
+              return {
+                id: p.id,
+                data_inicio_semana: p.data_inicio_semana,
+                mes_apostila: p.mes_apostila,
+                partes: p.partes || [],
+                status: p.status || 'ativo',
+                assignment_status: p.assignment_status || 'generated',
+                assignments_generated_at: p.updated_at || p.created_at || null,
+                total_assignments_generated: designacoes.length,
+                designacoes,
+              };
+            });
+
+            setAssignmentPrograms(built);
+            return;
+          }
+        } catch (offlineErr) {
+          console.error('Failed to load offline assignments:', offlineErr);
+        }
       }
 
       setAssignmentPrograms(programs || []);
@@ -120,6 +233,101 @@ const Designacoes = () => {
   };
 
   // Remove mock data - rely entirely on database queries
+
+  const handleExportarPDF = async (program: any) => {
+    try {
+      const programData = {
+        id: program.id,
+        semana: program.mes_apostila || `Semana de ${new Date(program.data_inicio_semana).toLocaleDateString('pt-BR')}`,
+        mes_apostila: program.mes_apostila,
+        data_inicio_semana: program.data_inicio_semana,
+        status: program.status,
+        assignment_status: program.assignment_status,
+        partes: program.partes || [],
+        dataImportacao: new Date().toISOString(),
+      };
+
+      const assignments = (program.designacoes || []).map((d: any) => ({
+        id: d.id,
+        numero_parte: d.numero_parte,
+        titulo_parte: d.titulo_parte,
+        tipo_parte: d.tipo_parte,
+        tempo_minutos: d.tempo_minutos,
+        estudante: {
+          id: d.estudantes?.id || d.id_estudante,
+          nome: d.estudantes?.nome || '—',
+          cargo: d.estudantes?.cargo || '',
+          genero: d.estudantes?.genero || '',
+        },
+        ajudante: d.id_ajudante ? {
+          id: d.ajudante?.id || d.id_ajudante,
+          nome: d.ajudante?.nome || '',
+          cargo: d.ajudante?.cargo || '',
+          genero: d.ajudante?.genero || '',
+        } : null,
+        confirmado: d.confirmado,
+      }));
+
+      await generateAssignmentsPDF(programData, assignments);
+    } catch (error) {
+      console.error('Erro ao exportar PDF de designações:', error);
+      toast({
+        title: "Erro ao Exportar PDF",
+        description: "Não foi possível gerar o PDF. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Função para exportar PDF a partir de Ações Rápidas (usa programa mais recente)
+  const handleExportarPDFAcoesRapidas = async () => {
+    try {
+      if (!assignmentPrograms || assignmentPrograms.length === 0) {
+        toast({
+          title: "Nenhum Programa Encontrado",
+          description: "Gere designações primeiro para exportar o PDF.",
+          variant: "destructive"
+        });
+        return;
+      }
+      // Seleciona o primeiro programa com designações; se não houver, usa o mais recente
+      const program = (assignmentPrograms as any[]).find((p: any) => p.designacoes && p.designacoes.length > 0) || (assignmentPrograms as any[])[0];
+      await handleExportarPDF(program);
+    } catch (error) {
+      console.error('Erro ao exportar PDF (Ações Rápidas):', error);
+      toast({
+        title: "Erro ao Exportar PDF",
+        description: "Não foi possível gerar o PDF. Tente novamente.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Ações Offline: baixar dados para uso offline
+  const handleBaixarDadosOffline = async () => {
+    try {
+      const ok = await downloadDataForOffline();
+      if (ok) {
+        toast({
+          title: "Dados Offline Atualizados",
+          description: "Estudantes, programas e designações foram salvos no dispositivo.",
+        });
+      } else {
+        toast({
+          title: "Falha ao Baixar Dados",
+          description: "Não foi possível atualizar o cache offline.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao baixar dados offline:', error);
+      toast({
+        title: "Erro ao Baixar Dados",
+        description: "Ocorreu um erro inesperado.",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Função para abrir modal de seleção de semana
   const handleAbrirModalSelecao = () => {
@@ -384,7 +592,11 @@ const Designacoes = () => {
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Regenerar Semana
                 </Button>
-                <Button variant="outline" size="sm" className="min-w-[140px] md:min-w-[160px]">
+                <Button variant="outline" size="sm" className="min-w-[160px] md:min-w-[180px]" onClick={handleBaixarDadosOffline}>
+                  <Download className="w-4 h-4 mr-2" />
+                  Baixar Dados Offline
+                </Button>
+                <Button variant="outline" size="sm" className="min-w-[140px] md:min-w-[160px]" onClick={handleExportarPDFAcoesRapidas}>
                   <Download className="w-4 h-4 mr-2" />
                   Exportar PDF
                 </Button>
@@ -491,7 +703,7 @@ const Designacoes = () => {
                               <Send className="w-4 h-4 mr-2" />
                               Enviar Notificações
                             </Button>
-                            <Button variant="outline" size="sm">
+                            <Button variant="outline" size="sm" onClick={() => handleExportarPDF(program)}>
                               <Download className="w-4 h-4 mr-2" />
                               Exportar PDF
                             </Button>
