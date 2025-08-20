@@ -4,6 +4,7 @@ import pt from './locales/pt.json';
 export const resources = {
   en: { translation: en || {} },
   'pt-BR': { translation: pt || {} },
+  pt: { translation: pt || {} },
 } as const;
 
 export type SupportedLng = keyof typeof resources;

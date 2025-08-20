@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
-import { resources, FALLBACK_LNG, SupportedLng } from '../translations';
+import '../i18n';
 
 type Language = 'pt' | 'en';
 

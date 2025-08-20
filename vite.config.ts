@@ -13,12 +13,12 @@ export default defineConfig({
   server: {
     port: 5173,
     strictPort: true, // se 5173 estiver ocupada, o Vite falha (não "pula" de porta)
-    host: 'localhost'
+    host: 'localhost',
     // Enable HTTP/2 for better performance
     https: false,
     // Optimize HMR
     hmr: {
-      port: 8080,
+      port: 5173,
       overlay: false
     }
   },

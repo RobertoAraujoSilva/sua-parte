@@ -3,7 +3,8 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import { resources, FALLBACK_LNG } from './translations';
 
-const startLng = (localStorage.getItem('language') as keyof typeof resources) || FALLBACK_LNG;
+const saved = localStorage.getItem('language') as keyof typeof resources | null;
+const startLng = saved && resources[saved] ? saved : FALLBACK_LNG;
 
 if (!i18n.isInitialized) {
   i18n

@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "build": "tsc -p tsconfig.json || echo \"no TS to build\"",
     "dev": "nodemon server.js",
     "test": "jest",
     "backup": "node scripts/backup.js",
