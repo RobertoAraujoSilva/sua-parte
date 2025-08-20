@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
+import { resources, FALLBACK_LNG, SupportedLng } from '../translations';
 
 type Language = 'pt' | 'en';
 
@@ -14,14 +15,17 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [language, setLanguageState] = useState<Language>('pt');
 
-  // Simple language management without relying on useTranslation hook
   const toggleLanguage = () => {
     const newLanguage = language === 'pt' ? 'en' : 'pt';
     setLanguageState(newLanguage);
-    // Try to change i18n language if available
+    localStorage.setItem('language', newLanguage);
+    
+    // Mudança segura do i18n
     try {
       import('../i18n').then(({ default: i18n }) => {
-        i18n.changeLanguage(newLanguage);
+        if (i18n.isInitialized) {
+          i18n.changeLanguage(newLanguage);
+        }
       });
     } catch (error) {
       console.warn('Could not change i18n language:', error);
@@ -30,15 +34,26 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    // Try to change i18n language if available
+    localStorage.setItem('language', lang);
+    
     try {
       import('../i18n').then(({ default: i18n }) => {
-        i18n.changeLanguage(lang);
+        if (i18n.isInitialized) {
+          i18n.changeLanguage(lang);
+        }
       });
     } catch (error) {
       console.warn('Could not change i18n language:', error);
     }
   };
+
+  // Carregar idioma do localStorage na inicialização
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('language') as Language;
+    if (savedLanguage && (savedLanguage === 'pt' || savedLanguage === 'en')) {
+      setLanguageState(savedLanguage);
+    }
+  }, []);
 
   return (
     <LanguageContext.Provider value={{ language, toggleLanguage, setLanguage }}>

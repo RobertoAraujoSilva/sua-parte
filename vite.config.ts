@@ -11,8 +11,9 @@ export default defineConfig({
     jsxRuntime: 'automatic'
   })],
   server: {
-    port: 8080,
-    host: true,
+    port: 5173,
+    strictPort: true, // se 5173 estiver ocupada, o Vite falha (não "pula" de porta)
+    host: 'localhost'
     // Enable HTTP/2 for better performance
     https: false,
     // Optimize HMR

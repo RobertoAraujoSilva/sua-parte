@@ -1,44 +1,34 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import { resources, FALLBACK_LNG } from './translations';
 
-// Import translation files
-import ptTranslations from './locales/pt.json';
-import enTranslations from './locales/en.json';
+const startLng = (localStorage.getItem('language') as keyof typeof resources) || FALLBACK_LNG;
 
-const resources = {
-  pt: {
-    translation: ptTranslations
-  },
-  en: {
-    translation: enTranslations
-  }
-};
-
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    resources,
-    fallbackLng: 'pt',
-    lng: 'pt', // Set default language explicitly
-    debug: true, // Enable debug to see what's happening
-    
-    interpolation: {
-      escapeValue: false, // React already escapes values
-    },
-    
-    returnObjects: true, // Enable returning objects for complex translations
-    
-    detection: {
-      order: ['localStorage', 'navigator', 'htmlTag'],
-      caches: ['localStorage'],
-      lookupLocalStorage: 'language',
-    },
-    
-    react: {
-      useSuspense: false,
-    }
-  });
+if (!i18n.isInitialized) {
+  i18n
+    .use(LanguageDetector)
+    .use(initReactI18next)
+    .init({
+      resources, // <- nunca undefined
+      lng: startLng,
+      fallbackLng: FALLBACK_LNG,
+      interpolation: {
+        escapeValue: false, // React already escapes values
+      },
+      
+      // Evita suspense se você não estiver usando <Suspense> para i18n:
+      react: {
+        useSuspense: false
+      },
+      
+      detection: {
+        order: ['localStorage', 'navigator', 'htmlTag'],
+        caches: ['localStorage'],
+        lookupLocalStorage: 'language',
+      }
+    })
+    .catch(console.error);
+}
 
 export default i18n;
