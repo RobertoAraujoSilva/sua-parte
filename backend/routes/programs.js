@@ -1,10 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const ProgramGenerator = require('../services/programGenerator');
-const { supabase } = require('../config/database');
 
-// Instanciar serviços
-const programGenerator = new ProgramGenerator();
+// Note: This route file is deprecated. Use programs-new.js instead.
+// Keeping for backward compatibility but updating to use ServiceContainer.
 
 // Middleware de autenticação (simplificado para desenvolvimento)
 const requireAuth = (req, res, next) => {
@@ -22,6 +20,7 @@ const requireAuth = (req, res, next) => {
 // Listar todos os programas
 router.get('/', requireAuth, async (req, res) => {
   try {
+    const programGenerator = req.container.resolve('programGenerator');
     const { status } = req.query;
     const programs = await programGenerator.listPrograms(status);
     
@@ -94,6 +93,7 @@ router.post('/', requireAuth, async (req, res) => {
       material = materialInfo;
     }
 
+    const programGenerator = req.container.resolve('programGenerator');
     console.log(`📋 Gerando programa para: ${material.filename}`);
     const program = await programGenerator.generateWeeklyProgram(material);
     
@@ -116,6 +116,7 @@ router.post('/:id/publish', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     
+    const programGenerator = req.container.resolve('programGenerator');
     console.log(`📢 Publicando programa: ${id}`);
     const program = await programGenerator.publishProgram(id);
     
@@ -468,6 +469,7 @@ router.post('/cleanup-archived', requireAuth, async (req, res) => {
 // Gerar programa de teste
 router.post('/test/generate', requireAuth, async (req, res) => {
   try {
+    const programGenerator = req.container.resolve('programGenerator');
     console.log('🧪 Gerando programa de teste...');
     
     const program = await programGenerator.generateTestProgram();
@@ -491,6 +493,7 @@ router.post('/test/publish/:id', requireAuth, async (req, res) => {
   try {
     const { id } = req.params;
     
+    const programGenerator = req.container.resolve('programGenerator');
     console.log('🧪 Testando publicação...');
     
     const program = await programGenerator.publishProgram(id);

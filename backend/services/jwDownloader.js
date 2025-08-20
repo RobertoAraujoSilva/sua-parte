@@ -5,31 +5,94 @@ const cheerio = require('cheerio');
 const mwbSources = require('../config/mwbSources.json');
 
 class JWDownloader {
-  constructor() {
+  constructor(options = {}) {
     this.downloadPath = path.join(__dirname, '../../docs/Oficial');
     this.downloadQueue = [];
     this.isDownloading = false;
+    
+    // Optional mode configuration
+    this.options = {
+      enabled: options.enabled !== false, // Default to enabled for backward compatibility
+      offlineMode: options.offlineMode || false,
+      allowAutoDownloads: options.allowAutoDownloads !== false,
+      requireExplicitRequest: options.requireExplicitRequest || false,
+      ...options
+    };
+    
+    console.log(`🔧 JWDownloader initialized with options:`, {
+      enabled: this.options.enabled,
+      offlineMode: this.options.offlineMode,
+      allowAutoDownloads: this.options.allowAutoDownloads,
+      requireExplicitRequest: this.options.requireExplicitRequest
+    });
   }
 
   async initialize() {
     try {
       await fs.ensureDir(this.downloadPath);
-      console.log('✅ JWDownloader inicializado');
+      
+      if (this.options.offlineMode) {
+        console.log('✅ JWDownloader inicializado em modo offline - downloads externos desabilitados');
+      } else if (this.options.requireExplicitRequest) {
+        console.log('✅ JWDownloader inicializado em modo opcional - downloads apenas quando solicitados');
+      } else {
+        console.log('✅ JWDownloader inicializado em modo padrão');
+      }
     } catch (error) {
       console.error('❌ Erro ao inicializar JWDownloader:', error);
       throw error;
     }
   }
 
+  // Check if downloads are allowed
+  canDownload() {
+    if (!this.options.enabled) {
+      return { allowed: false, reason: 'JWDownloader está desabilitado' };
+    }
+    
+    if (this.options.offlineMode) {
+      return { allowed: false, reason: 'Sistema está em modo offline' };
+    }
+    
+    return { allowed: true, reason: 'Downloads permitidos' };
+  }
+
+  // Check if automatic downloads are allowed
+  canAutoDownload() {
+    const downloadCheck = this.canDownload();
+    if (!downloadCheck.allowed) {
+      return downloadCheck;
+    }
+    
+    if (this.options.requireExplicitRequest) {
+      return { allowed: false, reason: 'Downloads automáticos desabilitados - apenas downloads explícitos' };
+    }
+    
+    if (!this.options.allowAutoDownloads) {
+      return { allowed: false, reason: 'Downloads automáticos desabilitados na configuração' };
+    }
+    
+    return { allowed: true, reason: 'Downloads automáticos permitidos' };
+  }
+
   // Verificar se há novas versões disponíveis
-  async checkForNewVersions(language = 'pt-BR') {
+  async checkForNewVersions(language = 'pt-BR', explicitRequest = false) {
+    const downloadCheck = this.canDownload();
+    if (!downloadCheck.allowed && !explicitRequest) {
+      throw new Error(`Download não permitido: ${downloadCheck.reason}`);
+    }
+
     try {
       const source = mwbSources[language];
       if (!source || !source.active) {
         throw new Error(`Idioma ${language} não está ativo`);
       }
 
-      console.log(`🔍 Verificando novas versões para ${language}...`);
+      if (explicitRequest) {
+        console.log(`🔍 Verificando novas versões para ${language} (solicitação explícita)...`);
+      } else {
+        console.log(`🔍 Verificando novas versões para ${language}...`);
+      }
       
       const response = await fetch(source.url);
       const html = await response.text();
@@ -106,9 +169,18 @@ class JWDownloader {
   }
 
   // Baixar material específico
-  async downloadMaterial(materialInfo) {
+  async downloadMaterial(materialInfo, explicitRequest = false) {
+    const downloadCheck = this.canDownload();
+    if (!downloadCheck.allowed && !explicitRequest) {
+      throw new Error(`Download não permitido: ${downloadCheck.reason}`);
+    }
+
     try {
-      console.log(`📥 Baixando: ${materialInfo.filename}`);
+      if (explicitRequest) {
+        console.log(`📥 Baixando (solicitação explícita): ${materialInfo.filename}`);
+      } else {
+        console.log(`📥 Baixando: ${materialInfo.filename}`);
+      }
       
       const response = await fetch(materialInfo.url);
       if (!response.ok) {
@@ -158,9 +230,18 @@ class JWDownloader {
   }
 
   // Verificar e baixar todos os materiais
-  async checkAndDownloadAll() {
+  async checkAndDownloadAll(explicitRequest = false) {
+    const downloadCheck = explicitRequest ? this.canDownload() : this.canAutoDownload();
+    if (!downloadCheck.allowed) {
+      throw new Error(`Download não permitido: ${downloadCheck.reason}`);
+    }
+
     try {
-      console.log('🔄 Verificando e baixando todos os materiais...');
+      if (explicitRequest) {
+        console.log('🔄 Verificando e baixando todos os materiais (solicitação explícita)...');
+      } else {
+        console.log('🔄 Verificando e baixando todos os materiais...');
+      }
       
       const results = {
         checked: [],
@@ -174,7 +255,7 @@ class JWDownloader {
         if (!source.active) continue;
 
         try {
-          const materials = await this.checkForNewVersions(language);
+          const materials = await this.checkForNewVersions(language, explicitRequest);
           
           for (const material of materials) {
             results.checked.push(material);
@@ -183,7 +264,7 @@ class JWDownloader {
             const localPath = path.join(this.downloadPath, material.filename);
             if (!(await fs.pathExists(localPath))) {
               // Baixar material
-              const downloadResult = await this.downloadMaterial(material);
+              const downloadResult = await this.downloadMaterial(material, explicitRequest);
               
               if (downloadResult.status === 'downloaded') {
                 results.downloaded.push(downloadResult);
@@ -212,7 +293,12 @@ class JWDownloader {
   }
 
   // Baixar material específico por URL
-  async downloadByUrl(url, language = 'pt-BR') {
+  async downloadByUrl(url, language = 'pt-BR', explicitRequest = true) {
+    const downloadCheck = this.canDownload();
+    if (!downloadCheck.allowed && !explicitRequest) {
+      throw new Error(`Download não permitido: ${downloadCheck.reason}`);
+    }
+
     try {
       const materialInfo = {
         url,
@@ -222,7 +308,7 @@ class JWDownloader {
         lastChecked: new Date().toISOString()
       };
 
-      return await this.downloadMaterial(materialInfo);
+      return await this.downloadMaterial(materialInfo, explicitRequest);
     } catch (error) {
       console.error('❌ Erro ao baixar por URL:', error);
       throw error;
@@ -253,6 +339,26 @@ class JWDownloader {
       console.error('❌ Erro ao listar materiais:', error);
       throw error;
     }
+  }
+
+  // Get service status and configuration
+  getStatus() {
+    const downloadCheck = this.canDownload();
+    const autoDownloadCheck = this.canAutoDownload();
+    
+    return {
+      enabled: this.options.enabled,
+      offlineMode: this.options.offlineMode,
+      allowAutoDownloads: this.options.allowAutoDownloads,
+      requireExplicitRequest: this.options.requireExplicitRequest,
+      canDownload: downloadCheck.allowed,
+      canAutoDownload: autoDownloadCheck.allowed,
+      downloadReason: downloadCheck.reason,
+      autoDownloadReason: autoDownloadCheck.reason,
+      downloadPath: this.downloadPath,
+      isDownloading: this.isDownloading,
+      queueLength: this.downloadQueue.length
+    };
   }
 
   // Formatar bytes para legibilidade

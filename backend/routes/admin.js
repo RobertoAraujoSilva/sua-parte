@@ -1,13 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const JWDownloader = require('../services/jwDownloader');
-const ProgramGenerator = require('../services/programGenerator');
-const MaterialManager = require('../services/materialManager');
 
-// Instanciar serviços
-const jwDownloader = new JWDownloader();
-const programGenerator = new ProgramGenerator();
-const materialManager = new MaterialManager();
+// Services are now resolved from the container instead of being instantiated here
 
 // Middleware de autenticação (simplificado para desenvolvimento)
 const requireAuth = (req, res, next) => {
@@ -30,7 +24,7 @@ router.get('/status', requireAuth, async (req, res) => {
       system: 'online',
       timestamp: new Date().toISOString(),
       services: {
-        jwDownloader: 'active',
+        jwDownloader: req.container.resolve('jwDownloader').getStatus(),
         programGenerator: 'active',
         materialManager: 'active'
       },
@@ -52,9 +46,20 @@ router.get('/status', requireAuth, async (req, res) => {
 // Verificar atualizações disponíveis
 router.post('/check-updates', requireAuth, async (req, res) => {
   try {
+    // Check if downloads are allowed
+    const jwDownloader = req.container.resolve('jwDownloader');
+    const status = jwDownloader.getStatus();
+    if (!status.canDownload) {
+      return res.status(403).json({
+        success: false,
+        error: `Downloads não permitidos: ${status.downloadReason}`,
+        status: status
+      });
+    }
+
     console.log('🔍 Verificando atualizações...');
     
-    const results = await jwDownloader.checkAndDownloadAll();
+    const results = await jwDownloader.checkAndDownloadAll(true); // true = explicit request
     
     res.json({
       success: true,
@@ -79,8 +84,19 @@ router.post('/download-material', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'URL é obrigatória' });
     }
 
+    // Check if downloads are allowed
+    const jwDownloader = req.container.resolve('jwDownloader');
+    const status = jwDownloader.getStatus();
+    if (!status.canDownload) {
+      return res.status(403).json({
+        success: false,
+        error: `Downloads não permitidos: ${status.downloadReason}`,
+        status: status
+      });
+    }
+
     console.log(`📥 Baixando material: ${url}`);
-    const result = await jwDownloader.downloadByUrl(url, language || 'pt-BR');
+    const result = await jwDownloader.downloadByUrl(url, language || 'pt-BR', true); // true = explicit request
     
     res.json({
       success: true,
@@ -99,6 +115,7 @@ router.post('/download-material', requireAuth, async (req, res) => {
 // Listar materiais baixados
 router.get('/materials', requireAuth, async (req, res) => {
   try {
+    const jwDownloader = req.container.resolve('jwDownloader');
     const materials = await jwDownloader.listDownloadedMaterials();
     
     res.json({
@@ -131,6 +148,7 @@ router.post('/generate-program', requireAuth, async (req, res) => {
     let material;
     if (materialId) {
       // Buscar material por ID
+      const jwDownloader = req.container.resolve('jwDownloader');
       const materials = await jwDownloader.listDownloadedMaterials();
       material = materials.find(m => m.filename === materialId);
       if (!material) {
@@ -140,6 +158,7 @@ router.post('/generate-program', requireAuth, async (req, res) => {
       material = materialInfo;
     }
 
+    const programGenerator = req.container.resolve('programGenerator');
     console.log(`📋 Gerando programa para: ${material.filename}`);
     const program = await programGenerator.generateWeeklyProgram(material);
     
@@ -255,6 +274,7 @@ router.post('/cleanup-materials', requireAuth, async (req, res) => {
   try {
     const { daysToKeep } = req.body;
     
+    const jwDownloader = req.container.resolve('jwDownloader');
     console.log(`🗑️ Limpando materiais antigos (mais de ${daysToKeep || 90} dias)`);
     const result = await jwDownloader.cleanupOldMaterials(daysToKeep);
     
@@ -294,6 +314,26 @@ router.get('/health', requireAuth, async (req, res) => {
 // ROTAS DE TESTE (desenvolvimento)
 // =====================================================
 
+// Rota para obter status do JWDownloader
+router.get('/jwdownloader/status', requireAuth, async (req, res) => {
+  try {
+    const jwDownloader = req.container.resolve('jwDownloader');
+    const status = jwDownloader.getStatus();
+    
+    res.json({
+      success: true,
+      status: status
+    });
+  } catch (error) {
+    console.error('❌ Erro ao obter status do JWDownloader:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Erro ao obter status do JWDownloader',
+      details: error.message
+    });
+  }
+});
+
 // Gerar programa de teste
 router.post('/test/generate-program', requireAuth, async (req, res) => {
   try {
@@ -323,8 +363,19 @@ router.post('/test/download', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'URL é obrigatória' });
     }
 
+    // Check if downloads are allowed
+    const jwDownloader = req.container.resolve('jwDownloader');
+    const status = jwDownloader.getStatus();
+    if (!status.canDownload) {
+      return res.status(403).json({
+        success: false,
+        error: `Downloads não permitidos: ${status.downloadReason}`,
+        status: status
+      });
+    }
+
     console.log('🧪 Testando download...');
-    const result = await jwDownloader.downloadByUrl(url, 'pt-BR');
+    const result = await jwDownloader.downloadByUrl(url, 'pt-BR', true); // true = explicit request
     
     res.json({
       success: true,

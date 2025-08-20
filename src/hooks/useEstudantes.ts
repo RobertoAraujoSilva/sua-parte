@@ -23,14 +23,22 @@ export function useEstudantes(scope: string) {
   const { data: estudantes, isLoading, error, refetch } = useQuery({
     queryKey: queryKey,
     queryFn: async () => {
+      // Only load essential fields initially for better performance
       const { data, error } = await withTimeout(
-        supabase.from("estudantes").select("*").limit(200)
+        supabase
+          .from("estudantes")
+          .select("id, nome, familia, idade, genero, cargo, ativo, created_at")
+          .limit(100) // Reduce initial load
+          .order('nome'),
+        5000 // Reduce timeout for faster failure detection
       );
       if (error) throw error;
       return data || [];
     },
-    retry: 2,
-    staleTime: 5 * 60_000,
+    retry: 1, // Reduce retries for faster failure
+    staleTime: 2 * 60_000, // Reduce stale time
+    gcTime: 5 * 60_000, // Add garbage collection time
+    refetchOnWindowFocus: false, // Prevent unnecessary refetches
   });
 
   const createEstudanteMutation = useMutation({

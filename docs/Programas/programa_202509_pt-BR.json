@@ -1,0 +1,74 @@
+{
+  "id": "program_202509_pt-BR",
+  "semana": "Setembro 2025",
+  "periodo_inicio": "2025-08-31T23:00:00.000Z",
+  "periodo_fim": "2025-09-29T23:00:00.000Z",
+  "idioma": "pt-BR",
+  "material_origem": "mwb_T_202509.pdf",
+  "material_caminho": "/test/path",
+  "congregacao_id": "default",
+  "status": "rascunho",
+  "total_partes": 7,
+  "partes_geradas": [
+    {
+      "tipo": "abertura",
+      "titulo": "Abertura e Cântico",
+      "duracao": 3,
+      "ordem": 1,
+      "observacoes": "Cântico de abertura e oração",
+      "id": "part_202509_1"
+    },
+    {
+      "tipo": "estudo",
+      "titulo": "Estudo Bíblico da Congregação",
+      "duracao": 30,
+      "ordem": 2,
+      "observacoes": "Baseado no material da semana",
+      "material": "mwb_T_202509.pdf",
+      "id": "part_202509_2"
+    },
+    {
+      "tipo": "leitura",
+      "titulo": "Leitura da Bíblia",
+      "duracao": 4,
+      "ordem": 3,
+      "observacoes": "Leitura da semana com comentários",
+      "id": "part_202509_3"
+    },
+    {
+      "tipo": "revisao",
+      "titulo": "Revisão da Semana",
+      "duracao": 10,
+      "ordem": 4,
+      "observacoes": "Revisão das designações da semana anterior",
+      "id": "part_202509_4"
+    },
+    {
+      "tipo": "designacoes",
+      "titulo": "Designações da Semana",
+      "duracao": 15,
+      "ordem": 5,
+      "observacoes": "Novas designações para a próxima semana",
+      "id": "part_202509_5"
+    },
+    {
+      "tipo": "vida",
+      "titulo": "Vida e Ministério Cristão",
+      "duracao": 30,
+      "ordem": 6,
+      "observacoes": "Partes práticas e designações",
+      "material": "mwb_T_202509.pdf",
+      "id": "part_202509_6"
+    },
+    {
+      "tipo": "fechamento",
+      "titulo": "Cântico e Oração",
+      "duracao": 2,
+      "ordem": 7,
+      "observacoes": "Cântico de encerramento e oração",
+      "id": "part_202509_7"
+    }
+  ],
+  "criado_em": "2025-08-20T14:40:27.465Z",
+  "atualizado_em": "2025-08-20T14:40:27.465Z"
+}

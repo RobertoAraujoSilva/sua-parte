@@ -65,9 +65,9 @@ export const testStickyToolbar = (): boolean => {
   const computedStyle = window.getComputedStyle(toolbar);
   const isSticky = computedStyle.position === 'sticky' || computedStyle.position === 'fixed';
   const hasBackdrop = computedStyle.backdropFilter !== 'none' || 
-                     computedStyle.webkitBackdropFilter !== 'none' ||
+                     (computedStyle as any)['-webkit-backdrop-filter'] !== 'none' ||
                      computedStyle.backdropFilter?.includes('blur') ||
-                     computedStyle.webkitBackdropFilter?.includes('blur');
+                     (computedStyle as any)['-webkit-backdrop-filter']?.includes('blur');
 
   return isSticky && hasBackdrop;
 };

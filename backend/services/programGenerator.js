@@ -1,11 +1,18 @@
 const fs = require('fs-extra');
 const path = require('path');
-const { supabase } = require('../config/database');
 
 class ProgramGenerator {
-  constructor() {
+  constructor(dataStore, options = {}) {
+    this.dataStore = dataStore;
     this.materialsPath = path.join(__dirname, '../../docs/Oficial');
     this.programsPath = path.join(__dirname, '../../docs/Programas');
+    
+    // Offline mode configuration
+    this.offlineMode = options.offlineMode !== false; // Default to true for offline operation
+    this.enableLocalStorage = options.enableLocalStorage !== false; // Default to true
+    this.enableNotifications = options.enableNotifications !== false; // Default to true
+    
+    console.log(`🔧 ProgramGenerator initialized in ${this.offlineMode ? 'OFFLINE' : 'ONLINE'} mode`);
   }
 
   async initialize() {
@@ -19,7 +26,7 @@ class ProgramGenerator {
   }
 
   // Gerar programa semanal baseado em material MWB
-  async generateWeeklyProgram(materialInfo) {
+  async generateWeeklyProgram(materialInfo, congregacaoId = 'default') {
     try {
       console.log(`📋 Gerando programa para: ${materialInfo.filename}`);
       
@@ -42,6 +49,7 @@ class ProgramGenerator {
         idioma: materialInfo.language,
         material_origem: materialInfo.filename,
         material_caminho: materialInfo.localPath,
+        congregacao_id: congregacaoId,
         status: 'rascunho',
         total_partes: 0,
         partes_geradas: [],
@@ -199,33 +207,56 @@ class ProgramGenerator {
   // Salvar programa no banco de dados
   async saveProgramToDatabase(program) {
     try {
-      const { data, error } = await supabase
-        .from('programas')
-        .insert([{
-          semana: program.semana,
-          periodo_inicio: program.periodo_inicio,
-          periodo_fim: program.periodo_fim,
-          idioma: program.idioma,
-          material_origem: program.material_origem,
-          material_caminho: program.material_caminho,
-          status: program.status,
-          total_partes: program.total_partes,
-          criado_em: program.criado_em,
-          atualizado_em: program.atualizado_em
-        }])
-        .select()
-        .single();
+      // Ensure material reference is local in offline mode
+      const materialReference = this.offlineMode ? 
+        this.ensureLocalMaterialReference(program.material_origem) : 
+        program.material_origem;
 
-      if (error) {
-        throw new Error(`Erro ao salvar programa: ${error.message}`);
-      }
+      const programData = {
+        semana_inicio: program.periodo_inicio,
+        semana_fim: program.periodo_fim,
+        material_estudo: materialReference,
+        congregacao_id: program.congregacao_id || 'default', // Use default if not provided
+        status: program.status === 'rascunho' ? 'rascunho' : 'ativo'
+      };
 
-      console.log(`✅ Programa salvo no banco: ${data.id}`);
-      return data;
+      const savedProgram = await this.dataStore.createPrograma(programData);
+      console.log(`✅ Programa salvo no banco: ${savedProgram.id}`);
+      return savedProgram;
 
     } catch (error) {
       console.error('❌ Erro ao salvar programa no banco:', error);
       throw error;
+    }
+  }
+
+  // Ensure material reference is local (no external URLs)
+  ensureLocalMaterialReference(materialReference) {
+    try {
+      // Remove any external URLs and keep only filename
+      if (typeof materialReference === 'string') {
+        // Remove http/https URLs
+        if (materialReference.includes('http://') || materialReference.includes('https://')) {
+          const filename = path.basename(materialReference);
+          console.log(`🔒 Converting external reference to local: ${materialReference} -> ${filename}`);
+          return filename;
+        }
+        
+        // Remove jw.org references
+        if (materialReference.includes('jw.org')) {
+          const filename = path.basename(materialReference);
+          console.log(`🔒 Converting jw.org reference to local: ${materialReference} -> ${filename}`);
+          return filename;
+        }
+        
+        // Already local reference
+        return materialReference;
+      }
+      
+      return materialReference;
+    } catch (error) {
+      console.error('❌ Erro ao processar referência de material:', error);
+      return materialReference; // Return original if processing fails
     }
   }
 
@@ -235,26 +266,15 @@ class ProgramGenerator {
       console.log(`📢 Publicando programa: ${programId}`);
       
       // Atualizar status no banco
-      const { data, error } = await supabase
-        .from('programas')
-        .update({ 
-          status: 'ativo',
-          publicado_em: new Date().toISOString(),
-          atualizado_em: new Date().toISOString()
-        })
-        .eq('id', programId)
-        .select()
-        .single();
-
-      if (error) {
-        throw new Error(`Erro ao publicar programa: ${error.message}`);
-      }
+      const updatedProgram = await this.dataStore.updatePrograma(programId, { 
+        status: 'ativo'
+      });
 
       // Notificar congregações sobre novo programa
-      await this.notifyCongregations(data);
+      await this.notifyCongregations(updatedProgram);
 
       console.log(`✅ Programa publicado: ${programId}`);
-      return data;
+      return updatedProgram;
 
     } catch (error) {
       console.error('❌ Erro ao publicar programa:', error);
@@ -265,59 +285,42 @@ class ProgramGenerator {
   // Notificar congregações sobre novo programa
   async notifyCongregations(program) {
     try {
-      // Buscar todas as congregações ativas
-      const { data: congregations, error } = await supabase
-        .from('profiles')
-        .select('id, congregacao')
-        .eq('role', 'instrutor')
-        .not('congregacao', 'is', null);
-
-      if (error) {
-        console.error('❌ Erro ao buscar congregações:', error);
-        return;
-      }
-
-      // Agrupar por congregação
-      const congregationsByGroup = {};
-      congregations.forEach(profile => {
-        if (!congregationsByGroup[profile.congregacao]) {
-          congregationsByGroup[profile.congregacao] = [];
+      if (this.offlineMode) {
+        // In offline mode, store notifications locally for later processing
+        console.log(`📢 [OFFLINE] Programa ${program.id} disponível para congregação ${program.congregacao_id}`);
+        
+        if (this.enableNotifications) {
+          // Store notification locally for future sync or local display
+          await this.storeLocalNotification({
+            type: 'program_published',
+            programId: program.id,
+            congregacaoId: program.congregacao_id,
+            message: `Novo programa disponível: ${program.material_estudo}`,
+            timestamp: new Date().toISOString(),
+            status: 'pending'
+          });
         }
-        congregationsByGroup[profile.congregacao].push(profile.id);
-      });
-
-      console.log(`📢 Notificando ${Object.keys(congregationsByGroup).length} congregações`);
-      
-      // Aqui você pode implementar notificações por email, push, etc.
-      // Por enquanto, apenas log
-      Object.entries(congregationsByGroup).forEach(([congregation, userIds]) => {
-        console.log(`📢 Congregação ${congregation}: ${userIds.length} instrutores notificados`);
-      });
-
+      } else {
+        // Online mode - could implement actual notification system
+        console.log(`📢 [ONLINE] Programa ${program.id} disponível para congregação ${program.congregacao_id}`);
+        // Future: implement actual notification delivery
+      }
     } catch (error) {
       console.error('❌ Erro ao notificar congregações:', error);
+      // Don't throw error - notifications are not critical for program functionality
     }
   }
 
   // Listar programas disponíveis
   async listPrograms(status = null) {
     try {
-      let query = supabase
-        .from('programas')
-        .select('*')
-        .order('criado_em', { ascending: false });
-
+      const filters = {};
       if (status) {
-        query = query.eq('status', status);
+        filters.status = status;
       }
 
-      const { data, error } = await query;
-
-      if (error) {
-        throw new Error(`Erro ao listar programas: ${error.message}`);
-      }
-
-      return data;
+      const programs = await this.dataStore.getProgramas(filters);
+      return programs;
 
     } catch (error) {
       console.error('❌ Erro ao listar programas:', error);
@@ -378,6 +381,168 @@ class ProgramGenerator {
     } catch (error) {
       console.error('❌ Erro ao gerar programa de teste:', error);
       throw error;
+    }
+  }
+
+  // Criar designações para um programa
+  async createAssignmentsForProgram(programId, assignments) {
+    try {
+      console.log(`📝 Criando designações para programa: ${programId}`);
+      
+      const createdAssignments = [];
+      
+      for (const assignment of assignments) {
+        const designacaoData = {
+          programa_id: programId,
+          estudante_id: assignment.estudante_id,
+          ajudante_id: assignment.ajudante_id,
+          parte: assignment.parte,
+          tema: assignment.tema,
+          tempo_minutos: assignment.tempo_minutos,
+          observacoes: assignment.observacoes,
+          status: 'agendada'
+        };
+
+        const createdAssignment = await this.dataStore.createDesignacao(designacaoData);
+        createdAssignments.push(createdAssignment);
+      }
+
+      console.log(`✅ ${createdAssignments.length} designações criadas`);
+      return createdAssignments;
+
+    } catch (error) {
+      console.error('❌ Erro ao criar designações:', error);
+      throw error;
+    }
+  }
+
+  // Obter designações de um programa
+  async getAssignmentsForProgram(programId) {
+    try {
+      const assignments = await this.dataStore.getDesignacoesByPrograma(programId);
+      return assignments;
+    } catch (error) {
+      console.error('❌ Erro ao obter designações:', error);
+      throw error;
+    }
+  }
+
+  // Obter histórico de designações de um estudante
+  async getStudentAssignmentHistory(estudanteId, weeks = 8) {
+    try {
+      const history = await this.dataStore.getHistoricoDesignacoes(estudanteId, weeks);
+      return history;
+    } catch (error) {
+      console.error('❌ Erro ao obter histórico de designações:', error);
+      throw error;
+    }
+  }
+
+  // Store local notification for offline mode
+  async storeLocalNotification(notification) {
+    try {
+      if (!this.enableLocalStorage) return;
+
+      const notificationsFile = path.join(this.programsPath, 'notifications.json');
+      let notifications = [];
+
+      // Read existing notifications
+      if (await fs.pathExists(notificationsFile)) {
+        try {
+          notifications = await fs.readJson(notificationsFile);
+        } catch (error) {
+          console.warn('⚠️ Erro ao ler notificações existentes, criando novo arquivo');
+          notifications = [];
+        }
+      }
+
+      // Add new notification
+      notification.id = `notification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      notifications.push(notification);
+
+      // Keep only last 100 notifications to prevent file from growing too large
+      if (notifications.length > 100) {
+        notifications = notifications.slice(-100);
+      }
+
+      // Save updated notifications
+      await fs.writeJson(notificationsFile, notifications, { spaces: 2 });
+      console.log(`📝 Notificação local armazenada: ${notification.id}`);
+
+    } catch (error) {
+      console.error('❌ Erro ao armazenar notificação local:', error);
+      // Don't throw - this is not critical functionality
+    }
+  }
+
+  // Obter estudantes disponíveis para designações
+  async getAvailableStudents(congregacaoId, filters = {}) {
+    try {
+      const estudanteFilters = {
+        congregacao_id: congregacaoId,
+        ativo: true,
+        ...filters
+      };
+
+      const students = await this.dataStore.getEstudantes(estudanteFilters);
+      return students;
+    } catch (error) {
+      console.error('❌ Erro ao obter estudantes:', error);
+      throw error;
+    }
+  }
+
+  // Validate offline functionality - ensure no external dependencies
+  async validateOfflineMode() {
+    try {
+      console.log('🔍 Validating offline mode functionality...');
+      
+      const validationResults = {
+        dataStore: false,
+        localStorage: false,
+        materialsPath: false,
+        programsPath: false,
+        offlineMode: this.offlineMode
+      };
+
+      // Test data store connection
+      try {
+        await this.dataStore.healthCheck();
+        validationResults.dataStore = true;
+        console.log('✅ Data store connection validated');
+      } catch (error) {
+        console.error('❌ Data store validation failed:', error.message);
+      }
+
+      // Test local storage paths
+      try {
+        await fs.ensureDir(this.materialsPath);
+        await fs.ensureDir(this.programsPath);
+        validationResults.localStorage = true;
+        validationResults.materialsPath = await fs.pathExists(this.materialsPath);
+        validationResults.programsPath = await fs.pathExists(this.programsPath);
+        console.log('✅ Local storage paths validated');
+      } catch (error) {
+        console.error('❌ Local storage validation failed:', error.message);
+      }
+
+      const isFullyOffline = Object.values(validationResults).every(result => result === true);
+      
+      console.log(`${isFullyOffline ? '✅' : '⚠️'} Offline mode validation ${isFullyOffline ? 'passed' : 'has issues'}`);
+      
+      return {
+        isValid: isFullyOffline,
+        results: validationResults,
+        timestamp: new Date().toISOString()
+      };
+
+    } catch (error) {
+      console.error('❌ Offline mode validation failed:', error);
+      return {
+        isValid: false,
+        error: error.message,
+        timestamp: new Date().toISOString()
+      };
     }
   }
 }

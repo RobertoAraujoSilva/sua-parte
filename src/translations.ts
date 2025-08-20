@@ -27,7 +27,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Inglês': 'Inglês',
     'Alternar para Inglês': 'Alternar para Inglês',
     'Alternar para Português': 'Alternar para Português',
-    
+
     // Hero section
     'Automatização Inteligente de Designações Ministeriais': 'Automatização Inteligente de Designações Ministeriais',
     'Sistema completo para congregações das Testemunhas de Jeová organizarem designações da Reunião Vida e Ministério Cristão com eficiência e conformidade.': 'Sistema completo para congregações das Testemunhas de Jeová organizarem designações da Reunião Vida e Ministério Cristão com eficiência e conformidade.',
@@ -36,7 +36,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Congregações Atendidas': 'Congregações Atendidas',
     'Redução de Tempo Manual': 'Redução de Tempo Manual',
     'Disponibilidade Contínua': 'Disponibilidade Contínua',
-    
+
     // Features section
     'Funcionalidades Principais': 'Funcionalidades Principais',
     'Tudo que sua congregação precisa para automatizar e otimizar o processo de designações ministeriais com total conformidade.': 'Tudo que sua congregação precisa para automatizar e otimizar o processo de designações ministeriais com total conformidade.',
@@ -52,7 +52,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Algoritmo inteligente que respeita todas as diretrizes da Escola do Ministério Teocrático e regulamentos congregacionais.': 'Algoritmo inteligente que respeita todas as diretrizes da Escola do Ministério Teocrático e regulamentos congregacionais.',
     'Portal do Estudante': 'Portal do Estudante',
     'Interface responsiva para estudantes visualizarem designações, confirmarem participação e contribuírem via doações.': 'Interface responsiva para estudantes visualizarem designações, confirmarem participação e contribuírem via doações.',
-    
+
     // Student Form translations
     'Gestão de Estudantes': 'Gestão de Estudantes',
     'Cadastre e gerencie estudantes da Escola do Ministério Teocrático com validação automática de qualificações e regras congregacionais.': 'Cadastre e gerencie estudantes da Escola do Ministério Teocrático com validação automática de qualificações e regras congregacionais.',
@@ -87,7 +87,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Homens': 'Homens',
     'Mulheres': 'Mulheres',
     'Distribuição por Cargo': 'Distribuição por Cargo',
-    
+
     // Student Form
     'Editar Estudante': 'Editar Estudante',
     'Novo Estudante Form': 'Novo Estudante',
@@ -117,7 +117,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Cadastrar': 'Cadastrar',
     'Atualizar': 'Atualizar',
     'Salvando...': 'Salvando...',
-    
+
     // Technical Specifications
     'Especificações Técnicas': 'Especificações Técnicas',
     'Performance': 'Performance',
@@ -135,7 +135,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Integração WhatsApp': 'Integração WhatsApp',
     'Importação PDF': 'Importação PDF',
     'Exportação de dados': 'Exportação de dados',
-    
+
     // Student Portal
     'Portal do Estudante Title': 'Portal do Estudante',
     'Bem-vindo': 'Bem-vindo',
@@ -145,7 +145,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Designações Cumpridas': 'Designações Cumpridas',
     'Taxa de Participação': 'Taxa de Participação',
     'Meses Ativo': 'Meses Ativo',
-    
+
     // Additional translations
     'de': 'de',
     'Completas': 'Completas',
@@ -188,7 +188,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Estudante Não Encontrado': 'Estudante Não Encontrado',
     'Batizado': 'Batizado',
     'Não Batizado': 'Não Batizado',
-    
+
     // Footer
     'Sistema Ministerial': 'Ministerial System',
     'Automatização inteligente de designações ministeriais para congregações das Testemunhas de Jeová, com foco em eficiência e conformidade.': 'Intelligent automation of ministerial assignments for Jehovah\'s Witnesses congregations, focused on efficiency and compliance.',
@@ -233,7 +233,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Inglês': 'English',
     'Alternar para Inglês': 'Switch to English',
     'Alternar para Português': 'Switch to Portuguese',
-    
+
     // Hero section
     'Automatização Inteligente de Designações Ministeriais': 'Intelligent Automation of Ministerial Assignments',
     'Sistema completo para congregações das Testemunhas de Jeová organizarem designações da Reunião Vida e Ministério Cristão com eficiência e conformidade.': 'Complete system for Jehovah\'s Witnesses congregations to organize Life and Ministry Meeting assignments with efficiency and compliance.',
@@ -242,7 +242,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Congregações Atendidas': 'Congregations Served',
     'Redução de Tempo Manual': 'Manual Time Reduction',
     'Disponibilidade Contínua': 'Continuous Availability',
-    
+
     // Features section
     'Funcionalidades Principais': 'Key Features',
     'Tudo que sua congregação precisa para automatizar e otimizar o processo de designações ministeriais com total conformidade.': 'Everything your congregation needs to automate and optimize the ministerial assignment process with full compliance.',
@@ -258,7 +258,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Algoritmo inteligente que respeita todas as diretrizes da Escola do Ministério Teocrático e regulamentos congregacionais.': 'Intelligent algorithm that respects all guidelines of the Theocratic Ministry School and congregational regulations.',
     'Portal do Estudante': 'Student Portal',
     'Interface responsiva para estudantes visualizarem designações, confirmarem participação e contribuírem via doações.': 'Responsive interface for students to view assignments, confirm participation, and contribute via donations.',
-    
+
     // Student Management
     'Gestão de Estudantes': 'Student Management',
     'Cadastre e gerencie estudantes da Escola do Ministério Teocrático com validação automática de qualificações e regras congregacionais.': 'Register and manage students of the Theocratic Ministry School with automatic validation of qualifications and congregational rules.',
@@ -293,7 +293,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Homens': 'Men',
     'Mulheres': 'Women',
     'Distribuição por Cargo': 'Position Distribution',
-    
+
     // Student Form
     'Editar Estudante': 'Edit Student',
     'Novo Estudante Form': 'New Student',
@@ -323,7 +323,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Cadastrar': 'Register',
     'Atualizar': 'Update',
     'Salvando...': 'Saving...',
-    
+
     // Technical Specifications
     'Especificações Técnicas': 'Technical Specifications',
     'Performance': 'Performance',
@@ -341,7 +341,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Integração WhatsApp': 'WhatsApp integration',
     'Importação PDF': 'PDF import',
     'Exportação de dados': 'Data export',
-    
+
     // Student Portal
     'Portal do Estudante Title': 'Student Portal',
     'Bem-vindo': 'Welcome',
@@ -351,7 +351,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Designações Cumpridas': 'Assignments Completed',
     'Taxa de Participação': 'Participation Rate',
     'Meses Ativo': 'Months Active',
-    
+
     // Additional translations
     'de': 'of',
     'Completas': 'Complete',
@@ -394,7 +394,7 @@ export const translations: Record<Language, Record<string, string>> = {
     'Estudante Não Encontrado': 'Student Not Found',
     'Batizado': 'Baptized',
     'Não Batizado': 'Unbaptized',
-    
+
     // Footer
     'Recursos': 'Resources',
     'Documentação': 'Documentation',

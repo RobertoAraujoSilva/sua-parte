@@ -1,10 +1,26 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
-import { AgGridReact } from 'ag-grid-react';
-import { ColDef, GridReadyEvent, CellValueChangedEvent, ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
+import { useState, useCallback, useMemo, useEffect, lazy, Suspense } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
-ModuleRegistry.registerModules([AllCommunityModule]);
+// Lazy load AG-Grid to reduce initial bundle size
+const AgGridReact = lazy(() => import('ag-grid-react').then(module => ({ default: module.AgGridReact })));
+
+// Lazy load AG-Grid styles
+const loadAgGridStyles = () => {
+  if (typeof window !== 'undefined' && !document.querySelector('[data-ag-grid-styles]')) {
+    import('ag-grid-community/styles/ag-grid.css');
+    import('ag-grid-community/styles/ag-theme-alpine.css');
+    
+    // Register modules only when needed
+    import('ag-grid-community').then(({ ModuleRegistry, AllCommunityModule }) => {
+      ModuleRegistry.registerModules([AllCommunityModule]);
+    });
+    
+    // Mark as loaded
+    const marker = document.createElement('meta');
+    marker.setAttribute('data-ag-grid-styles', 'loaded');
+    document.head.appendChild(marker);
+  }
+};
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,6 +41,7 @@ const StudentsSpreadsheet = ({ estudantes, onRefresh }: StudentsSpreadsheetProps
 
   useEffect(() => {
     setRowData(estudantes || []);
+    loadAgGridStyles(); // Load AG-Grid styles when component mounts
   }, [estudantes]);
 
   const columnDefs: ColDef[] = useMemo(() => [
@@ -126,16 +143,25 @@ const StudentsSpreadsheet = ({ estudantes, onRefresh }: StudentsSpreadsheetProps
       </CardHeader>
       <CardContent>
         <div className="ag-theme-alpine" style={{ height: '600px', width: '100%' }}>
-          <AgGridReact
-            theme="legacy"
-            rowData={rowData}
-            columnDefs={columnDefs}
-            defaultColDef={gridOptions}
-            onGridReady={onGridReady}
-            onCellValueChanged={onCellValueChanged}
-            pagination={true}
-            paginationPageSize={25}
-          />
+          <Suspense fallback={
+            <div className="space-y-4">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+              <Skeleton className="h-16 w-full" />
+            </div>
+          }>
+            <AgGridReact
+              theme="legacy"
+              rowData={rowData}
+              columnDefs={columnDefs}
+              defaultColDef={gridOptions}
+              onGridReady={onGridReady}
+              onCellValueChanged={onCellValueChanged}
+              pagination={true}
+              paginationPageSize={25}
+            />
+          </Suspense>
         </div>
       </CardContent>
     </Card>

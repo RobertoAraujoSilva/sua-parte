@@ -25,13 +25,13 @@ const RESOLUTIONS = [
  */
 function testLayoutStability() {
   const pageShell = document.querySelector('[data-testid="page-shell"]');
-  const toolbar = document.querySelector('[data-testid="toolbar"]') || 
-                 document.querySelector('.sticky') ||
-                 document.querySelector('[class*="toolbar"]');
+  const toolbar = document.querySelector('[data-testid="toolbar"]') ||
+    document.querySelector('.sticky') ||
+    document.querySelector('[class*="toolbar"]');
   const mainContent = document.querySelector('[data-testid="main-content"]') ||
-                     document.querySelector('main') ||
-                     document.querySelector('[class*="main"]');
-  
+    document.querySelector('main') ||
+    document.querySelector('[class*="main"]');
+
   if (!pageShell && !toolbar && !mainContent) {
     console.warn('⚠️ Layout elements not found. Make sure you are on a page with PageShell component.');
     return false;
@@ -43,7 +43,7 @@ function testLayoutStability() {
     mainContent: mainContent ? mainContent.getBoundingClientRect() : null
   };
 
-  const isStable = Object.values(results).some(rect => 
+  const isStable = Object.values(results).some(rect =>
     rect && rect.width > 0 && rect.width <= window.innerWidth
   );
 
@@ -54,21 +54,21 @@ function testLayoutStability() {
  * Test sticky toolbar behavior
  */
 function testStickyToolbar() {
-  const toolbar = document.querySelector('[data-testid="toolbar"]') || 
-                 document.querySelector('.sticky') ||
-                 document.querySelector('[class*="toolbar"]') ||
-                 document.querySelector('[style*="sticky"]');
-  
+  const toolbar = document.querySelector('[data-testid="toolbar"]') ||
+    document.querySelector('.sticky') ||
+    document.querySelector('[class*="toolbar"]') ||
+    document.querySelector('[style*="sticky"]');
+
   if (!toolbar) {
     return { hasSticky: false, details: 'No toolbar found' };
   }
 
   const computedStyle = window.getComputedStyle(toolbar);
   const isSticky = computedStyle.position === 'sticky' || computedStyle.position === 'fixed';
-  const hasBackdrop = computedStyle.backdropFilter !== 'none' || 
-                     computedStyle.webkitBackdropFilter !== 'none' ||
-                     computedStyle.backdropFilter?.includes('blur') ||
-                     computedStyle.webkitBackdropFilter?.includes('blur');
+  const hasBackdrop = computedStyle.backdropFilter !== 'none' ||
+    computedStyle.webkitBackdropFilter !== 'none' ||
+    computedStyle.backdropFilter?.includes('blur') ||
+    computedStyle.webkitBackdropFilter?.includes('blur');
 
   return {
     hasSticky: isSticky,
@@ -84,10 +84,10 @@ function testStickyToolbar() {
  */
 function testFluidWidth() {
   const container = document.querySelector('[data-testid="page-shell"]') ||
-                   document.querySelector('.container') ||
-                   document.querySelector('main') ||
-                   document.body;
-  
+    document.querySelector('.container') ||
+    document.querySelector('main') ||
+    document.body;
+
   if (!container) {
     return { isFluid: false, details: 'No container found' };
   }
@@ -95,7 +95,7 @@ function testFluidWidth() {
   const rect = container.getBoundingClientRect();
   const maxExpectedWidth = Math.min(1600, window.innerWidth * 0.95);
   const utilization = (rect.width / window.innerWidth) * 100;
-  
+
   const isFluid = rect.width <= maxExpectedWidth && rect.width > window.innerWidth * 0.6;
 
   return {
@@ -112,7 +112,7 @@ function testFluidWidth() {
  */
 function testHorizontalScroll() {
   const hasHorizontalScroll = document.documentElement.scrollWidth > document.documentElement.clientWidth;
-  
+
   return {
     hasHorizontalScroll,
     scrollWidth: document.documentElement.scrollWidth,
@@ -143,9 +143,9 @@ function testCalcHeights() {
       height: Math.round(rect.height),
       minHeight: computedStyle.minHeight,
       maxHeight: computedStyle.maxHeight,
-      hasCalc: computedStyle.height?.includes('calc') || 
-               computedStyle.minHeight?.includes('calc') ||
-               computedStyle.maxHeight?.includes('calc')
+      hasCalc: computedStyle.height?.includes('calc') ||
+        computedStyle.minHeight?.includes('calc') ||
+        computedStyle.maxHeight?.includes('calc')
     };
   });
 
@@ -165,7 +165,7 @@ function testCSSVariables() {
   const rootStyles = getComputedStyle(document.documentElement);
   const variables = [
     '--shell-max-w',
-    '--shell-gutter', 
+    '--shell-gutter',
     '--hero-h',
     '--toolbar-h',
     '--footer-h',
@@ -195,10 +195,10 @@ function testCSSVariables() {
 function getCurrentZoomLevel() {
   // Method 1: Using outer/inner width ratio
   const zoomRatio1 = window.outerWidth / window.innerWidth;
-  
+
   // Method 2: Using device pixel ratio (less reliable for zoom)
   const zoomRatio2 = window.devicePixelRatio;
-  
+
   // Method 3: Using screen width comparison
   const zoomRatio3 = screen.width / window.innerWidth;
 
@@ -250,9 +250,9 @@ function testZoomResponsiveness() {
   console.log('🔍 Starting Zoom & Responsiveness Testing...\n');
 
   const results = runComprehensiveTest();
-  
+
   console.group('📊 Test Results Summary');
-  
+
   // Viewport Info
   console.group('🖥️ Viewport Information');
   console.log(`Width: ${results.viewport.width}px`);
@@ -336,7 +336,7 @@ function testZoomResponsiveness() {
   ].filter(Boolean).length;
 
   console.log(`\n🎯 Overall Score: ${passCount}/6 tests passed`);
-  
+
   if (passCount === 6) {
     console.log('🎉 All tests passed! Layout is optimized for current zoom/resolution.');
   } else if (passCount >= 4) {

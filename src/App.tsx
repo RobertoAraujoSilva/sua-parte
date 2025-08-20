@@ -1,50 +1,62 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TutorialProvider } from "@/contexts/TutorialContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
-import { TutorialOverlay } from "@/components/tutorial";
-// Debug tools will be loaded conditionally in development only
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import { LanguageDebug } from "@/components/LanguageDebug";
-import Demo from "./pages/Demo";
-import Dashboard from "./pages/Dashboard";
-import Estudantes from "./pages/Estudantes";
-import EstudantesResponsive from "./pages/EstudantesResponsive";
-import ProgramasOptimized from "./pages/ProgramasOptimized";
-import ProgramaPreview from "./pages/ProgramaPreview";
-import ProgramasTest from "./pages/ProgramasTest";
-import PdfParsingTest from "./pages/PdfParsingTest";
-import DesignacoesOptimized from "./pages/DesignacoesOptimized";
-import Relatorios from "./pages/Relatorios";
-import Reunioes from "./pages/Reunioes";
-import EstudantePortal from "./pages/EstudantePortal";
-import FamiliaPage from "./pages/estudante/[id]/familia";
-import Funcionalidades from "./pages/Funcionalidades";
-import Congregacoes from "./pages/Congregacoes";
-import Suporte from "./pages/Suporte";
-import Sobre from "./pages/Sobre";
-import Doar from "./pages/Doar";
-import BemVindo from "./pages/BemVindo";
-import ConfiguracaoInicial from "./pages/ConfiguracaoInicial";
-import PrimeiroPrograma from "./pages/PrimeiroPrograma";
-import DeveloperPanel from "./pages/DeveloperPanel";
-import NotFound from "./pages/NotFound";
-import ConviteAceitar from "./pages/convite/aceitar";
-import PortalFamiliar from "./pages/PortalFamiliar";
-import Equidade from "./pages/Equidade";
-import AdminDashboard from "./pages/AdminDashboard";
-import DensityToggleTestPage from "./pages/DensityToggleTest";
-import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
-import ProtectedRoute from "./components/ProtectedRoute";
-import DebugFab from "./components/DebugFab";
-import { Header } from '@/components/Header';
-import { ConnectionStatusBanner } from '@/components/ConnectionStatusBanner';
-import { SyncButton } from '@/components/SyncButton';
+import { Skeleton } from "@/components/ui/skeleton";
+import { PerformanceMonitor } from "@/components/PerformanceMonitor";
+
+// Lazy load all pages for better performance
+const Index = lazy(() => import("./pages/Index"));
+const Auth = lazy(() => import("./pages/Auth"));
+const Demo = lazy(() => import("./pages/Demo"));
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Estudantes = lazy(() => import("./pages/Estudantes"));
+const EstudantesResponsive = lazy(() => import("./pages/EstudantesResponsive"));
+const ProgramasOptimized = lazy(() => import("./pages/ProgramasOptimized"));
+const ProgramaPreview = lazy(() => import("./pages/ProgramaPreview"));
+const ProgramasTest = lazy(() => import("./pages/ProgramasTest"));
+const PdfParsingTest = lazy(() => import("./pages/PdfParsingTest"));
+const DesignacoesOptimized = lazy(() => import("./pages/DesignacoesOptimized"));
+const Relatorios = lazy(() => import("./pages/Relatorios"));
+const Reunioes = lazy(() => import("./pages/Reunioes"));
+const EstudantePortal = lazy(() => import("./pages/EstudantePortal"));
+const FamiliaPage = lazy(() => import("./pages/estudante/[id]/familia"));
+const Funcionalidades = lazy(() => import("./pages/Funcionalidades"));
+const Congregacoes = lazy(() => import("./pages/Congregacoes"));
+const Suporte = lazy(() => import("./pages/Suporte"));
+const Sobre = lazy(() => import("./pages/Sobre"));
+const Doar = lazy(() => import("./pages/Doar"));
+const BemVindo = lazy(() => import("./pages/BemVindo"));
+const ConfiguracaoInicial = lazy(() => import("./pages/ConfiguracaoInicial"));
+const PrimeiroPrograma = lazy(() => import("./pages/PrimeiroPrograma"));
+const DeveloperPanel = lazy(() => import("./pages/DeveloperPanel"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const ConviteAceitar = lazy(() => import("./pages/convite/aceitar"));
+const PortalFamiliar = lazy(() => import("./pages/PortalFamiliar"));
+const Equidade = lazy(() => import("./pages/Equidade"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const DensityToggleTestPage = lazy(() => import("./pages/DensityToggleTest"));
+const ZoomResponsivenessTestPage = lazy(() => import("./pages/ZoomResponsivenessTest"));
+
+// Lazy load components
+const ProtectedRoute = lazy(() => import("./components/ProtectedRoute"));
+const TutorialOverlay = lazy(() => import("@/components/tutorial").then(m => ({ default: m.TutorialOverlay })));
+
+// Loading component
+const PageLoader = () => (
+  <div className="min-h-screen bg-background p-4">
+    <Skeleton className="h-16 w-full mb-4" />
+    <div className="space-y-4">
+      <Skeleton className="h-32 w-full" />
+      <Skeleton className="h-48 w-full" />
+    </div>
+  </div>
+);
+
 
 const queryClient = new QueryClient();
 
@@ -78,19 +90,23 @@ const ConditionalDebugPanel: React.FC = () => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
+    {import.meta.env.DEV && <PerformanceMonitor />}
     <LanguageProvider>
       <AuthProvider>
         <TutorialProvider>
           <TooltipProvider>
             <Sonner />
-            <TutorialOverlay />
+            <Suspense fallback={<PageLoader />}>
+              <TutorialOverlay />
+            </Suspense>
             <BrowserRouter
               future={{
                 v7_startTransition: true,
                 v7_relativeSplatPath: true
               }}
             >
-              <Routes>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
@@ -287,13 +303,18 @@ const App = () => (
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              </Suspense>
             </BrowserRouter>
           </TooltipProvider>
 
           {/* Debug Panel - Only shows in development */}
           <ConditionalDebugPanel />
-          {import.meta.env.DEV && <DebugFab />}
-          {import.meta.env.DEV && <LanguageDebug />}
+          {import.meta.env.DEV && (
+            <Suspense fallback={null}>
+              {React.createElement(lazy(() => import("@/components/DebugFab")))}
+              {React.createElement(lazy(() => import("@/components/LanguageDebug")))}
+            </Suspense>
+          )}
         </TutorialProvider>
       </AuthProvider>
     </LanguageProvider>
@@ -301,22 +322,3 @@ const App = () => (
 );
 
 export default App;
-
-// Add SyncButton to Header or create a dedicated sync area
-<div className="min-h-screen bg-background">
-  <Header />
-  <ConnectionStatusBanner />
-  
-  {/* Optional: Add sync controls in a dedicated area */}
-  <div className="container mx-auto px-4 py-2 border-b">
-    <div className="flex justify-end">
-      <SyncButton />
-    </div>
-  </div>
-  
-  <main className="container mx-auto px-4 py-8">
-    <Routes>
-      {/* ... existing routes ... */}
-    </Routes>
-  </main>
-</div>

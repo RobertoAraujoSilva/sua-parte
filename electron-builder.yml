@@ -1,0 +1,131 @@
+appId: com.ministerial.system
+productName: Sistema Ministerial
+copyright: Copyright © 2024 Sistema Ministerial
+
+directories:
+  output: dist-electron
+  buildResources: resources
+
+files:
+  - dist/**/*
+  - backend/**/*
+  - resources/**/*
+  - "!backend/node_modules"
+  - "!**/*.map"
+  - "!**/*.ts"
+  - "!**/tsconfig.json"
+
+extraResources:
+  - from: resources/seed
+    to: seed
+    filter:
+      - "**/*"
+  - from: docs/Oficial
+    to: materials
+    filter:
+      - "**/*"
+
+# Windows configuration
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+        - ia32
+  icon: resources/icon.ico
+  artifactName: ${productName}-Setup-${version}.${ext}
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Sistema Ministerial
+  uninstallDisplayName: Sistema Ministerial
+  license: LICENSE.txt
+  installerIcon: resources/icon.ico
+  uninstallerIcon: resources/icon.ico
+
+# macOS configuration
+mac:
+  target:
+    - target: dmg
+      arch:
+        - x64
+        - arm64
+  icon: resources/icon.icns
+  category: public.app-category.productivity
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: resources/entitlements.mac.plist
+  entitlementsInherit: resources/entitlements.mac.plist
+
+dmg:
+  title: Sistema Ministerial
+  icon: resources/icon.icns
+  background: resources/dmg-background.png
+  contents:
+    - x: 410
+      y: 150
+      type: link
+      path: /Applications
+    - x: 130
+      y: 150
+      type: file
+
+# Linux configuration
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+    - target: deb
+      arch:
+        - x64
+    - target: rpm
+      arch:
+        - x64
+  icon: resources/icon.png
+  category: Office
+  synopsis: Sistema de Gestão Ministerial
+  description: Sistema completo para gestão de designações ministeriais em congregações
+
+deb:
+  depends:
+    - gconf2
+    - gconf-service
+    - libnotify4
+    - libappindicator1
+    - libxtst6
+    - libnss3
+
+rpm:
+  depends:
+    - libnotify
+    - libappindicator
+    - libxtst6
+    - libnss3
+
+# Build configuration
+compression: maximum
+removePackageScripts: true
+
+# Auto-updater configuration (for future use)
+publish:
+  provider: github
+  owner: your-github-username
+  repo: sistema-ministerial
+  private: false
+
+# Electron configuration
+electronVersion: 37.3.1
+electronDownload:
+  cache: .electron-cache
+
+# Build scripts
+# beforeBuild: npm run build  # Build is handled by the npm script
+# afterSign: scripts/notarize.js  # Disabled for now - will be enabled when code signing is set up
+
+# Development configuration
+buildDependenciesFromSource: false
+nodeGypRebuild: false

@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 
 type Language = 'pt' | 'en';
@@ -12,26 +12,33 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { i18n } = useTranslation();
-  
-  const language = (i18n.language || 'pt') as Language;
+  const [language, setLanguageState] = useState<Language>('pt');
 
+  // Simple language management without relying on useTranslation hook
   const toggleLanguage = () => {
     const newLanguage = language === 'pt' ? 'en' : 'pt';
-    console.log('🌐 LanguageContext: Changing from', language, 'to', newLanguage);
-    i18n.changeLanguage(newLanguage);
+    setLanguageState(newLanguage);
+    // Try to change i18n language if available
+    try {
+      import('../i18n').then(({ default: i18n }) => {
+        i18n.changeLanguage(newLanguage);
+      });
+    } catch (error) {
+      console.warn('Could not change i18n language:', error);
+    }
   };
 
   const setLanguage = (lang: Language) => {
-    console.log('🌐 LanguageContext: Setting language to', lang);
-    i18n.changeLanguage(lang);
+    setLanguageState(lang);
+    // Try to change i18n language if available
+    try {
+      import('../i18n').then(({ default: i18n }) => {
+        i18n.changeLanguage(lang);
+      });
+    } catch (error) {
+      console.warn('Could not change i18n language:', error);
+    }
   };
-
-  // Debug current language
-  React.useEffect(() => {
-    console.log('🌐 LanguageContext: Current language is', language);
-    console.log('🌐 LanguageContext: Available resources:', Object.keys(i18n.options.resources || {}));
-  }, [language, i18n]);
 
   return (
     <LanguageContext.Provider value={{ language, toggleLanguage, setLanguage }}>

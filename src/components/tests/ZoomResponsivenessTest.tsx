@@ -53,7 +53,7 @@ export const ZoomResponsivenessTest: React.FC = () => {
       const pageShell = document.querySelector('[data-testid="page-shell"]');
       const toolbar = document.querySelector('[data-testid="toolbar"]');
       const mainContent = document.querySelector('[data-testid="main-content"]');
-      
+
       if (!pageShell || !toolbar || !mainContent) {
         return {
           test: 'Layout Elements Present',
@@ -67,10 +67,10 @@ export const ZoomResponsivenessTest: React.FC = () => {
       const mainRect = mainContent.getBoundingClientRect();
 
       // Check if elements are properly positioned
-      const isLayoutStable = shellRect.width > 0 && 
-                            toolbarRect.width > 0 && 
-                            mainRect.width > 0 &&
-                            shellRect.width <= window.innerWidth;
+      const isLayoutStable = shellRect.width > 0 &&
+        toolbarRect.width > 0 &&
+        mainRect.width > 0 &&
+        shellRect.width <= window.innerWidth;
 
       return {
         test: `Layout Stability at ${viewportInfo.zoom}x zoom`,
@@ -94,7 +94,7 @@ export const ZoomResponsivenessTest: React.FC = () => {
 
       const computedStyle = window.getComputedStyle(toolbar);
       const isSticky = computedStyle.position === 'sticky' || computedStyle.position === 'fixed';
-      const hasBackdrop = computedStyle.backdropFilter !== 'none' || computedStyle.webkitBackdropFilter !== 'none';
+      const hasBackdrop = computedStyle.backdropFilter !== 'none' || (computedStyle as any)['-webkit-backdrop-filter'] !== 'none';
 
       return {
         test: 'Sticky Toolbar Behavior',
@@ -132,7 +132,7 @@ export const ZoomResponsivenessTest: React.FC = () => {
     // Test 4: No horizontal scrollbars
     const horizontalScrollTest = () => {
       const hasHorizontalScroll = document.documentElement.scrollWidth > document.documentElement.clientWidth;
-      
+
       return {
         test: 'No Horizontal Scrollbars',
         status: hasHorizontalScroll ? 'fail' as const : 'pass' as const,
@@ -208,7 +208,7 @@ export const ZoomResponsivenessTest: React.FC = () => {
       return {
         test: `Resolution Optimization (${resolutionCategory})`,
         status: isOptimalForResolution ? 'pass' as const : 'warning' as const,
-        details: `${expectedBehavior}. Current width: ${Math.round(shellWidth)}px (${Math.round((shellWidth/width)*100)}% of viewport)`
+        details: `${expectedBehavior}. Current width: ${Math.round(shellWidth)}px (${Math.round((shellWidth / width) * 100)}% of viewport)`
       };
     };
 
@@ -229,15 +229,15 @@ export const ZoomResponsivenessTest: React.FC = () => {
 
   const toolbarActions = (
     <div className="flex gap-2">
-      <Button 
-        onClick={runTests} 
+      <Button
+        onClick={runTests}
         disabled={isRunning}
         className="bg-blue-600 hover:bg-blue-700"
       >
         {isRunning ? 'Running Tests...' : 'Run Tests'}
       </Button>
-      <Button 
-        variant="outline" 
+      <Button
+        variant="outline"
         onClick={() => setTestResults([])}
       >
         Clear Results
@@ -336,7 +336,7 @@ export const ZoomResponsivenessTest: React.FC = () => {
                   </div>
                 ))}
               </div>
-              
+
               {/* Large content area to test scrolling */}
               <div className="h-96 p-4 border rounded-lg bg-gray-50 overflow-y-auto">
                 <h4 className="font-medium mb-4">Scrollable Content Area</h4>
