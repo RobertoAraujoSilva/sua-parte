@@ -23,6 +23,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   refreshAuth: () => Promise<void>;
   clearAuthError: () => void;
+  forceClearInvalidTokens: () => Promise<void>;
   authError: string | null;
 }
 
@@ -262,6 +263,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setAuthError(null);
   }, []);
 
+  // 🔄 Função para forçar limpeza de tokens inválidos
+  const forceClearInvalidTokens = useCallback(async () => {
+    try {
+      console.log('🧹 Force clearing invalid tokens...');
+      
+      // Limpar estado local
+      setUser(null);
+      setProfile(null);
+      setAuthError(null);
+      
+      // Limpar tokens do localStorage
+      try {
+        localStorage.removeItem('sb-nwpuurgwnnuejqinkvrh-auth-token');
+        sessionStorage.clear();
+      } catch (e) {
+        console.log('🧹 Error clearing storage:', e);
+      }
+      
+      // Forçar logout no Supabase
+      await supabase.auth.signOut();
+      
+      console.log('✅ Invalid tokens cleared successfully');
+    } catch (error) {
+      console.error('❌ Error clearing invalid tokens:', error);
+    }
+  }, []);
+
   // 🔄 Efeito para inicializar autenticação
   useEffect(() => {
     console.log('🚀 Initializing authentication...');
@@ -290,7 +318,39 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Monitorar erros de refresh token
+    const handleRefreshError = (error: any) => {
+      if (error?.message?.includes('Invalid Refresh Token') || 
+          error?.message?.includes('Refresh Token Not Found') ||
+          error?.message?.includes('JWT expired')) {
+        
+        console.log('🔄 Refresh token error detected, clearing auth state');
+        setUser(null);
+        setProfile(null);
+        setAuthError('Sessão expirada. Por favor, faça login novamente.');
+        
+        // Limpar tokens inválidos do localStorage
+        try {
+          localStorage.removeItem('sb-nwpuurgwnnuejqinkvrh-auth-token');
+          sessionStorage.clear();
+        } catch (e) {
+          console.log('🧹 Error clearing storage:', e);
+        }
+      }
+    };
+
+    // Adicionar listener global para erros de auth
+    window.addEventListener('unhandledrejection', (event) => {
+      if (event.reason?.message?.includes('Refresh Token')) {
+        handleRefreshError(event.reason);
+        event.preventDefault();
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      window.removeEventListener('unhandledrejection', handleRefreshError);
+    };
   }, []);
 
   // 🔄 Computar se o usuário é admin
@@ -306,6 +366,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
     refreshAuth,
     clearAuthError,
+    forceClearInvalidTokens,
     authError,
   };
 
