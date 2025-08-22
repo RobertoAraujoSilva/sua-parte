@@ -8,6 +8,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import FallbackScreen from "@/components/FallbackScreen";
 import SafeAreaLayout from "@/layouts/SafeAreaLayout";
 import { DensityProvider } from "@/contexts/DensityContext";
+import { monitorWebVitals, analyzeBundle } from './config/performance';
 import './sw-register';
 
 createRoot(document.getElementById("root")!).render(
@@ -19,3 +20,13 @@ createRoot(document.getElementById("root")!).render(
     </DensityProvider>
   </ErrorBoundary>
 );
+
+// 🚀 Performance Monitoring
+if (import.meta.env.DEV) {
+  monitorWebVitals();
+  
+  // 📊 Bundle Analysis após carregamento
+  window.addEventListener('load', () => {
+    setTimeout(analyzeBundle, 1000);
+  });
+}
