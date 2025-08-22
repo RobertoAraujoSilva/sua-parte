@@ -86,8 +86,10 @@ const swRegister: SWRegister = {
   }
 };
 
-// Registrar service worker
-swRegister.register();
+// Registrar service worker somente em produção
+if (import.meta.env.PROD) {
+  swRegister.register();
+}
 
 // Listener para erros de chunk
 window.addEventListener('error', (event) => {

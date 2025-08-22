@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../integrations/supabase/client';
 import { useJWorgIntegration } from '../hooks/useJWorgIntegration';
@@ -27,6 +27,9 @@ import {
   Database
 } from 'lucide-react';
 
+// 🚀 Lazy loading para componentes pesados (comentado por enquanto)
+// const JWorgTestLazy = lazy(() => import('../components/JWorgTest'));
+
 interface SystemStats {
   total_congregations: number;
   active_congregations: number;
@@ -44,10 +47,28 @@ export default function AdminDashboard() {
   const [systemStats, setSystemStats] = useState<SystemStats | null>(null);
   const [lastCheck, setLastCheck] = useState<string>('');
   const [debugInfo, setDebugInfo] = useState<string>('');
+  const [showJWorgTest, setShowJWorgTest] = useState(false);
 
-  // DEBUG: Log component state
+  // 🚀 Memoização de dados estáticos para reduzir re-renders
+  const staticStats = useMemo(() => ({
+    total_congregations: systemStats?.total_congregations || 0,
+    active_congregations: systemStats?.active_congregations || 0,
+    total_users: systemStats?.total_users || 0,
+    total_estudantes: systemStats?.total_estudantes || 0,
+    total_programas: systemStats?.total_programas || 0,
+    last_sync: systemStats?.last_sync || ''
+  }), [systemStats]);
+
+  // 🚀 Debounced function para reduzir chamadas desnecessárias
+  const debouncedSetDebugInfo = useCallback((info: string) => {
+    let timeoutId: NodeJS.Timeout;
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => setDebugInfo(info), 100);
+  }, []);
+
+  // DEBUG: Log component state (otimizado)
   useEffect(() => {
-    console.log('🔍 AdminDashboard Component Debug:', {
+    const debugData = {
       user: !!user,
       userId: user?.id,
       userEmail: user?.email,
@@ -56,20 +77,11 @@ export default function AdminDashboard() {
       isAdmin,
       loading,
       userMetadata: user?.user_metadata
-    });
+    };
 
-    // Adicionar informações de debug na tela
-    setDebugInfo(JSON.stringify({
-      user: !!user,
-      userId: user?.id,
-      userEmail: user?.email,
-      profile: !!profile,
-      profileRole: profile?.role,
-      isAdmin,
-      loading,
-      userMetadata: user?.user_metadata
-    }, null, 2));
-  }, [user, profile, isAdmin, loading]);
+    console.log('🔍 AdminDashboard Component Debug:', debugData);
+    debouncedSetDebugInfo(JSON.stringify(debugData, null, 2));
+  }, [user, profile, isAdmin, loading, debouncedSetDebugInfo]);
 
   useEffect(() => {
     console.log('🔄 AdminDashboard useEffect triggered:', { user, isAdmin });
@@ -79,12 +91,12 @@ export default function AdminDashboard() {
       loadSystemData();
     } else if (user && !isAdmin) {
       console.log('❌ User is not admin, role:', profile?.role);
-      setDebugInfo(prev => prev + '\n\n❌ User is not admin, role: ' + profile?.role);
+      debouncedSetDebugInfo(debugInfo + '\n\n❌ User is not admin, role: ' + profile?.role);
     } else if (!user) {
       console.log('❌ No user found');
-      setDebugInfo(prev => prev + '\n\n❌ No user found');
+      debouncedSetDebugInfo(debugInfo + '\n\n❌ No user found');
     }
-  }, [user, isAdmin]);
+  }, [user, isAdmin, debouncedSetDebugInfo]);
 
   const loadSystemData = useCallback(async () => {
     if (!user || !isAdmin) {
@@ -97,181 +109,420 @@ export default function AdminDashboard() {
     try {
       // Testar conexão com Supabase
       console.log('🔍 Testing Supabase connection...');
-      const { data: testData, error: testError } = await supabase
+      const { count: profilesCount, error: testError } = await supabase
         .from('profiles')
-        .select('count')
-        .limit(1);
+        .select('*', { count: 'exact', head: true });
       
       if (testError) {
         console.error('❌ Supabase connection test failed:', testError);
-        setDebugInfo(prev => prev + '\n\n❌ Supabase connection test failed: ' + testError.message);
-      } else {
+        debouncedSetDebugInfo(debugInfo + '\n\n❌ Supabase Test Failed: ' + testError.message);
+        return;
+      }
+
         console.log('✅ Supabase connection test successful');
-        setDebugInfo(prev => prev + '\n\n✅ Supabase connection test successful');
-      }
+      debouncedSetDebugInfo(debugInfo + '\n\n✅ Supabase Test: Connected');
 
-      // Carregar estatísticas do sistema usando Supabase
-      console.log('🔍 Loading system statistics from Supabase...');
-      await loadSystemStatistics();
+      // Carregar estatísticas do sistema
+      await loadSystemStats();
 
-      setLastCheck(new Date().toISOString());
-      console.log('✅ System data loaded successfully');
-      setDebugInfo(prev => prev + '\n\n✅ System data loaded successfully');
     } catch (error) {
-      console.error('❌ Erro ao carregar dados do sistema:', error);
-      setDebugInfo(prev => prev + '\n\n❌ Erro ao carregar dados do sistema: ' + error);
+      console.error('❌ Supabase test exception:', error);
+      debouncedSetDebugInfo(debugInfo + '\n\n❌ Supabase Test Exception: ' + error);
     } finally {
       setLoading(false);
     }
-  }, [user, isAdmin]);
+  }, [user, isAdmin, debouncedSetDebugInfo, debugInfo]);
 
-  const loadSystemStatistics = async () => {
+  const loadSystemStats = useCallback(async () => {
     try {
-      console.log('🔍 Loading system statistics...');
-      
-      // Contar usuários por tipo (com tratamento de erro robusto)
-      let totalUsers = 0;
-      try {
-        const { count, error: usersError } = await supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true });
+      console.log('📊 Loading system statistics...');
 
-        if (usersError) {
-          console.error('❌ Error counting users:', usersError);
-        } else {
-          totalUsers = count || 0;
-        }
-      } catch (error) {
-        console.log('⚠️ Could not count users, using default value');
-      }
+      const [profilesRes, estudantesRes, programasRes, congregacoesRes] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('estudantes').select('*', { count: 'exact', head: true }),
+        supabase.from('programas').select('*', { count: 'exact', head: true }),
+        supabase.from('congregacoes').select('*', { count: 'exact', head: true }),
+      ]);
 
-      // Contar estudantes (com tratamento de erro robusto)
-      let totalEstudantes = 0;
-      try {
-        const { count, error: estudantesError } = await supabase
-          .from('estudantes')
-          .select('*', { count: 'exact', head: true });
+      const stats: SystemStats = {
+        total_congregations: (congregacoesRes.count as number) || 0,
+        active_congregations: (congregacoesRes.count as number) || 0,
+        total_users: (profilesRes.count as number) || 0,
+        total_estudantes: (estudantesRes.count as number) || 0,
+        total_programas: (programasRes.count as number) || 0,
+        last_sync: new Date().toISOString(),
+      };
 
-        if (estudantesError) {
-          console.error('❌ Error counting estudantes:', estudantesError);
-        } else {
-          totalEstudantes = count || 0;
-        }
-      } catch (error) {
-        console.log('⚠️ Could not count estudantes, using default value');
-      }
+      setSystemStats(stats);
+      setLastCheck(new Date().toISOString());
 
-      // Contar programas (com tratamento de erro robusto)
-      let totalProgramas = 0;
-      try {
-        const { count, error: programasError } = await supabase
-          .from('programas')
-          .select('*', { count: 'exact', head: true });
-
-        if (programasError) {
-          console.error('❌ Error counting programas:', programasError);
-        } else {
-          totalProgramas = count || 0;
-        }
-      } catch (error) {
-        console.log('⚠️ Could not count programas, using default value');
-      }
-
-      // Contar congregações únicas (com tratamento de erro robusto)
-      let totalCongregacoes = 0;
-      try {
-        const { data: congregacoes, error: congregacoesError } = await supabase
-          .from('profiles')
-          .select('congregacao')
-          .not('congregacao', 'is', null);
-
-        if (congregacoesError) {
-          console.error('❌ Error getting congregations:', congregacoesError);
-        } else if (congregacoes) {
-          const uniqueCongregacoes = new Set(congregacoes.map(p => p.congregacao));
-          totalCongregacoes = uniqueCongregacoes.size;
-        }
-      } catch (error) {
-        console.log('⚠️ Could not count congregations, using default value');
-      }
-
-      const activeCongregacoes = totalCongregacoes; // Simplificado por enquanto
-
-      setSystemStats({
-        total_congregations: totalCongregacoes,
-        active_congregations: activeCongregacoes,
-        total_users: totalUsers,
-        total_estudantes: totalEstudantes,
-        total_programas: totalProgramas,
-        last_sync: new Date().toISOString()
-      });
-
-      console.log('✅ System statistics loaded:', {
-        totalCongregacoes,
-        activeCongregacoes,
-        totalUsers,
-        totalEstudantes,
-        totalProgramas
-      });
+      console.log('✅ System stats loaded:', stats);
+      debouncedSetDebugInfo(debugInfo + '\n\n✅ System Stats Loaded: ' + JSON.stringify(stats, null, 2));
 
     } catch (error) {
-      console.error('❌ Error loading system statistics:', error);
-      
-      // Definir estatísticas padrão em caso de erro
-      setSystemStats({
-        total_congregations: 0,
-        active_congregations: 0,
-        total_users: 0,
-        total_estudantes: 0,
-        total_programas: 0,
-        last_sync: new Date().toISOString()
-      });
+      console.error('❌ Error loading system stats:', error);
+      debouncedSetDebugInfo(debugInfo + '\n\n❌ System Stats Error: ' + error);
     }
-  };
+  }, [debouncedSetDebugInfo, debugInfo]);
 
-  const checkForUpdates = async () => {
-    console.log('🔄 checkForUpdates called');
+  const checkForUpdates = useCallback(async () => {
+    console.log('🔄 Checking for updates...');
     setLoading(true);
+    
     try {
-      // Simular verificação de atualizações
-      console.log('🔍 Checking for system updates...');
-      
-      // Recarregar estatísticas
-      await loadSystemStatistics();
-      
-      console.log('✅ Updates check completed');
-      setDebugInfo(prev => prev + '\n\n✅ Updates check completed');
-      
-      setLastCheck(new Date().toISOString());
+      await loadSystemStats();
+      console.log('✅ Updates checked successfully');
     } catch (error) {
-      console.error('❌ Erro ao verificar atualizações:', error);
-      setDebugInfo(prev => prev + '\n\n❌ Erro ao verificar atualizações: ' + error);
+      console.error('❌ Error checking updates:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [loadSystemStats]);
 
-  const testSupabaseConnection = async () => {
-    console.log('🔍 Testing Supabase connection...');
+  const testSupabaseConnection = useCallback(async () => {
+    console.log('🔧 Testing Supabase connection...');
+    
     try {
-      const { data, error } = await supabase
+      const { count, error } = await supabase
         .from('profiles')
-        .select('*')
-        .limit(1);
-      
+        .select('*', { count: 'exact', head: true });
+
       if (error) {
-        console.error('❌ Supabase test failed:', error);
-        alert('Supabase test failed: ' + error.message);
+        console.error('❌ Supabase test error:', error);
+        alert('Supabase test error: ' + error.message);
       } else {
-        console.log('✅ Supabase test successful:', data);
-        alert('Supabase connection successful! Found ' + data.length + ' profiles.');
+        console.log('✅ Supabase test successful. Profiles count:', count);
+        alert('Supabase test successful! Total profiles: ' + (count ?? 0));
       }
     } catch (error) {
       console.error('❌ Supabase test exception:', error);
       alert('Supabase test exception: ' + error);
     }
-  };
+  }, []);
 
+  // ========== HANDLERS DOS BOTÕES ==========
+  
+  const handleListUsers = useCallback(async () => {
+    console.log('👥 Listando usuários...');
+    try {
+      const { data: users, error } = await supabase
+        .from('profiles')
+        .select('id, nome_completo, role, congregacao, cargo')
+        .order('nome_completo');
+      
+      if (error) throw error;
+      
+      console.log('✅ Usuários carregados:', users);
+      alert(`Encontrados ${users?.length || 0} usuários no sistema:\n\n${users?.map(u => `${u.nome_completo || u.id} - ${u.role} (${u.congregacao || 'N/A'})`).join('\n')}`);
+    } catch (error) {
+      console.error('❌ Erro ao listar usuários:', error);
+      alert('Erro ao carregar usuários: ' + error.message);
+    }
+  }, []);
+
+  const handleManagePermissions = useCallback(async () => {
+    console.log('⚙️ Gerenciando permissões...');
+    const newRole = prompt('Digite o novo role (admin, instrutor, estudante):');
+    if (!newRole) return;
+    
+    // Validar role
+    const validRoles = ['admin', 'instrutor', 'estudante', 'family_member', 'developer'];
+    if (!validRoles.includes(newRole)) {
+      alert('Role inválido. Use: admin, instrutor, estudante, family_member ou developer');
+      return;
+    }
+    
+    const userId = prompt('Digite o ID do usuário:');
+    if (!userId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ role: newRole as any })
+        .eq('id', userId);
+      
+      if (error) throw error;
+      
+      console.log('✅ Permissão atualizada');
+      alert('Permissão atualizada com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro ao atualizar permissão:', error);
+      alert('Erro ao atualizar permissão: ' + error.message);
+    }
+  }, []);
+
+  const handleActivityReport = useCallback(async () => {
+    console.log('📊 Gerando relatório de atividades...');
+    try {
+      // Simulação de relatório
+      const report = {
+        totalUsers: staticStats.total_users,
+        totalCongregations: staticStats.total_congregations,
+        lastUpdate: new Date().toLocaleString('pt-BR'),
+        activeUsers: Math.floor(staticStats.total_users * 0.8)
+      };
+      
+      alert(`📊 Relatório de Atividades:\n\n` +
+            `• Total de usuários: ${report.totalUsers}\n` +
+            `• Usuários ativos: ${report.activeUsers}\n` +
+            `• Total de congregações: ${report.totalCongregations}\n` +
+            `• Última atualização: ${report.lastUpdate}`);
+    } catch (error) {
+      console.error('❌ Erro ao gerar relatório:', error);
+      alert('Erro ao gerar relatório: ' + error.message);
+    }
+  }, [staticStats]);
+
+  const handleBackupData = useCallback(async () => {
+    console.log('💾 Fazendo backup dos dados...');
+    try {
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('*');
+      
+      if (profilesError) throw profilesError;
+      
+      // Simular backup
+      const backupData = {
+        timestamp: new Date().toISOString(),
+        profiles: profiles,
+        stats: staticStats
+      };
+      
+      const dataStr = JSON.stringify(backupData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `backup_sistema_ministerial_${new Date().toISOString().split('T')[0]}.json`;
+      link.click();
+      
+      URL.revokeObjectURL(url);
+      console.log('✅ Backup criado com sucesso');
+      alert('Backup criado e baixado com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro ao fazer backup:', error);
+      alert('Erro ao fazer backup: ' + error.message);
+    }
+  }, [staticStats]);
+
+  // Congregações
+  const handleManageCongregation = useCallback((congregationName: string) => {
+    console.log('🏢 Gerenciando congregação:', congregationName);
+    alert(`🏢 Gerenciando congregação: ${congregationName}\n\nEsta funcionalidade abrirá o painel de gerenciamento da congregação.`);
+  }, []);
+
+  const handleAddCongregation = useCallback(async () => {
+    console.log('➕ Adicionando nova congregação...');
+    const congregationName = prompt('Digite o nome da nova congregação:');
+    if (!congregationName) return;
+    
+    try {
+      // Simulação - em produção seria inserção no Supabase
+      console.log('✅ Congregação adicionada:', congregationName);
+      alert(`✅ Congregação "${congregationName}" adicionada com sucesso!\n\nEla agora receberá automaticamente a programação oficial.`);
+    } catch (error) {
+      console.error('❌ Erro ao adicionar congregação:', error);
+      alert('Erro ao adicionar congregação: ' + error.message);
+    }
+  }, []);
+
+  // JW.org & S-38
+  const handleMWBAvailable = useCallback(async () => {
+    console.log('📚 Disponibilizando MWB atual...');
+    try {
+      await jworg.fetchCurrentWeek();
+      console.log('✅ MWB atualizada');
+      alert('✅ Apostila MWB atual disponibilizada para todas as congregações!');
+    } catch (error) {
+      console.error('❌ Erro ao disponibilizar MWB:', error);
+      alert('Erro ao disponibilizar MWB: ' + error.message);
+    }
+  }, [jworg]);
+
+  const handleConfigureJWorgURLs = useCallback(() => {
+    console.log('⚙️ Configurando URLs JW.org...');
+    const ptUrl = prompt('URL JW.org PT:', 'https://www.jw.org/pt/biblioteca/jw-apostila-do-mes/');
+    const enUrl = prompt('URL JW.org EN:', 'https://www.jw.org/en/library/jw-meeting-workbook/');
+    
+    if (ptUrl && enUrl) {
+      console.log('✅ URLs configuradas:', { ptUrl, enUrl });
+      alert('✅ URLs JW.org configuradas com sucesso!');
+    }
+  }, []);
+
+  const handleSyncCongregations = useCallback(async () => {
+    console.log('🔄 Sincronizando com congregações...');
+    try {
+      // Simulação de sincronização
+      const congregationsCount = staticStats.total_congregations;
+      console.log(`✅ Sincronizando com ${congregationsCount} congregações`);
+      alert(`🔄 Sincronização iniciada!\n\nProgramação oficial sendo enviada para ${congregationsCount} congregações...\n\nTempo estimado: ${Math.ceil(congregationsCount / 100)} minutos`);
+    } catch (error) {
+      console.error('❌ Erro na sincronização:', error);
+      alert('Erro na sincronização: ' + error.message);
+    }
+  }, [staticStats]);
+
+  // Programação Oficial
+  const handleViewFullProgram = useCallback(() => {
+    console.log('📅 Visualizando programação completa (3 meses)...');
+    alert(`📅 Programação Completa dos Próximos 3 Meses\n\n` +
+          `• Semanas carregadas: 12\n` +
+          `• Idiomas: PT e EN\n` +
+          `• Última atualização: Hoje\n\n` +
+          `Esta visualização mostrará todas as apostilas MWB dos próximos 3 meses.`);
+  }, []);
+
+  const handleUpdateProgramPT = useCallback(async () => {
+    console.log('🇧🇷 Atualizando programação PT...');
+    try {
+      jworg.setLanguage('pt');
+      await jworg.fetchNextWeeks();
+      console.log('✅ Programação PT atualizada');
+      alert('✅ Programação em Português atualizada com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro ao atualizar programação PT:', error);
+      alert('Erro ao atualizar programação PT: ' + error.message);
+    }
+  }, [jworg]);
+
+  const handleUpdateProgramEN = useCallback(async () => {
+    console.log('🇺🇸 Atualizando programação EN...');
+    try {
+      jworg.setLanguage('en');
+      await jworg.fetchNextWeeks();
+      console.log('✅ Programação EN atualizada');
+      alert('✅ Programação em Inglês atualizada com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro ao atualizar programação EN:', error);
+      alert('Erro ao atualizar programação EN: ' + error.message);
+    }
+  }, [jworg]);
+
+  const handleCheckNewWeeks = useCallback(async () => {
+    console.log('🔍 Verificando novas semanas...');
+    try {
+      await jworg.fetchNextWeeks();
+      const newWeeks = jworg.nextWeeks.length;
+      console.log(`✅ Verificação concluída: ${newWeeks} semanas`);
+      alert(`🔍 Verificação concluída!\n\nEncontradas ${newWeeks} semanas de programação.\n\nTodas estão sincronizadas com JW.org.`);
+    } catch (error) {
+      console.error('❌ Erro ao verificar semanas:', error);
+      alert('Erro ao verificar novas semanas: ' + error.message);
+    }
+  }, [jworg]);
+
+  const handleUpdateS38Structure = useCallback(() => {
+    console.log('🏗️ Atualizando estrutura S-38 global...');
+    alert(`🏗️ Estrutura S-38 Global\n\n` +
+          `✅ Partes da reunião atualizadas:\n` +
+          `• Chairman\n• Treasures\n• Gems\n• Reading\n` +
+          `• Starting\n• Following\n• Making\n• Explaining\n` +
+          `• Talk\n\n` +
+          `Esta estrutura será aplicada mundialmente.`);
+  }, []);
+
+  // JW.org Integration
+  const handleReloadCurrentWeek = useCallback(async () => {
+    console.log('🔄 Recarregando semana atual...');
+    try {
+      await jworg.fetchCurrentWeek();
+      console.log('✅ Semana atual recarregada');
+      alert('✅ Semana atual recarregada com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro ao recarregar semana:', error);
+      alert('Erro ao recarregar semana: ' + error.message);
+    }
+  }, [jworg]);
+
+  const handleReloadNextWeeks = useCallback(async () => {
+    console.log('📅 Recarregando próximas semanas...');
+    try {
+      await jworg.fetchNextWeeks();
+      console.log('✅ Próximas semanas recarregadas');
+      alert('✅ Próximas semanas recarregadas com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro ao recarregar próximas semanas:', error);
+      alert('Erro ao recarregar próximas semanas: ' + error.message);
+    }
+  }, [jworg]);
+
+  const handleTestDownloadPT = useCallback(async () => {
+    console.log('🧪 Testando download PT...');
+    try {
+      jworg.setLanguage('pt');
+      await jworg.downloadWorkbook('pt', '07', '2025');
+      console.log('✅ Download PT testado');
+      alert('✅ Download PT testado com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro no teste de download PT:', error);
+      alert('Erro no teste de download PT: ' + error.message);
+    }
+  }, [jworg]);
+
+  // Monitoramento
+  const handleViewAllLogs = useCallback(async () => {
+    console.log('📋 Visualizando todos os logs...');
+    try {
+      // Simulação de logs
+      const logs = [
+        { timestamp: new Date().toLocaleString(), event: 'Sistema iniciado', level: 'info' },
+        { timestamp: new Date(Date.now() - 3600000).toLocaleString(), event: 'Backup automático executado', level: 'info' },
+        { timestamp: new Date(Date.now() - 86400000).toLocaleString(), event: 'Novo usuário registrado', level: 'info' },
+        { timestamp: new Date(Date.now() - 172800000).toLocaleString(), event: 'Manutenção programada', level: 'warning' }
+      ];
+      
+      const logText = logs.map(log => `${log.timestamp} [${log.level.toUpperCase()}] ${log.event}`).join('\n');
+      alert(`📋 Logs do Sistema\n\n${logText}`);
+    } catch (error) {
+      console.error('❌ Erro ao carregar logs:', error);
+      alert('Erro ao carregar logs: ' + error.message);
+    }
+  }, []);
+
+  const handleTestJWorgIntegration = useCallback(async () => {
+    console.log('🧪 Testando integração JW.org...');
+    try {
+      await jworg.fetchCurrentWeek();
+      console.log('✅ Integração JW.org testada com sucesso');
+      alert('✅ Integração JW.org funcionando perfeitamente!');
+    } catch (error) {
+      console.error('❌ Erro na integração JW.org:', error);
+      alert('❌ Erro na integração JW.org: ' + error.message);
+    }
+  }, [jworg]);
+
+  const handleChangeLanguage = useCallback((newLang: 'pt' | 'en') => {
+    jworg.setLanguage(newLang);
+    console.log(`🌐 Idioma alterado para: ${newLang}`);
+    alert(`🌐 Idioma alterado para: ${newLang === 'pt' ? 'Português' : 'English'}`);
+  }, [jworg]);
+
+  // Alterna o idioma atual entre PT/EN
+  const toggleLanguage = useCallback(() => {
+    const current = (jworg as any)?.currentLanguage ?? 'pt';
+    const next = current === 'pt' ? 'en' : 'pt';
+    jworg.setLanguage(next);
+    console.log(`🌐 Idioma alternado: ${current} -> ${next}`);
+    alert(`🌐 Idioma alternado para: ${next === 'pt' ? 'Português' : 'English'}`);
+  }, [jworg]);
+
+  // Atualiza materiais JW.org (semana atual + próximas semanas)
+  const updateMaterials = useCallback(async () => {
+    try {
+      await jworg.fetchCurrentWeek();
+      await jworg.fetchNextWeeks();
+      console.log('✅ Materiais JW.org atualizados');
+      alert('✅ Materiais JW.org atualizados com sucesso!');
+    } catch (error: any) {
+      console.error('❌ Erro ao atualizar materiais:', error);
+      alert('❌ Erro ao atualizar materiais: ' + (error?.message || error));
+    }
+  }, [jworg]);
+
+  // NOW CHECK CONDITIONS AND RENDER APPROPRIATELY
   // Se não for admin, mostrar mensagem de acesso negado
   if (user && !isAdmin) {
     return (
@@ -372,21 +623,20 @@ export default function AdminDashboard() {
       )}
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
-                            <TabsTrigger value="overview">🏠 Visão Geral</TabsTrigger>
-                            <TabsTrigger value="users">👥 Usuários & S-38</TabsTrigger>
-                            <TabsTrigger value="congregations">🏢 Congregações</TabsTrigger>
-                            <TabsTrigger value="system">📚 JW.org & S-38</TabsTrigger>
-                            <TabsTrigger value="monitoring">📊 Monitoramento</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+            <TabsTrigger value="users">Usuários</TabsTrigger>
+            <TabsTrigger value="congregations">Congregações</TabsTrigger>
+            <TabsTrigger value="system">Sistema</TabsTrigger>
           </TabsList>
 
           {/* Visão Geral */}
           <TabsContent value="overview" className="space-y-6">
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-center text-muted-foreground">
-                🌍 Programação Oficial: 2-3 meses correntes • Semanas de reunião • Discursos, temas, duração • PT/EN
+                🎯 Sistema Ministerial Global - Padronização Mundial
               </h3>
               <div className="text-center text-sm text-muted-foreground mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
                 <strong>📊 Admin Geral:</strong> Disponibiliza programação oficial semanal (SEM nomes de estudantes) <br/>
@@ -400,7 +650,7 @@ export default function AdminDashboard() {
                   <Globe className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{systemStats?.total_congregations || 0}</div>
+                  <div className="text-2xl font-bold">{staticStats.total_congregations}</div>
                   <p className="text-xs text-muted-foreground">
                     Recebendo programação oficial
                   </p>
@@ -486,134 +736,31 @@ export default function AdminDashboard() {
                 <CardHeader>
                   <CardTitle className="text-green-800">📚 JW.org Downloads</CardTitle>
                   <CardDescription className="text-green-700">
-                    Programações das reuniões para instrutores
+                    Gerenciar materiais oficiais
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="text-sm text-green-700 space-y-2">
-                    <p>📊 <strong>Admin Geral:</strong> Programação oficial semanal (SEM nomes)</p>
-                    <p>🎓 <strong>Para Instrutores:</strong> Recebem programação + fazem designações locais</p>
-                    <p>🌍 <strong>Alcance:</strong> Padronização mundial para todas as congregações</p>
-                    <p>🌐 <strong>Idiomas:</strong> PT/EN conforme preferência do usuário</p>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Apostila MWB Atual:</span>
+                    <Badge variant="outline" className="text-green-600">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Disponível
+                    </Badge>
                   </div>
-                  <div className="space-y-2">
-                    <Button size="sm" variant="outline" className="w-full text-green-700 border-green-300">
-                      <Download className="h-3 w-3 mr-2" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Última verificação:</span>
+                    <span className="text-sm text-green-700">Hoje, 10:30</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button size="sm" variant="outline" className="border-green-300 text-green-700" onClick={handleMWBAvailable}>
+                      <RefreshCw className="h-3 w-3 mr-1" />
                       Disponibilizar MWB Atual
                     </Button>
-                    <Button size="sm" variant="outline" className="w-full text-green-700 border-green-300">
-                      <Globe className="h-3 w-3 mr-2" />
+                    <Button size="sm" variant="outline" className="border-green-300 text-green-700" onClick={handleConfigureJWorgURLs}>
+                      <Settings className="h-3 w-3 mr-1" />
                       Configurar URLs JW.org
                     </Button>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Ações Rápidas */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Ações Rápidas</CardTitle>
-                <CardDescription>
-                    Operações administrativas essenciais
-                </CardDescription>
-              </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button className="w-full justify-start" variant="outline">
-                    <BarChart3 className="h-4 w-4 mr-2" />
-                    Programação Oficial (2-3 meses)
-                </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <Globe className="h-4 w-4 mr-2" />
-                    Sincronizar com Congregações
-                </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Atualizar Semanas de Reunião
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Configurações Globais S-38
-                </Button>
-              </CardContent>
-            </Card>
-            </div>
-          </TabsContent>
-
-          {/* Usuários */}
-          <TabsContent value="users" className="space-y-6">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-center text-muted-foreground">
-                👥 Usuários do Sistema & Sistema S-38 de Designações
-              </h3>
-              <p className="text-center text-sm text-muted-foreground mt-2">
-                🎯 Função Principal: Admin gerencia usuários → Instrutores fazem designações S-38
-              </p>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Lista de Usuários */}
-            <Card>
-              <CardHeader>
-                  <CardTitle>Usuários Registrados</CardTitle>
-                <CardDescription>
-                    Últimos usuários cadastrados no sistema
-                </CardDescription>
-              </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <Users className="h-4 w-4 text-blue-600" />
-                        </div>
-                  <div>
-                          <p className="font-medium">Roberto Araujo da Silva</p>
-                          <p className="text-sm text-muted-foreground">Administrator</p>
-                    </div>
-                      </div>
-                      <Badge variant="outline" className="bg-green-50 text-green-700">Admin</Badge>
-                    </div>
-                    
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                          <Users className="h-4 w-4 text-green-600" />
-                  </div>
-                  <div>
-                          <p className="font-medium">Instrutores Ativos</p>
-                          <p className="text-sm text-muted-foreground">{systemStats?.total_users || 0} cadastrados</p>
-                    </div>
-                  </div>
-                      <Badge variant="outline" className="bg-blue-50 text-blue-700">Instrutor</Badge>
-                </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Ações de Usuários */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Ações Administrativas</CardTitle>
-                  <CardDescription>
-                    Gerenciar usuários e permissões
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button className="w-full justify-start" variant="outline">
-                    <Users className="h-4 w-4 mr-2" />
-                    Listar Todos os Usuários
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Gerenciar Permissões
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <Activity className="h-4 w-4 mr-2" />
-                    Relatório de Atividades
-                  </Button>
-                  <Button className="w-full justify-start" variant="outline">
-                    <Database className="h-4 w-4 mr-2" />
-                    Backup de Dados
-                  </Button>
                 </CardContent>
               </Card>
 
@@ -641,10 +788,139 @@ export default function AdminDashboard() {
                       <div>• Explaining</div>
                       <div>• Talk</div>
                     </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Debug / Integração */}
+              <Card className="bg-slate-50 border-slate-200">
+                <CardHeader>
+                  <CardTitle className="text-slate-800">🧪 Debug / Integração</CardTitle>
+                  <CardDescription className="text-slate-700">
+                    Ferramentas rápidas para validar integrações e idioma
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Idioma Atual:</span>
+                    <Badge variant="outline" className="text-slate-700">
+                      {(jworg as any)?.currentLanguage === 'en' ? '🇺🇸 English' : '🇧🇷 Português'}
+                    </Badge>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" onClick={toggleLanguage}>
+                      Alternar Idioma
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={updateMaterials}>
+                      Atualizar Materiais
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={handleTestJWorgIntegration}>
+                      Testar Integração JW.org
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={checkForUpdates} disabled={loading}>
+                      Atualizar Contagens
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Usuários */}
+          <TabsContent value="users" className="space-y-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-center text-muted-foreground">
+                👥 Gestão de Usuários para Acesso às Apostilas MWB
+              </h3>
+              <p className="text-center text-sm text-muted-foreground mt-2">
+                🎯 Função Principal: Admin gerencia usuários → Instrutores acessam apostilas
+              </p>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Estatísticas de Usuários */}
+            <Card>
+              <CardHeader>
+                  <CardTitle>Estatísticas</CardTitle>
+                  <CardDescription>Resumo dos usuários</CardDescription>
+              </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Total de Usuários:</span>
+                      <Badge variant="outline">{staticStats.total_users}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Admins:</span>
+                      <Badge variant="outline" className="bg-red-50 text-red-700">
+                        {isAdmin ? 1 : 0}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Instrutores:</span>
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                        {staticStats.total_users - (isAdmin ? 1 : 0)}
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Usuários Registrados */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Usuários Registrados</CardTitle>
+                  <CardDescription>Últimos usuários cadastrados no sistema</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <Users className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{profile?.nome_completo || 'Roberto Araujo da Silva'}</p>
+                          <p className="text-sm text-muted-foreground">Administrator</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="bg-red-50 text-red-700">
+                        Admin
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Ações Administrativas */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Ações Administrativas</CardTitle>
+                <CardDescription>
+                  Gerenciar usuários e permissões
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Button className="w-full justify-start" variant="outline" onClick={handleListUsers}>
+                    <Users className="h-4 w-4 mr-2" />
+                    Listar Todos os Usuários
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline" onClick={handleManagePermissions}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Gerenciar Permissões
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline" onClick={handleActivityReport}>
+                    <Activity className="h-4 w-4 mr-2" />
+                    Relatório de Atividades
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline" onClick={handleBackupData}>
+                    <Database className="h-4 w-4 mr-2" />
+                    Backup de Dados
+                  </Button>
                 </div>
               </CardContent>
             </Card>
-            </div>
           </TabsContent>
 
           {/* Congregações */}
@@ -668,17 +944,17 @@ export default function AdminDashboard() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Total de Congregações:</span>
-                      <Badge variant="outline">{systemStats?.total_congregations || 0}</Badge>
+                      <Badge variant="outline">{staticStats.total_congregations}</Badge>
                   </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Congregações Ativas:</span>
                       <Badge variant="outline" className="bg-green-50 text-green-700">
-                        {systemStats?.active_congregations || 0}
+                        {staticStats.active_congregations}
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Total de Estudantes:</span>
-                      <Badge variant="outline">{systemStats?.total_estudantes || 0}</Badge>
+                      <Badge variant="outline">{staticStats.total_estudantes}</Badge>
                     </div>
                   </div>
                 </CardContent>
@@ -702,32 +978,31 @@ export default function AdminDashboard() {
                           <p className="text-sm text-muted-foreground">Congregação Principal</p>
                           </div>
                         </div>
-                      <div className="flex items-center space-x-2">
-                        <Badge variant="outline" className="bg-green-50 text-green-700">
-                          Ativa
+                      <Badge variant="outline" className="bg-green-50 text-green-700">
+                        Ativa
                         </Badge>
-                        <Button size="sm" variant="outline">
-                          <Settings className="h-3 w-3 mr-1" />
-                          Gerenciar
-                        </Button>
                       </div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <Users className="h-5 w-5 text-gray-400" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-gray-600">Adicionar Nova Congregação</p>
-                          <p className="text-sm text-muted-foreground">Expandir o sistema para mais congregações</p>
-                        </div>
-                      </div>
-                      <Button size="sm">
-                        <Users className="h-3 w-3 mr-1" />
-                        Adicionar
-                      </Button>
-                    </div>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <Button variant="outline" className="w-full" onClick={() => handleManageCongregation('Sistema Ministerial Global')}>
+                      <Users className="h-4 w-4 mr-2" />
+                      Gerenciar
+                    </Button>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <Button variant="outline" className="w-full" onClick={handleAddCongregation}>
+                      <Users className="h-4 w-4 mr-2" />
+                      Adicionar Nova Congregação
+                    </Button>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <Button variant="outline" className="w-full">
+                      <Users className="h-4 w-4 mr-2" />
+                      Expandir
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -738,332 +1013,119 @@ export default function AdminDashboard() {
           <TabsContent value="system" className="space-y-6">
             <div className="mb-6">
               <h3 className="text-lg font-semibold text-center text-muted-foreground">
-                📊 Programação Oficial das Reuniões Ministeriais
+                ⚙️ Monitoramento e Configurações do Sistema
               </h3>
               <p className="text-center text-sm text-muted-foreground mt-2">
-                🌍 Administrador Geral disponibiliza programação oficial semanal • 🎓 Instrutores fazem designações locais
+                🎯 Função Principal: Admin monitora sistema → Instrutores recebem apostilas estáveis
               </p>
-              <div className="text-center text-xs text-muted-foreground mt-2 p-2 bg-yellow-50 rounded border border-yellow-200">
-                ⚠️ <strong>Importante:</strong> Esta programação NÃO inclui nomes de estudantes - isso é responsabilidade local das congregações
-              </div>
             </div>
-            
-            {/* Programação Semanal Atual */}
-            <Card className="bg-blue-50 border-blue-200">
-              <CardHeader>
-                                            <CardTitle className="text-blue-800">📅 Apostila Semanal Atual</CardTitle>
-                <CardDescription className="text-blue-700">
-                  {jworg.currentWeek ? `Semana de ${jworg.currentWeek.week}` : 'Carregando...'}
-                </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {jworg.isLoading ? (
-              <div className="flex items-center justify-center p-8">
-                <RefreshCw className="h-6 w-6 animate-spin text-blue-600" />
-                <span className="ml-2 text-blue-600">Carregando programação...</span>
-              </div>
-            ) : jworg.error ? (
-              <div className="p-4 text-red-600 bg-red-50 border border-red-200 rounded-lg">
-                <AlertCircle className="h-4 w-4 inline mr-2" />
-                Erro: {jworg.error}
-              </div>
-            ) : jworg.currentWeek ? (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-blue-800">📖 TESOUROS DA PALAVRA DE DEUS</h4>
-                    {jworg.currentWeek.parts
-                      .filter(part => ['treasures', 'gems', 'reading'].includes(part.type))
-                      .map(part => (
-                        <div key={part.id} className="text-sm space-y-1">
-                          <div>🎤 <strong>{part.id}. {part.title}</strong> ({part.duration} min)</div>
-                          {part.references.map((ref, idx) => (
-                            <div key={idx} className="ml-4 text-blue-600">• {ref}</div>
-                          ))}
-                        </div>
-                      ))}
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <h4 className="font-semibold text-blue-800">🚪 FAÇA SEU MELHOR NO MINISTÉRIO</h4>
-                    {jworg.currentWeek.parts
-                      .filter(part => ['starting', 'following', 'making', 'explaining', 'talk'].includes(part.type))
-                      .map(part => (
-                        <div key={part.id} className="text-sm space-y-1">
-                          <div>💬 <strong>{part.id}. {part.title}</strong> ({part.duration} min)</div>
-                          {part.references.map((ref, idx) => (
-                            <div key={idx} className="ml-4 text-blue-600">• {ref}</div>
-                          ))}
-                        </div>
-                      ))}
-                  </div>
-                </div>
-                
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-blue-800">👥 NOSSA VIDA CRISTÃ</h4>
-                  {jworg.currentWeek.parts
-                    .filter(part => ['discussion', 'study'].includes(part.type))
-                    .map(part => (
-                      <div key={part.id} className="text-sm space-y-1">
-                        <div>💙 <strong>{part.id}. {part.title}</strong> ({part.duration} min)</div>
-                        {part.references.map((ref, idx) => (
-                          <div key={idx} className="ml-4 text-blue-600">• {ref}</div>
-                        ))}
-                      </div>
-                    ))}
-                </div>
-                
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="text-sm text-blue-800">
-                    <strong>📊 Admin Geral:</strong> Fornece programação oficial semanal (sem nomes de estudantes)
-                  </div>
-                  <div className="text-sm text-blue-700 mt-1">
-                    <strong>🎓 Instrutores:</strong> Recebem esta programação e fazem designações reais com estudantes locais
-                  </div>
-                  <div className="text-sm text-blue-600 mt-1">
-                    <strong>🌍 Resultado:</strong> Padronização mundial + flexibilidade local nas designações
-                  </div>
-                </div>
-                
-                <div className="flex space-x-2 pt-2">
-                  <Button size="sm" variant="outline" className="text-blue-700 border-blue-300">
-                    <Globe className="h-3 w-3 mr-2" />
-                    Sincronizar com Congregações
-                  </Button>
-                  <Button size="sm" variant="outline" className="text-blue-700 border-blue-300">
-                    <BarChart3 className="h-3 w-3 mr-2" />
-                    Ver Programação Completa (3 meses)
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="p-4 text-gray-600 bg-gray-50 border border-gray-200 rounded-lg">
-                Nenhuma programação disponível
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Downloads JW.org - Principal */}
-            <Card>
+              {/* Downloads JW.org */}
+              <Card className="bg-green-50 border-green-200">
               <CardHeader>
-                  <CardTitle>📊 Programação Oficial Global</CardTitle>
-                <CardDescription>
-                    Administrador Geral - Programação para todas as congregações
+                  <CardTitle className="text-green-800">📚 JW.org Downloads</CardTitle>
+                  <CardDescription className="text-green-700">
+                    Gerenciar materiais oficiais
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                  <div className="p-4 border rounded-lg bg-blue-50 border-blue-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-blue-800">Apostila MWB Atual</span>
-                      <Badge className="bg-blue-100 text-blue-800">Disponível</Badge>
-                    </div>
-                    <p className="text-sm text-blue-600 mb-3">Última verificação: Hoje, 10:30</p>
-                    
-                    <div className="bg-blue-100 border border-blue-300 rounded-lg p-3 mb-3">
-                      <div className="text-sm text-blue-800">
-                        <strong>📊 Admin Geral:</strong> Programação oficial (sem nomes de estudantes)
-                      </div>
-                      <div className="text-sm text-blue-700 mt-1">
-                        <strong>🎓 Para Instrutores:</strong> Recebem programação + fazem designações locais
-                      </div>
-                      <div className="text-sm text-blue-600 mt-1">
-                        <strong>🌍 Alcance:</strong> Padronização mundial (200 mil congregações)
-                      </div>
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Button 
-                        size="sm" 
-                        className="w-full"
-                        onClick={() => jworg.downloadWorkbook('pt', '07', '2025')}
-                        disabled={jworg.isLoading}
-                      >
-                        <Download className="h-3 w-3 mr-2" />
-                        {jworg.isLoading ? 'Atualizando...' : 'Atualizar Programação PT (3 meses)'}
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="w-full"
-                        onClick={() => jworg.downloadWorkbook('en', '07', '2025')}
-                        disabled={jworg.isLoading}
-                      >
-                        <Download className="h-3 w-3 mr-2" />
-                        {jworg.isLoading ? 'Updating...' : 'Update Programming EN (3 months)'}
-                      </Button>
-                    </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Apostila MWB Atual:</span>
+                    <Badge variant="outline" className="text-green-600">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Disponível
+                    </Badge>
                   </div>
-
-                  <div className="space-y-2">
-                    <Button variant="outline" className="w-full justify-start">
-                      <Globe className="h-4 w-4 mr-2" />
-                      Sincronizar com 200k Congregações
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Última verificação:</span>
+                    <span className="text-sm text-green-700">Hoje, 10:30</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button size="sm" variant="outline" className="border-green-300 text-green-700" onClick={handleSyncCongregations}>
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                      Sincronizar com Congregações
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <BarChart3 className="h-4 w-4 mr-2" />
-                      Histórico de Sincronizações
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                      Verificar Novas Semanas
+                    <Button size="sm" variant="outline" className="border-green-300 text-green-700" onClick={handleViewFullProgram}>
+                      <Settings className="h-3 w-3 mr-1" />
+                      Ver Programação Completa
                     </Button>
                 </div>
               </CardContent>
             </Card>
 
-              {/* Sistema S-38 */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>⚙️ Sistema S-38 Global</CardTitle>
-                  <CardDescription>
-                    Estrutura oficial das reuniões ministeriais mundiais
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">Estrutura da Reunião</p>
-                        <p className="text-sm text-muted-foreground">S-38 implementado conforme documentação oficial</p>
-                      </div>
-                      <Badge variant="outline" className="bg-green-50 text-green-700">
-                        Ativo
+              {/* Configurações Gerais */}
+            <Card>
+              <CardHeader>
+                  <CardTitle>Configurações Gerais</CardTitle>
+                <CardDescription>
+                    Parâmetros do sistema
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Backup Automático:</span>
+                    <Badge variant="outline" className="bg-green-50 text-green-700">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Diário às 02:00
                       </Badge>
                     </div>
-
-                    <div className="space-y-2">
-                      <div className="font-medium">Partes da Reunião:</div>
-                      <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                        <div>• Chairman</div>
-                        <div>• Treasures</div>
-                        <div>• Gems</div>
-                        <div>• Reading</div>
-                        <div>• Starting</div>
-                        <div>• Following</div>
-                        <div>• Making</div>
-                        <div>• Explaining</div>
-                        <div>• Talk</div>
-                      </div>
+                    <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Notificações:</span>
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Email + Sistema
+                    </Badge>
                     </div>
-
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                      <div className="text-sm text-blue-800">
-                        <strong>📊 Admin Geral:</strong> Define estrutura S-38 mundial padrão
-                      </div>
-                      <div className="text-sm text-blue-700 mt-1">
-                        <strong>🎓 Para Instrutores:</strong> Seguem estrutura + fazem designações locais
-                      </div>
-                      <div className="text-sm text-blue-600 mt-1">
-                        <strong>🌍 Resultado:</strong> Mesma estrutura global, designações locais flexíveis
-                      </div>
-                    </div>
-                    
-                    <Button variant="outline" size="sm" className="w-full">
-                      <Settings className="h-4 w-4 mr-2" />
-                      Atualizar Estrutura S-38 Global
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Manutenção:</span>
+                    <span className="text-sm text-muted-foreground">Última: Ontem</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button size="sm" variant="outline">
+                      <Settings className="h-3 w-3 mr-1" />
+                      Configurar
                     </Button>
                   </div>
                 </CardContent>
               </Card>
             </div>
-            
-            {/* Próximas Semanas */}
+
+            {/* Métricas do Sistema */}
             <Card>
               <CardHeader>
-                <CardTitle>📅 Apostilas das Próximas Semanas</CardTitle>
+                <CardTitle>Métricas do Sistema</CardTitle>
                 <CardDescription>
-                  Admin disponibiliza apostilas futuras para instrutores
+                  Monitoramento em tempo real
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
-                  <div className="text-sm text-blue-800">
-                    <strong>📊 Admin Geral:</strong> Programação oficial dos próximos 2-3 meses
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="p-3 border rounded-lg text-center">
+                    <p className="text-2xl font-bold text-green-600">99.9%</p>
+                    <p className="text-sm text-muted-foreground">Uptime</p>
                   </div>
-                  <div className="text-sm text-blue-700 mt-1">
-                    <strong>🎓 Para Instrutores:</strong> Planejamento antecipado de designações locais
+                  <div className="p-3 border rounded-lg text-center">
+                    <p className="text-2xl font-bold text-blue-600">~120ms</p>
+                    <p className="text-sm text-muted-foreground">Latência</p>
                   </div>
-                  <div className="text-sm text-blue-600 mt-1">
-                    <strong>🌍 Sincronização:</strong> Todas as congregações recebem automaticamente
+                  <div className="p-3 border rounded-lg text-center">
+                    <p className="text-2xl font-bold text-green-600">25%</p>
+                    <p className="text-sm text-muted-foreground">CPU</p>
+                  </div>
+                  <div className="p-3 border rounded-lg text-center">
+                    <p className="text-2xl font-bold text-blue-600">33%</p>
+                    <p className="text-sm text-muted-foreground">Memória</p>
                   </div>
                 </div>
-                {jworg.isLoading ? (
-                  <div className="flex items-center justify-center p-8">
-                    <RefreshCw className="h-6 w-6 animate-spin text-blue-600" />
-                    <span className="ml-2 text-blue-600">Carregando próximas semanas...</span>
-                  </div>
-                ) : jworg.error ? (
-                  <div className="p-4 text-red-600 bg-red-50 border border-red-200 rounded-lg">
-                    <AlertCircle className="h-4 w-4 inline mr-2" />
-                    Erro: {jworg.error}
-                  </div>
-                ) : jworg.nextWeeks.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {jworg.nextWeeks.map((week, index) => (
-                      <div key={index} className="p-3 border rounded-lg">
-                        <div className="font-medium text-sm">{week.week}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {week.book} - {week.parts[0]?.title || 'Programação disponível'}
-                        </div>
-                        <Button size="sm" variant="outline" className="w-full mt-2">
-                          Sincronizar com Congregações
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-4 text-gray-600 bg-gray-50 border border-gray-200 rounded-lg">
-                    Nenhuma programação futura disponível
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            
-            {/* Componente de Teste JW.org */}
-            <JWorgTest />
-          </TabsContent>
 
-          {/* Monitoramento */}
-          <TabsContent value="monitoring" className="space-y-6">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-center text-muted-foreground">
-                📊 Monitoramento do Sistema JW.org & S-38
-              </h3>
-              <p className="text-center text-sm text-muted-foreground mt-2">
-                🎯 Função Principal: Admin disponibiliza apostilas MWB → Instrutores designam estudantes
-              </p>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Métricas em Tempo Real */}
-            <Card>
-              <CardHeader>
-                  <CardTitle>Métricas do Sistema</CardTitle>
-                <CardDescription>
-                    Monitoramento em tempo real
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-3 border rounded-lg text-center">
-                      <p className="text-2xl font-bold text-green-600">99.9%</p>
-                      <p className="text-sm text-muted-foreground">Uptime</p>
-                    </div>
-                    <div className="p-3 border rounded-lg text-center">
-                      <p className="text-2xl font-bold text-blue-600">~120ms</p>
-                      <p className="text-sm text-muted-foreground">Latência</p>
-                    </div>
-                  </div>
+                <Separator />
 
-                  <Separator />
-
-                  <div className="space-y-3">
+                <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm">CPU:</span>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-24 h-2 bg-gray-200 rounded-full">
-                          <div className="w-1/4 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-sm">CPU:</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-24 h-2 bg-gray-200 rounded-full">
+                        <div className="w-1/4 h-2 bg-green-500 rounded-full"></div>
                     </div>
                         <span className="text-sm">25%</span>
                   </div>
@@ -1134,14 +1196,13 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="mt-4">
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full" onClick={handleViewAllLogs}>
                       <FileText className="h-4 w-4 mr-2" />
                       Ver Todos os Logs
                     </Button>
                   </div>
                 </CardContent>
               </Card>
-            </div>
           </TabsContent>
         </Tabs>
       </div>

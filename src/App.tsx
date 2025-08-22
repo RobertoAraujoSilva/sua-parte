@@ -37,7 +37,8 @@ import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
 import Equidade from "./pages/Equidade";
-import AdminDashboard from "./pages/AdminDashboard";
+import UnifiedDashboard from "./components/UnifiedDashboard";
+import CacheAsideDemo from "./pages/CacheAsideDemo";
 import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -92,6 +93,7 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/demo" element={<Demo />} />
+                <Route path="/cache-demo" element={<CacheAsideDemo />} />
                 <Route path="/funcionalidades" element={<Funcionalidades />} />
                 <Route path="/congregacoes" element={<Congregacoes />} />
                 <Route path="/suporte" element={<Suporte />} />
@@ -162,7 +164,7 @@ const App = () => (
                   path="/dashboard"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Dashboard />
+                      <UnifiedDashboard />
                     </ProtectedRoute>
                   }
                 />
@@ -247,7 +249,15 @@ const App = () => (
                   path="/admin"
                   element={
                     <ProtectedRoute allowedRoles={['admin']}>
-                      <AdminDashboard />
+                      <UnifiedDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/*"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <UnifiedDashboard />
                     </ProtectedRoute>
                   }
                 />
@@ -257,7 +267,7 @@ const App = () => (
                   path="/estudante/:id"
                   element={
                     <ProtectedRoute allowedRoles={['estudante']}>
-                      <EstudantePortal />
+                      <UnifiedDashboard />
                     </ProtectedRoute>
                   }
                 />

@@ -9,6 +9,34 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+    // Evitar múltiplas cópias de React em dev
+    dedupe: ['react', 'react-dom'],
+  },
+  server: {
+    // Configuração padrão do servidor
+    host: 'localhost',
+    port: 8080,
+    strictPort: true,
+    
+    // Configuração de HMR desabilitada para estabilizar desenvolvimento
+    hmr: false,
+    
+    // Configurações de WebSocket
+    watch: {
+      usePolling: false,
+      interval: 100,
+    },
+    
+    // Headers de desenvolvimento
+    headers: {
+      'Cache-Control': 'no-store',
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+    
+    // Configurações de CORS
+    cors: true,
   },
   build: {
     // Otimizações de performance
@@ -66,21 +94,6 @@ export default defineConfig({
     ],
     // Excluir dependências desnecessárias
     exclude: ['@supabase/mcp-server-supabase'],
-  },
-  server: {
-    // Otimizações de desenvolvimento
-    hmr: {
-      overlay: false,
-    },
-    // Compressão
-    compress: true,
-    // Headers de performance
-    headers: {
-      'Cache-Control': 'public, max-age=31536000, immutable',
-      'X-Content-Type-Options': 'nosniff',
-      'X-Frame-Options': 'DENY',
-      'X-XSS-Protection': '1; mode=block',
-    },
   },
   // Otimizações de CSS
   css: {
