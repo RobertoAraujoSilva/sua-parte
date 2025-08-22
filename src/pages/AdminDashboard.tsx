@@ -5,6 +5,7 @@ import { useJWorgIntegration } from '../hooks/useJWorgIntegration';
 import { JWorgTest } from '../components/JWorgTest';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import LazyLoader from '../components/LazyLoader';
+import AuthErrorHandler from '../components/AuthErrorHandler';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
@@ -318,6 +319,9 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Auth Error Handler */}
+      <AuthErrorHandler />
+      
       {/* Header */}
       <div className="border-b">
         <div className="container mx-auto px-4 py-6">
