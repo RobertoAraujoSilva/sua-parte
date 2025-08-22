@@ -255,25 +255,6 @@
     "passwordMinLength": "Minimum 6 characters",
     "creatingAccount": "Creating account...",
     "createAccount": "Create Account",
-    "validation": {
-      "birthDateRequired": "Birth date is required.",
-      "birthDateFuture": "Birth date cannot be in the future.",
-      "ageMinimum": "Minimum age to participate in the Ministry School is 6 years.",
-      "ageMaximum": "Please check the birth date entered.",
-      "allFieldsRequired": "Please fill in all required fields.",
-      "roleRequired": "Please select your role in the congregation.",
-      "passwordMismatch": "Passwords do not match.",
-      "passwordMinLength": "Password must be at least 6 characters.",
-      "emailAlreadyExists": "This email is already registered. Try logging in.",
-      "unexpectedError": "An unexpected error occurred. Please try again."
-    },
-    "messages": {
-      "accountCreated": "Registration completed!",
-      "accountCreatedDesc": "Your account has been created successfully. You can now log in.",
-      "signupError": "Registration error",
-      "credentialsFilled": "Credentials filled",
-      "credentialsFilledDesc": "{{type}} credentials loaded."
-    },
     "roles": {
       "instrutor": {
         "title": "Instructor/Assigner",
@@ -328,16 +309,7 @@
   },
   "terms": {
     "bibleReading": "Bible Reading",
-    "talk": "Talk",
-    "theocraticMinistrySchool": "Theocratic Ministry School",
-    "congregation": "Congregation",
-    "anciao": "Elder",
-    "servo_ministerial": "Ministerial Servant",
-    "pioneiro_regular": "Regular Pioneer",
-    "publicador_batizado": "Baptized Publisher",
-    "publicador_nao_batizado": "Unbaptized Publisher",
-    "estudante_novo": "New Student",
-    "instructor": "Instructor"
+    "talk": "Talk"
   },
   "initialSetup": {
     "title": "Initial Setup",
@@ -441,42 +413,6 @@
     "goToDashboard": "Go to Dashboard",
     "helpNote": "You can access this tutorial again anytime from the Help menu"
   },
-  "welcome": {
-    "welcomeUser": "Welcome, {{name}}!",
-    "title": "Welcome to the Ministerial System",
-    "subtitle": "Let's set up your environment to start using all features.",
-    "howItWorks": "How it works",
-    "howItWorksDesc": "A simple three-step flow to get everything running.",
-    "letsStart": "Let's get started",
-    "letsStartDesc": "Follow the steps below or skip to the Dashboard.",
-    "stepsTitle": "Initial steps",
-    "stepsSubtitle": "Follow this step-by-step to begin",
-    "step1Title": "Register Students",
-    "step1Desc": "Add students with basic data and relationships.",
-    "step2Title": "Import a Program",
-    "step2Desc": "Upload the workbook PDF or paste content.",
-    "step3Title": "Generate Assignments",
-    "step3Desc": "Automatically create assignments from the program.",
-    "benefitsTitle": "Onboarding Benefits",
-    "benefitsSubtitle": "Completing these steps brings the following advantages:",
-    "benefits": [
-      "Guided and faster setup",
-      "Fewer errors in the first assignments",
-      "Consistent experience for the congregation"
-    ],
-    "complianceTitle": "Compliance from the start",
-    "complianceSubtitle": "The system already applies TMS rules during setup.",
-    "genderRestrictions": "Gender restrictions",
-    "genderRestrictionsDesc": "Assignments respect participation guidelines by gender.",
-    "qualifications": "Congregational qualifications",
-    "qualificationsDesc": "Rules and qualifications are validated automatically.",
-    "familyRelationships": "Family relationships",
-    "familyRelationshipsDesc": "Avoids improper combinations in joint parts.",
-    "startSetup": "Start Setup",
-    "skipToDashboard": "Skip and go to Dashboard",
-    "setupTime": "Complete setup in less than 10 minutes.",
-    "configuring": "Configuring..."
-  },
   "hero": {
     "title": "Intelligent Automation of",
     "titleHighlight": "Ministerial Assignments",
@@ -515,34 +451,6 @@
     "studentPortal": {
       "title": "Student Portal",
       "description": "Responsive interface for students to view assignments, confirm participation, and contribute via donations."
-    }
-  },
-  "faq": {
-    "title": "Frequently Asked Questions",
-    "subtitle": "Find answers to the most common questions about the Ministerial System",
-    "searchPlaceholder": "Search questions...",
-    "categories": "Categories",
-    "question": "question",
-    "questions": "questions",
-    "noResults": "No results found",
-    "tryOtherTerms": "Try using other search terms",
-    "needHelp": "Need more help?",
-    "supportTeam": "Our support team is ready to help you",
-    "contact": "Contact Us",
-    "viewFeatures": "View Features",
-    "categoryTitles": {
-      "overview": "Overview",
-      "students": "Student Registration",
-      "programs": "Program Import",
-      "algorithm": "Assignment Algorithm",
-      "communication": "Communication & Security"
-    },
-    "categoryDescriptions": {
-      "overview": "General information about the system",
-      "students": "How to manage students and qualifications",
-      "programs": "Importing and creating programs",
-      "algorithm": "How automatic distribution works",
-      "communication": "Notifications and data security"
     }
   },
   "benefits": {
@@ -585,7 +493,6 @@
     "searchPlaceholder": "Search questions...",
     "categories": "Categories",
     "question": "question",
-    "questions": "questions",
     "noResults": "No results found",
     "tryOtherTerms": "Try using other search terms",
     "needHelp": "Need more help?",
@@ -780,9 +687,7 @@
   },
   "faqHardcoded": {
     "question": "question",
-    "questions": "questions",
-    "comingSoon": "Coming soon...",
-    "moreQuestions": "More questions will be added soon."
+    "questions": "questions"
   },
   "footer": {
     "appName": "Ministerial System",
@@ -801,34 +706,6 @@
     "technicalContact": "Technical Contact",
     "updates": "Updates",
     "community": "Community",
-    "developedFor": "Developed to serve Jehovah's Witnesses congregations.",
-    "testimonialQuote": "\"{testimonial}\"",
-    "testimonialAuthor": "— {author}",
-    "checkmark": "✅"
-  },
-  "configuracaoInicial": {
-    "toast": {
-      "success": {
-        "title": "Setup Complete!",
-        "description": "Your profile has been configured successfully. Let's go to the first program!"
-      },
-      "error": {
-        "title": "Configuration Error",
-        "description": "Could not save settings. Please try again."
-      }
-    }
-  },
-  "congregacoes": {
-    "stats": {
-      "activeCongregationsValue": "100+",
-      "registeredStudentsValue": "2,500+",
-      "generatedAssignmentsValue": "50,000+",
-      "satisfactionValue": "98%"
-    },
-    "successStories": {
-      "timeReductionValue": "95%",
-      "engagementValue": "87%",
-      "complianceValue": "100%"
-    }
+    "developedFor": "Developed to serve Jehovah's Witnesses congregations."
   }
 }
