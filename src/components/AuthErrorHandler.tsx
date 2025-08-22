@@ -15,7 +15,7 @@ const AuthErrorHandler: React.FC<AuthErrorHandlerProps> = ({
   onRetry, 
   onLogin 
 }) => {
-  const { authError, clearAuthError, refreshAuth } = useAuth();
+  const { authError, clearAuthError, refreshAuth, forceClearInvalidTokens } = useAuth();
   
   const currentError = error || authError;
   
@@ -39,7 +39,9 @@ const AuthErrorHandler: React.FC<AuthErrorHandlerProps> = ({
     }
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
+    // Limpar tokens inválidos antes de redirecionar para login
+    await forceClearInvalidTokens();
     clearAuthError();
     if (onLogin) {
       onLogin();

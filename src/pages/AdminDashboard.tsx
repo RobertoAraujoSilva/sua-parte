@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../integrations/supabase/client';
 import { useJWorgIntegration } from '../hooks/useJWorgIntegration';
@@ -394,20 +394,18 @@ export default function AdminDashboard() {
               </div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {useMemo(() => (
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Congregações Conectadas</CardTitle>
-                    <Globe className="h-4 w-4 text-muted-foreground" />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{systemStats?.total_congregations || 0}</div>
-                    <p className="text-xs text-muted-foreground">
-                      Recebendo programação oficial
-                    </p>
-                  </CardContent>
-                </Card>
-              ), [systemStats?.total_congregations])}
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Congregações Conectadas</CardTitle>
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{systemStats?.total_congregations || 0}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Recebendo programação oficial
+                  </p>
+                </CardContent>
+              </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
