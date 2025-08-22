@@ -385,6 +385,7 @@ const Auth = () => {
                       placeholder="••••••••"
                       required
                       minLength={6}
+                      autoComplete="current-password"
                     />
                     <Button
                       type="button"
