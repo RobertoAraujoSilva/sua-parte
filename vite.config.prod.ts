@@ -157,38 +157,7 @@ export default defineConfig({
   },
   // 🎨 Otimizações de CSS
   css: {
-    postcss: {
-      plugins: [
-        require('tailwindcss'),
-        require('autoprefixer'),
-        // 🗜️ Minificação de CSS
-        require('cssnano')({
-          preset: ['default', {
-            discardComments: { removeAll: true },
-            normalizeWhitespace: true,
-            colormin: true,
-            minifyFontValues: true,
-            minifySelectors: true,
-            mergeRules: true,
-            mergeLonghand: true,
-            mergeShorthand: true,
-          }],
-        }),
-      ],
-    },
+    postcss: './postcss.config.js',
   },
-  // 📊 Build Analysis
-  build: {
-    rollupOptions: {
-      plugins: [
-        // 📊 Bundle size analyzer
-        visualizer({
-          filename: 'dist/bundle-analysis.html',
-          open: true,
-          gzipSize: true,
-          brotliSize: true,
-        }),
-      ],
-    },
-  },
+
 })

@@ -84,21 +84,6 @@ export default defineConfig({
   },
   // Otimizações de CSS
   css: {
-    postcss: {
-      plugins: [
-        require('tailwindcss'),
-        require('autoprefixer'),
-        // Minificação de CSS
-        require('cssnano')({
-          preset: ['default', {
-            discardComments: { removeAll: true },
-            normalizeWhitespace: true,
-            colormin: true,
-            minifyFontValues: true,
-            minifySelectors: true,
-          }],
-        }),
-      ],
-    },
+    postcss: './postcss.config.js',
   },
 })

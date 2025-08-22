@@ -122,7 +122,7 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user, isAdmin]);
 
   const loadSystemStatistics = async () => {
     try {
