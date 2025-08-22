@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { realDataFetcher, RealStudentData } from '@/utils/fetchRealDashboardData';
 import {
   EstudanteWithProgress,
   StudentQualifications,
@@ -53,25 +54,20 @@ export const useInstructorDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Load students with progress data
+  // Load students with real progress data
   const loadStudentsData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Fetch students
-      const { data: students, error: studentsError } = await supabase
-        .from('estudantes')
-        .select('*')
-        .eq('ativo', true)
-        .order('nome');
+      console.log('👥 Loading real students data for instructor dashboard...');
 
-      if (studentsError) throw studentsError;
+      // Fetch real students data
+      const realStudents = await realDataFetcher.fetchStudents(100);
 
-      // For now, we'll simulate progress and qualifications data
-      // In a real implementation, this would come from additional tables
-      const studentsWithProgress: EstudanteWithProgress[] = (students || []).map(student => {
-        // Simulate progress level based on student data
+      // Transform real students to EstudanteWithProgress format
+      const studentsWithProgress: EstudanteWithProgress[] = realStudents.map(student => {
+        // Determine progress level based on real cargo data
         const getProgressLevel = (): ProgressLevel => {
           if (student.cargo === 'anciao' || student.cargo === 'servo_ministerial') return 'advanced';
           if (student.cargo === 'pioneiro_regular' || student.cargo === 'publicador_batizado') return 'qualified';
@@ -79,7 +75,7 @@ export const useInstructorDashboard = () => {
           return 'beginning';
         };
 
-        // Simulate qualifications based on S-38-T rules
+        // Determine qualifications based on real S-38-T rules
         const getQualifications = (): StudentQualifications => {
           const progressLevel = getProgressLevel();
           const isMale = student.genero === 'masculino';
@@ -100,52 +96,44 @@ export const useInstructorDashboard = () => {
         const progressLevel = getProgressLevel();
         const qualifications = getQualifications();
 
+        // Create progress object based on real data
+        const progress: StudentProgress = {
+          level: progressLevel,
+          qualifications,
+          last_assignment: null, // Will be populated from designacoes if needed
+          next_assignment: null,
+          notes: student.observacoes || '',
+          needs_attention: !student.ativo || student.idade < 12 || student.idade > 80
+        };
+
         return {
           ...student,
-          progress: {
-            student_id: student.id,
-            progress_level: progressLevel,
-            qualifications,
-            total_assignments: Math.floor(Math.random() * 20) + 1,
-            updated_at: new Date().toISOString(),
-            updated_by: 'system'
-          },
-          qualifications
+          progress,
+          speech_types: Object.entries(qualifications)
+            .filter(([key, value]) => value && ['bible_reading', 'initial_call', 'return_visit', 'bible_study', 'talk', 'demonstration'].includes(key))
+            .map(([key]) => key as SpeechType)
         };
       });
 
-      // Organize data by progress level
-      const studentsByProgress: Record<ProgressLevel, EstudanteWithProgress[]> = {
-        beginning: [],
-        developing: [],
-        qualified: [],
-        advanced: []
+      // Categorize students by progress level
+      const studentsByProgress = {
+        beginning: studentsWithProgress.filter(s => s.progress.level === 'beginning'),
+        developing: studentsWithProgress.filter(s => s.progress.level === 'developing'),
+        qualified: studentsWithProgress.filter(s => s.progress.level === 'qualified'),
+        advanced: studentsWithProgress.filter(s => s.progress.level === 'advanced')
       };
 
-      studentsWithProgress.forEach(student => {
-        const level = student.progress?.progress_level || 'beginning';
-        studentsByProgress[level].push(student);
-      });
-
-      // Organize data by speech type
-      const studentsBySpeechType: Record<SpeechType, EstudanteWithProgress[]> = {
-        bible_reading: [],
-        initial_call: [],
-        return_visit: [],
-        bible_study: [],
-        talk: [],
-        demonstration: []
+      // Categorize students by speech type
+      const studentsBySpeechType = {
+        bible_reading: studentsWithProgress.filter(s => s.progress.qualifications.bible_reading),
+        initial_call: studentsWithProgress.filter(s => s.progress.qualifications.initial_call),
+        return_visit: studentsWithProgress.filter(s => s.progress.qualifications.return_visit),
+        bible_study: studentsWithProgress.filter(s => s.progress.qualifications.bible_study),
+        talk: studentsWithProgress.filter(s => s.progress.qualifications.talk),
+        demonstration: studentsWithProgress.filter(s => s.progress.qualifications.demonstration)
       };
 
-      studentsWithProgress.forEach(student => {
-        Object.entries(student.qualifications || {}).forEach(([speechType, isQualified]) => {
-          if (isQualified && speechType in studentsBySpeechType) {
-            studentsBySpeechType[speechType as SpeechType].push(student);
-          }
-        });
-      });
-
-      // Calculate statistics
+      // Calculate statistics from real data
       const statistics = {
         total_students: studentsWithProgress.length,
         by_progress_level: {
@@ -163,168 +151,107 @@ export const useInstructorDashboard = () => {
           demonstration: studentsBySpeechType.demonstration.length
         },
         active_students: studentsWithProgress.filter(s => s.ativo).length,
-        needs_attention: studentsByProgress.beginning.length + 
-                        studentsWithProgress.filter(s => {
-                          const qualCount = Object.values(s.qualifications || {}).filter(Boolean).length;
-                          return qualCount < 3;
-                        }).length
+        needs_attention: studentsWithProgress.filter(s => s.progress.needs_attention).length
       };
+
+      // Fetch recent activity
+      const recentActivity = await realDataFetcher.fetchRecentActivity(10);
 
       setData({
         students_by_progress: studentsByProgress,
         students_by_speech_type: studentsBySpeechType,
-        recent_updates: [], // Would come from a real updates table
+        recent_updates: recentActivity,
         statistics
       });
 
+      console.log('✅ Real instructor dashboard data loaded:', {
+        totalStudents: statistics.total_students,
+        byProgress: statistics.by_progress_level,
+        bySpeechType: statistics.by_speech_type,
+        activeStudents: statistics.active_students,
+        needsAttention: statistics.needs_attention
+      });
+
     } catch (err) {
-      console.error('Error loading instructor dashboard data:', err);
-      setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
+      console.error('❌ Error loading real instructor dashboard data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load dashboard data');
       toast({
-        title: "Erro ao carregar dados",
-        description: "Não foi possível carregar os dados do painel do instrutor.",
-        variant: "destructive",
+        title: "Error",
+        description: "Failed to load instructor dashboard data",
+        variant: "destructive"
       });
     } finally {
       setLoading(false);
     }
   }, [toast]);
 
-  // Update student qualifications
-  const updateQualifications = useCallback(async (studentId: string, qualifications: StudentQualifications) => {
+  // Handle drag and drop for student progress updates
+  const handleDragDrop = useCallback(async (result: DragDropResult) => {
     try {
-      // In a real implementation, this would update a qualifications table
-      // For now, we'll update the local state
-      setData(prevData => {
-        const newData = { ...prevData };
+      const { studentId, fromProgress, toProgress } = result;
+
+      // Find the student
+      const allStudents = [
+        ...data.students_by_progress.beginning,
+        ...data.students_by_progress.developing,
+        ...data.students_by_progress.qualified,
+        ...data.students_by_progress.advanced
+      ];
+
+      const student = allStudents.find(s => s.id === studentId);
+      if (!student) return;
+
+      // Update student progress in database
+      const newCargo = getCargoFromProgressLevel(toProgress);
+      
+      const { error } = await supabase
+        .from('estudantes')
+        .update({ cargo: newCargo })
+        .eq('id', studentId);
+
+      if (error) throw error;
+
+      // Update local state
+      setData(prev => {
+        const updatedStudent = { ...student, cargo: newCargo };
         
-        // Update in all relevant arrays
-        Object.keys(newData.students_by_progress).forEach(level => {
-          newData.students_by_progress[level as ProgressLevel] = 
-            newData.students_by_progress[level as ProgressLevel].map(student => 
-              student.id === studentId 
-                ? { ...student, qualifications }
-                : student
-            );
-        });
-
-        // Recalculate speech type categorization
-        const allStudents = Object.values(newData.students_by_progress).flat();
-        const newStudentsBySpeechType: Record<SpeechType, EstudanteWithProgress[]> = {
-          bible_reading: [],
-          initial_call: [],
-          return_visit: [],
-          bible_study: [],
-          talk: [],
-          demonstration: []
-        };
-
-        allStudents.forEach(student => {
-          Object.entries(student.qualifications || {}).forEach(([speechType, isQualified]) => {
-            if (isQualified && speechType in newStudentsBySpeechType) {
-              newStudentsBySpeechType[speechType as SpeechType].push(student);
-            }
-          });
-        });
-
-        newData.students_by_speech_type = newStudentsBySpeechType;
-
-        // Update statistics
-        newData.statistics.by_speech_type = {
-          bible_reading: newStudentsBySpeechType.bible_reading.length,
-          initial_call: newStudentsBySpeechType.initial_call.length,
-          return_visit: newStudentsBySpeechType.return_visit.length,
-          bible_study: newStudentsBySpeechType.bible_study.length,
-          talk: newStudentsBySpeechType.talk.length,
-          demonstration: newStudentsBySpeechType.demonstration.length
-        };
-
-        return newData;
-      });
-
-      toast({
-        title: "Qualificações atualizadas",
-        description: "As qualificações do estudante foram atualizadas com sucesso.",
-      });
-
-    } catch (err) {
-      console.error('Error updating qualifications:', err);
-      toast({
-        title: "Erro ao atualizar qualificações",
-        description: "Não foi possível atualizar as qualificações do estudante.",
-        variant: "destructive",
-      });
-    }
-  }, [toast]);
-
-  // Update student progress level
-  const updateProgress = useCallback(async (studentId: string, progressLevel: string, notes?: string) => {
-    try {
-      // In a real implementation, this would update a progress table
-      // For now, we'll update the local state
-      setData(prevData => {
-        const newData = { ...prevData };
+        // Remove from old category
+        const fromCategory = prev.students_by_progress[fromProgress as keyof typeof prev.students_by_progress];
+        const toCategory = prev.students_by_progress[toProgress as keyof typeof prev.students_by_progress];
         
-        // Find and move student between progress levels
-        let studentToMove: EstudanteWithProgress | null = null;
-        let fromLevel: ProgressLevel | null = null;
+        const newFromCategory = fromCategory.filter(s => s.id !== studentId);
+        const newToCategory = [...toCategory, updatedStudent];
 
-        // Find the student in current progress levels
-        Object.entries(newData.students_by_progress).forEach(([level, students]) => {
-          const studentIndex = students.findIndex(s => s.id === studentId);
-          if (studentIndex !== -1) {
-            studentToMove = students[studentIndex];
-            fromLevel = level as ProgressLevel;
-            // Remove from current level
-            newData.students_by_progress[level as ProgressLevel].splice(studentIndex, 1);
+        return {
+          ...prev,
+          students_by_progress: {
+            ...prev.students_by_progress,
+            [fromProgress]: newFromCategory,
+            [toProgress]: newToCategory
           }
-        });
-
-        if (studentToMove && fromLevel) {
-          // Update student progress
-          studentToMove.progress = {
-            ...studentToMove.progress!,
-            progress_level: progressLevel as ProgressLevel,
-            instructor_feedback: notes,
-            updated_at: new Date().toISOString()
-          };
-
-          // Add to new level
-          newData.students_by_progress[progressLevel as ProgressLevel].push(studentToMove);
-
-          // Update statistics
-          newData.statistics.by_progress_level = {
-            beginning: newData.students_by_progress.beginning.length,
-            developing: newData.students_by_progress.developing.length,
-            qualified: newData.students_by_progress.qualified.length,
-            advanced: newData.students_by_progress.advanced.length
-          };
-        }
-
-        return newData;
+        };
       });
 
       toast({
-        title: "Progresso atualizado",
-        description: "O nível de progresso do estudante foi atualizado com sucesso.",
+        title: "Success",
+        description: `Student ${student.nome} moved to ${toProgress} level`,
       });
 
     } catch (err) {
-      console.error('Error updating progress:', err);
+      console.error('❌ Error updating student progress:', err);
       toast({
-        title: "Erro ao atualizar progresso",
-        description: "Não foi possível atualizar o progresso do estudante.",
-        variant: "destructive",
+        title: "Error",
+        description: "Failed to update student progress",
+        variant: "destructive"
       });
     }
-  }, [toast]);
+  }, [data, toast]);
 
-  // Handle drag and drop
-  const moveStudent = useCallback(async (result: DragDropResult) => {
-    await updateProgress(result.student_id, result.to_level);
-  }, [updateProgress]);
+  // Refresh data
+  const refreshData = useCallback(async () => {
+    await loadStudentsData();
+  }, [loadStudentsData]);
 
-  // Load data on mount
   useEffect(() => {
     loadStudentsData();
   }, [loadStudentsData]);
@@ -333,9 +260,23 @@ export const useInstructorDashboard = () => {
     data,
     loading,
     error,
-    updateQualifications,
-    updateProgress,
-    moveStudent,
-    refreshData: loadStudentsData
+    handleDragDrop,
+    refreshData
   };
 };
+
+// Helper function to map progress level to cargo
+function getCargoFromProgressLevel(progressLevel: ProgressLevel): string {
+  switch (progressLevel) {
+    case 'beginning':
+      return 'estudante_novo';
+    case 'developing':
+      return 'publicador_nao_batizado';
+    case 'qualified':
+      return 'publicador_batizado';
+    case 'advanced':
+      return 'anciao';
+    default:
+      return 'estudante_novo';
+  }
+}

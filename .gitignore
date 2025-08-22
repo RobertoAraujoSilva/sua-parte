@@ -109,3 +109,7 @@ backend/config.env
 
 # Supabase
 .supabase/
+
+
+#Ignore vscode AI rules
+.github\instructions\codacy.instructions.md

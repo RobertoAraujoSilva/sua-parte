@@ -78,33 +78,155 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // 🔄 Função para carregar perfil do usuário
+  // 🔄 Função para carregar perfil do usuário com timeout e recovery
   const loadProfile = useCallback(async (userId: string) => {
-    try {
-      console.log('🔍 Loading profile for user:', userId);
-      
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+    // Implement retry logic with exponential backoff and jitter
+    const maxRetries = 4;
+    let retryCount = 0;
 
-      if (profileError) {
-        console.error('❌ Error loading profile:', profileError);
-        setAuthError(`Erro ao carregar perfil: ${profileError.message}`);
-        return;
-      }
+    // Network condition detection for adaptive timeouts using type-safe utility
+    const baseTimeout = 15000; // Base 15 seconds
+    const adaptiveTimeout = getAdaptiveTimeout(baseTimeout);
 
-      if (profileData) {
-        console.log('✅ Profile loaded successfully:', profileData);
-        setProfile(profileData);
-      } else {
-        console.log('⚠️ No profile found for user');
-        setProfile(null);
+    console.log(`📶 Network-adaptive timeout set to: ${adaptiveTimeout}ms`);
+    
+    while (retryCount <= maxRetries) {
+      try {
+        console.log(`🔍 Loading profile for user: ${userId} (attempt ${retryCount + 1}/${maxRetries + 1})`);
+
+        // Create a timeout promise to prevent hanging with adaptive timeout
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error(`Profile loading timeout after ${baseTimeout}ms`)), baseTimeout);
+        });
+
+        // Create the profile query promise
+        const queryPromise = supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single();
+
+        // Race between query and timeout
+        const { data: profileData, error: profileError } = await Promise.race([
+          queryPromise,
+          timeoutPromise
+        ]) as any;
+
+        if (profileError) {
+          console.error('❌ Error loading profile:', profileError);
+
+          // If it's a table not found error, don't set it as a critical error
+          if (profileError.code === 'PGRST205') {
+            console.log('⚠️ Profiles table not found - this is expected during initial setup');
+            setProfile(null);
+            return;
+          }
+
+          // If it's a 403 error, retry with backoff
+          if (profileError.message?.includes('403') && retryCount < maxRetries) {
+            const backoffDelay = Math.min(1000 * Math.pow(2, retryCount) + Math.random() * 1000, 10000); // Exponential backoff with jitter, max 10s
+            console.log(`🔄 Profile 403 error, retrying in ${backoffDelay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, backoffDelay));
+            retryCount++;
+            continue;
+          }
+
+          // If it's a network error, retry with backoff
+          if ((profileError.message?.includes('Network Error') || profileError.message?.includes('Failed to fetch')) && retryCount < maxRetries) {
+            const backoffDelay = Math.min(1500 * Math.pow(2, retryCount) + Math.random() * 1500, 15000); // Exponential backoff with jitter, max 15s
+            console.log(`🌐 Network error detected, retrying in ${backoffDelay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, backoffDelay));
+            retryCount++;
+            continue;
+          }
+
+          setAuthError(`Erro ao carregar perfil: ${profileError.message}`);
+          return;
+        }
+
+        if (profileData) {
+          console.log('✅ Profile loaded successfully:', profileData);
+          setProfile(profileData);
+        } else {
+          console.log('⚠️ No profile found for user');
+          setProfile(null);
+        }
+        return; // Success, exit the retry loop
+      } catch (error: any) {
+        console.error('❌ Error in loadProfile:', error);
+
+        // If it's a timeout and we have retries left, try again with increased timeout
+        if (error.message.includes('Profile loading timeout') && retryCount < maxRetries) {
+          // Increase timeout for next attempt
+          baseTimeout = Math.min(baseTimeout * 1.5, 45000); // Increase by 50%, max 45 seconds
+          const backoffDelay = Math.min(2000 * Math.pow(2, retryCount) + Math.random() * 2000, 20000); // Exponential backoff with jitter, max 20s
+          console.log(`⏰ Profile loading timed out, increasing timeout to ${baseTimeout}ms and retrying in ${backoffDelay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, backoffDelay));
+          retryCount++;
+          continue;
+        }
+
+        // Handle timeout error with more specific information
+        if (error.message.includes('Profile loading timeout')) {
+          console.log('⏰ Profile loading timed out - this might indicate network issues or auth corruption');
+          setAuthError(`Timeout ao carregar perfil (${baseTimeout}ms) - possível problema de rede ou corrupção de sessão`);
+
+          // Import and trigger auth recovery with better error context
+          import('../utils/authRecovery').then(({ detectAuthCorruption, recoverAuthentication }) => {
+            detectAuthCorruption().then(isCorrupted => {
+              if (isCorrupted) {
+                console.log('🔄 Triggering authentication recovery...');
+                recoverAuthentication({ clearStorageOnFailure: true, timeoutMs: 15000 }).then(result => {
+                  console.log('🔄 Recovery result:', result);
+                  if (result.success && result.action === 'cleared') {
+                    console.log('🔄 Storage cleared, redirecting to auth...');
+                    // Force redirect after a short delay
+                    setTimeout(() => {
+                      window.location.href = '/auth';
+                    }, 1000);
+                  } else if (result.success && result.action === 'recovered') {
+                    console.log('🔄 Session recovered, reloading page...');
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 1000);
+                  } else {
+                    console.log('🚨 Recovery failed, forcing manual clear...');
+                    // Fallback: manual clear and redirect
+                    import('../utils/authRecovery').then(({ clearAuthStorage }) => {
+                      clearAuthStorage().then(() => {
+                        setTimeout(() => {
+                          window.location.href = '/auth';
+                        }, 1000);
+                      });
+                    });
+                  }
+                });
+              } else {
+                console.log('⚠️ No corruption detected, but profile still timing out - checking network...');
+                // If no corruption detected but still timing out, check network and force clear anyway
+                // Check if we're online
+                if (!navigator.onLine) {
+                  console.log('🌐 Device is offline, showing network error...');
+                  setAuthError('Dispositivo offline - verifique sua conexão e tente novamente');
+                  return;
+                }
+                
+                // If online but still timing out, force clear
+                import('../utils/authRecovery').then(({ clearAuthStorage }) => {
+                  clearAuthStorage().then(() => {
+                    setTimeout(() => {
+                      window.location.href = '/auth';
+                    }, 1000);
+                  });
+                });
+              }
+            });
+          });
+        } else {
+          setAuthError(`Erro interno ao carregar perfil: ${error.message}`);
+        }
+        return; // Exit on error
       }
-    } catch (error) {
-      console.error('❌ Error in loadProfile:', error);
-      setAuthError('Erro interno ao carregar perfil');
     }
   }, []);
 

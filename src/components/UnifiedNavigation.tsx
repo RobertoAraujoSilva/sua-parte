@@ -1,37 +1,41 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { 
-  Home, 
-  Users, 
-  BookOpen, 
-  Calendar, 
-  BarChart3, 
-  Settings, 
-  Shield, 
+import {
+  Home,
+  Users,
+  BookOpen,
+  Calendar,
+  BarChart3,
+  Settings,
+  Shield,
   UserCheck,
   Globe,
   FileText,
   Activity,
-  Cog
+  Cog,
+  Database,
+  Upload
 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import UnifiedNotifications from './UnifiedNotifications';
 
 // 🎯 NAVEGAÇÃO UNIFICADA QUE ADAPTA AO ROLE
 export default function UnifiedNavigation() {
-  const { profile } = useAuth();
+  const { role, profile } = useUserRole();
   const location = useLocation();
 
   // 🚨 SEM PERFIL = SEM NAVEGAÇÃO
   if (!profile) return null;
 
   // 🏠 NAVEGAÇÃO ADMIN - CONTROLE GLOBAL
-  if (profile.role === 'admin') {
+  if (role === 'admin') {
     const adminNavItems = [
       { href: '/admin', label: 'Dashboard', icon: Shield, exact: true },
+      { href: '/admin/global', label: 'Programação Global', icon: Globe, exact: true },
+      { href: '/admin/workbooks', label: 'Apostilas', icon: Upload },
       { href: '/admin/users', label: 'Usuários', icon: Users },
-      { href: '/admin/congregations', label: 'Congregações', icon: Globe },
+      { href: '/admin/congregations', label: 'Congregações', icon: Database },
       { href: '/admin/system', label: 'Sistema', icon: Cog },
       { href: '/admin/monitoring', label: 'Monitoramento', icon: Activity },
       { href: '/admin/developer', label: 'Developer', icon: Settings }
@@ -65,9 +69,10 @@ export default function UnifiedNavigation() {
   }
 
   // 👨‍🏫 NAVEGAÇÃO INSTRUTOR - GESTÃO LOCAL
-  if (profile.role === 'instrutor') {
+  if (role === 'instrutor') {
     const instructorNavItems = [
       { href: '/dashboard', label: 'Dashboard', icon: Home, exact: true },
+      { href: '/global-programming', label: 'Programação Global', icon: Globe },
       { href: '/estudantes', label: 'Estudantes', icon: Users },
       { href: '/programas', label: 'Programas', icon: BookOpen },
       { href: '/designacoes', label: 'Designações', icon: Calendar },
@@ -104,7 +109,7 @@ export default function UnifiedNavigation() {
   }
 
   // 👨‍🎓 NAVEGAÇÃO ESTUDANTE - VISÃO INDIVIDUAL
-  if (profile.role === 'estudante') {
+  if (role === 'estudante') {
     const studentNavItems = [
       { href: `/estudante/${profile.id}`, label: 'Meu Dashboard', icon: UserCheck, exact: true },
       { href: `/estudante/${profile.id}/designacoes`, label: 'Minhas Designações', icon: Calendar },
@@ -144,7 +149,7 @@ export default function UnifiedNavigation() {
   return (
     <nav className="flex space-x-2 p-4 bg-background border-b">
       <div className="text-sm text-muted-foreground">
-        Role não reconhecido: {profile.role}
+        Role não reconhecido: {role}
       </div>
     </nav>
   );

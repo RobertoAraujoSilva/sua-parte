@@ -22,11 +22,11 @@ This tracker is updated as work progresses. Each task lists acceptance criteria 
   - Changes: Cabeçalho tipo tabela (PARTE/SEÇÃO, TÍTULO, TEMPO); separadores de seção (Abertura, Tesouros, Ministério, Vida Cristã, Encerramento); blocos compactos por parte.
   - Acceptance: PDF mais fácil de ler, com seções e colunas básicas, mantendo quebras de página e rodapé.
 
-- [~] 1.3 Ajustar layout para o modelo oficial
+- [x] 1.3 Ajustar layout para o modelo oficial
   - Add: cânticos, orações, comentários de abertura/encerramento, formatação dos horários (ex.: 7.00–7.05), tipografia mais fiel.
   - Acceptance: Estrutura visual espelha o modelo fornecido; mantém compatibilidade com dados atuais.
 
-- [ ] 1.4 Aprimorar generateProgramPDF (programa semanal)
+- [x] 1.4 Aprimorar generateProgramPDF (programa semanal)
   - Add: seções, tempos e cabeçalhos equivalentes; fallback quando partes não disponíveis.
   - Acceptance: Programa semanal também exportável com layout coerente.
 
@@ -56,7 +56,7 @@ This tracker is updated as work progresses. Each task lists acceptance criteria 
   - Scope: Programas + Designações nas telas que ainda consultam supabase diretamente.
   - Acceptance: Telas principais continuam funcionais offline com dados previamente baixados.
 
-- [ ] 2.5 UI de status e pendências
+- [x] 2.5 UI de status e pendências
   - Add: Banner Online/Offline (navigator.onLine); contador de pendências (outbox).
   - Acceptance: Usuário vê o estado da conexão e itens pendentes.
 
@@ -85,7 +85,7 @@ This tracker is updated as work progresses. Each task lists acceptance criteria 
 
 ## MCP-05 — Metadados e RLS (Aderência à Arquitetura)
 
-- [~] 5.1 Metadados e triggers
+- [x] 5.1 Metadados e triggers
   - Add (estudantes, programas, designacoes): updated_at TIMESTAMPTZ NOT NULL DEFAULT now(), revision BIGINT NOT NULL DEFAULT 0, last_modified_by UUID NULL, deleted_at TIMESTAMPTZ NULL.
   - Triggers BEFORE UPDATE: bump revision, set updated_at/last_modified_by.
   - Acceptance: Banco pronto para delta e resolução de conflitos.
@@ -94,7 +94,7 @@ This tracker is updated as work progresses. Each task lists acceptance criteria 
   - Affected: src/utils/applyEstudantesRLS.ts (políticas adicionadas anteriormente)
   - Acceptance: Somente owner acessa seus estudantes; confirmado em código.
 
-- [~] 5.3 RLS — programas/designações
+- [x] 5.3 RLS — programas/designações
   - Instrutor: acesso por congregação (programas/designações da congregação e somente leitura/escrita conforme papel).
   - Estudante: apenas suas designações.
   - Admin: acesso global.

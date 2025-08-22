@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { TutorialProvider } from "@/contexts/TutorialContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TutorialOverlay } from "@/components/tutorial";
+import { ConnectionStatusBanner } from "@/components/ConnectionStatusBanner";
 // Debug tools will be loaded conditionally in development only
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -33,6 +34,8 @@ import BemVindo from "./pages/BemVindo";
 import ConfiguracaoInicial from "./pages/ConfiguracaoInicial";
 import PrimeiroPrograma from "./pages/PrimeiroPrograma";
 import DeveloperPanel from "./pages/DeveloperPanel";
+import AdminGlobalDashboard from "./pages/AdminGlobalDashboard";
+import GlobalProgrammingView from "./pages/GlobalProgrammingView";
 import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
@@ -82,6 +85,7 @@ const App = () => (
           <TooltipProvider>
             <Sonner />
             <TutorialOverlay />
+            <ConnectionStatusBanner />
             <BrowserRouter
               future={{
                 v7_startTransition: true,
@@ -122,6 +126,26 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
                       <PrimeiroPrograma />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Admin Routes */}
+                <Route
+                  path="/admin/global"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin', 'developer']}>
+                      <AdminGlobalDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Global Programming View for Instructors */}
+                <Route
+                  path="/global-programming"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin', 'instrutor', 'developer']}>
+                      <GlobalProgrammingView />
                     </ProtectedRoute>
                   }
                 />

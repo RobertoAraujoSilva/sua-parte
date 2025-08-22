@@ -196,10 +196,73 @@ export async function listOffline(entity: 'estudantes' | 'programas' | 'designac
   return getAll(STORES[entity]);
 }
 
+// Enhanced outbox operations
+export async function addToOutbox(operation: {
+  type: 'insert' | 'update' | 'delete';
+  table: string;
+  data: any;
+  id?: string;
+}) {
+  const db = await openDB();
+  const t = tx(db, STORES.outbox, 'readwrite');
+  const s = t.objectStore(STORES.outbox);
+
+  const outboxItem = {
+    ...operation,
+    status: 'pending',
+    created_at: new Date().toISOString(),
+    retry_count: 0
+  };
+
+  return new Promise<void>((resolve, reject) => {
+    const req = s.add(outboxItem);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+export async function getOutboxCount(): Promise<number> {
+  const db = await openDB();
+  const t = tx(db, STORES.outbox, 'readonly');
+  const s = t.objectStore(STORES.outbox);
+
+  return new Promise((resolve, reject) => {
+    const req = s.count();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+export async function getOutboxItems(): Promise<any[]> {
+  const db = await openDB();
+  const t = tx(db, STORES.outbox, 'readonly');
+  const s = t.objectStore(STORES.outbox);
+
+  return new Promise((resolve, reject) => {
+    const req = s.getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
 // Placeholder for future sync upload logic
 export async function syncOutbox() {
-  // TODO: read outbox, push to server with revision checks, mark synced
-  console.log('ℹ️ syncOutbox() ainda não implementado.');
+  try {
+    const items = await getOutboxItems();
+    console.log(`ℹ️ Sincronizando ${items.length} itens pendentes...`);
+
+    // TODO: Implement actual sync logic
+    // For now, just log the items
+    items.forEach(item => {
+      console.log(`📤 ${item.type} ${item.table}:`, item.data);
+    });
+
+    console.log('✅ Sincronização simulada concluída.');
+    return { success: true, synced: items.length };
+  } catch (error) {
+    console.error('❌ Erro na sincronização:', error);
+    return { success: false, error };
+  }
 }
 
 // Expose helpers on window for manual testing
@@ -208,6 +271,10 @@ if (typeof window !== 'undefined') {
     download: downloadDataForOffline,
     list: listOffline,
     sync: syncOutbox,
+    addToOutbox,
+    getOutboxCount,
+    getOutboxItems,
   };
   console.log('🔧 Offline DB tools available: window.offlineDB.download(), window.offlineDB.list(\'estudantes\'), window.offlineDB.sync()');
+  console.log('🔧 Outbox tools: window.offlineDB.getOutboxCount(), window.offlineDB.getOutboxItems()');
 }

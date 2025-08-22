@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useAdminCache } from '@/hooks/admin/useAdminCache';
 import { useJWorgIntegration } from '@/hooks/useJWorgIntegration';
+import { useSupabaseData } from '@/hooks/useSupabaseData';
 
 /**
  * 🎯 OVERVIEW TAB - Visão Geral do Sistema
@@ -26,19 +27,29 @@ import { useJWorgIntegration } from '@/hooks/useJWorgIntegration';
  */
 
 export default function OverviewTab() {
-  const { 
-    stats, 
-    isLoading, 
-    error, 
-    refreshStats, 
-    getCacheMetrics 
+  const {
+    stats,
+    isLoading,
+    error,
+    refreshStats,
+    getCacheMetrics
   } = useAdminCache();
-  
-  const { 
-    currentLanguage, 
+
+  const {
+    currentLanguage,
     isLoading: jwLoading,
-    setLanguage 
+    setLanguage
   } = useJWorgIntegration();
+
+  // 📊 DADOS REAIS DO SUPABASE
+  const {
+    stats: supabaseStats,
+    workbooks,
+    programming,
+    loading: supabaseLoading,
+    error: supabaseError,
+    refreshData
+  } = useSupabaseData();
 
   const cacheMetrics = getCacheMetrics();
 
@@ -105,7 +116,7 @@ export default function OverviewTab() {
             <BarChart3 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
+            <div className="text-2xl font-bold">{supabaseStats.totalWeeks}</div>
             <p className="text-xs text-muted-foreground">
               Próximas 3 meses
             </p>

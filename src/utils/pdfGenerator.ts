@@ -38,7 +38,7 @@ export const generateProgramPDF = async (programa: ProgramData): Promise<void> =
   try {
     // Create jsPDF instance
     const doc = new jsPDF();
-    
+
     // Set document properties
     doc.setProperties({
       title: `${programa.semana}`,
@@ -48,75 +48,215 @@ export const generateProgramPDF = async (programa: ProgramData): Promise<void> =
       creator: 'Sistema Ministerial'
     });
 
-    // Add title
-    doc.setFontSize(18);
+    // Add title with official JW formatting
+    doc.setFontSize(16);
     doc.setFont(undefined, 'bold');
-    doc.text('PROGRAMA DA REUNIAO', 105, 20, { align: 'center' });
-    doc.text('VIDA E MINISTERIO CRISTAO', 105, 30, { align: 'center' });
-    
+    doc.text('PROGRAMA DA REUNIÃO', 105, 18, { align: 'center' });
+    doc.setFontSize(14);
+    doc.text('VIDA E MINISTÉRIO CRISTÃO', 105, 26, { align: 'center' });
+
     // Add program information
-    doc.setFontSize(12);
+    doc.setFontSize(11);
     doc.setFont(undefined, 'normal');
     const dataFormatada = new Date(programa.data_inicio_semana).toLocaleDateString('pt-BR');
-    doc.text(`Semana de ${dataFormatada}`, 105, 45, { align: 'center' });
-    doc.text(`${programa.mes_apostila || programa.semana}`, 105, 55, { align: 'center' });
-    
-    // Add line separator
-    doc.line(20, 65, 190, 65);
-    
-    // Add program parts header
-    doc.setFontSize(14);
+    doc.text(`Semana de ${dataFormatada}`, 105, 36, { align: 'center' });
+    doc.text(`${programa.mes_apostila || programa.semana}`, 105, 42, { align: 'center' });
+
+    // Add official meeting structure header
+    doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
-    doc.text('PARTES DO PROGRAMA', 20, 75);
-    
-    // Add program parts
-    let yPosition = 85;
+    doc.text('DURAÇÃO TOTAL: 1h45min (incluindo cânticos e orações)', 105, 50, { align: 'center' });
+
+    // Add line separator
+    doc.line(20, 55, 190, 55);
+
+    // Add official meeting structure
+    let yPos = 65;
     doc.setFontSize(11);
-    
-    if (programa.partes && Array.isArray(programa.partes)) {
-      programa.partes.forEach((parte: string, index: number) => {
+    doc.setFont(undefined, 'bold');
+    doc.text('ESTRUTURA DA REUNIÃO', 20, yPos);
+    yPos += 8;
+
+    // Opening section
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('ABERTURA (5 min)', 20, yPos);
+    yPos += 5;
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text('• Cântico de Abertura', 25, yPos);
+    yPos += 4;
+    doc.text('• Oração de Abertura', 25, yPos);
+    yPos += 4;
+    doc.text('• Comentários Iniciais (3 min)', 25, yPos);
+    yPos += 8;
+
+    // Add program parts header
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text('PARTES DO PROGRAMA', 20, yPos);
+    yPos += 8;
+
+    // Add program parts with sections and times
+    let yPosition = yPos;
+    doc.setFontSize(10);
+
+    if (programa.partes && Array.isArray(programa.partes) && programa.partes.length > 0) {
+      // Organize parts by sections
+      const sections = [
+        { name: 'TESOUROS DA PALAVRA DE DEUS (10 min)', start: 0, end: 3 },
+        { name: 'FAÇA SEU MELHOR NO MINISTÉRIO (15 min)', start: 3, end: 6 },
+        { name: 'NOSSA VIDA CRISTÃ (15 min)', start: 6, end: 9 }
+      ];
+
+      sections.forEach(section => {
         // Check if we need a new page
-        if (yPosition > 260) {
+        if (yPosition > 220) {
           doc.addPage();
           yPosition = 20;
         }
-        
+
+        // Section header
+        doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
-        doc.text(`${index + 1}.`, 20, yPosition);
+        doc.text(section.name, 20, yPosition);
+        yPosition += 6;
+
+        // Section parts
+        const sectionParts = programa.partes.slice(section.start, section.end);
+        if (sectionParts.length > 0) {
+          sectionParts.forEach((parte: string, index: number) => {
+            if (yPosition > 240) {
+              doc.addPage();
+              yPosition = 20;
+            }
+
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.text(`  ${section.start + index + 1}. ${parte}`, 25, yPosition);
+            yPosition += 5;
+          });
+        } else {
+          // Fallback for missing parts
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'italic');
+          doc.text('  (Partes não disponíveis para esta seção)', 25, yPosition);
+          yPosition += 5;
+        }
+
+        yPosition += 4; // Space between sections
+      });
+
+      // Add any remaining parts
+      if (programa.partes.length > 9) {
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text('PARTES ADICIONAIS', 20, yPosition);
+        yPosition += 6;
+
+        programa.partes.slice(9).forEach((parte: string, index: number) => {
+          if (yPosition > 240) {
+            doc.addPage();
+            yPosition = 20;
+          }
+
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'normal');
+          doc.text(`  ${index + 10}. ${parte}`, 25, yPosition);
+          yPosition += 5;
+        });
+      }
+    } else {
+      // Fallback when no parts available
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'italic');
+      doc.text('Programa não disponível. Aguardando processamento dos dados.', 25, yPosition);
+      yPosition += 8;
+
+      // Show default structure
+      doc.setFontSize(10);
+      doc.setFont(undefined, 'bold');
+      doc.text('ESTRUTURA PADRÃO DA REUNIÃO:', 20, yPosition);
+      yPosition += 6;
+
+      const defaultStructure = [
+        'TESOUROS DA PALAVRA DE DEUS (10 min)',
+        '• Tesouros da Palavra de Deus',
+        '• Joias Espirituais',
+        '• Leitura da Bíblia',
+        '',
+        'FAÇA SEU MELHOR NO MINISTÉRIO (15 min)',
+        '• Apresentação Inicial',
+        '• Revisita',
+        '• Estudo Bíblico',
+        '',
+        'NOSSA VIDA CRISTÃ (15 min)',
+        '• Parte 1',
+        '• Parte 2',
+        '• Estudo Bíblico da Congregação'
+      ];
+
+      defaultStructure.forEach(item => {
+        if (yPosition > 240) {
+          doc.addPage();
+          yPosition = 20;
+        }
+
+        doc.setFontSize(8);
         doc.setFont(undefined, 'normal');
-        doc.text(parte, 30, yPosition);
-        yPosition += 12;
+        if (item.startsWith('•')) {
+          doc.text(`  ${item}`, 25, yPosition);
+        } else if (item === '') {
+          yPosition += 2;
+          return;
+        } else {
+          doc.setFont(undefined, 'bold');
+          doc.text(item, 25, yPosition);
+        }
+        yPosition += 4;
       });
     }
-    
-    // Add status information
-    yPosition += 10;
-    doc.setFontSize(12);
-    doc.setFont(undefined, 'bold');
-    doc.text('STATUS DO PROGRAMA', 20, yPosition);
-    yPosition += 10;
-    
-    doc.setFont(undefined, 'normal');
-    doc.text(`Status: ${programa.status}`, 20, yPosition);
-    yPosition += 8;
-    doc.text(`Data de Importacao: ${new Date(programa.dataImportacao).toLocaleDateString('pt-BR')}`, 20, yPosition);
-    
-    if (programa.assignment_status === 'approved') {
-      yPosition += 8;
-      doc.text('Programa aprovado e designacoes confirmadas', 20, yPosition);
-    } else if (programa.assignment_status === 'generated') {
-      yPosition += 8;
-      doc.text('Designacoes geradas - aguardando aprovacao', 20, yPosition);
-    } else {
-      yPosition += 8;
-      doc.text('Aguardando geracao de designacoes', 20, yPosition);
+
+    // Add closing section
+    if (yPosition > 230) {
+      doc.addPage();
+      yPosition = 20;
     }
-    
-    // Add footer
+
+    yPosition += 10;
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('ENCERRAMENTO (5 min)', 20, yPosition);
+    yPosition += 5;
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text('• Comentários Finais (3 min)', 25, yPosition);
+    yPosition += 4;
+    doc.text('• Cântico Final', 25, yPosition);
+    yPosition += 4;
+    doc.text('• Oração de Encerramento', 25, yPosition);
+
+    // Add status information
+    yPosition += 15;
     doc.setFontSize(8);
     doc.setFont(undefined, 'normal');
-    doc.text('Gerado pelo Sistema Ministerial', 105, 285, { align: 'center' });
-    doc.text(new Date().toLocaleDateString('pt-BR'), 105, 290, { align: 'center' });
+    doc.text(`Status: ${programa.status} | Data: ${new Date(programa.dataImportacao).toLocaleDateString('pt-BR')}`, 20, yPosition);
+
+    // Add official footer
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(7);
+      doc.setFont(undefined, 'normal');
+
+      // Official JW footer style
+      doc.text(`Página ${i} de ${pageCount}`, 20, 285);
+      doc.text('Sistema Ministerial', 105, 285, { align: 'center' });
+      doc.text(new Date().toLocaleDateString('pt-BR'), 190, 285, { align: 'right' });
+
+      // Add subtle line above footer
+      doc.line(20, 280, 190, 280);
+    }
 
     // Save the PDF
     const fileName = `${programa.semana.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
@@ -139,13 +279,13 @@ export const generateProgramPDF = async (programa: ProgramData): Promise<void> =
 };
 
 export const generateAssignmentsPDF = async (
-  programa: ProgramData, 
+  programa: ProgramData,
   assignments: AssignmentData[]
 ): Promise<void> => {
   try {
     // Create jsPDF instance
     const doc = new jsPDF();
-    
+
     // Set document properties
     doc.setProperties({
       title: `Programa - ${programa?.mes_apostila || 'Desconhecido'}`,
@@ -155,35 +295,60 @@ export const generateAssignmentsPDF = async (
       creator: 'Sistema Ministerial'
     });
 
-    // Add title
-    doc.setFontSize(18);
+    // Add title with official JW formatting
+    doc.setFontSize(16);
     doc.setFont(undefined, 'bold');
-    doc.text('PROGRAMA DA REUNIAO', 105, 20, { align: 'center' });
-    doc.text('VIDA E MINISTERIO CRISTAO', 105, 30, { align: 'center' });
-    
+    doc.text('PROGRAMA DA REUNIÃO', 105, 18, { align: 'center' });
+    doc.setFontSize(14);
+    doc.text('VIDA E MINISTÉRIO CRISTÃO', 105, 26, { align: 'center' });
+
     // Add program information
-    doc.setFontSize(12);
+    doc.setFontSize(11);
     doc.setFont(undefined, 'normal');
     const dataFormatada = new Date(programa?.data_inicio_semana || '').toLocaleDateString('pt-BR');
-    doc.text(`Semana de ${dataFormatada}`, 105, 45, { align: 'center' });
-    doc.text(`${programa?.mes_apostila || 'Mes nao especificado'}`, 105, 55, { align: 'center' });
-    
-    // Add line separator
-    doc.line(20, 65, 190, 65);
-    
-    // Add assignments header
-    doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
-    doc.text('DESIGNACOES DA REUNIAO', 20, 75);
+    doc.text(`Semana de ${dataFormatada}`, 105, 36, { align: 'center' });
+    doc.text(`${programa?.mes_apostila || 'Mês não especificado'}`, 105, 42, { align: 'center' });
 
-    // Simple table header for better readability
+    // Add official meeting structure header
     doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
-    doc.text('PARTE/SECAO', 20, 82);
-    doc.text('TITULO', 60, 82);
-    doc.text('HORARIO', 130, 82);
-    doc.text('TEMPO', 160, 82);
-    doc.line(20, 84, 190, 84);
+    doc.text('DURAÇÃO TOTAL: 1h45min (incluindo cânticos e orações)', 105, 50, { align: 'center' });
+
+    // Add line separator
+    doc.line(20, 55, 190, 55);
+    
+    // Add official meeting structure with cânticos
+    let yPos = 62;
+
+    // Opening section
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'bold');
+    doc.text('ABERTURA (5 min)', 20, yPos);
+    yPos += 6;
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text('• Cântico de Abertura', 25, yPos);
+    yPos += 4;
+    doc.text('• Oração de Abertura', 25, yPos);
+    yPos += 4;
+    doc.text('• Comentários Iniciais (3 min)', 25, yPos);
+    yPos += 8;
+
+    // Add assignments header
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'bold');
+    doc.text('DESIGNAÇÕES DA REUNIÃO', 20, yPos);
+    yPos += 8;
+
+    // Official table header matching JW format
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('HORÁRIO', 20, yPos);
+    doc.text('PARTE/SEÇÃO', 45, yPos);
+    doc.text('TÍTULO', 90, yPos);
+    doc.text('TEMPO', 160, yPos);
+    doc.line(20, yPos + 2, 190, yPos + 2);
+    yPos += 6;
     
     // Helper functions
     const getSectionInfo = (numeroParte: number) => {
@@ -222,20 +387,23 @@ export const generateAssignmentsPDF = async (
         : { restriction: 'Ambos os Generos', icon: 'M/F', color: 'text-green-600' };
     };
     
-    // Compute simple sequential timeline (default start 19:00)
+    // Compute official JW timeline format (7.00–7.05)
     const computeTimeline = (items: AssignmentData[], start: string = '19:00') => {
       const [hStr, mStr] = start.split(':');
       let minutes = (parseInt(hStr || '19', 10) * 60) + (parseInt(mStr || '0', 10));
       const timeline = new Map<string, string>();
       const sorted = [...items].sort((a, b) => (a.numero_parte || 0) - (b.numero_parte || 0));
+
       for (const it of sorted) {
         const startH = Math.floor(minutes / 60);
         const startM = minutes % 60;
         const endMin = minutes + (it.tempo_minutos || 0);
         const endH = Math.floor(endMin / 60);
         const endM = endMin % 60;
-        const fmt = (h: number, m: number) => `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
-        timeline.set(it.id, `${fmt(startH, startM)}-${fmt(endH, endM)}`);
+
+        // Official JW format: 7.00–7.05 (with en dash)
+        const fmt = (h: number, m: number) => `${h}.${m.toString().padStart(2,'0')}`;
+        timeline.set(it.id, `${fmt(startH, startM)}–${fmt(endH, endM)}`);
         minutes = endMin;
       }
       return timeline;
@@ -243,107 +411,118 @@ export const generateAssignmentsPDF = async (
 
     const timeline = computeTimeline(assignments, '19:00');
 
-    // Add assignments
-    let yPosition = 88;
-    doc.setFontSize(10);
+    // Add assignments with official formatting
+    let yPosition = yPos;
+    doc.setFontSize(9);
 
     let lastSection = '';
-    
+
     assignments.forEach((assignment, index) => {
       const sectionInfo = getSectionInfo(assignment.numero_parte);
+
+      // Add section header if changed
       if (sectionInfo.section !== lastSection) {
-        // Add section header row
         if (yPosition > 240) {
           doc.addPage();
           yPosition = 20;
         }
-        doc.setFontSize(11);
+
+        // Section header with official styling
+        doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
         doc.text(sectionInfo.section.toUpperCase(), 20, yPosition);
         doc.line(20, yPosition + 2, 190, yPosition + 2);
-        yPosition += 8;
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'normal');
+        yPosition += 10;
         lastSection = sectionInfo.section;
       }
+
       // Check if we need a new page
       if (yPosition > 240) {
         doc.addPage();
         yPosition = 20;
       }
-      
-      // Add assignment header with number and section
-      doc.setFont(undefined, 'bold');
-      doc.setFontSize(11);
-      const numeroFormatado = assignment.numero_parte.toString().padStart(2, '0');
 
-      doc.text(`${numeroFormatado}`, 20, yPosition);
-      const timeLabel = timeline.get(assignment.id) || '';
-      doc.text(`${timeLabel}`, 130, yPosition);
-      doc.text(`${assignment.tempo_minutos} min`, 160, yPosition);
-      
-      // Add assignment title
-      doc.setFont(undefined, 'normal');
-      doc.setFontSize(10);
-      const titulo = assignment.titulo_parte || getAssignmentTypeLabel(assignment.tipo_parte);
-      doc.text(titulo, 30, yPosition);
-      yPosition += 6;
-      
-      // Add assignment details if different from title
-      doc.setFont(undefined, 'normal');
+      // Official assignment row format
       doc.setFontSize(9);
-      const detalhes = getAssignmentTypeLabel(assignment.tipo_parte);
-      if (titulo !== detalhes) {
-        doc.text(detalhes, 30, yPosition);
-        yPosition += 5;
-      }
-      
-      // Add student information - THIS IS THE KEY PART
+      doc.setFont(undefined, 'normal');
+
+      const timeLabel = timeline.get(assignment.id) || '';
+      const titulo = assignment.titulo_parte || getAssignmentTypeLabel(assignment.tipo_parte);
+
+      // Time column (official format: 7.00–7.05)
+      doc.text(timeLabel, 20, yPosition);
+
+      // Part number and section
+      const numeroFormatado = assignment.numero_parte.toString().padStart(2, '0');
+      doc.text(`${numeroFormatado}.`, 45, yPosition);
+
+      // Title
+      doc.text(titulo, 50, yPosition);
+
+      // Duration
+      doc.text(`(${assignment.tempo_minutos} min)`, 160, yPosition);
+
+      yPosition += 4;
+
+      // Add student assignment information (indented)
       if (assignment.estudante?.nome) {
-        doc.setFont(undefined, 'bold');
-        doc.setFontSize(10);
-        doc.text(`Estudante:`, 20, yPosition);
+        doc.setFontSize(8);
         doc.setFont(undefined, 'normal');
-        doc.text(`${assignment.estudante.nome}`, 45, yPosition);
-        
-        const genderInfo = getGenderRestrictionInfo(assignment.tipo_parte);
-        doc.text(`Restricao: ${genderInfo.restriction}`, 120, yPosition);
-        yPosition += 5;
-        
+
+        // Student name with confirmation status
+        const confirmStatus = assignment.confirmado ? ' ✓' : ' (pendente)';
+        doc.text(`    Estudante: ${assignment.estudante.nome}${confirmStatus}`, 50, yPosition);
+        yPosition += 4;
+
         // Helper if exists
         if (assignment.ajudante?.nome) {
-          doc.setFont(undefined, 'bold');
-          doc.text(`Ajudante:`, 20, yPosition);
-          doc.setFont(undefined, 'normal');
-          doc.text(`${assignment.ajudante.nome}`, 45, yPosition);
-          yPosition += 5;
+          doc.text(`    Ajudante: ${assignment.ajudante.nome}`, 50, yPosition);
+          yPosition += 4;
         }
-
-        // Confirmation
-        if (assignment.confirmado) {
-          doc.setFont(undefined, 'bold');
-          doc.text('Status: Confirmado', 20, yPosition);
-          yPosition += 5;
-        }
-      }
-      
-      yPosition += 6;
-      
-      // Add separator line
-      if (index < assignments.length - 1) {
-        doc.line(20, yPosition - 2, 190, yPosition - 2);
+      } else {
+        // Show unassigned
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'italic');
+        doc.text('    (Não designado)', 50, yPosition);
         yPosition += 4;
       }
+
+      yPosition += 2;
     });
+
+    // Add closing section
+    if (yPosition > 230) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    yPosition += 10;
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('ENCERRAMENTO (5 min)', 20, yPosition);
+    yPosition += 6;
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'normal');
+    doc.text('• Comentários Finais (3 min)', 25, yPosition);
+    yPosition += 4;
+    doc.text('• Cântico Final', 25, yPosition);
+    yPosition += 4;
+    doc.text('• Oração de Encerramento', 25, yPosition);
     
-    // Add footer to all pages
+    // Add official footer to all pages
     const pageCount = doc.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       doc.setPage(i);
-      doc.setFontSize(8);
+      doc.setFontSize(7);
       doc.setFont(undefined, 'normal');
-      doc.text(`Pagina ${i} de ${pageCount}`, 105, 285, { align: 'center' });
-      doc.text('Gerado pelo Sistema Ministerial', 105, 290, { align: 'center' });
+
+      // Official JW footer style
+      doc.text(`Página ${i} de ${pageCount}`, 20, 285);
+      doc.text('Sistema Ministerial', 105, 285, { align: 'center' });
+      doc.text(new Date().toLocaleDateString('pt-BR'), 190, 285, { align: 'right' });
+
+      // Add subtle line above footer
+      doc.line(20, 280, 190, 280);
     }
 
     // Save the PDF

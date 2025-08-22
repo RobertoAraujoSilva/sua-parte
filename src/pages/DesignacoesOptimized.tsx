@@ -13,6 +13,7 @@ import PageShell from "@/components/layout/PageShell";
 import DesignacoesToolbar from "@/components/assignments/DesignacoesToolbar";
 import { ResponsiveTableWrapper } from "@/components/layout/ResponsiveTableWrapper";
 import { AdaptiveGrid } from "@/components/layout/adaptive-grid";
+import { ConnectionStatusIndicator } from "@/components/ConnectionStatusBanner";
 
 // Import assignment system components
 import { ModalSelecaoSemana, type DadosSelecaoSemana } from "@/components/ModalSelecaoSemana";
@@ -316,20 +317,23 @@ const DesignacoesOptimized = () => {
 
   // Toolbar component
   const toolbar = (
-    <DesignacoesToolbar
-      searchValue={searchValue}
-      onSearchChange={setSearchValue}
-      pendingCount={assignmentStats.pendingAssignments}
-      completedCount={assignmentStats.confirmedAssignments}
-      totalCount={assignmentStats.totalAssignments}
-      selectedTab={selectedTab}
-      onTabChange={setSelectedTab}
-      onAddAssignment={handleAbrirModalSelecao}
-      onExport={() => console.log('Export clicked')}
-      onRefresh={loadAssignments}
-      onShowFilters={() => console.log('Show filters clicked')}
-      hasActiveFilters={!!searchValue}
-    />
+    <div className="flex flex-col gap-2">
+      <ConnectionStatusIndicator className="px-4" />
+      <DesignacoesToolbar
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        pendingCount={assignmentStats.pendingAssignments}
+        completedCount={assignmentStats.confirmedAssignments}
+        totalCount={assignmentStats.totalAssignments}
+        selectedTab={selectedTab}
+        onTabChange={setSelectedTab}
+        onAddAssignment={handleAbrirModalSelecao}
+        onExport={() => console.log('Export clicked')}
+        onRefresh={loadAssignments}
+        onShowFilters={() => console.log('Show filters clicked')}
+        hasActiveFilters={!!searchValue}
+      />
+    </div>
   );
 
   return (

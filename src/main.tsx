@@ -8,6 +8,29 @@ import { ErrorBoundary } from '@/components/ErrorBoundary';
 import SafeAreaLayout from "@/layouts/SafeAreaLayout";
 import { DensityProvider } from "@/contexts/DensityContext";
 import { monitorWebVitals, analyzeBundle } from './config/performance';
+// Import migration utilities for development
+if (import.meta.env.DEV) {
+  import('./utils/applyMigration');
+  import('./utils/applyComprehensiveRLS');
+  import('./utils/applyGlobalProgrammingSchema');
+  import('./utils/createDatabaseTables');
+  import('./utils/createSampleData');
+  import('./utils/fixAdminProfile');
+  import('./utils/setupAdminDashboard');
+  import('./utils/authRecovery');
+  import('./utils/sessionHealthCheck');
+  import('./utils/emergencyAuthFix');
+}
+
+// Initialize authentication recovery system
+import('./utils/authRecovery').then(({ initializeAuthRecovery }) => {
+  // Run auth recovery check after a short delay to allow initial auth to settle
+  setTimeout(() => {
+    initializeAuthRecovery().catch(error => {
+      console.error('❌ Auth recovery initialization failed:', error);
+    });
+  }, 3000);
+});
 // Register Service Worker only in production to avoid HMR conflicts in dev
 if (import.meta.env.PROD) {
   import('./sw-register');

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Database } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -45,9 +46,27 @@ const ProtectedRoute = ({
   requireAuth = true,
   redirectTo
 }: ProtectedRouteProps) => {
-  const { user, profile, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { role, profile, loading: roleLoading } = useUserRole();
   const navigate = useNavigate();
   const [profileTimeout, setProfileTimeout] = useState(false);
+  const [forceReady, setForceReady] = useState(false);
+
+  // Combined loading state with timeout override
+  const loading = (authLoading || roleLoading) && !forceReady;
+
+  // Set up timeout to force ready state if loading takes too long
+  useEffect(() => {
+    if (user && (authLoading || roleLoading)) {
+      const timeout = setTimeout(() => {
+        console.log('⏰ ProtectedRoute: Timeout reached, forcing ready state');
+        setForceReady(true);
+        setProfileTimeout(true);
+      }, 10000); // 10 second timeout
+
+      return () => clearTimeout(timeout);
+    }
+  }, [user, authLoading, roleLoading]);
   const [accessCheckComplete, setAccessCheckComplete] = useState(false);
 
   // Set up profile timeout - reduced to 1 second for better UX
@@ -91,22 +110,18 @@ const ProtectedRoute = ({
 
     // If user is logged in, check access
     if (user) {
-      let userRole: UserRole | undefined;
+      // Use role from useUserRole hook, or fallback to metadata role
+      let userRole = role;
 
-      // Get role from profile if available, otherwise from user metadata
-      if (profile) {
-        userRole = profile.role;
-        console.log('✅ ProtectedRoute: Using profile role:', userRole);
-      } else if (user.user_metadata?.role) {
-        userRole = user.user_metadata?.role as UserRole;
-        if (profileTimeout) {
-          console.log('⚠️ ProtectedRoute: Using metadata role fallback:', userRole, '(profile loading timed out)');
-        } else {
-          console.log('🔄 ProtectedRoute: Using metadata role temporarily:', userRole, '(profile still loading)');
-        }
+      // If no role from useUserRole but we have metadata role, use it
+      if (!userRole && user.user_metadata?.role) {
+        userRole = user.user_metadata.role as UserRole;
+        console.log('🔄 ProtectedRoute: Using metadata role fallback:', userRole);
       }
 
       if (userRole) {
+        console.log('✅ ProtectedRoute: Using role:', userRole);
+
         // Check if user's role is allowed
         if (!allowedRoles.includes(userRole)) {
           console.log('🚫 ProtectedRoute: Role not allowed, redirecting...', {

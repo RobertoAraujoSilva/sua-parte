@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Missing Tables - Sua Parte</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        .status.info {
+            background-color: #e3f2fd;
+            color: #1976d2;
+            border: 1px solid #bbdefb;
+        }
+        .status.success {
+            background-color: #e8f5e8;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        .status.error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        .status.warning {
+            background-color: #fff3e0;
+            color: #ef6c00;
+            border: 1px solid #ffcc02;
+        }
+        button {
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background-color: #1565c0;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .instructions {
+            background-color: #f0f8ff;
+            border-left: 4px solid #1976d2;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix Missing Tables</h1>
+        
+        <div class="status info">
+            <strong>Problem:</strong> Your application is showing 404 errors because some database tables are missing:
+            <ul>
+                <li><code>workbook_versions</code></li>
+                <li><code>global_programming</code></li>
+                <li><code>congregacoes</code></li>
+            </ul>
+        </div>
+
+        <div class="instructions">
+            <strong>Instructions:</strong>
+            <ol>
+                <li>Make sure you're logged into your application</li>
+                <li>Click the "Fix Missing Tables" button below</li>
+                <li>Wait for the process to complete</li>
+                <li>Refresh your application page</li>
+            </ol>
+        </div>
+
+        <div style="text-align: center;">
+            <button id="fixButton" onclick="fixMissingTables()">🔧 Fix Missing Tables</button>
+            <button onclick="clearLog()">🗑️ Clear Log</button>
+        </div>
+
+        <div id="status" class="status info" style="display: none;"></div>
+        
+        <div class="log" id="log"></div>
+    </div>
+
+    <script>
+        let logElement = document.getElementById('log');
+        let statusElement = document.getElementById('status');
+        let fixButton = document.getElementById('fixButton');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logMessage = `[${timestamp}] ${message}\n`;
+            logElement.textContent += logMessage;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(message);
+        }
+
+        function showStatus(message, type = 'info') {
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+            statusElement.style.display = 'block';
+        }
+
+        function clearLog() {
+            logElement.textContent = '';
+            statusElement.style.display = 'none';
+        }
+
+        async function fixMissingTables() {
+            try {
+                fixButton.disabled = true;
+                showStatus('Starting to fix missing tables...', 'info');
+                log('🔧 Starting to fix missing tables...');
+
+                // Check if we're in the right environment
+                if (typeof window.supabase === 'undefined') {
+                    throw new Error('Supabase client not found. Make sure you\'re on the application page.');
+                }
+
+                // Create the missing tables
+                log('🚀 Creating missing tables...');
+
+                // Create global_programming table
+                log('📋 Creating global_programming table...');
+                await executeSQL(`
+                    CREATE TABLE IF NOT EXISTS public.global_programming (
+                        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                        week_start_date DATE NOT NULL,
+                        week_end_date DATE NOT NULL,
+                        week_number INTEGER NOT NULL,
+                        meeting_type TEXT NOT NULL CHECK (meeting_type IN ('midweek', 'weekend')),
+                        section_name TEXT NOT NULL CHECK (section_name IN ('opening', 'treasures', 'ministry', 'christian_life', 'closing')),
+                        part_number INTEGER NOT NULL CHECK (part_number BETWEEN 1 AND 12),
+                        part_title TEXT NOT NULL,
+                        part_duration INTEGER NOT NULL,
+                        part_type TEXT NOT NULL,
+                        source_material TEXT,
+                        content_references JSONB,
+                        requirements JSONB,
+                        admin_user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+                        status TEXT DEFAULT 'draft' CHECK (status IN ('draft', 'published', 'archived')),
+                        revision BIGINT NOT NULL DEFAULT 0,
+                        last_modified_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+                        deleted_at TIMESTAMPTZ NULL,
+                        created_at TIMESTAMPTZ DEFAULT now(),
+                        updated_at TIMESTAMPTZ DEFAULT now(),
+                        UNIQUE(week_start_date, meeting_type, part_number)
+                    );
+                `);
+
+                // Create workbook_versions table
+                log('📋 Creating workbook_versions table...');
+                await executeSQL(`
+                    CREATE TABLE IF NOT EXISTS public.workbook_versions (
+                        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                        version_code TEXT NOT NULL UNIQUE,
+                        title TEXT NOT NULL,
+                        language_code TEXT NOT NULL DEFAULT 'pt-BR',
+                        period_start DATE NOT NULL,
+                        period_end DATE NOT NULL,
+                        original_filename TEXT,
+                        file_url TEXT,
+                        file_size_bytes BIGINT,
+                        parsing_status TEXT DEFAULT 'pending' CHECK (parsing_status IN ('pending', 'processing', 'completed', 'failed')),
+                        parsing_error TEXT,
+                        parsed_content JSONB,
+                        uploaded_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+                        revision BIGINT NOT NULL DEFAULT 0,
+                        last_modified_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+                        deleted_at TIMESTAMPTZ NULL,
+                        created_at TIMESTAMPTZ DEFAULT now(),
+                        updated_at TIMESTAMPTZ DEFAULT now()
+                    );
+                `);
+
+                // Create congregacoes table
+                log('📋 Creating congregacoes table...');
+                await executeSQL(`
+                    CREATE TABLE IF NOT EXISTS public.congregacoes (
+                        id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+                        nome VARCHAR(255) NOT NULL UNIQUE,
+                        pais VARCHAR(100) NOT NULL DEFAULT 'Brasil',
+                        cidade VARCHAR(100),
+                        endereco TEXT,
+                        telefone VARCHAR(20),
+                        email VARCHAR(255),
+                        ativa BOOLEAN DEFAULT true,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    );
+                `);
+
+                // Enable RLS and create policies
+                log('🔒 Setting up Row Level Security...');
+                await executeSQL('ALTER TABLE public.global_programming ENABLE ROW LEVEL SECURITY;');
+                await executeSQL('ALTER TABLE public.workbook_versions ENABLE ROW LEVEL SECURITY;');
+                await executeSQL('ALTER TABLE public.congregacoes ENABLE ROW LEVEL SECURITY;');
+
+                // Create policies
+                log('📜 Creating security policies...');
+                await executeSQL(`
+                    CREATE POLICY IF NOT EXISTS "Users can view global programming" 
+                    ON public.global_programming FOR SELECT
+                    USING (status = 'published');
+                `);
+
+                await executeSQL(`
+                    CREATE POLICY IF NOT EXISTS "Users can view workbook versions" 
+                    ON public.workbook_versions FOR SELECT
+                    USING (true);
+                `);
+
+                await executeSQL(`
+                    CREATE POLICY IF NOT EXISTS "Users can view congregacoes" 
+                    ON public.congregacoes FOR SELECT
+                    USING (true);
+                `);
+
+                // Grant permissions
+                log('🔑 Granting permissions...');
+                await executeSQL('GRANT SELECT, INSERT, UPDATE, DELETE ON public.global_programming TO authenticated;');
+                await executeSQL('GRANT SELECT, INSERT, UPDATE, DELETE ON public.workbook_versions TO authenticated;');
+                await executeSQL('GRANT SELECT, INSERT, UPDATE, DELETE ON public.congregacoes TO authenticated;');
+
+                // Insert sample data
+                log('📝 Inserting sample congregacoes...');
+                await executeSQL(`
+                    INSERT INTO public.congregacoes (nome, pais, cidade) VALUES 
+                    ('Market Harborough', 'Reino Unido', 'Market Harborough'),
+                    ('compensa', 'Brasil', 'Manaus')
+                    ON CONFLICT (nome) DO NOTHING;
+                `);
+
+                // Verify tables
+                log('🔍 Verifying tables...');
+                const tables = ['global_programming', 'workbook_versions', 'congregacoes'];
+                
+                for (const table of tables) {
+                    try {
+                        const { data, error } = await window.supabase
+                            .from(table)
+                            .select('id')
+                            .limit(1);
+                        
+                        if (error) {
+                            log(`⚠️ Warning: Could not verify table ${table}: ${error.message}`, 'warning');
+                        } else {
+                            log(`✅ Table ${table} exists and is accessible`);
+                        }
+                    } catch (error) {
+                        log(`⚠️ Warning: Could not verify table ${table}: ${error.message}`, 'warning');
+                    }
+                }
+
+                log('🎉 All missing tables have been created successfully!');
+                showStatus('✅ Success! Missing tables have been created. Please refresh your application page.', 'success');
+
+            } catch (error) {
+                log(`❌ Error: ${error.message}`, 'error');
+                showStatus(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                fixButton.disabled = false;
+            }
+        }
+
+        async function executeSQL(sql) {
+            try {
+                const { error } = await window.supabase.rpc('exec_sql', { sql });
+                if (error) {
+                    log(`⚠️ SQL Warning: ${error.message}`, 'warning');
+                }
+            } catch (error) {
+                log(`⚠️ SQL Warning: ${error.message}`, 'warning');
+            }
+        }
+
+        // Check if we're in the right environment
+        if (typeof window.supabase === 'undefined') {
+            showStatus('⚠️ Warning: Supabase client not found. Make sure you\'re on the application page.', 'warning');
+            log('⚠️ Supabase client not found. Make sure you\'re on the application page.', 'warning');
+        } else {
+            log('✅ Supabase client found. Ready to fix missing tables.');
+        }
+    </script>
+</body>
+</html>
