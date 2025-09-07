@@ -42,7 +42,7 @@ import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DebugFab from "./components/DebugFab";
-import { Header } from '@/components/Header';
+import Header from '@/components/Header';
 import { ConnectionStatusBanner } from '@/components/ConnectionStatusBanner';
 import { SyncButton } from '@/components/SyncButton';
 
@@ -84,7 +84,7 @@ const App = () => (
           <TooltipProvider>
             <Sonner />
             <TutorialOverlay />
-            <BrowserRouter
+            <Router
               future={{
                 v7_startTransition: true,
                 v7_relativeSplatPath: true
@@ -287,7 +287,7 @@ const App = () => (
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </BrowserRouter>
+            </Router>
           </TooltipProvider>
 
           {/* Debug Panel - Only shows in development */}

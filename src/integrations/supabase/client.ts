@@ -53,6 +53,14 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
     detectSessionInUrl: true,
     flowType: 'pkce',
     debug: import.meta.env.DEV,
+    // Add error handling for refresh token issues
+    onAuthStateChange: (event, session) => {
+      if (event === 'TOKEN_REFRESHED') {
+        console.log('✅ Token refreshed successfully');
+      } else if (event === 'SIGNED_OUT') {
+        console.log('⚠️ User signed out');
+      }
+    },
   },
   db: {
     schema: 'public',
