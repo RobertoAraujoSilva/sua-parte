@@ -6,7 +6,14 @@ import path from 'path'
 export default defineConfig({
   plugins: [react()],
   server: {
-    port: 8080
+    port: 8080,
+    hmr: {
+      port: 8080,
+      host: 'localhost',
+      clientPort: 8080,
+      protocol: 'ws',
+      timeout: 30000
+    }
   },
   resolve: {
     alias: {

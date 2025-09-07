@@ -3,6 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { smartLogout } from '@/utils/forceLogout';
+import { withRefreshTokenErrorHandling, recoverSessionWithErrorHandling } from '@/utils/refreshTokenHandler';
 
 // Types
 type UserRole = Database['public']['Enums']['user_role'];
@@ -282,12 +283,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase.auth, forceLoadProfile]);
 
   useEffect(() => {
-    // Get initial session with standard Supabase approach
+    // Get initial session with refresh token error handling
     const getInitialSession = async () => {
       try {
         console.log('🔄 Getting initial session...');
 
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { session, error, recovered } = await recoverSessionWithErrorHandling();
+
+        if (!recovered) {
+          console.log('❌ Session recovery failed, user will need to log in again');
+          setLoading(false);
+          return;
+        }
 
         if (error) {
           console.error('❌ Error getting initial session:', error);
@@ -329,30 +336,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     getInitialSession();
 
-    // Listen for auth changes
+    // Listen for auth changes with refresh token error handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔄 Auth state changed:', event, session?.user?.email);
 
-        if (session?.user) {
-          console.log('👤 Setting user and session...');
-          setSession(session);
-          setUser(session.user);
+        try {
+          if (session?.user) {
+            console.log('👤 Setting user and session...');
+            setSession(session);
+            setUser(session.user);
 
-          // Fetch profile
-          try {
-            const userProfile = await fetchProfile(session.user.id);
-            console.log('📋 Profile loaded:', userProfile);
-            setProfile(userProfile);
-          } catch (error: unknown) {
-            const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-            console.error('❌ Profile fetch failed:', errorMessage);
+            // Fetch profile with error handling
+            await withRefreshTokenErrorHandling(async () => {
+              const userProfile = await fetchProfile(session.user.id);
+              console.log('📋 Profile loaded:', userProfile);
+              setProfile(userProfile);
+            });
+          } else {
+            console.log('🚪 User signed out, clearing data...');
+            setSession(null);
+            setUser(null);
+            setProfile(null);
           }
-        } else {
-          console.log('🚪 User signed out, clearing data...');
-          setSession(null);
-          setUser(null);
-          setProfile(null);
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+          console.error('❌ Auth state change error:', errorMessage);
+          
+          // If it's a refresh token error, the global handler will take care of it
+          if (errorMessage.includes('Authentication session expired')) {
+            return; // Don't set loading to false, let the logout process handle it
+          }
         }
 
         setLoading(false);
@@ -391,9 +405,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const { error } = await withRefreshTokenErrorHandling(async () => {
+        const result = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        return result;
       });
 
       if (error) {

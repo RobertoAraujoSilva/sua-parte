@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { withRefreshTokenErrorHandling } from '@/utils/refreshTokenHandler';
 import { 
   FamilyMember, 
   FamilyMemberInsert, 
@@ -107,8 +108,10 @@ export const useFamilyMembers = (studentId?: string) => {
         throw new Error('ID do estudante não encontrado');
       }
 
-      // Verify current session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      // Verify current session with refresh token error handling
+      const { data: { session }, error: sessionError } = await withRefreshTokenErrorHandling(async () => {
+        return await supabase.auth.getSession();
+      });
       if (sessionError || !session) {
         console.error('❌ No valid session found:', sessionError);
         throw new Error('Sessão expirada. Faça login novamente.');
@@ -227,8 +230,10 @@ export const useFamilyMembers = (studentId?: string) => {
         throw new Error('ID do estudante não encontrado');
       }
 
-      // Verify current session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      // Verify current session with refresh token error handling
+      const { data: { session }, error: sessionError } = await withRefreshTokenErrorHandling(async () => {
+        return await supabase.auth.getSession();
+      });
       if (sessionError || !session) {
         console.error('❌ No valid session found:', sessionError);
         throw new Error('Sessão expirada. Faça login novamente.');

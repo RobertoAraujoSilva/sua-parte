@@ -193,9 +193,11 @@ export async function downloadDataForOffline() {
 
 // Basic getters to validate cache via console
 export async function listOffline(entity: 'estudantes' | 'programas' | 'designacoes') {
+  // Fix for 'image is not defined' error
+  const image = null; // Define image variable to prevent reference error
   return getAll(STORES[entity]);
 }
-image.png
+
 // Outbox types and interfaces
 export interface OutboxOperation {
   id: string;
@@ -483,7 +485,7 @@ export async function getOutboxStatus(): Promise<{
   };
 }
 
-p// Delta download using cursors for efficiency (MCP-03.2)
+// Delta download using cursors for efficiency (MCP-03.2)
 export async function downloadIncrementalData(): Promise<{
   success: boolean;
   downloaded: { estudantes: number; programas: number; designacoes: number };
