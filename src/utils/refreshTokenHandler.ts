@@ -26,7 +26,8 @@ export function isRefreshTokenError(error: any): boolean {
     message.includes('Refresh Token Not Found') ||
     message.includes('refresh_token') ||
     code === 'invalid_grant' ||
-    code === 'refresh_token_not_found'
+    code === 'refresh_token_not_found' ||
+    code === 'auth/invalid-refresh-token'
   );
 }
 
@@ -38,10 +39,18 @@ export function handleRefreshTokenError(error: any): void {
   
   // Clear all authentication data
   try {
+    // Clear Supabase session
+    supabase.auth.signOut({ scope: 'local' }).catch(e => {
+      console.error('❌ Error during signOut:', e);
+    });
+    
+    // Clear localStorage tokens
     localStorage.removeItem('supabase.auth.token');
+    localStorage.removeItem('sb-refresh-token');
+    localStorage.removeItem('sb-access-token');
     sessionStorage.clear();
     
-    // Clear Supabase-specific storage
+    // Clear all Supabase-specific storage
     const keys = Object.keys(localStorage);
     keys.forEach(key => {
       if (key.includes('supabase') || key.includes('sb-')) {
@@ -132,8 +141,69 @@ export function setupGlobalRefreshTokenErrorHandler(): void {
   });
 }
 
-// Auto-setup global handler
+/**
+ * Preemptively refresh the token before it expires
+ */
+export async function preemptiveTokenRefresh(): Promise<boolean> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) return false;
+
+    const now = Date.now() / 1000;
+    const expiresAt = session.expires_at || 0;
+    const timeUntilExpiry = expiresAt - now;
+
+    // Refresh if token expires in less than 5 minutes
+    if (timeUntilExpiry < 300) {
+      console.log('🔄 Preemptively refreshing token...');
+      
+      const { data, error } = await supabase.auth.refreshSession();
+      
+      if (error) {
+        console.warn('⚠️ Preemptive refresh failed:', error);
+        
+        // If it's a refresh token error, handle it
+        if (isRefreshTokenError(error)) {
+          handleRefreshTokenError(error);
+        }
+        
+        return false;
+      }
+
+      console.log('✅ Token refreshed preemptively');
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    console.warn('⚠️ Preemptive refresh check failed:', error);
+    return false;
+  }
+}
+
+/**
+ * Setup periodic token refresh
+ */
+export function setupPeriodicTokenRefresh(intervalMinutes: number = 4): void {
+  if (typeof window === 'undefined') return;
+  
+  // Check token every 4 minutes by default
+  const interval = setInterval(() => {
+    preemptiveTokenRefresh().catch(error => {
+      console.error('❌ Periodic token refresh error:', error);
+    });
+  }, intervalMinutes * 60 * 1000);
+  
+  // Clean up on page unload
+  window.addEventListener('beforeunload', () => {
+    clearInterval(interval);
+  });
+}
+
+// Auto-setup global handler and periodic refresh
 if (typeof window !== 'undefined') {
   setupGlobalRefreshTokenErrorHandler();
+  setupPeriodicTokenRefresh();
 }
 
