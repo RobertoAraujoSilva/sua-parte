@@ -3,7 +3,6 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 import { authLogger, createAuthMetrics } from '@/utils/authLogger';
-import { withRefreshTokenErrorHandling } from '@/utils/refreshTokenHandler';
 
 type UserRole = Database['public']['Enums']['user_role'];
 
@@ -98,10 +97,8 @@ export const useProfileLoader = () => {
     try {
       setIsLoading(true);
       
-      // Get current session with refresh token error handling
-      const { data: { session }, error: sessionError } = await withRefreshTokenErrorHandling(async () => {
-        return await supabase.auth.getSession();
-      });
+      // Get current session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError || !session) {
         throw new Error(`Session error: ${sessionError?.message || 'No session'}`);

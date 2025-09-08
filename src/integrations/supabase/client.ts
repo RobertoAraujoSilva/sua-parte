@@ -44,7 +44,7 @@ console.log('✅ Supabase Client Configuration:', {
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
-// Create Supabase client with enhanced configuration
+// Create Supabase client with standard configuration
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
     storage: localStorage,
@@ -53,32 +53,9 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
     detectSessionInUrl: true,
     flowType: 'pkce',
     debug: import.meta.env.DEV,
-    // Enhanced error handling for refresh token issues
-    onAuthStateChange: (event, session) => {
-      if (event === 'TOKEN_REFRESHED') {
-        console.log('✅ Token refreshed successfully');
-      } else if (event === 'SIGNED_OUT') {
-        console.log('⚠️ User signed out');
-      } else if (event === 'USER_UPDATED') {
-        console.log('👤 User profile updated');
-      }
-    },
   },
   db: {
     schema: 'public',
-  },
-  global: {
-    headers: {
-      'X-Client-Info': 'supabase-js/2.x',
-    },
-    // Retry failed requests to improve reliability
-    fetch: (url, options) => {
-      return fetch(url, {
-        ...options,
-        // Add retry logic for auth endpoints
-        signal: url.includes('/auth/') ? AbortSignal.timeout(10000) : options?.signal,
-      });
-    },
   },
   realtime: {
     params: {

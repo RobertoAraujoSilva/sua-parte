@@ -61,7 +61,7 @@ export const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
       const { data, error } = await supabase
         .from('programas')
         .select('*')
-        .eq('template_status_enum', 'published' as any)
+        .eq('template_status_enum', 'published')
         .order('data_inicio_semana', { ascending: false });
 
       if (error) throw error;
@@ -147,7 +147,7 @@ export const TemplateLibrary: React.FC<TemplateLibraryProps> = ({
               template_name: template.semana,
               download_method: 'library'
             }
-          } as any);
+          });
       }
 
       toast({

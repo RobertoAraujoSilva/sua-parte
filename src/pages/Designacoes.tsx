@@ -105,7 +105,7 @@ const Designacoes = () => {
             )
           )
         `)
-        .eq('assignment_status', 'generated' as any)
+        .eq('assignment_status', 'generated')
         .order('data_inicio_semana', { ascending: false });
 
       if (programsError) {

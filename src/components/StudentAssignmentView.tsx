@@ -106,14 +106,14 @@ export const StudentAssignmentView: React.FC<StudentAssignmentViewProps> = ({
             nome
           )
         `)
-        .eq('id_estudante', studentId as any)
+        .eq('id_estudante', studentId)
         .order('programa.data_inicio_semana', { ascending: false });
 
       if (assignmentError) {
         throw new Error(assignmentError.message);
       }
 
-      setAssignments((data as any) || []);
+      setAssignments(data || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao carregar designações');
       console.error('Error loading student assignments:', err);
@@ -169,8 +169,8 @@ export const StudentAssignmentView: React.FC<StudentAssignmentViewProps> = ({
     try {
       const { error } = await supabase
         .from('designacoes')
-        .update({ confirmado: true } as any)
-        .eq('id', assignmentId as any);
+        .update({ confirmado: true })
+        .eq('id', assignmentId);
 
       if (error) throw error;
 

@@ -51,9 +51,9 @@ export const ModalSelecaoSemana = ({
 
       if (error) throw error;
 
-      setProgramasDisponiveis((data as any) || []);
+      setProgramasDisponiveis(data || []);
       if (data?.length > 0) {
-        setProgramaSelecionado((data as any)[0]?.id?.toString() || "");
+        setProgramaSelecionado(data[0].id.toString());
       }
     } catch (error) {
       toast({

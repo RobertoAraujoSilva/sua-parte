@@ -48,7 +48,7 @@ const StudentDashboard: React.FC = () => {
           qualificacoes,
           created_at
         `)
-        .eq('id', id as any)
+        .eq('id', id)
         .single();
 
       if (error) {
@@ -82,8 +82,8 @@ const StudentDashboard: React.FC = () => {
     try {
       const { error } = await supabase
         .from('designacoes')
-        .update({ confirmado: true } as any)
-        .eq('id', designacaoId as any);
+        .update({ confirmado: true })
+        .eq('id', designacaoId);
 
       if (error) {
         console.error('Error confirming assignment:', error);

@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { EnhancedCacheFactory } from '@/utils/cacheAsidePatternEnhanced';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 
 /**
  * 🎯 ENHANCED CACHE-ASIDE HOOK para Estudantes
@@ -22,7 +22,7 @@ interface Estudante {
   nome: string;
   sobrenome: string;
   congregacao_id?: string;
-  ativo: boolean | null;
+  ativo: boolean;
   created_at: string;
 }
 
@@ -87,7 +87,7 @@ export function useCacheAsideEstudantesEnhanced(): UseEstudantesEnhancedReturn {
           const { data, error } = await supabase
             .from('estudantes')
             .select('*')
-            .eq('ativo', true as boolean)
+            .eq('ativo', true)
             .order('nome', { ascending: true });
 
           if (error) {
@@ -105,7 +105,7 @@ export function useCacheAsideEstudantesEnhanced(): UseEstudantesEnhancedReturn {
 
       console.log(`✅ Estudantes loaded in ${latency.toFixed(0)}ms`);
       
-      setEstudantes(data as Estudante[]);
+      setEstudantes(data);
       setIsFromCache(latency < 50); // Se muito rápido, provavelmente veio do cache
       
     } catch (err) {

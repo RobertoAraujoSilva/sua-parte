@@ -61,8 +61,8 @@ export const useAssignmentGeneration = () => {
       const { data: estudantes, error: estudantesError } = await supabase
         .from('estudantes')
         .select('*')
-        .eq('user_id', userId as any)
-        .eq('ativo', true as any)
+        .eq('user_id', userId)
+        .eq('ativo', true)
         .order('nome');
 
       if (estudantesError) {
@@ -298,12 +298,12 @@ const ensureProgramExists = async (programData: ProgramData, userId: string): Pr
   const { data: existingProgram } = await supabase
     .from('programas')
     .select('id')
-    .eq('user_id', userId as any)
-    .eq('data_inicio_semana', programData.data_inicio_semana as any)
+    .eq('user_id', userId)
+    .eq('data_inicio_semana', programData.data_inicio_semana)
     .single();
 
   if (existingProgram) {
-    return (existingProgram as any).id;
+    return existingProgram.id;
   }
 
   // Create new program
@@ -315,7 +315,7 @@ const ensureProgramExists = async (programData: ProgramData, userId: string): Pr
       mes_apostila: programData.mes_apostila || null,
       partes: programData.partes,
       status: 'ativo'
-    } as any)
+    })
     .select('id')
     .single();
 
@@ -323,7 +323,7 @@ const ensureProgramExists = async (programData: ProgramData, userId: string): Pr
     throw new Error(`Erro ao criar programa: ${error.message}`);
   }
 
-  return (newProgram as any).id;
+  return newProgram.id;
 };
 
 // Helper function to update program assignment status
@@ -347,7 +347,7 @@ const updateProgramAssignmentStatus = async (
   const { error } = await supabase
     .from('programas')
     .update(updateData)
-    .eq('id', programId as any);
+    .eq('id', programId);
 
   if (error) {
     console.error('Error updating program assignment status:', error);

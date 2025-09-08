@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { EnhancedCacheFactory } from '@/utils/cacheAsidePatternEnhanced';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 
 /**
  * 🎯 HOOK ADMIN CACHE - Error Handling Robusto
@@ -86,7 +86,7 @@ export function useAdminCache(): UseAdminCacheReturn {
         defaultStats // Fallback data
       );
 
-      setStats(data as AdminStats);
+      setStats(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar estatísticas';
       setError(errorMessage);
@@ -120,7 +120,7 @@ export function useAdminCache(): UseAdminCacheReturn {
         [] // Fallback: array vazio
       );
 
-      setProfiles(data as Profile[]);
+      setProfiles(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar perfis';
       setError(errorMessage);

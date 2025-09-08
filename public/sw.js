@@ -1,12 +1,6 @@
-// Optimized Service Worker - Avoids intercepting Supabase requests
-const CACHE_NAME = 'sistema-ministerial-cache-v3';
-const SUPABASE_DOMAINS = [
-  'supabase.co',
-  'supabase.com',  
-  'nwpuurgwnnuejqinkvrh.supabase.co'
-];
+// public/sw.js - Robust service worker for Sistema Ministerial
 
-// Static assets to cache
+const CACHE_NAME = 'sistema-ministerial-cache-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -15,30 +9,33 @@ const STATIC_ASSETS = [
   '/favicon.svg'
 ];
 
-// Install event
+// Instalação do Service Worker
 self.addEventListener('install', (event) => {
-  console.log('🔧 Service Worker: Installing...');
+  console.log('Service Worker: Installing...');
   
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('✅ Service Worker: Cache opened');
+        console.log('Service Worker: Cache opened');
+        // Adicionar apenas recursos que sabemos que existem
         return cache.addAll(STATIC_ASSETS);
       })
       .catch((error) => {
-        console.warn('⚠️ Service Worker: Cache addAll failed, continuing without cache:', error);
+        console.warn('Service Worker: Cache addAll failed, continuing without cache:', error);
+        // Continuar mesmo se o cache falhar
         return Promise.resolve();
       })
       .then(() => {
-        console.log('✅ Service Worker: Install completed');
+        console.log('Service Worker: Install completed');
+        // Forçar ativação imediata
         return self.skipWaiting();
       })
   );
 });
 
-// Activate event - clean old caches
+// Ativação do Service Worker
 self.addEventListener('activate', (event) => {
-  console.log('🔄 Service Worker: Activating...');
+  console.log('Service Worker: Activating...');
   
   event.waitUntil(
     caches.keys()
@@ -47,72 +44,75 @@ self.addEventListener('activate', (event) => {
           cacheNames
             .filter((cacheName) => cacheName !== CACHE_NAME)
             .map((cacheName) => {
-              console.log('🗑️ Service Worker: Deleting old cache:', cacheName);
+              console.log('Service Worker: Deleting old cache:', cacheName);
               return caches.delete(cacheName);
             })
         );
       })
       .then(() => {
-        console.log('✅ Service Worker: Activation completed');
+        console.log('Service Worker: Activation completed');
+        // Tomar controle de todas as páginas abertas
         return self.clients.claim();
       })
   );
 });
 
-// Fetch event - avoid intercepting Supabase requests
+// Interceptação de requisições
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
-
-  // Skip Supabase requests entirely - DON'T INTERCEPT
-  if (SUPABASE_DOMAINS.some(domain => url.hostname.includes(domain))) {
-    return; // Let browser handle directly
-  }
-
-  // Skip API requests (backend)
+  
+  // Não fazer cache de requisições de API ou backend
   if (url.pathname.startsWith('/api/') || 
-      (url.hostname === 'localhost' && url.port === '3001') ||
-      (url.hostname === 'sua-parte.lovable.app' && url.pathname.startsWith('/api/'))) {
+      url.hostname === 'localhost' && url.port === '3001' ||
+      url.hostname === 'sua-parte.lovable.app' && url.pathname.startsWith('/api/')) {
     return;
   }
-
-  // Skip non-GET requests
+  
+  // Não fazer cache de requisições POST, PUT, DELETE
   if (request.method !== 'GET') {
     return;
   }
-
-  // Cache strategy for static assets only
+  
+  // Estratégia: Cache First, depois Network
   event.respondWith(
     caches.match(request)
       .then((cachedResponse) => {
         if (cachedResponse) {
+          console.log('Service Worker: Serving from cache:', request.url);
           return cachedResponse;
         }
         
+        // Se não estiver em cache, buscar da rede
         return fetch(request)
           .then((response) => {
+            // Só fazer cache de respostas válidas
             if (!response || response.status !== 200 || response.type !== 'basic') {
               return response;
             }
             
+            // Clonar a resposta para fazer cache
             const responseToCache = response.clone();
             caches.open(CACHE_NAME)
               .then((cache) => {
                 cache.put(request, responseToCache);
+                console.log('Service Worker: Cached new resource:', request.url);
               })
               .catch((error) => {
-                console.warn('⚠️ Service Worker: Failed to cache:', request.url, error);
+                console.warn('Service Worker: Failed to cache resource:', request.url, error);
               });
             
             return response;
           })
           .catch((error) => {
-            console.warn('⚠️ Service Worker: Fetch failed:', request.url, error);
+            console.warn('Service Worker: Fetch failed:', request.url, error);
             
+            // Para páginas HTML, tentar retornar index.html do cache
             if (request.destination === 'document') {
               return caches.match('/index.html');
             }
             
+            // Para outros recursos, retornar uma resposta de erro amigável
             return new Response('Resource not available offline', {
               status: 503,
               statusText: 'Service Unavailable',
@@ -134,4 +134,4 @@ self.addEventListener('message', (event) => {
   }
 });
 
-console.log('✅ Service Worker: Loaded successfully - Sistema Ministerial v3');
+console.log('Service Worker: Loaded successfully');

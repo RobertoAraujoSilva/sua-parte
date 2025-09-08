@@ -269,6 +269,6 @@ export function withResponsiveShell<T extends object>(
       }
     }, [density, ref]);
 
-    return <Component {...(props as any)} ref={ref} />;
+    return <Component {...props} ref={ref} />;
   });
 }

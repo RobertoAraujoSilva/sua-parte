@@ -23,8 +23,9 @@ export function useEstudantes(scope: string) {
   const { data: estudantes, isLoading, error, refetch } = useQuery({
     queryKey: queryKey,
     queryFn: async () => {
-      const query = supabase.from("estudantes").select("*").limit(200);
-      const { data, error } = await query;
+      const { data, error } = await withTimeout(
+        supabase.from("estudantes").select("*").limit(200)
+      );
       if (error) throw error;
       return data || [];
     },
@@ -41,8 +42,9 @@ export function useEstudantes(scope: string) {
       const insertData: EstudanteInsert = {
         ...data,
         user_id: user.id,
-      } as any;
-      const { error } = await supabase.from("estudantes").insert(insertData as any);
+        congregacao: user.user_metadata?.congregacao || 'Default',
+      };
+      const { error } = await supabase.from("estudantes").insert(insertData);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -58,7 +60,7 @@ export function useEstudantes(scope: string) {
     mutationFn: async ({ id, data }: { id: string, data: Partial<EstudanteFormData> }) => {
       if (!user) throw new Error("User not authenticated");
       const updateData: EstudanteUpdate = { ...data, updated_at: new Date().toISOString() };
-      const { error } = await supabase.from("estudantes").update(updateData as any).eq("id", id as any);
+      const { error } = await supabase.from("estudantes").update(updateData).eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -73,7 +75,7 @@ export function useEstudantes(scope: string) {
   const deleteEstudanteMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!user) throw new Error("User not authenticated");
-      const { error } = await supabase.from("estudantes").delete().eq("id", id as any);
+      const { error } = await supabase.from("estudantes").delete().eq("id", id);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -87,7 +89,7 @@ export function useEstudantes(scope: string) {
 
   const filterEstudantes = (filters: EstudanteFilters): EstudanteWithParent[] => {
     if (!estudantes) return [];
-    return (estudantes as any[]).filter((estudante: any) => {
+    return estudantes.filter((estudante) => {
       if (filters.searchTerm && !estudante.nome.toLowerCase().includes(filters.searchTerm.toLowerCase())) return false;
       if (filters.cargo && filters.cargo !== "todos" && estudante.cargo !== filters.cargo) return false;
       if (filters.genero && filters.genero !== "todos" && estudante.genero !== filters.genero) return false;
@@ -98,13 +100,12 @@ export function useEstudantes(scope: string) {
 
   const getStatistics = () => {
     if (!estudantes) return { total: 0, ativos: 0, inativos: 0, menores: 0, homens: 0, mulheres: 0, cargoStats: {} };
-    const estudantesAny = estudantes as any[];
-    const total = estudantesAny.length;
-    const ativos = estudantesAny.filter(e => e.ativo).length;
-    const menores = estudantesAny.filter(e => e.idade && e.idade < 18).length;
-    const homens = estudantesAny.filter(e => e.genero === "masculino").length;
-    const mulheres = estudantesAny.filter(e => e.genero === "feminino").length;
-    const cargoStats = estudantesAny.reduce((acc, e) => {
+    const total = estudantes.length;
+    const ativos = estudantes.filter(e => e.ativo).length;
+    const menores = estudantes.filter(e => e.idade && e.idade < 18).length;
+    const homens = estudantes.filter(e => e.genero === "masculino").length;
+    const mulheres = estudantes.filter(e => e.genero === "feminino").length;
+    const cargoStats = estudantes.reduce((acc, e) => {
       acc[e.cargo] = (acc[e.cargo] || 0) + 1;
       return acc;
     }, {} as Record<string, number>);
