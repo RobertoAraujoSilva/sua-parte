@@ -83,11 +83,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Step 2: Fetch profile from database
       console.log('🔍 Fetching from profiles table...');
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId as any)
+          .single();
 
       if (profileError) {
         if (profileError.code === 'PGRST116') {
@@ -102,7 +102,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Get email from session
         const email = session.user.email || '';
         const profileWithEmail = {
-          ...profileData,
+          ...(profileData as any),
           email
         };
 
@@ -163,7 +163,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           congregacao: metadata.congregacao || '',
           cargo: metadata.cargo || '',
           role: (metadata.role as UserRole) || 'instrutor'
-        })
+        } as any)
         .select()
         .single();
 
@@ -188,7 +188,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Return the profile with email from auth
       return {
-        ...data,
+        ...(data as any),
         email: user.email || ''
       } as UserProfile;
     } catch (error: unknown) {
@@ -209,7 +209,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', user.id as any)
         .single();
 
       if (profileError) {
@@ -220,7 +220,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (profileData) {
         console.log('✅ Force profile load successful:', profileData);
         setProfile({
-          ...profileData,
+          ...(profileData as any),
           email: user.email || ''
         });
       }
@@ -474,8 +474,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .update(updates)
-        .eq('id', user.id)
+        .update(updates as any)
+        .eq('id', user.id as any)
         .select()
         .single();
 

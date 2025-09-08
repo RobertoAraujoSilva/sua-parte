@@ -32,9 +32,7 @@ export const TutorialManager: React.FC<TutorialManagerProps> = ({
   className = ''
 }) => {
   const {
-    currentTutorial,
-    currentStep,
-    isActive,
+    state,
     startTutorial,
     nextStep,
     previousStep,
@@ -44,6 +42,8 @@ export const TutorialManager: React.FC<TutorialManagerProps> = ({
     getTutorialProgress,
     isTutorialCompleted
   } = useTutorial();
+
+  const { currentTutorial, currentStep, isActive } = state;
 
   const [availableTutorials, setAvailableTutorials] = useState<Tutorial[]>([]);
   const [showTutorialMenu, setShowTutorialMenu] = useState(false);
@@ -248,14 +248,16 @@ export const TutorialManager: React.FC<TutorialManagerProps> = ({
       )}
 
       {/* Active Tutorial Progress */}
-      {isActive && currentTutorial && showProgress && (
+      {isActive && currentTutorial && showProgress && (() => {
+        const tutorial = getAvailableTutorials().find(t => t.id === currentTutorial);
+        return tutorial && (
         <Card className="fixed top-4 right-4 z-50 w-80 shadow-xl">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-sm">{currentTutorial.title}</CardTitle>
+                <CardTitle className="text-sm">{tutorial.title}</CardTitle>
                 <CardDescription className="text-xs">
-                  Passo {currentStep + 1} de {currentTutorial.steps.length}
+                  Passo {currentStep + 1} de {tutorial.steps.length}
                 </CardDescription>
               </div>
               <Button
@@ -270,7 +272,7 @@ export const TutorialManager: React.FC<TutorialManagerProps> = ({
           </CardHeader>
           <CardContent>
             <Progress 
-              value={(currentStep + 1) / currentTutorial.steps.length * 100} 
+              value={(currentStep + 1) / tutorial.steps.length * 100} 
               className="h-2"
             />
             <div className="flex justify-between items-center mt-3">
@@ -283,29 +285,33 @@ export const TutorialManager: React.FC<TutorialManagerProps> = ({
                 Anterior
               </Button>
               <span className="text-xs text-gray-500">
-                {Math.round((currentStep + 1) / currentTutorial.steps.length * 100)}%
+                {Math.round((currentStep + 1) / tutorial.steps.length * 100)}%
               </span>
               <Button
                 size="sm"
-                onClick={currentStep === currentTutorial.steps.length - 1 ? completeTutorial : nextStep}
+                onClick={currentStep === tutorial.steps.length - 1 ? completeTutorial : nextStep}
               >
-                {currentStep === currentTutorial.steps.length - 1 ? 'Concluir' : 'Próximo'}
+                {currentStep === tutorial.steps.length - 1 ? 'Concluir' : 'Próximo'}
               </Button>
             </div>
           </CardContent>
         </Card>
-      )}
+        );
+      })()}
 
       {/* Tutorial Completion Alert */}
-      {isActive && currentTutorial && currentStep === currentTutorial.steps.length - 1 && (
+      {isActive && currentTutorial && (() => {
+        const tutorial = getAvailableTutorials().find(t => t.id === currentTutorial);
+        return tutorial && currentStep === tutorial.steps.length - 1 && (
         <Alert className="fixed bottom-4 left-4 right-4 z-50 max-w-md mx-auto">
           <CheckCircle className="h-4 w-4" />
           <AlertDescription>
-            <strong>Parabéns!</strong> Você completou o tutorial "{currentTutorial.title}". 
+            <strong>Parabéns!</strong> Você completou o tutorial "{tutorial.title}". 
             Clique em "Concluir" para finalizar.
           </AlertDescription>
         </Alert>
-      )}
+        );
+      })()}
     </div>
   );
 };

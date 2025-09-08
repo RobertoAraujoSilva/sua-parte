@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', userId as any)
         .single();
 
       if (profileError) {
@@ -72,13 +72,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
           const { data: insertData, error: insertError } = await supabase
             .from('profiles')
-            .insert(newProfile)
+            .insert({
+              id: userId,
+              nome_completo: metadata.nome_completo || '',
+              congregacao: metadata.congregacao || '',
+              cargo: metadata.cargo || '',
+            } as any)
             .select()
             .single();
 
           if (!insertError && insertData) {
             return {
-              ...insertData,
+              ...(insertData as any),
               email: userData.user.email || '',
               role: metadata.role || 'instrutor', // Default fallback
             } as UserProfile;
@@ -90,9 +95,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Add email from auth user
       const { data: userData } = await supabase.auth.getUser();
       return {
-        ...profileData,
+        ...(profileData as any),
         email: userData.user?.email || '',
-        role: profileData.role || 'instrutor', // Fallback if role column doesn't exist
+        role: (profileData as any)?.role || 'instrutor', // Fallback if role column doesn't exist
       } as UserProfile;
 
     } catch (error) {
@@ -219,8 +224,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .update(updates)
-        .eq('id', user.id)
+        .update(updates as any)
+        .eq('id', user.id as any)
         .select()
         .single();
 
