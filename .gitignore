@@ -111,3 +111,7 @@ backend/config.env
 # Supabase
 .supabase/
 supabase.temp
+
+# Large documentation files
+docs/Oficial/*.daisy.zip
+docs/Oficial/*.epub
