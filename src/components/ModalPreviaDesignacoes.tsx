@@ -96,7 +96,7 @@ export const ModalPreviaDesignacoes = ({
               </h3>
               <div className="space-y-2">
                 {conflitos.map((conflito, index) => (
-                  <Alert key={index} variant="warning">
+                  <Alert key={index} variant="destructive">
                     <AlertDescription>
                       <span className="font-medium">{conflito.tipo}:</span> {conflito.descricao} (Parte {conflito.numero_parte})
                     </AlertDescription>

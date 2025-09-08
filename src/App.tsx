@@ -38,6 +38,8 @@ import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
 import Equidade from "./pages/Equidade";
 import AdminDashboard from "./pages/AdminDashboard";
+import InstrutorDashboard from "./pages/InstrutorDashboard";
+import EstudanteDashboard from "./pages/EstudanteDashboard";
 import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -160,12 +162,30 @@ const App = () => (
                   </>
                 )}
 
-                {/* Instrutor Only Routes */}
+                {/* Role-specific Dashboard Routes */}
                 <Route
                   path="/dashboard"
                   element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Dashboard />
+                    <ProtectedRoute allowedRoles={['instrutor', 'admin']}>
+                      <InstrutorDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Estudante Dashboard Route */}
+                <Route
+                  path="/estudante/:id"
+                  element={
+                    <ProtectedRoute allowedRoles={['estudante', 'instrutor', 'admin']}>
+                      <EstudanteDashboard />
                     </ProtectedRoute>
                   }
                 />
@@ -241,25 +261,17 @@ const App = () => (
                 <Route
                   path="/equidade"
                   element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
+                    <ProtectedRoute allowedRoles={['instrutor', 'admin']}>
                       <Equidade />
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  }
-                />
 
-                {/* Estudante Only Routes */}
+                {/* Student Portal - Override with new dashboard */}
                 <Route
-                  path="/estudante/:id"
+                  path="/estudante-portal/:id"
                   element={
-                    <ProtectedRoute allowedRoles={['estudante']}>
+                    <ProtectedRoute allowedRoles={['estudante', 'instrutor', 'admin']}>
                       <EstudantePortal />
                     </ProtectedRoute>
                   }
@@ -301,22 +313,3 @@ const App = () => (
 );
 
 export default App;
-
-// Add SyncButton to Header or create a dedicated sync area
-<div className="min-h-screen bg-background">
-  <Header />
-  <ConnectionStatusBanner />
-  
-  {/* Optional: Add sync controls in a dedicated area */}
-  <div className="container mx-auto px-4 py-2 border-b">
-    <div className="flex justify-end">
-      <SyncButton />
-    </div>
-  </div>
-  
-  <main className="container mx-auto px-4 py-8">
-    <Routes>
-      {/* ... existing routes ... */}
-    </Routes>
-  </main>
-</div>
