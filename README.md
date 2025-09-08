@@ -228,12 +228,12 @@ Login → Dashboard Estudante → Ver Materiais Publicados
 ## 🌟 **Benefícios do Sistema**
 
 ### **Para Administradores:**
-- Controle total sobre materiais e usuários
+- Controle total sobre materiais e usuários Mostra a Programacao completa
 - Automação de downloads da JW.org
 - Monitoramento em tempo real
 
 ### **Para Instrutores:**
-- Gerenciamento eficiente de estudantes
+- Gerenciamento eficiente de estudantes puxa do Dashboard do Admin a programacao disponivel para designar os estudantes localmenete.
 - Acesso rápido a materiais atualizados
 - Controle de designações e programas
 
