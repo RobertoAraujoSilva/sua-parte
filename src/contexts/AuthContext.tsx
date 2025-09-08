@@ -51,6 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [ready, setReady] = useState(false);
 
 
 
@@ -282,6 +283,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [supabase.auth, forceLoadProfile]);
 
+  // Track initial load completion to prevent race conditions
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+
   useEffect(() => {
     // Get initial session with refresh token error handling
     const getInitialSession = async () => {
@@ -293,18 +297,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (!recovered) {
           console.log('❌ Session recovery failed, user will need to log in again');
           setLoading(false);
+          setInitialLoadComplete(true); // Mark initial load as complete
           return;
         }
 
         if (error) {
           console.error('❌ Error getting initial session:', error);
           setLoading(false);
+          setInitialLoadComplete(true); // Mark initial load as complete
           return;
         }
 
         if (!session) {
           console.log('ℹ️ No session found');
           setLoading(false);
+          setInitialLoadComplete(true); // Mark initial load as complete
           return;
         }
 
@@ -331,6 +338,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('Error in getInitialSession:', errorMessage);
       } finally {
         setLoading(false);
+        setInitialLoadComplete(true); // Mark initial load as complete
       }
     };
 
@@ -340,6 +348,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('🔄 Auth state changed:', event, session?.user?.email);
+        
+        // Skip INITIAL_SESSION during initial load to prevent race conditions
+        if (!initialLoadComplete && event === 'INITIAL_SESSION') {
+          console.log('⏭️ Skipping INITIAL_SESSION event (already handled by getInitialSession)');
+          return;
+        }
 
         try {
           if (session?.user) {
@@ -375,6 +389,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     return () => subscription.unsubscribe();
   }, [fetchProfile]);
+
+  // Mark app ready after initial auth check completes
+  useEffect(() => {
+    if (!loading) {
+      setReady(true);
+    }
+  }, [loading]);
 
   const signUp = async (data: SignUpData) => {
     try {
@@ -515,7 +536,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={value}>
-      {children}
+      {ready ? children : (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-sm text-muted-foreground">
+            Carregando Sistema Ministerial<br/>
+            Inicializando autenticação e permissões...
+          </div>
+        </div>
+      )}
     </AuthContext.Provider>
   );
 }

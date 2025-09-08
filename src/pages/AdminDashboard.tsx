@@ -48,6 +48,9 @@ export default function AdminDashboard() {
   const [lastCheck, setLastCheck] = useState<string>('');
   const [debugInfo, setDebugInfo] = useState<string>('');
   const [showJWorgTest, setShowJWorgTest] = useState(false);
+  const [programs, setPrograms] = useState<any[]>([]);
+  const [programsLoading, setProgramsLoading] = useState<boolean>(true);
+  const [initialized, setInitialized] = useState<boolean>(false);
 
   // 🚀 Memoização de dados estáticos para reduzir re-renders
   const staticStats = useMemo(() => ({
@@ -84,19 +87,34 @@ export default function AdminDashboard() {
   }, [user, profile, isAdmin, loading, debouncedSetDebugInfo]);
 
   useEffect(() => {
-    console.log('🔄 AdminDashboard useEffect triggered:', { user, isAdmin });
+    console.log('🔄 AdminDashboard useEffect triggered:', { user, isAdmin, initialized });
     
-    if (user && isAdmin) {
+    if (user && isAdmin && !initialized) {
       console.log('✅ Admin user detected, loading system data...');
+      setInitialized(true);
       loadSystemData();
     } else if (user && !isAdmin) {
       console.log('❌ User is not admin, role:', profile?.role);
+      setProgramsLoading(false);
       debouncedSetDebugInfo(debugInfo + '\n\n❌ User is not admin, role: ' + profile?.role);
     } else if (!user) {
       console.log('❌ No user found');
+      setProgramsLoading(false);
       debouncedSetDebugInfo(debugInfo + '\n\n❌ No user found');
     }
-  }, [user, isAdmin, debouncedSetDebugInfo]);
+  }, [user, isAdmin, initialized, debouncedSetDebugInfo]);
+
+  // Fallback para garantir que dados sejam carregados após delay
+  useEffect(() => {
+    const fallbackTimer = setTimeout(() => {
+      if (user && isAdmin && programs.length === 0 && !programsLoading) {
+        console.log('🔄 Fallback: Recarregando dados após delay...');
+        loadSystemData();
+      }
+    }, 2000);
+
+    return () => clearTimeout(fallbackTimer);
+  }, [user, isAdmin, programs.length, programsLoading]);
 
   const loadSystemData = useCallback(async () => {
     if (!user || !isAdmin) {
@@ -124,6 +142,8 @@ export default function AdminDashboard() {
 
       // Carregar estatísticas do sistema
       await loadSystemStats();
+      // Carregar programações publicadas
+      await loadPrograms();
 
     } catch (error) {
       console.error('❌ Supabase test exception:', error);
@@ -137,16 +157,18 @@ export default function AdminDashboard() {
     try {
       console.log('📊 Loading system statistics...');
 
-      const [profilesRes, estudantesRes, programasRes, congregacoesRes] = await Promise.all([
+      const [profilesRes, estudantesRes, programasRes] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('estudantes').select('*', { count: 'exact', head: true }),
         supabase.from('programas').select('*', { count: 'exact', head: true }),
-        supabase.from('congregacoes').select('*', { count: 'exact', head: true }),
       ]);
 
+      // congregacoes (removido: tabela pode não existir neste projeto)
+      const congregacoesCount = 0;
+
       const stats: SystemStats = {
-        total_congregations: (congregacoesRes.count as number) || 0,
-        active_congregations: (congregacoesRes.count as number) || 0,
+        total_congregations: congregacoesCount,
+        active_congregations: congregacoesCount,
         total_users: (profilesRes.count as number) || 0,
         total_estudantes: (estudantesRes.count as number) || 0,
         total_programas: (programasRes.count as number) || 0,
@@ -163,6 +185,25 @@ export default function AdminDashboard() {
       console.error('❌ Error loading system stats:', error);
       debouncedSetDebugInfo(debugInfo + '\n\n❌ System Stats Error: ' + error);
     }
+  }, [debouncedSetDebugInfo, debugInfo, supabase]);
+
+  const loadPrograms = useCallback(async () => {
+    try {
+      setProgramsLoading(true);
+      const { data, error } = await supabase
+        .from('programas')
+        .select('id, semana, mes_apostila, status, data_inicio_semana, arquivo')
+        .order('data_inicio_semana', { ascending: false })
+        .limit(12);
+      if (error) throw error;
+      setPrograms(data || []);
+      console.log('✅ Programs loaded:', data?.length || 0);
+    } catch (error: any) {
+      console.error('❌ Error loading programs:', error);
+      debouncedSetDebugInfo(debugInfo + '\n\n❌ Programs Load Error: ' + (error?.message || error));
+    } finally {
+      setProgramsLoading(false);
+    }
   }, [debouncedSetDebugInfo, debugInfo]);
 
   const checkForUpdates = useCallback(async () => {
@@ -171,6 +212,7 @@ export default function AdminDashboard() {
     
     try {
       await loadSystemStats();
+      await loadPrograms();
       console.log('✅ Updates checked successfully');
     } catch (error) {
       console.error('❌ Error checking updates:', error);
@@ -522,6 +564,82 @@ export default function AdminDashboard() {
     }
   }, [jworg]);
 
+  // Sincronizar materiais da pasta docs/Oficial -> tabela public.programas
+  const syncMaterialsToPrograms = useCallback(async () => {
+    try {
+      setLoading(true);
+
+      // Obter token do usuário atual para autenticar no backend
+      const { data: sessionData } = await supabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (!accessToken) {
+        alert('Sessão inválida. Faça login novamente.');
+        return;
+      }
+
+      // Buscar lista de materiais no backend (requer Authorization)
+      const res = await fetch('http://localhost:3001/api/materials', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!res.ok) {
+        alert('Falha ao listar materiais no backend.');
+        return;
+      }
+      const payload = await res.json();
+      const materials: Array<{ filename: string }> = payload.materials || [];
+
+      // Filtrar arquivos relevantes e preparar upserts
+      const rows: any[] = materials
+        .map((m) => m.filename)
+        .filter((name) => /^(mwb_|S-38_|mwb_T_)/i.test(name))
+        .map((arquivo) => {
+          // Extrair ano/mês do padrão mwb_E_YYYYMM.pdf
+          let ano = '';
+          let mes = '';
+          const match = arquivo.match(/mwb_[A-Z]_([0-9]{6})/i);
+          if (match) {
+            ano = match[1].slice(0, 4);
+            mes = match[1].slice(4, 6);
+          }
+          const mes_apostila = ano && mes ? `${ano}-${mes}` : null;
+          const data_inicio_semana = mes_apostila ? `${ano}-${mes}-01` : null;
+          return {
+            semana: null,
+            mes_apostila,
+            status: 'ativo',
+            data_inicio_semana,
+            arquivo,
+          };
+        });
+
+      // Inserir somente os que ainda não existem por arquivo
+      for (const row of rows) {
+        const { data: exists, error: selErr } = await supabase
+          .from('programas')
+          .select('id')
+          .eq('arquivo', row.arquivo)
+          .maybeSingle();
+        if (selErr) {
+          console.warn('Select error (ignorado):', selErr.message);
+        }
+        if (!exists) {
+          const { error: insErr } = await supabase.from('programas').insert(row as any);
+          if (insErr) {
+            console.warn('Insert error para', row.arquivo, insErr.message);
+          }
+        }
+      }
+
+      await loadPrograms();
+      alert('Sincronização concluída.');
+    } catch (error: any) {
+      console.error('❌ Erro ao sincronizar materiais:', error);
+      alert('Erro ao sincronizar materiais: ' + (error?.message || error));
+    } finally {
+      setLoading(false);
+    }
+  }, [supabase, loadPrograms]);
+
   // NOW CHECK CONDITIONS AND RENDER APPROPRIATELY
   // Se não for admin, mostrar mensagem de acesso negado
   if (user && !isAdmin) {
@@ -731,6 +849,71 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
 
+              {/* Programações Publicadas */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Programações Publicadas</CardTitle>
+                  <CardDescription>
+                    Últimas semanas importadas/publicadas
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {programsLoading ? (
+                    <div className="flex items-center justify-center py-8">
+                      <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground mr-2" />
+                      <span className="text-sm text-muted-foreground">Carregando programações...</span>
+                    </div>
+                  ) : programs.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-8 text-center">
+                      <FileText className="h-12 w-12 text-muted-foreground mb-3" />
+                      <h4 className="font-medium mb-2">Nenhuma programação encontrada</h4>
+                      <p className="text-sm text-muted-foreground mb-4 max-w-sm">
+                        Não há programações carregadas. Isso pode ocorrer após recarregar a página (F5).
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={loadPrograms}
+                        disabled={programsLoading}
+                      >
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        Recarregar Programações
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {programs.map((p) => (
+                        <div key={p.id} className="p-2 border rounded-md">
+                          <div className="flex items-center justify-between">
+                            <div className="text-sm">
+                              <div className="font-medium">Semana {p.semana || '—'} • {p.mes_apostila || '—'}</div>
+                              <div className="text-xs text-muted-foreground">
+                                {p.data_inicio_semana ? new Date(p.data_inicio_semana).toLocaleDateString('pt-BR') : '—'}
+                              </div>
+                            </div>
+                            <Badge variant="outline" className={p.status === 'ativo' || p.status === 'publicado' ? 'bg-green-50 text-green-700' : ''}>
+                              {p.status || '—'}
+                            </Badge>
+                          </div>
+                          {p.arquivo && (
+                            <div className="mt-2">
+                              <a
+                                href={`http://localhost:3001/materials/${encodeURIComponent(p.arquivo)}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 text-xs underline"
+                              >
+                                Abrir material ({p.arquivo})
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
               {/* JW.org Downloads */}
               <Card className="bg-green-50 border-green-200">
                 <CardHeader>
@@ -759,6 +942,10 @@ export default function AdminDashboard() {
                     <Button size="sm" variant="outline" className="border-green-300 text-green-700" onClick={handleConfigureJWorgURLs}>
                       <Settings className="h-3 w-3 mr-1" />
                       Configurar URLs JW.org
+                    </Button>
+                    <Button size="sm" variant="outline" className="border-green-300 text-green-700" onClick={syncMaterialsToPrograms} disabled={loading}>
+                      <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                      Sincronizar materiais → programas
                     </Button>
                   </div>
                 </CardContent>

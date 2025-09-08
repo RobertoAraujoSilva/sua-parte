@@ -2,6 +2,7 @@ import React from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TutorialProvider } from "@/contexts/TutorialContext";
@@ -20,6 +21,7 @@ import ProgramaPreview from "./pages/ProgramaPreview";
 import ProgramasTest from "./pages/ProgramasTest";
 import PdfParsingTest from "./pages/PdfParsingTest";
 import DesignacoesOptimized from "./pages/DesignacoesOptimized";
+import ProgramDisplayDemo from "./pages/ProgramDisplayDemo";
 import Relatorios from "./pages/Relatorios";
 import Reunioes from "./pages/Reunioes";
 import EstudantePortal from "./pages/EstudantePortal";
@@ -47,6 +49,7 @@ import DebugFab from "./components/DebugFab";
 import Header from '@/components/Header';
 import { ConnectionStatusBanner } from '@/components/ConnectionStatusBanner';
 import { SyncButton } from '@/components/SyncButton';
+import { Skeleton } from "@/components/ui/skeleton";
 
 const queryClient = new QueryClient();
 
@@ -92,6 +95,13 @@ const App = () => (
                 v7_relativeSplatPath: true
               }}
             >
+                        <Suspense
+                          fallback={
+                            <div className="flex items-center justify-center min-h-screen bg-background">
+                              <Skeleton className="w-32 h-32" />
+                            </div>
+                          }
+                        >
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Index />} />
@@ -232,6 +242,14 @@ const App = () => (
                         </ProtectedRoute>
                       }
                     />
+                    <Route
+                      path="/program-display-demo"
+                      element={
+                        <ProtectedRoute allowedRoles={['instrutor']}>
+                          <ProgramDisplayDemo />
+                        </ProtectedRoute>
+                      }
+                    />
                   </>
                 )}
                 <Route
@@ -299,6 +317,7 @@ const App = () => (
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+                        </Suspense>
             </Router>
           </TooltipProvider>
 
