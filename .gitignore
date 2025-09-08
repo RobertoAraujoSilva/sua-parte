@@ -14,6 +14,18 @@ dist/
 dist-electron/
 out/
 
+# Electron build artifacts
+release/
+app/dist/
+app/build/
+*.asar
+*.exe
+*.dmg
+*.AppImage
+*.deb
+*.rpm
+*.snap
+
 # Environment variables
 .env
 .env.local
