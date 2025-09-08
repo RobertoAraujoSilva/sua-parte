@@ -1,0 +1,25 @@
+{
+  "semana_data_inicio": "2025-08-04",
+  "semana_data_fim": "2025-08-10",
+  "status": "publicada",
+  "itens": [
+    { "ordem": 1, "secao": "ABERTURA", "tipo": "song", "titulo": "Song 154 and prayer", "tempo_min": 5 },
+    { "ordem": 2, "secao": "ABERTURA", "tipo": "opening", "titulo": "Opening Comments", "tempo_min": 1 },
+
+    { "ordem": 3, "secao": "TREASURES", "tipo": "talk", "titulo": "Wise Principles for Our Speech", "tempo_min": 10 },
+    { "ordem": 4, "secao": "TREASURES", "tipo": "spiritual_gems", "titulo": "Spiritual Gems", "tempo_min": 10 },
+    { "ordem": 5, "secao": "TREASURES", "tipo": "bible_reading", "titulo": "Bible Reading", "tema": "Pr 25:1-17", "tempo_min": 4, "regras_papel": {"sexo": "M"} },
+
+    { "ordem": 6, "secao": "APPLY", "tipo": "starting", "titulo": "Starting a Conversation", "tempo_min": 3, "regras_papel": {"assistente": true} },
+    { "ordem": 7, "secao": "APPLY", "tipo": "following", "titulo": "Following Up", "tempo_min": 4, "regras_papel": {"assistente": true} },
+    { "ordem": 8, "secao": "APPLY", "tipo": "talk", "titulo": "Talk: What if People Are Gossiping About Me?", "tempo_min": 5, "regras_papel": {"sexo": "M"} },
+
+    { "ordem": 9, "secao": "LIVING", "tipo": "song", "titulo": "Song 123", "tempo_min": 5 },
+    { "ordem": 10, "secao": "LIVING", "tipo": "local_needs", "titulo": "Local Needs / Convention Review", "tempo_min": 15 },
+    { "ordem": 11, "secao": "LIVING", "tipo": "cbs", "titulo": "Congregation Bible Study", "tema": "lff 6 intro; sec.3; l7", "tempo_min": 30 },
+
+    { "ordem": 12, "secao": "ENCERRAMENTO", "tipo": "concluding", "titulo": "Concluding Comments", "tempo_min": 3 },
+    { "ordem": 13, "secao": "ENCERRAMENTO", "tipo": "song", "titulo": "Song 150 and Prayer", "tempo_min": 5 }
+  ]
+}
+

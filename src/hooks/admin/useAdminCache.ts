@@ -63,22 +63,31 @@ export function useAdminCache(): UseAdminCacheReturn {
       const data = await EnhancedCacheFactory.metrics.get(
         'admin-stats',
         async () => {
-          const [usersResult, congregationsResult, estudantesResult] = await Promise.all([
-            supabase.from('profiles').select('id', { count: 'exact', head: true }),
-            supabase.from('congregacoes').select('id', { count: 'exact', head: true }),
-            supabase.from('estudantes').select('id', { count: 'exact', head: true })
+          // Helper: safe count that treats 404 (table missing) as 0
+          const safeCount = async (table: string) => {
+            try {
+              const { count, error } = await supabase
+                .from(table)
+                .select('id', { count: 'exact', head: true });
+              if (error) throw error;
+              return count || 0;
+            } catch (e: any) {
+              if (e?.message?.includes('Not Found') || e?.status === 404) return 0;
+              throw e;
+            }
+          };
+
+          const [usersCount, congregationsCount, estudantesCount] = await Promise.all([
+            safeCount('profiles'),
+            safeCount('congregacoes'),
+            safeCount('estudantes'),
           ]);
 
-          // 🛡️ Guard clauses (Regra 12)
-          if (usersResult.error) throw usersResult.error;
-          if (congregationsResult.error) throw congregationsResult.error;
-          if (estudantesResult.error) throw estudantesResult.error;
-
           return {
-            total_users: usersResult.count || 0,
-            total_congregations: congregationsResult.count || 0,
-            active_congregations: congregationsResult.count || 0,
-            total_estudantes: estudantesResult.count || 0,
+            total_users: usersCount,
+            total_congregations: congregationsCount,
+            active_congregations: congregationsCount,
+            total_estudantes: estudantesCount,
             system_uptime: '99.9%',
             last_backup: 'Hoje, 02:00'
           };
@@ -183,4 +192,3 @@ export function useAdminCache(): UseAdminCacheReturn {
     getHealthStatus
   };
 }
-

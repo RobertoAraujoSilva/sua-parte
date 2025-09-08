@@ -1,318 +1,240 @@
-import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../integrations/supabase/client';
-import { useJWorgIntegration } from '../hooks/useJWorgIntegration';
-import { JWorgTest } from '../components/JWorgTest';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import LazyLoader from '../components/LazyLoader';
-import AuthErrorHandler from '../components/AuthErrorHandler';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Separator } from '../components/ui/separator';
-import { 
-  Download, 
-  Upload, 
-  Globe, 
-  BarChart3, 
-  Settings, 
-  RefreshCw,
-  CheckCircle,
-  AlertCircle,
-  Clock,
-  FileText,
-  Users,
-  Package,
-  Activity,
-  Database
-} from 'lucide-react';
+import React, { useMemo, useState } from 'react';
 
-// 🚀 Lazy loading para componentes pesados (comentado por enquanto)
-// const JWorgTestLazy = lazy(() => import('../components/JWorgTest'));
+type LangKey = 'en' | 'pt';
+type LangLabel = { title: string; notes?: string };
+type Item = {
+  order: number;
+  section: 'OPENING' | 'TREASURES' | 'APPLY' | 'LIVING' | 'CLOSING';
+  type:
+    | 'song'
+    | 'opening_comments'
+    | 'talk'
+    | 'spiritual_gems'
+    | 'bible_reading'
+    | 'starting'
+    | 'following'
+    | 'making_disciples'
+    | 'local_needs'
+    | 'cbs'
+    | 'concluding_comments';
+  minutes: number;
+  rules?: {
+    requires_male?: boolean;
+    allows_assistant?: boolean;
+    elders_only?: boolean;
+    elders_or_ms_only?: boolean;
+  };
+  lang: { en: LangLabel; pt: LangLabel };
+};
 
-interface SystemStats {
-  total_congregations: number;
-  active_congregations: number;
-  total_users: number;
-  total_estudantes: number;
-  total_programas: number;
-  last_sync: string;
+type Programacao = {
+  week_start: string;
+  week_end: string;
+  status: 'rascunho' | 'publicada';
+  congregation_scope: 'global' | 'scoped';
+  items: Item[];
+};
+
+const SEED_NOV_3_9: Programacao = {
+  week_start: '2025-11-03',
+  week_end: '2025-11-09',
+  status: 'rascunho',
+  congregation_scope: 'global',
+  items: [
+    { order: 1, section: 'OPENING', type: 'song', minutes: 5, lang: { en: { title: 'Song 132 and Prayer' }, pt: { title: 'Cântico 132 e oração' } } },
+    { order: 2, section: 'OPENING', type: 'opening_comments', minutes: 1, lang: { en: { title: 'Opening Comments' }, pt: { title: 'Comentários iniciais' } } },
+    { order: 3, section: 'TREASURES', type: 'talk', minutes: 10, rules: { requires_male: true }, lang: { en: { title: 'A Story of Unfailing Love', notes: '[Play VIDEO] Song of Solomon intro; Ca 1:9-11; 2:16-17' }, pt: { title: 'Uma história de amor verdadeiro', notes: '[Mostre o VÍDEO] Introdução a Cântico de Salomão; Cân. 1:9-11; 2:16-17' } } },
+    { order: 4, section: 'TREASURES', type: 'spiritual_gems', minutes: 10, lang: { en: { title: 'Spiritual Gems', notes: 'Ca 2:7; questions for audience' }, pt: { title: 'Joias espirituais', notes: 'Cân. 2:7; perguntas para a audiência' } } },
+    { order: 5, section: 'TREASURES', type: 'bible_reading', minutes: 4, rules: { requires_male: true }, lang: { en: { title: 'Bible Reading', notes: 'Ca 2:1-17 (th study 12)' }, pt: { title: 'Leitura da Bíblia', notes: 'Cân. 2:1-17 (th lição 12)' } } },
+    { order: 6, section: 'APPLY', type: 'starting', minutes: 3, rules: { allows_assistant: true }, lang: { en: { title: 'Starting a Conversation', notes: 'HOUSE TO HOUSE; Love People (lmd) lesson 1 point 3' }, pt: { title: 'Iniciando conversas', notes: 'DE CASA EM CASA; Ame as Pessoas (lmd) lição 1 ponto 3' } } },
+    { order: 7, section: 'APPLY', type: 'following', minutes: 4, rules: { allows_assistant: true }, lang: { en: { title: 'Following Up', notes: 'HOUSE TO HOUSE; lmd lesson 9 point 3' }, pt: { title: 'Cultivando o interesse', notes: 'DE CASA EM CASA; lmd lição 9 ponto 3' } } },
+    { order: 8, section: 'APPLY', type: 'making_disciples', minutes: 5, rules: { allows_assistant: false }, lang: { en: { title: 'Making Disciples', notes: 'lff lesson 18 intro & points 1–3 (th study 8)' }, pt: { title: 'Fazendo discípulos', notes: 'lff lição 18 introdução e pontos 1–3 (th lição 8)' } } },
+    { order: 9, section: 'LIVING', type: 'song', minutes: 5, lang: { en: { title: 'Song 46' }, pt: { title: 'Cântico 46' } } },
+    { order: 10, section: 'LIVING', type: 'local_needs', minutes: 15, rules: { elders_only: true }, lang: { en: { title: 'The Generous Person Will Be Blessed', notes: '[Play VIDEO] Generosity Brings Joy — discussion by an elder' }, pt: { title: 'A pessoa generosa será abençoada', notes: '[Mostre o VÍDEO] A Generosidade nos Traz Alegria — consideração por um ancião' } } },
+    { order: 11, section: 'LIVING', type: 'cbs', minutes: 30, rules: { elders_or_ms_only: true }, lang: { en: { title: 'Congregation Bible Study', notes: 'lfb lessons 32–33' }, pt: { title: 'Estudo bíblico de congregação', notes: 'lfb lições 32–33' } } },
+    { order: 12, section: 'CLOSING', type: 'concluding_comments', minutes: 3, lang: { en: { title: 'Concluding Comments' }, pt: { title: 'Comentários finais' } } },
+    { order: 13, section: 'CLOSING', type: 'song', minutes: 5, lang: { en: { title: 'Song 137 and Prayer' }, pt: { title: 'Cântico 137 e oração' } } }
+  ]
+};
+
+const SECTION_LABEL: Record<Item['section'], { en: string; pt: string; color: string }> = {
+  OPENING: { en: 'Opening', pt: 'Abertura', color: 'bg-sky-50' },
+  TREASURES: { en: "Treasures From God's Word", pt: 'Tesouros da Palavra', color: 'bg-emerald-50' },
+  APPLY: { en: 'Apply Yourself to the Field Ministry', pt: 'Faça seu melhor no ministério', color: 'bg-amber-50' },
+  LIVING: { en: 'Living as Christians', pt: 'Nossa Vida Cristã', color: 'bg-violet-50' },
+  CLOSING: { en: 'Closing', pt: 'Encerramento', color: 'bg-slate-50' }
+};
+
+function groupBySection(items: Item[]) {
+  return items
+    .slice()
+    .sort((a, b) => a.order - b.order)
+    .reduce<Record<Item['section'], Item[]>>((acc, it) => {
+      (acc[it.section] ||= []).push(it);
+      return acc;
+    }, {} as any);
 }
 
 export default function AdminDashboard() {
-  const { user, profile, isAdmin } = useAuth();
-  const jworg = useJWorgIntegration();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [loading, setLoading] = useState(false);
-  const [systemStats, setSystemStats] = useState<SystemStats | null>(null);
-  const [lastCheck, setLastCheck] = useState<string>('');
-  const [debugInfo, setDebugInfo] = useState<string>('');
-  const [showJWorgTest, setShowJWorgTest] = useState(false);
+  const [langTab, setLangTab] = useState<LangKey>('pt');
+  const [program, setProgram] = useState<Programacao | null>(null);
 
-  // 🚀 Memoização de dados estáticos para reduzir re-renders
-  const staticStats = useMemo(() => ({
-    total_congregations: systemStats?.total_congregations || 0,
-    active_congregations: systemStats?.active_congregations || 0,
-    total_users: systemStats?.total_users || 0,
-    total_estudantes: systemStats?.total_estudantes || 0,
-    total_programas: systemStats?.total_programas || 0,
-    last_sync: systemStats?.last_sync || ''
-  }), [systemStats]);
+  const grouped = useMemo(() => (program ? groupBySection(program.items) : null), [program]);
 
-  // 🚀 Debounced function para reduzir chamadas desnecessárias
-  const debouncedSetDebugInfo = useCallback((info: string) => {
-    let timeoutId: NodeJS.Timeout;
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => setDebugInfo(info), 100);
-  }, []);
+  function importFromMWB() {
+    setProgram(SEED_NOV_3_9);
+  }
 
-  // DEBUG: Log component state (otimizado)
-  useEffect(() => {
-    const debugData = {
-      user: !!user,
-      userId: user?.id,
-      userEmail: user?.email,
-      profile: !!profile,
-      profileRole: profile?.role,
-      isAdmin,
-      loading,
-      userMetadata: user?.user_metadata
-    };
+  function duplicateWeek() {
+    if (!program) return;
+    setProgram({ ...program, status: 'rascunho' });
+  }
 
-    console.log('🔍 AdminDashboard Component Debug:', debugData);
-    debouncedSetDebugInfo(JSON.stringify(debugData, null, 2));
-  }, [user, profile, isAdmin, loading, debouncedSetDebugInfo]);
-
-  useEffect(() => {
-    console.log('🔄 AdminDashboard useEffect triggered:', { user, isAdmin });
-    
-    if (user && isAdmin) {
-      console.log('✅ Admin user detected, loading system data...');
-      loadSystemData();
-    } else if (user && !isAdmin) {
-      console.log('❌ User is not admin, role:', profile?.role);
-      debouncedSetDebugInfo(debugInfo + '\n\n❌ User is not admin, role: ' + profile?.role);
-    } else if (!user) {
-      console.log('❌ No user found');
-      debouncedSetDebugInfo(debugInfo + '\n\n❌ No user found');
-    }
-  }, [user, isAdmin, debouncedSetDebugInfo]);
-
-  const loadSystemData = useCallback(async () => {
-    if (!user || !isAdmin) {
-      console.log('🚫 loadSystemData: User not admin or not logged in');
+  async function saveDraft() {
+    if (!program) return;
+    const body: Programacao = { ...program, status: 'rascunho' };
+    const res = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/programacoes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      const msg = await res.text();
+      alert(`Erro ao salvar rascunho: ${res.status} ${msg}`);
       return;
     }
-    
-    console.log('🔄 Loading system data for admin...');
-    setLoading(true);
-    try {
-      // Testar conexão com Supabase
-      console.log('🔍 Testing Supabase connection...');
-      const { count: profilesCount, error: testError } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
-      
-      if (testError) {
-        console.error('❌ Supabase connection test failed:', testError);
-        debouncedSetDebugInfo(debugInfo + '\n\n❌ Supabase Test Failed: ' + testError.message);
-        return;
-      }
+    alert('Rascunho salvo.');
+  }
 
-        console.log('✅ Supabase connection test successful');
-      debouncedSetDebugInfo(debugInfo + '\n\n✅ Supabase Test: Connected');
-
-      // Carregar estatísticas do sistema
-      await loadSystemStats();
-
-    } catch (error) {
-      console.error('❌ Supabase test exception:', error);
-      debouncedSetDebugInfo(debugInfo + '\n\n❌ Supabase Test Exception: ' + error);
-    } finally {
-      setLoading(false);
-    }
-  }, [user, isAdmin, debouncedSetDebugInfo, debugInfo]);
-
-  const loadSystemStats = useCallback(async () => {
-    try {
-      console.log('📊 Loading system statistics...');
-
-      const [profilesRes, estudantesRes, programasRes, congregacoesRes] = await Promise.all([
-        supabase.from('profiles').select('*', { count: 'exact', head: true }),
-        supabase.from('estudantes').select('*', { count: 'exact', head: true }),
-        supabase.from('programas').select('*', { count: 'exact', head: true }),
-        supabase.from('congregacoes').select('*', { count: 'exact', head: true }),
-      ]);
-
-      const stats: SystemStats = {
-        total_congregations: (congregacoesRes.count as number) || 0,
-        active_congregations: (congregacoesRes.count as number) || 0,
-        total_users: (profilesRes.count as number) || 0,
-        total_estudantes: (estudantesRes.count as number) || 0,
-        total_programas: (programasRes.count as number) || 0,
-        last_sync: new Date().toISOString(),
-      };
-
-      setSystemStats(stats);
-      setLastCheck(new Date().toISOString());
-
-      console.log('✅ System stats loaded:', stats);
-      debouncedSetDebugInfo(debugInfo + '\n\n✅ System Stats Loaded: ' + JSON.stringify(stats, null, 2));
-
-    } catch (error) {
-      console.error('❌ Error loading system stats:', error);
-      debouncedSetDebugInfo(debugInfo + '\n\n❌ System Stats Error: ' + error);
-    }
-  }, [debouncedSetDebugInfo, debugInfo]);
-
-  const checkForUpdates = useCallback(async () => {
-    console.log('🔄 Checking for updates...');
-    setLoading(true);
-    
-    try {
-      await loadSystemStats();
-      console.log('✅ Updates checked successfully');
-    } catch (error) {
-      console.error('❌ Error checking updates:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [loadSystemStats]);
-
-  const testSupabaseConnection = useCallback(async () => {
-    console.log('🔧 Testing Supabase connection...');
-    
-    try {
-      const { count, error } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
-
-      if (error) {
-        console.error('❌ Supabase test error:', error);
-        alert('Supabase test error: ' + error.message);
-      } else {
-        console.log('✅ Supabase test successful. Profiles count:', count);
-        alert('Supabase test successful! Total profiles: ' + (count ?? 0));
-      }
-    } catch (error) {
-      console.error('❌ Supabase test exception:', error);
-      alert('Supabase test exception: ' + error);
-    }
-  }, []);
-
-  // ========== HANDLERS DOS BOTÕES ==========
-  
-  const handleListUsers = useCallback(async () => {
-    console.log('👥 Listando usuários...');
-    try {
-      const { data: users, error } = await supabase
-        .from('profiles')
-        .select('id, nome_completo, role, congregacao, cargo')
-        .order('nome_completo');
-      
-      if (error) throw error;
-      
-      console.log('✅ Usuários carregados:', users);
-      alert(`Encontrados ${users?.length || 0} usuários no sistema:\n\n${users?.map(u => `${u.nome_completo || u.id} - ${u.role} (${u.congregacao || 'N/A'})`).join('\n')}`);
-    } catch (error) {
-      console.error('❌ Erro ao listar usuários:', error);
-      alert('Erro ao carregar usuários: ' + error.message);
-    }
-  }, []);
-
-  const handleManagePermissions = useCallback(async () => {
-    console.log('⚙️ Gerenciando permissões...');
-    const newRole = prompt('Digite o novo role (admin, instrutor, estudante):');
-    if (!newRole) return;
-    
-    // Validar role
-    const validRoles = ['admin', 'instrutor', 'estudante', 'family_member', 'developer'];
-    if (!validRoles.includes(newRole)) {
-      alert('Role inválido. Use: admin, instrutor, estudante, family_member ou developer');
+  async function publish() {
+    if (!program) return;
+    const body: Programacao = { ...program, status: 'publicada' };
+    const res = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/programacoes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      const msg = await res.text();
+      alert(`Erro ao publicar: ${res.status} ${msg}`);
       return;
     }
-    
-    const userId = prompt('Digite o ID do usuário:');
-    if (!userId) return;
-    
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ role: newRole as any })
-        .eq('id', userId);
-      
-      if (error) throw error;
-      
-      console.log('✅ Permissão atualizada');
-      alert('Permissão atualizada com sucesso!');
-    } catch (error) {
-      console.error('❌ Erro ao atualizar permissão:', error);
-      alert('Erro ao atualizar permissão: ' + error.message);
-    }
-  }, []);
+    alert('Programa publicado para os Instrutores.');
+  }
 
-  const handleActivityReport = useCallback(async () => {
-    console.log('📊 Gerando relatório de atividades...');
-    try {
-      // Simulação de relatório
-      const report = {
-        totalUsers: staticStats.total_users,
-        totalCongregations: staticStats.total_congregations,
-        lastUpdate: new Date().toLocaleString('pt-BR'),
-        activeUsers: Math.floor(staticStats.total_users * 0.8)
-      };
-      
-      alert(`📊 Relatório de Atividades:\n\n` +
-            `• Total de usuários: ${report.totalUsers}\n` +
-            `• Usuários ativos: ${report.activeUsers}\n` +
-            `• Total de congregações: ${report.totalCongregations}\n` +
-            `• Última atualização: ${report.lastUpdate}`);
-    } catch (error) {
-      console.error('❌ Erro ao gerar relatório:', error);
-      alert('Erro ao gerar relatório: ' + error.message);
-    }
-  }, [staticStats]);
+  function printExport() {
+    window.print();
+  }
 
-  const handleBackupData = useCallback(async () => {
-    console.log('💾 Fazendo backup dos dados...');
-    try {
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*');
-      
-      if (profilesError) throw profilesError;
-      
-      // Simular backup
-      const backupData = {
-        timestamp: new Date().toISOString(),
-        profiles: profiles,
-        stats: staticStats
-      };
-      
-      const dataStr = JSON.stringify(backupData, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
-      const url = URL.createObjectURL(dataBlob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `backup_sistema_ministerial_${new Date().toISOString().split('T')[0]}.json`;
-      link.click();
-      
-      URL.revokeObjectURL(url);
-      console.log('✅ Backup criado com sucesso');
-      alert('Backup criado e baixado com sucesso!');
-    } catch (error) {
-      console.error('❌ Erro ao fazer backup:', error);
-      alert('Erro ao fazer backup: ' + error.message);
-    }
-  }, [staticStats]);
+  return (
+    <div className="p-6 space-y-6">
+      <header className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold">Programação da Semana (Admin)</h1>
+          <p className="text-sm text-slate-600">
+            Este é o <strong>modelo</strong> sem nomes. Após publicar, o Instrutor designa estudantes.
+          </p>
+        </div>
 
-  // Congregações
-  const handleManageCongregation = useCallback((congregationName: string) => {
-    console.log('🏢 Gerenciando congregação:', congregationName);
-    alert(`🏢 Gerenciando congregação: ${congregationName}\n\nEsta funcionalidade abrirá o painel de gerenciamento da congregação.`);
-  }, []);
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setLangTab('pt')}
+            className={`px-3 py-1 rounded border ${langTab === 'pt' ? 'bg-slate-900 text-white' : 'bg-white'}`}
+          >
+            Português (BR)
+          </button>
+          <button
+            onClick={() => setLangTab('en')}
+            className={`px-3 py-1 rounded border ${langTab === 'en' ? 'bg-slate-900 text-white' : 'bg-white'}`}
+          >
+            English
+          </button>
+        </div>
+      </header>
 
+      <div className="flex flex-wrap gap-2">
+        <button onClick={importFromMWB} className="px-4 py-2 rounded bg-blue-600 text-white">Importar do MWB</button>
+        <button onClick={duplicateWeek} className="px-4 py-2 rounded border">Duplicar semana</button>
+        <button onClick={saveDraft} className="px-4 py-2 rounded border">Salvar rascunho</button>
+        <button onClick={publish} className="px-4 py-2 rounded bg-emerald-600 text-white">Publicar</button>
+        <button onClick={printExport} className="px-4 py-2 rounded border">Imprimir/Exportar</button>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-slate-700">Semana:</span>
+        <input
+          type="date"
+          value={program?.week_start || '2025-11-03'}
+          onChange={(e) => {
+            const start = e.target.value;
+            const end = new Date(new Date(start).getTime() + 6 * 86400000).toISOString().slice(0, 10);
+            setProgram((p) => ({ ...(p || SEED_NOV_3_9), week_start: start, week_end: end }));
+          }}
+          className="border rounded px-2 py-1"
+        />
+        <span className="text-sm text-slate-500">{program?.week_end || '2025-11-09'}</span>
+        <span className="ml-4 text-xs rounded bg-slate-100 px-2 py-1">Status: {program?.status || ''}</span>
+        <span className="text-xs rounded bg-slate-100 px-2 py-1">Escopo: {program?.congregation_scope || ''}</span>
+      </div>
+
+      {!program ? (
+        <div className="p-6 rounded border text-slate-600">
+          Nenhum programa carregado. Clique em <strong>Importar do MWB</strong> para preencher esta semana ou selecione uma data.
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {Object.entries(grouped || {}).map(([sectionKey, items]) => (
+            <section key={sectionKey} className="rounded border overflow-hidden">
+              <div className={`px-4 py-2 border-b ${SECTION_LABEL[sectionKey as Item['section']].color}`}>
+                <h2 className="font-semibold">
+                  {langTab === 'pt' ? SECTION_LABEL[sectionKey as Item['section']].pt : SECTION_LABEL[sectionKey as Item['section']].en}
+                </h2>
+              </div>
+
+              <ul className="divide-y">
+                {(items as Item[]).map((it) => {
+                  const L = it.lang[langTab];
+                  return (
+                    <li key={`${it.section}-${it.order}`} className="p-4 grid md:grid-cols-12 gap-3 items-start">
+                      <div className="md:col-span-1 text-slate-500">{it.order}</div>
+                      <div className="md:col-span-7">
+                        <div className="font-medium">{L.title}</div>
+                        {L.notes && <div className="text-sm text-slate-600 mt-1">{L.notes}</div>}
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {it.rules?.requires_male && (
+                            <span className="text-xs px-2 py-0.5 rounded bg-slate-100">Requer masculino</span>
+                          )}
+                          {it.rules?.allows_assistant && (
+                            <span className="text-xs px-2 py-0.5 rounded bg-slate-100">Permite assistente</span>
+                          )}
+                          {it.rules?.elders_only && (
+                            <span className="text-xs px-2 py-0.5 rounded bg-slate-100">Somente ancião</span>
+                          )}
+                          {it.rules?.elders_or_ms_only && (
+                            <span className="text-xs px-2 py-0.5 rounded bg-slate-100">Ancião ou SM</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="md:col-span-2">
+                        <span className="inline-block px-2 py-1 rounded bg-slate-100 text-sm">{it.minutes} min</span>
+                      </div>
+                      <div className="md:col-span-2 text-right">
+                        <button className="text-sm px-2 py-1 rounded border mr-2">Editar</button>
+                        <button className="text-sm px-2 py-1 rounded border">Duplicar</button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/*
   const handleAddCongregation = useCallback(async () => {
     console.log('➕ Adicionando nova congregação...');
     const congregationName = prompt('Digite o nome da nova congregação:');
@@ -1209,3 +1131,4 @@ export default function AdminDashboard() {
     </div>
   );
 }
+*/

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 
@@ -25,6 +25,7 @@ interface AuthContextType {
   clearAuthError: () => void;
   forceClearInvalidTokens: () => Promise<void>;
   authError: string | null;
+  updateProfile: (updates: Partial<Profile>) => Promise<{ data: any; error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -161,6 +162,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
+  // Update profile (used by onboarding/setup screens)
+  const updateProfile = useCallback(async (updates: Partial<Profile>) => {
+    try {
+      if (!user) {
+        return { data: null, error: { message: 'No user logged in' } };
+      }
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id)
+        .select('*')
+        .single();
+
+      if (!error && data) {
+        // Refresh local state with latest profile
+        setProfile((prev) => ({ ...(prev || {} as Profile), ...data }));
+      }
+      return { data, error };
+    } catch (error) {
+      return { data: null, error };
+    }
+  }, [user]);
+
   // 🔄 Função de login com tratamento de erro robusto
   const signIn = useCallback(async (email: string, password: string) => {
     try {
@@ -290,26 +317,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // 🔄 Efeito para inicializar autenticação
+  // 🔄 Efeito para inicializar autenticação (singleton subscription)
+  const subscribedRef = useRef(false);
   useEffect(() => {
+    if (subscribedRef.current) {
+      if (import.meta.env.DEV) console.log('👀 Auth listener already subscribed, skipping');
+      return;
+    }
+    subscribedRef.current = true;
+
     console.log('🚀 Initializing authentication...');
-    
-    // Configurar listeners de autenticação
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleAuthStateChange);
 
-    // Tentar recuperar sessão inicial
-    refreshAuth();
-
-    // Cleanup
-    return () => {
-      console.log('🧹 Cleaning up auth listeners');
-      subscription.unsubscribe();
-    };
-  }, [handleAuthStateChange, refreshAuth]);
-
-  // 🔄 Efeito para monitorar erros de autenticação
-  useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      // Encaminhar para o handler principal
+      void handleAuthStateChange(event, session);
+
+      // Tratamento específico para falha de refresh
       if (event === 'TOKEN_REFRESHED' && !session) {
         console.log('🔄 Token refresh failed, clearing auth state');
         setUser(null);
@@ -318,40 +341,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    // Monitorar erros de refresh token
-    const handleRefreshError = (error: any) => {
-      if (error?.message?.includes('Invalid Refresh Token') || 
-          error?.message?.includes('Refresh Token Not Found') ||
-          error?.message?.includes('JWT expired')) {
-        
-        console.log('🔄 Refresh token error detected, clearing auth state');
-        setUser(null);
-        setProfile(null);
-        setAuthError('Sessão expirada. Por favor, faça login novamente.');
-        
-        // Limpar tokens inválidos do localStorage
-        try {
-          localStorage.removeItem('sb-nwpuurgwnnuejqinkvrh-auth-token');
-          sessionStorage.clear();
-        } catch (e) {
-          console.log('🧹 Error clearing storage:', e);
-        }
-      }
-    };
+    // Tentar recuperar sessão inicial
+    void refreshAuth();
 
-    // Adicionar listener global para erros de auth
-    window.addEventListener('unhandledrejection', (event) => {
-      if (event.reason?.message?.includes('Refresh Token')) {
-        handleRefreshError(event.reason);
-        event.preventDefault();
-      }
-    });
-
+    // Cleanup
     return () => {
+      console.log('🧹 Cleaning up auth listeners');
       subscription.unsubscribe();
-      window.removeEventListener('unhandledrejection', handleRefreshError);
     };
-  }, []);
+  }, [handleAuthStateChange, refreshAuth]);
 
   // 🔄 Computar se o usuário é admin
   const isAdmin = profile?.role === 'admin';
@@ -368,6 +366,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearAuthError,
     forceClearInvalidTokens,
     authError,
+    updateProfile,
   };
 
   return (

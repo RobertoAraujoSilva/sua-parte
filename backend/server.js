@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -15,9 +16,12 @@ const NotificationService = require('./services/notificationService');
 const adminRoutes = require('./routes/admin');
 const materialsRoutes = require('./routes/materials');
 const programsRoutes = require('./routes/programs');
+const programacoesRoutes = require('./routes/programacoes');
+const programacoesRoutes = require('./routes/programacoes');
+const designacoesRoutes = require('./routes/designacoes');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 0; // 0 = porta dinâmica
 
 // Middleware
 app.use(helmet());
@@ -32,6 +36,9 @@ app.use('/materials', express.static(path.join(__dirname, '../docs/Oficial')));
 app.use('/api/admin', adminRoutes);
 app.use('/api/materials', materialsRoutes);
 app.use('/api/programs', programsRoutes);
+app.use('/api/programacoes', programacoesRoutes);
+app.use('/api/programacoes', programacoesRoutes);
+app.use('/api/designacoes', designacoesRoutes);
 
 // Rota de status
 app.get('/api/status', (req, res) => {
@@ -100,10 +107,12 @@ async function initializeSystem() {
     console.log('✅ Todos os serviços inicializados');
     
     // Iniciar servidor
-    app.listen(PORT, () => {
-      console.log(`🎯 Sistema Ministerial Backend rodando na porta ${PORT}`);
+    const server = app.listen(PORT, () => {
+      const actualPort = server.address().port;
+      console.log(`🎯 Sistema Ministerial Backend rodando na porta ${actualPort}`);
       console.log(`📁 Materiais disponíveis em: ${docsPath}`);
-      console.log(`🌐 API disponível em: http://localhost:${PORT}/api`);
+      console.log(`🌐 API disponível em: http://localhost:${actualPort}/api`);
+      console.log(`🧪 Para testar: curl http://localhost:${actualPort}/api/status`);
     });
     
   } catch (error) {
