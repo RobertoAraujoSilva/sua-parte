@@ -2,7 +2,7 @@ import React from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { TutorialProvider } from "@/contexts/TutorialContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
@@ -37,12 +37,16 @@ import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
 import Equidade from "./pages/Equidade";
-import UnifiedDashboard from "./components/UnifiedDashboard";
-import CacheAsideDemo from "./pages/CacheAsideDemo";
+import AdminDashboard from "./pages/AdminDashboard";
+import InstrutorDashboard from "./pages/InstrutorDashboard";
+import EstudanteDashboard from "./pages/EstudanteDashboard";
 import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DebugFab from "./components/DebugFab";
+import Header from '@/components/Header';
+import { ConnectionStatusBanner } from '@/components/ConnectionStatusBanner';
+import { SyncButton } from '@/components/SyncButton';
 
 const queryClient = new QueryClient();
 
@@ -82,7 +86,7 @@ const App = () => (
           <TooltipProvider>
             <Sonner />
             <TutorialOverlay />
-            <BrowserRouter
+            <Router
               future={{
                 v7_startTransition: true,
                 v7_relativeSplatPath: true
@@ -93,7 +97,6 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/demo" element={<Demo />} />
-                <Route path="/cache-demo" element={<CacheAsideDemo />} />
                 <Route path="/funcionalidades" element={<Funcionalidades />} />
                 <Route path="/congregacoes" element={<Congregacoes />} />
                 <Route path="/suporte" element={<Suporte />} />
@@ -159,12 +162,30 @@ const App = () => (
                   </>
                 )}
 
-                {/* Instrutor Only Routes */}
+                {/* Role-specific Dashboard Routes */}
                 <Route
                   path="/dashboard"
                   element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <UnifiedDashboard />
+                    <ProtectedRoute allowedRoles={['instrutor', 'admin']}>
+                      <InstrutorDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <AdminDashboard />
+                    </ProtectedRoute>
+                  }
+                />
+
+                {/* Estudante Dashboard Route */}
+                <Route
+                  path="/estudante/:id"
+                  element={
+                    <ProtectedRoute allowedRoles={['estudante', 'instrutor', 'admin']}>
+                      <EstudanteDashboard />
                     </ProtectedRoute>
                   }
                 />
@@ -240,34 +261,18 @@ const App = () => (
                 <Route
                   path="/equidade"
                   element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
+                    <ProtectedRoute allowedRoles={['instrutor', 'admin']}>
                       <Equidade />
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <UnifiedDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/admin/*"
-                  element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <UnifiedDashboard />
-                    </ProtectedRoute>
-                  }
-                />
 
-                {/* Estudante Only Routes */}
+                {/* Student Portal - Override with new dashboard */}
                 <Route
-                  path="/estudante/:id"
+                  path="/estudante-portal/:id"
                   element={
-                    <ProtectedRoute allowedRoles={['estudante']}>
-                      <UnifiedDashboard />
+                    <ProtectedRoute allowedRoles={['estudante', 'instrutor', 'admin']}>
+                      <EstudantePortal />
                     </ProtectedRoute>
                   }
                 />
@@ -294,7 +299,7 @@ const App = () => (
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </BrowserRouter>
+            </Router>
           </TooltipProvider>
 
           {/* Debug Panel - Only shows in development */}

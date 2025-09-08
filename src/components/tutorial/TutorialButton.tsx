@@ -86,7 +86,10 @@ export const TutorialButton: React.FC<TutorialButtonProps> = ({
       programas: 'Programas',
       designacoes: 'Designações',
       reunioes: 'Reuniões',
-      relatorios: 'Relatórios'
+      relatorios: 'Relatórios',
+      'developer-panel': 'Painel do Desenvolvedor',
+      'template-library': 'Biblioteca de Templates',
+      'program-preview': 'Visualizar Programa'
     };
     return titles[page] || page;
   };

@@ -134,10 +134,10 @@ export function useEnhancedEstudantes(
           responsavel_primario_info:responsavel_primario(*),
           responsavel_secundario_info:responsavel_secundario(*)
         `)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id as any);
 
       if (!includeInactive) {
-        query.eq('ativo', true);
+        query.eq('ativo', true as any);
       }
 
       const { data, error } = await query.order('nome');
@@ -162,23 +162,23 @@ export function useEnhancedEstudantes(
         // For students with enhanced data, ensure all required fields are present
         const enhanced: EstudanteEnhanced = {
           // Core fields
-          id: student.id,
-          user_id: student.user_id,
-          nome: student.nome,
-          idade: student.idade || 0,
-          genero: student.genero,
-          email: student.email || undefined,
-          telefone: student.telefone || undefined,
-          data_batismo: student.data_batismo || undefined,
-          cargo: student.cargo,
-          id_pai_mae: student.id_pai_mae || undefined,
-          ativo: student.ativo ?? true,
-          observacoes: student.observacoes || undefined,
-          created_at: student.created_at || new Date().toISOString(),
-          updated_at: student.updated_at || new Date().toISOString(),
+          id: (student as any).id,
+          user_id: (student as any).user_id,
+          nome: (student as any).nome,
+          idade: (student as any).idade || 0,
+          genero: (student as any).genero,
+          email: (student as any).email || undefined,
+          telefone: (student as any).telefone || undefined,
+          data_batismo: (student as any).data_batismo || undefined,
+          cargo: (student as any).cargo,
+          id_pai_mae: (student as any).id_pai_mae || undefined,
+          ativo: (student as any).ativo ?? true,
+          observacoes: (student as any).observacoes || undefined,
+          created_at: (student as any).created_at || new Date().toISOString(),
+          updated_at: (student as any).updated_at || new Date().toISOString(),
 
           // Enhanced fields with defaults
-          familia: (student as any).familia || student.nome?.split(' ').pop() || '',
+          familia: (student as any).familia || (student as any).nome?.split(' ').pop() || '',
           data_nascimento: (student as any).data_nascimento || undefined,
           estado_civil: (student as any).estado_civil || 'desconhecido',
           papel_familiar: (student as any).papel_familiar || undefined,
@@ -186,7 +186,7 @@ export function useEnhancedEstudantes(
           id_mae: (student as any).id_mae || undefined,
           id_conjuge: (student as any).id_conjuge || undefined,
           coabitacao: (student as any).coabitacao ?? true,
-          menor: (student as any).menor ?? ((student.idade || 0) < 18),
+          menor: (student as any).menor ?? (((student as any).idade || 0) < 18),
           responsavel_primario: (student as any).responsavel_primario || undefined,
           responsavel_secundario: (student as any).responsavel_secundario || undefined,
 
@@ -204,7 +204,7 @@ export function useEnhancedEstudantes(
         };
         return enhanced;
       } else {
-        return convertToEnhanced(student as EstudanteRow);
+        return convertToEnhanced(student as any);
       }
     });
   }, [rawStudents]);
@@ -462,12 +462,12 @@ export function useEnhancedEstudantes(
         .insert({
           ...studentData,
           user_id: user.id
-        })
+        } as any)
         .select()
         .single();
 
       if (error) throw error;
-      return convertToEnhanced(data);
+      return convertToEnhanced(data as any);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['enhanced-estudantes'] });
@@ -483,13 +483,13 @@ export function useEnhancedEstudantes(
     mutationFn: async ({ id, updates }: { id: string; updates: UpdateEstudanteInput }): Promise<EstudanteEnhanced> => {
       const { data, error } = await supabase
         .from('estudantes')
-        .update(updates)
-        .eq('id', id)
+        .update(updates as any)
+        .eq('id', id as any)
         .select()
         .single();
 
       if (error) throw error;
-      return convertToEnhanced(data);
+      return convertToEnhanced(data as any);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['enhanced-estudantes'] });
@@ -506,7 +506,7 @@ export function useEnhancedEstudantes(
       const { error } = await supabase
         .from('estudantes')
         .delete()
-        .eq('id', id);
+        .eq('id', id as any);
 
       if (error) throw error;
     },
@@ -592,7 +592,7 @@ export function useEnhancedEstudantes(
   const bulkUpdate = useCallback(async (updates: Array<{ id: string; data: UpdateEstudanteInput }>) => {
     try {
       const promises = updates.map(({ id, data }) =>
-        supabase.from('estudantes').update(data).eq('id', id)
+        supabase.from('estudantes').update(data as any).eq('id', id as any)
       );
 
       await Promise.all(promises);
@@ -610,7 +610,7 @@ export function useEnhancedEstudantes(
       const { error } = await supabase
         .from('estudantes')
         .delete()
-        .in('id', ids);
+        .in('id', ids as any);
 
       if (error) throw error;
 
