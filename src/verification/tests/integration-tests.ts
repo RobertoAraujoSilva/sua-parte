@@ -1104,3 +1104,4 @@ export async function runPerformanceRegressionTests (): Promise<boolean>
     console.error( '❌ Performance tests failed:', error );
     return false;
   }
+}
