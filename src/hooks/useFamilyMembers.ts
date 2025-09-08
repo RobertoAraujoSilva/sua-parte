@@ -260,7 +260,7 @@ export const useFamilyMembers = (studentId?: string) => {
       if (method === 'EMAIL' && !(familyMember as any).email) {
         throw new Error('Email é obrigatório para convites por email');
       }
-      if (method === 'WHATSAPP' && !familyMember.phone) {
+      if (method === 'WHATSAPP' && !(familyMember as any).phone) {
         throw new Error('Telefone é obrigatório para convites por WhatsApp');
       }
 
@@ -268,7 +268,7 @@ export const useFamilyMembers = (studentId?: string) => {
         console.log('📝 Creating invitation log entry...');
 
         // Create invitation log entry first
-        const { data: invitation, error: invitationError } = await supabase
+        const { data: invitation, error: invitationError } = await (supabase as any)
           .from('invitations_log')
           .insert({
             family_member_id: familyMemberId,
@@ -304,7 +304,7 @@ export const useFamilyMembers = (studentId?: string) => {
         try {
           console.log('📧 Attempting to send invitation via Edge Function...');
 
-          const { data: functionResponse, error: functionError } = await supabase.functions.invoke(
+          const { data: functionResponse, error: functionError } = await (supabase as any).functions.invoke(
             'send-family-invitation',
             {
               body: {
@@ -333,21 +333,21 @@ export const useFamilyMembers = (studentId?: string) => {
           console.log('🔄 Edge Function error details:', edgeFunctionError);
 
           // Development mode: Create invitation link and show to user
-          const invitationLink = `${window.location.origin}/convite/aceitar?token=${invitation.invitation_token}`;
+          const invitationLink = `${window.location.origin}/convite/aceitar?token=${(invitation as any).invitation_token}`;
 
           if (method === 'EMAIL') {
             console.log('📧 Development mode - Email invitation details:', {
-              to: familyMember.email,
+              to: (familyMember as any).email,
               subject: 'Convite para acessar o Sistema Ministerial',
               invitationLink,
-              familyMemberName: familyMember.name,
-              relation: familyMember.relation,
+              familyMemberName: (familyMember as any).name,
+              relation: (familyMember as any).relation,
               invitedBy: user?.email
             });
 
             // Show invitation link to user for manual sending
-            const message = `✅ Convite criado com sucesso para ${familyMember.name}!\n\n` +
-              `📧 Email: ${familyMember.email}\n` +
+            const message = `✅ Convite criado com sucesso para ${(familyMember as any).name}!\n\n` +
+              `📧 Email: ${(familyMember as any).email}\n` +
               `🔗 Link de convite: ${invitationLink}\n\n` +
               `⚠️ MODO DESENVOLVIMENTO:\n` +
               `Copie este link e envie manualmente por email.\n` +
@@ -370,10 +370,10 @@ export const useFamilyMembers = (studentId?: string) => {
           // Update family member status manually in development mode
           console.log('📝 Updating family member status to SENT...');
 
-          const { error: updateError } = await supabase
+          const { error: updateError } = await (supabase as any)
             .from('family_members')
-            .update({ invitation_status: 'SENT' })
-            .eq('id', familyMemberId);
+            .update({ invitation_status: 'SENT' } as any)
+            .eq('id', familyMemberId as any);
 
           if (updateError) {
             console.error('❌ Error updating family member status:', updateError);
@@ -394,12 +394,12 @@ export const useFamilyMembers = (studentId?: string) => {
         if (method === 'WHATSAPP' && invitationSent) {
           console.log('📱 Opening WhatsApp for manual sending...');
 
-          const invitationLink = `${window.location.origin}/convite/aceitar?token=${invitation.invitation_token}`;
+          const invitationLink = `${window.location.origin}/convite/aceitar?token=${(invitation as any).invitation_token}`;
           const whatsappMessage = encodeURIComponent(
-            `Olá ${familyMember.name}! Você foi convidado(a) para acessar o Sistema Ministerial. ` +
+            `Olá ${(familyMember as any).name}! Você foi convidado(a) para acessar o Sistema Ministerial. ` +
             `Clique no link para ativar sua conta: ${invitationLink}`
           );
-          const whatsappUrl = `https://wa.me/${familyMember.phone?.replace(/\D/g, '')}?text=${whatsappMessage}`;
+          const whatsappUrl = `https://wa.me/${(familyMember as any).phone?.replace(/\D/g, '')}?text=${whatsappMessage}`;
 
           // Open WhatsApp with pre-filled message
           window.open(whatsappUrl, '_blank');
@@ -415,7 +415,7 @@ export const useFamilyMembers = (studentId?: string) => {
         console.log('✅ Invitation process completed successfully');
         console.log('✅ Final invitation data:', invitation);
 
-        return invitation;
+        return invitation as any;
       } catch (error) {
         console.error('❌ Exception during invitation sending:', error);
 
