@@ -60,30 +60,30 @@ export const useInstructorDashboard = () => {
       setError(null);
 
       // Fetch students
-      const { data: students, error: studentsError } = await supabase
+      const { data: students, error: studentsError } = await (supabase as any)
         .from('estudantes')
         .select('*')
-        .eq('ativo', true)
+        .eq('ativo', true as any)
         .order('nome');
 
       if (studentsError) throw studentsError;
 
       // For now, we'll simulate progress and qualifications data
       // In a real implementation, this would come from additional tables
-      const studentsWithProgress: EstudanteWithProgress[] = (students || []).map(student => {
+      const studentsWithProgress: EstudanteWithProgress[] = ((students as any) || []).map((student: any) => {
         // Simulate progress level based on student data
         const getProgressLevel = (): ProgressLevel => {
-          if (student.cargo === 'anciao' || student.cargo === 'servo_ministerial') return 'advanced';
-          if (student.cargo === 'pioneiro_regular' || student.cargo === 'publicador_batizado') return 'qualified';
-          if (student.cargo === 'publicador_nao_batizado') return 'developing';
+          if ((student as any).cargo === 'anciao' || (student as any).cargo === 'servo_ministerial') return 'advanced';
+          if ((student as any).cargo === 'pioneiro_regular' || (student as any).cargo === 'publicador_batizado') return 'qualified';
+          if ((student as any).cargo === 'publicador_nao_batizado') return 'developing';
           return 'beginning';
         };
 
         // Simulate qualifications based on S-38-T rules
         const getQualifications = (): StudentQualifications => {
           const progressLevel = getProgressLevel();
-          const isMale = student.genero === 'masculino';
-          const isQualified = ['anciao', 'servo_ministerial', 'pioneiro_regular', 'publicador_batizado'].includes(student.cargo);
+          const isMale = (student as any).genero === 'masculino';
+          const isQualified = ['anciao', 'servo_ministerial', 'pioneiro_regular', 'publicador_batizado'].includes((student as any).cargo);
 
           return {
             bible_reading: isMale && progressLevel !== 'beginning',
@@ -101,9 +101,9 @@ export const useInstructorDashboard = () => {
         const qualifications = getQualifications();
 
         return {
-          ...student,
+          ...(student as any),
           progress: {
-            student_id: student.id,
+            student_id: (student as any).id,
             progress_level: progressLevel,
             qualifications,
             total_assignments: Math.floor(Math.random() * 20) + 1,
@@ -112,7 +112,7 @@ export const useInstructorDashboard = () => {
           },
           qualifications
         };
-      });
+      })
 
       // Organize data by progress level
       const studentsByProgress: Record<ProgressLevel, EstudanteWithProgress[]> = {
