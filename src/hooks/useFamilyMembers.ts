@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { withRefreshTokenErrorHandling } from '@/utils/refreshTokenHandler';
 import { 
   FamilyMember, 
   FamilyMemberInsert, 
@@ -58,7 +59,7 @@ export const useFamilyMembers = (studentId?: string) => {
             created_at
           )
         `)
-        .eq('student_id', targetStudentId)
+        .eq('student_id', targetStudentId as any)
         .order('created_at', { ascending: false });
 
       if (membersError) {
@@ -70,13 +71,14 @@ export const useFamilyMembers = (studentId?: string) => {
 
       // Process the data to include latest invitation and can_invite flag
       const processedMembers: FamilyMemberWithInvitations[] = (members || []).map(member => {
-        const invitations = Array.isArray(member.invitations_log) ? member.invitations_log : [];
+        const memberAny = member as any;
+        const invitations = Array.isArray(memberAny.invitations_log) ? memberAny.invitations_log : [];
         const latestInvitation = invitations.length > 0 ? invitations[0] : undefined;
         
         return {
-          ...member,
+          ...memberAny,
           latest_invitation: latestInvitation,
-          can_invite: !!(member.email || member.phone),
+          can_invite: !!(memberAny.email || memberAny.phone),
           invitations_log: undefined // Remove the nested data
         };
       });
@@ -107,8 +109,10 @@ export const useFamilyMembers = (studentId?: string) => {
         throw new Error('ID do estudante não encontrado');
       }
 
-      // Verify current session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      // Verify current session with refresh token error handling
+      const { data: { session }, error: sessionError } = await withRefreshTokenErrorHandling(async () => {
+        return await supabase.auth.getSession();
+      });
       if (sessionError || !session) {
         console.error('❌ No valid session found:', sessionError);
         throw new Error('Sessão expirada. Faça login novamente.');
@@ -119,7 +123,7 @@ export const useFamilyMembers = (studentId?: string) => {
       try {
         const { data, error } = await supabase
           .from('family_members')
-          .insert(familyMemberData)
+          .insert(familyMemberData as any)
           .select()
           .single();
 
@@ -142,8 +146,8 @@ export const useFamilyMembers = (studentId?: string) => {
           }
         }
 
-        console.log('✅ Family member added successfully:', data.name);
-        return data;
+        console.log('✅ Family member added successfully:', (data as any).name);
+        return data as any;
       } catch (error) {
         console.error('❌ Exception during family member addition:', error);
         throw error;
@@ -165,8 +169,8 @@ export const useFamilyMembers = (studentId?: string) => {
 
       const { data, error } = await supabase
         .from('family_members')
-        .update(updates)
-        .eq('id', id)
+        .update(updates as any)
+        .eq('id', id as any)
         .select()
         .single();
 
@@ -175,8 +179,8 @@ export const useFamilyMembers = (studentId?: string) => {
         throw error;
       }
 
-      console.log('✅ Family member updated:', data);
-      return data;
+      console.log('✅ Family member updated:', data as any);
+      return data as any;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['family-members', targetStudentId] });
@@ -191,7 +195,7 @@ export const useFamilyMembers = (studentId?: string) => {
       const { error } = await supabase
         .from('family_members')
         .delete()
-        .eq('id', id);
+        .eq('id', id as any);
 
       if (error) {
         console.error('❌ Error deleting family member:', error);
@@ -227,8 +231,10 @@ export const useFamilyMembers = (studentId?: string) => {
         throw new Error('ID do estudante não encontrado');
       }
 
-      // Verify current session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      // Verify current session with refresh token error handling
+      const { data: { session }, error: sessionError } = await withRefreshTokenErrorHandling(async () => {
+        return await supabase.auth.getSession();
+      });
       if (sessionError || !session) {
         console.error('❌ No valid session found:', sessionError);
         throw new Error('Sessão expirada. Faça login novamente.');
@@ -240,7 +246,7 @@ export const useFamilyMembers = (studentId?: string) => {
       const { data: familyMember, error: fetchError } = await supabase
         .from('family_members')
         .select('*')
-        .eq('id', familyMemberId)
+        .eq('id', familyMemberId as any)
         .single();
 
       if (fetchError || !familyMember) {
@@ -248,10 +254,10 @@ export const useFamilyMembers = (studentId?: string) => {
         throw new Error('Familiar não encontrado ou acesso negado');
       }
 
-      console.log('✅ Family member found:', familyMember.name);
+      console.log('✅ Family member found:', (familyMember as any).name);
 
       // Validate contact information based on method
-      if (method === 'EMAIL' && !familyMember.email) {
+      if (method === 'EMAIL' && !(familyMember as any).email) {
         throw new Error('Email é obrigatório para convites por email');
       }
       if (method === 'WHATSAPP' && !familyMember.phone) {
@@ -268,7 +274,7 @@ export const useFamilyMembers = (studentId?: string) => {
             family_member_id: familyMemberId,
             sent_by_student_id: targetStudentId,
             invite_method: method,
-          })
+          } as any)
           .select()
           .single();
 
@@ -289,7 +295,7 @@ export const useFamilyMembers = (studentId?: string) => {
           }
         }
 
-        console.log('✅ Invitation log created successfully:', invitation.id);
+        console.log('✅ Invitation log created successfully:', (invitation as any).id);
 
         // Try to send invitation using Supabase Edge Function (production)
         // Fall back to development mode if Edge Function is not available
