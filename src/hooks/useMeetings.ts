@@ -44,36 +44,36 @@ export const useMeetings = () => {
       setLoading(true);
 
       // Fetch meetings first
-      const { data: meetingsData, error: meetingsError } = await supabase
+      const { data: meetingsData, error: meetingsError } = await (supabase as any)
         .from('meetings')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', user.id as any)
         .order('meeting_date', { ascending: true });
 
       if (meetingsError) throw meetingsError;
 
       // Fetch meeting parts separately
-      const { data: partsData, error: partsError } = await supabase
+      const { data: partsData, error: partsError } = await (supabase as any)
         .from('meeting_parts')
         .select('*')
-        .in('meeting_id', (meetingsData || []).map(m => m.id));
+        .in('meeting_id', ((meetingsData as any) || []).map((m: any) => (m as any).id));
 
       if (partsError) throw partsError;
 
       // Fetch administrative assignments separately
-      const { data: adminData, error: adminError } = await supabase
+      const { data: adminData, error: adminError } = await (supabase as any)
         .from('administrative_assignments')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id as any);
 
       if (adminError) throw adminError;
 
       // Combine the data
-      const meetingsWithParts = (meetingsData || []).map(meeting => ({
-        ...meeting,
-        meeting_parts: (partsData || []).filter(part => part.meeting_id === meeting.id),
-        administrative_assignments: (adminData || []).filter(admin => admin.assignment_date === meeting.meeting_date)
-      }));
+      const meetingsWithParts = ((meetingsData as any) || []).map((meeting: any) => ({
+        ...(meeting as any),
+        meeting_parts: ((partsData as any) || []).filter((part: any) => (part as any).meeting_id === (meeting as any).id),
+        administrative_assignments: ((adminData as any) || []).filter((admin: any) => (admin as any).assignment_date === (meeting as any).meeting_date)
+      }))
 
       setMeetings(meetingsWithParts);
     } catch (err) {
@@ -94,33 +94,33 @@ export const useMeetings = () => {
 
     try {
       // Fetch administrative assignments first
-      const { data: assignmentsData, error: assignmentsError } = await supabase
+      const { data: assignmentsData, error: assignmentsError } = await (supabase as any)
         .from('administrative_assignments')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', user.id as any)
         .order('assignment_date', { ascending: true });
 
       if (assignmentsError) throw assignmentsError;
 
       // Get unique student IDs
-      const studentIds = [...new Set((assignmentsData || []).map(a => a.id_estudante).filter(Boolean))];
+      const studentIds = [...new Set(((assignmentsData as any) || []).map((a: any) => (a as any).id_estudante).filter(Boolean))];
 
       // Fetch student details separately if there are any
       let studentsData: any[] = [];
       if (studentIds.length > 0) {
-        const { data: students, error: studentsError } = await supabase
+        const { data: students, error: studentsError } = await (supabase as any)
           .from('estudantes')
           .select('id, nome, cargo')
-          .in('id', studentIds);
+          .in('id', studentIds as any);
 
         if (studentsError) throw studentsError;
-        studentsData = students || [];
+        studentsData = (students as any) || [];
       }
 
       // Combine the data
-      const assignmentsWithStudents = (assignmentsData || []).map(assignment => ({
-        ...assignment,
-        estudante: studentsData.find(student => student.id === assignment.id_estudante) || null
+      const assignmentsWithStudents = ((assignmentsData as any) || []).map((assignment: any) => ({
+        ...(assignment as any),
+        estudante: (studentsData as any).find((student: any) => (student as any).id === (assignment as any).id_estudante) || null
       }));
 
       setAdministrativeAssignments(assignmentsWithStudents);
@@ -139,14 +139,14 @@ export const useMeetings = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('special_events')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', user.id as any)
         .order('start_date', { ascending: true });
 
       if (error) throw error;
-      setSpecialEvents(data || []);
+      setSpecialEvents((data as any) || []);
     } catch (err) {
       console.error('Error fetching special events:', err);
       toast({
@@ -162,15 +162,15 @@ export const useMeetings = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('rooms')
         .select('*')
-        .eq('user_id', user.id)
-        .eq('is_active', true)
+        .eq('user_id', user.id as any)
+        .eq('is_active', true as any)
         .order('room_name', { ascending: true });
 
       if (error) throw error;
-      setRooms(data || []);
+      setRooms((data as any) || []);
     } catch (err) {
       console.error('Error fetching rooms:', err);
       toast({
@@ -204,9 +204,9 @@ export const useMeetings = () => {
           { type: 'circuit_overseer' } : { type: 'regular' }
       };
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('meetings')
-        .insert(insertData);
+        .insert(insertData as any);
 
       if (error) throw error;
 
@@ -238,11 +238,11 @@ export const useMeetings = () => {
         updated_at: new Date().toISOString()
       };
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('meetings')
-        .update(updateData)
-        .eq('id', id)
-        .eq('user_id', user.id);
+        .update(updateData as any)
+        .eq('id', id as any)
+        .eq('user_id', user.id as any);
 
       if (error) throw error;
 
@@ -284,9 +284,9 @@ export const useMeetings = () => {
         user_id: user.id
       };
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('administrative_assignments')
-        .insert(insertData);
+        .insert(insertData as any);
 
       if (error) throw error;
 
@@ -329,9 +329,9 @@ export const useMeetings = () => {
         study_materials: data.study_materials || null
       };
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('special_events')
-        .insert(insertData);
+        .insert(insertData as any);
 
       if (error) throw error;
 
@@ -374,9 +374,9 @@ export const useMeetings = () => {
         is_active: true
       };
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('rooms')
-        .insert(insertData);
+        .insert(insertData as any);
 
       if (error) throw error;
 
