@@ -64,11 +64,11 @@ export const AssignmentEditModal: React.FC<AssignmentEditModalProps> = ({
       const { data, error } = await supabase
         .from('estudantes')
         .select('id, nome, cargo, genero')
-        .eq('ativo', true)
+        .eq('ativo', true as any)
         .order('nome');
 
       if (error) throw error;
-      setAvailableStudents(data || []);
+      setAvailableStudents((data as any) || []);
 
     } catch (error) {
       console.error('Error loading students:', error);
@@ -98,8 +98,8 @@ export const AssignmentEditModal: React.FC<AssignmentEditModalProps> = ({
           id_estudante: editedAssignment.estudante.id,
           id_ajudante: editedAssignment.ajudante?.id || null,
           updated_at: new Date().toISOString()
-        })
-        .eq('id', editedAssignment.id);
+        } as any)
+        .eq('id', editedAssignment.id as any);
 
       if (error) throw error;
 
