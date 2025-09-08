@@ -62,8 +62,18 @@ const ProtectedRoute = ({
       return () => clearTimeout(timeout);
     }
   }, [user, profile, loading]);
+  
+  // Sempre mostramos um componente de carregamento enquanto a verificação de acesso não estiver completa
+  if (!accessCheckComplete) {
+    return (
+      <LoadingScreen 
+        message="Verificando Acesso" 
+        subMessage="Configurando sua sessão..."
+      />
+    );
+  }
 
-  useEffect(() => {
+  useEffect((): void => {
     console.log('🛡️ ProtectedRoute check:', {
       loading,
       hasUser: !!user,
@@ -79,6 +89,8 @@ const ProtectedRoute = ({
 
     if (loading) {
       console.log('⏳ ProtectedRoute waiting for auth to load...');
+      // Não retornamos early aqui para evitar tela em branco
+      // O componente vai renderizar o LoadingScreen abaixo
       return;
     }
 
@@ -86,7 +98,14 @@ const ProtectedRoute = ({
     if (requireAuth && !user) {
       console.log('🚫 ProtectedRoute: No user, redirecting to auth');
       navigate('/auth');
-      return;
+      // Renderizamos um componente de carregamento em vez de retornar undefined
+      return (
+        <LoadingScreen 
+          message="Redirecionando" 
+          subMessage="Direcionando para página de login..."
+          spinnerSize="h-8 w-8"
+        />
+      );
     }
 
     // If user is logged in, check access
@@ -108,33 +127,39 @@ const ProtectedRoute = ({
 
       if (userRole) {
         // Check if user's role is allowed
-        if (!allowedRoles.includes(userRole)) {
-          console.log('🚫 ProtectedRoute: Role not allowed, redirecting...', {
-            userRole,
-            allowedRoles
-          });
-          
-          // Redirect based on user role
-          if (redirectTo) {
-            navigate(redirectTo);
-          } else if (userRole === 'instrutor') {
-            const onboardingCompleted = localStorage.getItem('onboarding_completed');
-            const currentPath = window.location.pathname;
-            const isOnboardingRoute = ['/bem-vindo', '/configuracao-inicial', '/primeiro-programa'].includes(currentPath);
+      if (!allowedRoles.includes(userRole)) {
+        console.log('🚫 ProtectedRoute: Role not allowed, redirecting...', {
+          userRole,
+          allowedRoles
+        });
+        
+        // Redirect based on user role
+        if (redirectTo) {
+          navigate(redirectTo);
+        } else if (userRole === 'instrutor') {
+          const onboardingCompleted = localStorage.getItem('onboarding_completed');
+          const currentPath = window.location.pathname;
+          const isOnboardingRoute = ['/bem-vindo', '/configuracao-inicial', '/primeiro-programa'].includes(currentPath);
 
-            if (!onboardingCompleted && !isOnboardingRoute) {
-              navigate('/bem-vindo');
-            } else {
-              navigate('/dashboard');
-            }
-          } else if (userRole === 'estudante') {
-            navigate(`/estudante/${user.id}`);
-          } else if (userRole === 'family_member') {
-            navigate('/portal-familiar');
+          if (!onboardingCompleted && !isOnboardingRoute) {
+            navigate('/bem-vindo');
           } else {
-            navigate('/auth');
+            navigate('/dashboard');
           }
-          return;
+        } else if (userRole === 'estudante') {
+          navigate(`/estudante/${user.id}`);
+        } else if (userRole === 'family_member') {
+          navigate('/portal-familiar');
+        } else {
+          navigate('/auth');
+        }
+        return (
+           <LoadingScreen 
+             message="Redirecionando" 
+             subMessage="Direcionando para área apropriada..."
+             spinnerSize="h-8 w-8"
+           />
+         );
         } else {
           console.log('✅ ProtectedRoute: Access granted for role:', userRole);
           setAccessCheckComplete(true);
@@ -157,17 +182,28 @@ const ProtectedRoute = ({
         // No role found - check if we should wait or timeout
         if (!profileTimeout) {
           console.log('⏳ ProtectedRoute: No role found, waiting for profile...');
-          return;
+          return (
+            <LoadingScreen 
+              message="Verificando Permissões" 
+              subMessage="Carregando perfil do usuário..."
+            />
+          );
         } else {
           console.log('❌ ProtectedRoute: Profile timeout reached, no role available, redirecting to auth');
           navigate('/auth');
-          return;
+          return (
+            <LoadingScreen 
+              message="Redirecionando" 
+              subMessage="Configurando acesso ao sistema..."
+              spinnerSize="h-8 w-8"
+            />
+          );
         }
       }
     }
   }, [user, profile, loading, allowedRoles, requireAuth, redirectTo, navigate, profileTimeout]);
 
-  // Show loading state while auth is loading
+  // Sempre mostramos o LoadingScreen quando estamos carregando
   if (loading) {
     console.log('🔄 ProtectedRoute: Showing loading state');
     return (

@@ -14,7 +14,7 @@ import { Eye, EyeOff, LogIn, UserPlus, Shield, BookOpen } from 'lucide-react';
 import { Database } from '@/integrations/supabase/types';
 import { CARGO_LABELS } from '@/types/estudantes';
 import { LoginFeedback, TestCredentials } from '@/components/auth/SimpleLoginFeedback';
-import { handleAuthError, validateLoginForm } from '@/lib/supabase';
+import { handleAuthError, validateLoginForm } from '@/utils/auth';
 
 type UserRole = Database['public']['Enums']['user_role'];
 

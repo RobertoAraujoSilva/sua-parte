@@ -86,7 +86,7 @@ const swRegister: SWRegister = {
   }
 };
 
-// Registrar service worker somente em produção
+// Registrar service worker somente em produção (desabilitado em dev)
 if (import.meta.env.PROD) {
   swRegister.register();
 }
