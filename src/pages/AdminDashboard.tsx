@@ -1,224 +1,466 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { Separator } from '../components/ui/separator';
-import { 
-  Download, 
-  Upload, 
-  Globe, 
-  BarChart3, 
-  Settings, 
-  RefreshCw,
-  CheckCircle,
-  AlertCircle,
-  Clock,
-  FileText,
-  Users,
-  Package,
-  Activity,
-  Database
-} from 'lucide-react';
+import React, { useMemo, useState } from 'react';
 
-interface MWBVersion {
-  id: string;
-  version_code: string;
-  period_start: string;
-  period_end: string;
-  language: string;
-  status: string;
-  total_parts: number;
-  created_at: string;
-}
+type LangKey = 'en' | 'pt';
+type LangLabel = { title: string; notes?: string };
+type Item = {
+  order: number;
+  section: 'OPENING' | 'TREASURES' | 'APPLY' | 'LIVING' | 'CLOSING';
+  type:
+    | 'song'
+    | 'opening_comments'
+    | 'talk'
+    | 'spiritual_gems'
+    | 'bible_reading'
+    | 'starting'
+    | 'following'
+    | 'making_disciples'
+    | 'local_needs'
+    | 'cbs'
+    | 'concluding_comments';
+  minutes: number;
+  rules?: {
+    requires_male?: boolean;
+    allows_assistant?: boolean;
+    elders_only?: boolean;
+    elders_or_ms_only?: boolean;
+  };
+  lang: { en: LangLabel; pt: LangLabel };
+};
 
-interface SystemStats {
-  total_congregations: number;
-  active_congregations: number;
-  total_downloads: number;
-  last_sync: string;
+type Programacao = {
+  week_start: string;
+  week_end: string;
+  status: 'rascunho' | 'publicada';
+  congregation_scope: 'global' | 'scoped';
+  items: Item[];
+};
+
+const SEED_NOV_3_9: Programacao = {
+  week_start: '2025-11-03',
+  week_end: '2025-11-09',
+  status: 'rascunho',
+  congregation_scope: 'global',
+  items: [
+    { order: 1, section: 'OPENING', type: 'song', minutes: 5, lang: { en: { title: 'Song 132 and Prayer' }, pt: { title: 'Cântico 132 e oração' } } },
+    { order: 2, section: 'OPENING', type: 'opening_comments', minutes: 1, lang: { en: { title: 'Opening Comments' }, pt: { title: 'Comentários iniciais' } } },
+    { order: 3, section: 'TREASURES', type: 'talk', minutes: 10, rules: { requires_male: true }, lang: { en: { title: 'A Story of Unfailing Love', notes: '[Play VIDEO] Song of Solomon intro; Ca 1:9-11; 2:16-17' }, pt: { title: 'Uma história de amor verdadeiro', notes: '[Mostre o VÍDEO] Introdução a Cântico de Salomão; Cân. 1:9-11; 2:16-17' } } },
+    { order: 4, section: 'TREASURES', type: 'spiritual_gems', minutes: 10, lang: { en: { title: 'Spiritual Gems', notes: 'Ca 2:7; questions for audience' }, pt: { title: 'Joias espirituais', notes: 'Cân. 2:7; perguntas para a audiência' } } },
+    { order: 5, section: 'TREASURES', type: 'bible_reading', minutes: 4, rules: { requires_male: true }, lang: { en: { title: 'Bible Reading', notes: 'Ca 2:1-17 (th study 12)' }, pt: { title: 'Leitura da Bíblia', notes: 'Cân. 2:1-17 (th lição 12)' } } },
+    { order: 6, section: 'APPLY', type: 'starting', minutes: 3, rules: { allows_assistant: true }, lang: { en: { title: 'Starting a Conversation', notes: 'HOUSE TO HOUSE; Love People (lmd) lesson 1 point 3' }, pt: { title: 'Iniciando conversas', notes: 'DE CASA EM CASA; Ame as Pessoas (lmd) lição 1 ponto 3' } } },
+    { order: 7, section: 'APPLY', type: 'following', minutes: 4, rules: { allows_assistant: true }, lang: { en: { title: 'Following Up', notes: 'HOUSE TO HOUSE; lmd lesson 9 point 3' }, pt: { title: 'Cultivando o interesse', notes: 'DE CASA EM CASA; lmd lição 9 ponto 3' } } },
+    { order: 8, section: 'APPLY', type: 'making_disciples', minutes: 5, rules: { allows_assistant: false }, lang: { en: { title: 'Making Disciples', notes: 'lff lesson 18 intro & points 1–3 (th study 8)' }, pt: { title: 'Fazendo discípulos', notes: 'lff lição 18 introdução e pontos 1–3 (th lição 8)' } } },
+    { order: 9, section: 'LIVING', type: 'song', minutes: 5, lang: { en: { title: 'Song 46' }, pt: { title: 'Cântico 46' } } },
+    { order: 10, section: 'LIVING', type: 'local_needs', minutes: 15, rules: { elders_only: true }, lang: { en: { title: 'The Generous Person Will Be Blessed', notes: '[Play VIDEO] Generosity Brings Joy — discussion by an elder' }, pt: { title: 'A pessoa generosa será abençoada', notes: '[Mostre o VÍDEO] A Generosidade nos Traz Alegria — consideração por um ancião' } } },
+    { order: 11, section: 'LIVING', type: 'cbs', minutes: 30, rules: { elders_or_ms_only: true }, lang: { en: { title: 'Congregation Bible Study', notes: 'lfb lessons 32–33' }, pt: { title: 'Estudo bíblico de congregação', notes: 'lfb lições 32–33' } } },
+    { order: 12, section: 'CLOSING', type: 'concluding_comments', minutes: 3, lang: { en: { title: 'Concluding Comments' }, pt: { title: 'Comentários finais' } } },
+    { order: 13, section: 'CLOSING', type: 'song', minutes: 5, lang: { en: { title: 'Song 137 and Prayer' }, pt: { title: 'Cântico 137 e oração' } } }
+  ]
+};
+
+const SECTION_LABEL: Record<Item['section'], { en: string; pt: string; color: string }> = {
+  OPENING: { en: 'Opening', pt: 'Abertura', color: 'bg-sky-50' },
+  TREASURES: { en: "Treasures From God's Word", pt: 'Tesouros da Palavra', color: 'bg-emerald-50' },
+  APPLY: { en: 'Apply Yourself to the Field Ministry', pt: 'Faça seu melhor no ministério', color: 'bg-amber-50' },
+  LIVING: { en: 'Living as Christians', pt: 'Nossa Vida Cristã', color: 'bg-violet-50' },
+  CLOSING: { en: 'Closing', pt: 'Encerramento', color: 'bg-slate-50' }
+};
+
+function groupBySection(items: Item[]) {
+  return items
+    .slice()
+    .sort((a, b) => a.order - b.order)
+    .reduce<Record<Item['section'], Item[]>>((acc, it) => {
+      (acc[it.section] ||= []).push(it);
+      return acc;
+    }, {} as any);
 }
 
 export default function AdminDashboard() {
-  const { user, profile, isAdmin } = useAuth();
-  const [activeTab, setActiveTab] = useState('overview');
-  const [loading, setLoading] = useState(false);
-  const [mwbVersions, setMwbVersions] = useState<MWBVersion[]>([]);
-  const [systemStats, setSystemStats] = useState<SystemStats | null>(null);
-  const [lastCheck, setLastCheck] = useState<string>('');
-  const [debugInfo, setDebugInfo] = useState<string>('');
+  const [langTab, setLangTab] = useState<LangKey>('pt');
+  const [program, setProgram] = useState<Programacao | null>(null);
 
-  // DEBUG: Log component state
-  useEffect(() => {
-    console.log('🔍 AdminDashboard Component Debug:', {
-      user: !!user,
-      userId: user?.id,
-      userEmail: user?.email,
-      profile: !!profile,
-      profileRole: profile?.role,
-      isAdmin,
-      loading,
-      userMetadata: user?.user_metadata
+  const grouped = useMemo(() => (program ? groupBySection(program.items) : null), [program]);
+
+  function importFromMWB() {
+    setProgram(SEED_NOV_3_9);
+  }
+
+  function duplicateWeek() {
+    if (!program) return;
+    setProgram({ ...program, status: 'rascunho' });
+  }
+
+  async function saveDraft() {
+    if (!program) return;
+    const body: Programacao = { ...program, status: 'rascunho' };
+    const res = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/programacoes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     });
-
-    // Adicionar informações de debug na tela
-    setDebugInfo(JSON.stringify({
-      user: !!user,
-      userId: user?.id,
-      userEmail: user?.email,
-      profile: !!profile,
-      profileRole: profile?.role,
-      isAdmin,
-      loading,
-      userMetadata: user?.user_metadata
-    }, null, 2));
-  }, [user, profile, isAdmin, loading]);
-
-  useEffect(() => {
-    console.log('🔄 AdminDashboard useEffect triggered:', { user, isAdmin });
-    
-    if (user && isAdmin) {
-      console.log('✅ Admin user detected, loading system data...');
-      loadSystemData();
-    } else if (user && !isAdmin) {
-      console.log('❌ User is not admin, role:', profile?.role);
-      setDebugInfo(prev => prev + '\n\n❌ User is not admin, role: ' + profile?.role);
-    } else if (!user) {
-      console.log('❌ No user found');
-      setDebugInfo(prev => prev + '\n\n❌ No user found');
-    }
-  }, [user, isAdmin]);
-
-  const loadSystemData = async () => {
-    if (!user || !isAdmin) {
-      console.log('🚫 loadSystemData: User not admin or not logged in');
+    if (!res.ok) {
+      const msg = await res.text();
+      alert(`Erro ao salvar rascunho: ${res.status} ${msg}`);
       return;
     }
+    alert('Rascunho salvo.');
+  }
+
+  async function publish() {
+    if (!program) return;
+    const body: Programacao = { ...program, status: 'publicada' };
+    const res = await fetch(`${import.meta.env.VITE_API_BASE || ''}/api/programacoes`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!res.ok) {
+      const msg = await res.text();
+      alert(`Erro ao publicar: ${res.status} ${msg}`);
+      return;
+    }
+    alert('Programa publicado para os Instrutores.');
+  }
+
+  function printExport() {
+    window.print();
+  }
+
+  return (
+    <div className="p-6 space-y-6">
+      <header className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold">Programação da Semana (Admin)</h1>
+          <p className="text-sm text-slate-600">
+            Este é o <strong>modelo</strong> sem nomes. Após publicar, o Instrutor designa estudantes.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setLangTab('pt')}
+            className={`px-3 py-1 rounded border ${langTab === 'pt' ? 'bg-slate-900 text-white' : 'bg-white'}`}
+          >
+            Português (BR)
+          </button>
+          <button
+            onClick={() => setLangTab('en')}
+            className={`px-3 py-1 rounded border ${langTab === 'en' ? 'bg-slate-900 text-white' : 'bg-white'}`}
+          >
+            English
+          </button>
+        </div>
+      </header>
+
+      <div className="flex flex-wrap gap-2">
+        <button onClick={importFromMWB} className="px-4 py-2 rounded bg-blue-600 text-white">Importar do MWB</button>
+        <button onClick={duplicateWeek} className="px-4 py-2 rounded border">Duplicar semana</button>
+        <button onClick={saveDraft} className="px-4 py-2 rounded border">Salvar rascunho</button>
+        <button onClick={publish} className="px-4 py-2 rounded bg-emerald-600 text-white">Publicar</button>
+        <button onClick={printExport} className="px-4 py-2 rounded border">Imprimir/Exportar</button>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-slate-700">Semana:</span>
+        <input
+          type="date"
+          value={program?.week_start || '2025-11-03'}
+          onChange={(e) => {
+            const start = e.target.value;
+            const end = new Date(new Date(start).getTime() + 6 * 86400000).toISOString().slice(0, 10);
+            setProgram((p) => ({ ...(p || SEED_NOV_3_9), week_start: start, week_end: end }));
+          }}
+          className="border rounded px-2 py-1"
+        />
+        <span className="text-sm text-slate-500">{program?.week_end || '2025-11-09'}</span>
+        <span className="ml-4 text-xs rounded bg-slate-100 px-2 py-1">Status: {program?.status || ''}</span>
+        <span className="text-xs rounded bg-slate-100 px-2 py-1">Escopo: {program?.congregation_scope || ''}</span>
+      </div>
+
+      {!program ? (
+        <div className="p-6 rounded border text-slate-600">
+          Nenhum programa carregado. Clique em <strong>Importar do MWB</strong> para preencher esta semana ou selecione uma data.
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {Object.entries(grouped || {}).map(([sectionKey, items]) => (
+            <section key={sectionKey} className="rounded border overflow-hidden">
+              <div className={`px-4 py-2 border-b ${SECTION_LABEL[sectionKey as Item['section']].color}`}>
+                <h2 className="font-semibold">
+                  {langTab === 'pt' ? SECTION_LABEL[sectionKey as Item['section']].pt : SECTION_LABEL[sectionKey as Item['section']].en}
+                </h2>
+              </div>
+
+              <ul className="divide-y">
+                {(items as Item[]).map((it) => {
+                  const L = it.lang[langTab];
+                  return (
+                    <li key={`${it.section}-${it.order}`} className="p-4 grid md:grid-cols-12 gap-3 items-start">
+                      <div className="md:col-span-1 text-slate-500">{it.order}</div>
+                      <div className="md:col-span-7">
+                        <div className="font-medium">{L.title}</div>
+                        {L.notes && <div className="text-sm text-slate-600 mt-1">{L.notes}</div>}
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {it.rules?.requires_male && (
+                            <span className="text-xs px-2 py-0.5 rounded bg-slate-100">Requer masculino</span>
+                          )}
+                          {it.rules?.allows_assistant && (
+                            <span className="text-xs px-2 py-0.5 rounded bg-slate-100">Permite assistente</span>
+                          )}
+                          {it.rules?.elders_only && (
+                            <span className="text-xs px-2 py-0.5 rounded bg-slate-100">Somente ancião</span>
+                          )}
+                          {it.rules?.elders_or_ms_only && (
+                            <span className="text-xs px-2 py-0.5 rounded bg-slate-100">Ancião ou SM</span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="md:col-span-2">
+                        <span className="inline-block px-2 py-1 rounded bg-slate-100 text-sm">{it.minutes} min</span>
+                      </div>
+                      <div className="md:col-span-2 text-right">
+                        <button className="text-sm px-2 py-1 rounded border mr-2">Editar</button>
+                        <button className="text-sm px-2 py-1 rounded border">Duplicar</button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </section>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/*
+  const handleAddCongregation = useCallback(async () => {
+    console.log('➕ Adicionando nova congregação...');
+    const congregationName = prompt('Digite o nome da nova congregação:');
+    if (!congregationName) return;
     
-    console.log('🔄 Loading system data for admin...');
-    setLoading(true);
     try {
-      // Testar conexão com Supabase
-      console.log('🔍 Testing Supabase connection...');
-      const { data: testData, error: testError } = await supabase
-        .from('profiles')
-        .select('count')
-        .limit(1);
-      
-      if (testError) {
-        console.error('❌ Supabase connection test failed:', testError);
-        setDebugInfo(prev => prev + '\n\n❌ Supabase connection test failed: ' + testError.message);
-      } else {
-        console.log('✅ Supabase connection test successful');
-        setDebugInfo(prev => prev + '\n\n✅ Supabase connection test successful');
-      }
-
-      // Carregar dados do backend
-      console.log('🔍 Loading data from backend...');
-      try {
-        const response = await fetch('http://localhost:3001/api/admin/status', {
-          headers: {
-            'Authorization': `Bearer ${user.id}` // Simplificado para desenvolvimento
-          }
-        });
-        
-        if (response.ok) {
-          const statusData = await response.json();
-          console.log('✅ Backend status loaded:', statusData);
-          setDebugInfo(prev => prev + '\n\n✅ Backend status loaded: ' + JSON.stringify(statusData, null, 2));
-        } else {
-          console.error('❌ Backend status failed:', response.status);
-          setDebugInfo(prev => prev + '\n\n❌ Backend status failed: ' + response.status);
-        }
-      } catch (backendError) {
-        console.error('❌ Backend connection failed:', backendError);
-        setDebugInfo(prev => prev + '\n\n❌ Backend connection failed: ' + backendError);
-      }
-
-      // TODO: Implementar quando tabela mwb_versions for criada
-      console.log('⚠️ Tabela mwb_versions não implementada ainda');
-      setMwbVersions([]);
-
-      // Carregar estatísticas do sistema
-      // TODO: Implementar quando tabelas estiverem criadas
-      setSystemStats({
-        total_congregations: 0,
-        active_congregations: 0,
-        total_downloads: 0,
-        last_sync: new Date().toISOString()
-      });
-
-      setLastCheck(new Date().toISOString());
-      console.log('✅ System data loaded successfully');
-      setDebugInfo(prev => prev + '\n\n✅ System data loaded successfully');
+      // Simulação - em produção seria inserção no Supabase
+      console.log('✅ Congregação adicionada:', congregationName);
+      alert(`✅ Congregação "${congregationName}" adicionada com sucesso!\n\nEla agora receberá automaticamente a programação oficial.`);
     } catch (error) {
-      console.error('❌ Erro ao carregar dados do sistema:', error);
-      setDebugInfo(prev => prev + '\n\n❌ Erro ao carregar dados do sistema: ' + error);
-    } finally {
-      setLoading(false);
+      console.error('❌ Erro ao adicionar congregação:', error);
+      alert('Erro ao adicionar congregação: ' + error.message);
     }
-  };
+  }, []);
 
-  const checkForUpdates = async () => {
-    console.log('🔄 checkForUpdates called');
-    setLoading(true);
+  // JW.org & S-38
+  const handleMWBAvailable = useCallback(async () => {
+    console.log('📚 Disponibilizando MWB atual...');
     try {
-      // Chamar API real do backend
-      console.log('🔍 Calling backend check-updates API...');
-      const response = await fetch('http://localhost:3001/api/admin/check-updates', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.id}` // Simplificado para desenvolvimento
-        }
-      });
-      
-      if (response.ok) {
-        const result = await response.json();
-        console.log('✅ Updates check successful:', result);
-        setDebugInfo(prev => prev + '\n\n✅ Updates check successful: ' + JSON.stringify(result, null, 2));
-        
-        // Atualizar lista de materiais se houver novos
-        if (result.results && result.results.newMaterials) {
-          console.log('📦 New materials found:', result.results.newMaterials.length);
-          setDebugInfo(prev => prev + '\n\n📦 New materials found: ' + result.results.newMaterials.length);
-        }
-      } else {
-        const errorData = await response.json();
-        console.error('❌ Updates check failed:', errorData);
-        setDebugInfo(prev => prev + '\n\n❌ Updates check failed: ' + JSON.stringify(errorData, null, 2));
-      }
-      
-      setLastCheck(new Date().toISOString());
+      await jworg.fetchCurrentWeek();
+      console.log('✅ MWB atualizada');
+      alert('✅ Apostila MWB atual disponibilizada para todas as congregações!');
     } catch (error) {
-      console.error('❌ Erro ao verificar atualizações:', error);
-      setDebugInfo(prev => prev + '\n\n❌ Erro ao verificar atualizações: ' + error);
-    } finally {
-      setLoading(false);
+      console.error('❌ Erro ao disponibilizar MWB:', error);
+      alert('Erro ao disponibilizar MWB: ' + error.message);
     }
-  };
+  }, [jworg]);
 
+  const handleConfigureJWorgURLs = useCallback(() => {
+    console.log('⚙️ Configurando URLs JW.org...');
+    const ptUrl = prompt('URL JW.org PT:', 'https://www.jw.org/pt/biblioteca/jw-apostila-do-mes/');
+    const enUrl = prompt('URL JW.org EN:', 'https://www.jw.org/en/library/jw-meeting-workbook/');
+    
+    if (ptUrl && enUrl) {
+      console.log('✅ URLs configuradas:', { ptUrl, enUrl });
+      alert('✅ URLs JW.org configuradas com sucesso!');
+    }
+  }, []);
+
+  const handleSyncCongregations = useCallback(async () => {
+    console.log('🔄 Sincronizando com congregações...');
+    try {
+      // Simulação de sincronização
+      const congregationsCount = staticStats.total_congregations;
+      console.log(`✅ Sincronizando com ${congregationsCount} congregações`);
+      alert(`🔄 Sincronização iniciada!\n\nProgramação oficial sendo enviada para ${congregationsCount} congregações...\n\nTempo estimado: ${Math.ceil(congregationsCount / 100)} minutos`);
+    } catch (error) {
+      console.error('❌ Erro na sincronização:', error);
+      alert('Erro na sincronização: ' + error.message);
+    }
+  }, [staticStats]);
+
+  // Programação Oficial
+  const handleViewFullProgram = useCallback(() => {
+    console.log('📅 Visualizando programação completa (3 meses)...');
+    alert(`📅 Programação Completa dos Próximos 3 Meses\n\n` +
+          `• Semanas carregadas: 12\n` +
+          `• Idiomas: PT e EN\n` +
+          `• Última atualização: Hoje\n\n` +
+          `Esta visualização mostrará todas as apostilas MWB dos próximos 3 meses.`);
+  }, []);
+
+  const handleUpdateProgramPT = useCallback(async () => {
+    console.log('🇧🇷 Atualizando programação PT...');
+    try {
+      jworg.setLanguage('pt');
+      await jworg.fetchNextWeeks();
+      console.log('✅ Programação PT atualizada');
+      alert('✅ Programação em Português atualizada com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro ao atualizar programação PT:', error);
+      alert('Erro ao atualizar programação PT: ' + error.message);
+    }
+  }, [jworg]);
+
+  const handleUpdateProgramEN = useCallback(async () => {
+    console.log('🇺🇸 Atualizando programação EN...');
+    try {
+      jworg.setLanguage('en');
+      await jworg.fetchNextWeeks();
+      console.log('✅ Programação EN atualizada');
+      alert('✅ Programação em Inglês atualizada com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro ao atualizar programação EN:', error);
+      alert('Erro ao atualizar programação EN: ' + error.message);
+    }
+  }, [jworg]);
+
+  const handleCheckNewWeeks = useCallback(async () => {
+    console.log('🔍 Verificando novas semanas...');
+    try {
+      await jworg.fetchNextWeeks();
+      const newWeeks = jworg.nextWeeks.length;
+      console.log(`✅ Verificação concluída: ${newWeeks} semanas`);
+      alert(`🔍 Verificação concluída!\n\nEncontradas ${newWeeks} semanas de programação.\n\nTodas estão sincronizadas com JW.org.`);
+    } catch (error) {
+      console.error('❌ Erro ao verificar semanas:', error);
+      alert('Erro ao verificar novas semanas: ' + error.message);
+    }
+  }, [jworg]);
+
+  const handleUpdateS38Structure = useCallback(() => {
+    console.log('🏗️ Atualizando estrutura S-38 global...');
+    alert(`🏗️ Estrutura S-38 Global\n\n` +
+          `✅ Partes da reunião atualizadas:\n` +
+          `• Chairman\n• Treasures\n• Gems\n• Reading\n` +
+          `• Starting\n• Following\n• Making\n• Explaining\n` +
+          `• Talk\n\n` +
+          `Esta estrutura será aplicada mundialmente.`);
+  }, []);
+
+  // JW.org Integration
+  const handleReloadCurrentWeek = useCallback(async () => {
+    console.log('🔄 Recarregando semana atual...');
+    try {
+      await jworg.fetchCurrentWeek();
+      console.log('✅ Semana atual recarregada');
+      alert('✅ Semana atual recarregada com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro ao recarregar semana:', error);
+      alert('Erro ao recarregar semana: ' + error.message);
+    }
+  }, [jworg]);
+
+  const handleReloadNextWeeks = useCallback(async () => {
+    console.log('📅 Recarregando próximas semanas...');
+    try {
+      await jworg.fetchNextWeeks();
+      console.log('✅ Próximas semanas recarregadas');
+      alert('✅ Próximas semanas recarregadas com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro ao recarregar próximas semanas:', error);
+      alert('Erro ao recarregar próximas semanas: ' + error.message);
+    }
+  }, [jworg]);
+
+  const handleTestDownloadPT = useCallback(async () => {
+    console.log('🧪 Testando download PT...');
+    try {
+      jworg.setLanguage('pt');
+      await jworg.downloadWorkbook('pt', '07', '2025');
+      console.log('✅ Download PT testado');
+      alert('✅ Download PT testado com sucesso!');
+    } catch (error) {
+      console.error('❌ Erro no teste de download PT:', error);
+      alert('Erro no teste de download PT: ' + error.message);
+    }
+  }, [jworg]);
+
+  // Monitoramento
+  const handleViewAllLogs = useCallback(async () => {
+    console.log('📋 Visualizando todos os logs...');
+    try {
+      // Simulação de logs
+      const logs = [
+        { timestamp: new Date().toLocaleString(), event: 'Sistema iniciado', level: 'info' },
+        { timestamp: new Date(Date.now() - 3600000).toLocaleString(), event: 'Backup automático executado', level: 'info' },
+        { timestamp: new Date(Date.now() - 86400000).toLocaleString(), event: 'Novo usuário registrado', level: 'info' },
+        { timestamp: new Date(Date.now() - 172800000).toLocaleString(), event: 'Manutenção programada', level: 'warning' }
+      ];
+      
+      const logText = logs.map(log => `${log.timestamp} [${log.level.toUpperCase()}] ${log.event}`).join('\n');
+      alert(`📋 Logs do Sistema\n\n${logText}`);
+    } catch (error) {
+      console.error('❌ Erro ao carregar logs:', error);
+      alert('Erro ao carregar logs: ' + error.message);
+    }
+  }, []);
+
+  const handleTestJWorgIntegration = useCallback(async () => {
+    console.log('🧪 Testando integração JW.org...');
+    try {
+      await jworg.fetchCurrentWeek();
+      console.log('✅ Integração JW.org testada com sucesso');
+      alert('✅ Integração JW.org funcionando perfeitamente!');
+    } catch (error) {
+      console.error('❌ Erro na integração JW.org:', error);
+      alert('❌ Erro na integração JW.org: ' + error.message);
+    }
+  }, [jworg]);
+
+  const handleChangeLanguage = useCallback((newLang: 'pt' | 'en') => {
+    jworg.setLanguage(newLang);
+    console.log(`🌐 Idioma alterado para: ${newLang}`);
+    alert(`🌐 Idioma alterado para: ${newLang === 'pt' ? 'Português' : 'English'}`);
+  }, [jworg]);
+
+  // Alterna o idioma atual entre PT/EN
+  const toggleLanguage = useCallback(() => {
+    const current = (jworg as any)?.currentLanguage ?? 'pt';
+    const next = current === 'pt' ? 'en' : 'pt';
+    jworg.setLanguage(next);
+    console.log(`🌐 Idioma alternado: ${current} -> ${next}`);
+    alert(`🌐 Idioma alternado para: ${next === 'pt' ? 'Português' : 'English'}`);
+  }, [jworg]);
+
+  // Atualiza materiais JW.org (semana atual + próximas semanas)
+  const updateMaterials = useCallback(async () => {
+    try {
+      await jworg.fetchCurrentWeek();
+      await jworg.fetchNextWeeks();
+      console.log('✅ Materiais JW.org atualizados');
+      alert('✅ Materiais JW.org atualizados com sucesso!');
+    } catch (error: any) {
+      console.error('❌ Erro ao atualizar materiais:', error);
+      alert('❌ Erro ao atualizar materiais: ' + (error?.message || error));
+    }
+  }, [jworg]);
+
+  // NOW CHECK CONDITIONS AND RENDER APPROPRIATELY
   // Se não for admin, mostrar mensagem de acesso negado
   if (user && !isAdmin) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="w-full max-w-md">
+      <div className="container mx-auto px-4 py-8">
+        <Card className="max-w-md mx-auto">
           <CardHeader>
-            <CardTitle className="text-red-600 flex items-center gap-2">
-              <AlertCircle className="h-5 w-5" />
-              Acesso Negado
-            </CardTitle>
+            <CardTitle className="text-red-600">Acesso Negado</CardTitle>
             <CardDescription>
-              Você não tem permissão para acessar o Dashboard Administrativo.
+              Você não tem permissão para acessar o painel administrativo.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground mb-4">
               Seu perfil atual: <strong>{profile?.role}</strong>
             </p>
-            <Button onClick={() => window.history.back()} variant="outline">
+            <Button onClick={() => window.history.back()}>
               Voltar
             </Button>
           </CardContent>
@@ -230,69 +472,17 @@ export default function AdminDashboard() {
   // Se não houver usuário, mostrar loading
   if (!user) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-jw-blue mx-auto mb-4"></div>
-          <p>Carregando...</p>
-          <p className="text-sm text-muted-foreground mt-2">
-            Aguardando autenticação...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // DEBUG: Mostrar informações do usuário se não for admin
-  if (user && !isAdmin) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <Card className="w-full max-w-2xl">
+      <div className="container mx-auto px-4 py-8">
+        <Card className="max-w-md mx-auto">
           <CardHeader>
-            <CardTitle className="text-red-600 flex items-center gap-2">
-              <AlertCircle className="h-5 w-5" />
-              Acesso Negado - Debug Info
-            </CardTitle>
+            <CardTitle>Carregando...</CardTitle>
             <CardDescription>
-              Você não tem permissão para acessar o Dashboard Administrativo.
+              Verificando autenticação...
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-semibold mb-2">Informações do Usuário:</h3>
-              <div className="text-sm space-y-1">
-                <p><strong>ID:</strong> {user.id}</p>
-                <p><strong>Email:</strong> {user.email}</p>
-                <p><strong>Role no Profile:</strong> {profile?.role || 'N/A'}</p>
-                <p><strong>Role no Metadata:</strong> {user.user_metadata?.role || 'N/A'}</p>
-                <p><strong>isAdmin:</strong> {isAdmin ? 'true' : 'false'}</p>
-                <p><strong>Profile Existe:</strong> {profile ? 'Sim' : 'Não'}</p>
-              </div>
-            </div>
-            
-            <div className="bg-yellow-50 p-4 rounded-lg">
-              <h3 className="font-semibold mb-2">Debug Info:</h3>
-              <pre className="text-xs text-yellow-700 overflow-auto max-h-40">
-                {debugInfo}
-              </pre>
-            </div>
-
-            <div className="flex gap-2">
-              <Button onClick={() => window.history.back()} variant="outline">
-                Voltar
-              </Button>
-              <Button 
-                onClick={() => {
-                  console.log('🔍 Full Debug Info:', {
-                    user,
-                    profile,
-                    isAdmin,
-                    userMetadata: user.user_metadata
-                  });
-                }}
-                variant="outline"
-              >
-                Log Debug Info
-              </Button>
+          <CardContent>
+            <div className="flex items-center justify-center">
+              <RefreshCw className="h-6 w-6 animate-spin" />
             </div>
           </CardContent>
         </Card>
@@ -302,152 +492,37 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Auth Error Handler */}
+      <AuthErrorHandler />
+      
       {/* Header */}
-      <div className="border-b bg-card">
+      <div className="border-b">
         <div className="container mx-auto px-4 py-6">
+          <div className="flex flex-col space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Dashboard Administrativo</h1>
-              <p className="text-muted-foreground mt-2">
-                Sistema Ministerial Global - Gerenciamento Central
+                <h1 className="text-3xl font-bold tracking-tight">📊 Dashboard do Administrador Geral</h1>
+                <p className="text-muted-foreground">
+                  Programação oficial das reuniões ministeriais - Padronização mundial para todas as congregações
               </p>
             </div>
-            <div className="flex items-center gap-4">
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                <CheckCircle className="h-4 w-4 mr-2" />
-                Sistema Ativo
-              </Badge>
-              
-              {/* Debug Button */}
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => {
-                  console.log('🔍 DEBUG - Current Auth State:', {
-                    user: !!user,
-                    userId: user?.id,
-                    userEmail: user?.email,
-                    profile: !!profile,
-                    profileRole: profile?.role,
-                    isAdmin,
-                    userMetadata: user?.user_metadata
-                  });
-                }}
-              >
-                🐛 Debug Auth
-              </Button>
-
-              {/* Test Login Button */}
-              {import.meta.env.DEV && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={async () => {
-                    console.log('🔧 Testing admin login...');
-                    try {
-                      // Testar login direto com Supabase
-                      const { data, error } = await supabase.auth.signInWithPassword({
-                        email: 'amazonwebber007@gmail.com',
-                        password: 'admin123'
-                      });
-                      
-                      if (error) {
-                        console.error('❌ Test login failed:', error);
-                        alert('Test login failed: ' + error.message);
-                      } else {
-                        console.log('✅ Test login successful:', data);
-                        alert('Test login successful! Check console for details.');
-                      }
-                    } catch (error) {
-                      console.error('❌ Test login exception:', error);
-                      alert('Test login exception: ' + error);
-                    }
-                  }}
-                >
-                  🔧 Test Login
-                </Button>
-              )}
-
-              {/* Test Database Button */}
-              {import.meta.env.DEV && (
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={async () => {
-                    console.log('🔍 Testing backend connection...');
-                    try {
-                      // Testar conexão com backend
-                      const response = await fetch('http://localhost:3001/api/status');
-                      
-                      if (response.ok) {
-                        const data = await response.json();
-                        console.log('✅ Backend connection test successful:', data);
-                        alert('Backend connection test successful!\nStatus: ' + data.status + '\nCheck console for details.');
-                      } else {
-                        console.error('❌ Backend connection test failed:', response.status);
-                        alert('Backend connection test failed: ' + response.status + '\nCheck console for details.');
-                      }
-                    } catch (error) {
-                      console.error('❌ Backend connection test exception:', error);
-                      alert('Backend connection test exception: ' + error);
-                    }
-                  }}
-                >
-                  🗄️ Test Backend
-                </Button>
-              )}
-
+              <div className="flex items-center space-x-2">
               {/* Force Profile Load Button */}
               {import.meta.env.DEV && (
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={async () => {
-                    console.log('🔧 Force loading profile and testing backend...');
-                    try {
-                      if (user) {
-                        // Testar backend primeiro
-                        console.log('🔍 Testing backend...');
-                        const backendResponse = await fetch('http://localhost:3001/api/status');
-                        
-                        if (backendResponse.ok) {
-                          const backendData = await backendResponse.json();
-                          console.log('✅ Backend test successful:', backendData);
-                        } else {
-                          console.error('❌ Backend test failed:', backendResponse.status);
-                        }
-                        
-                        // Forçar carregamento do perfil
-                        const { data, error } = await supabase
-                          .from('profiles')
-                          .select('*')
-                          .eq('id', user.id)
-                          .single();
-                        
-                        if (error) {
-                          console.error('❌ Force profile load failed:', error);
-                          alert('Force profile load failed: ' + error.message + '\nBackend test completed. Check console for details.');
-                        } else {
-                          console.log('✅ Force profile load successful:', data);
-                          alert('Profile loaded! Role: ' + data.role + '\nBackend test completed.\nCheck console for details.');
-                        }
-                      } else {
-                        alert('No user logged in');
-                      }
-                    } catch (error) {
-                      console.error('❌ Force profile load exception:', error);
-                      alert('Force profile load exception: ' + error);
-                    }
-                  }}
-                >
-                  👤 Force Profile + Backend
+                    onClick={testSupabaseConnection}
+                  >
+                    🔧 Test Supabase
                 </Button>
               )}
               
               <Button onClick={checkForUpdates} disabled={loading}>
                 <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Verificar Atualizações
+                  Atualizar
               </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -470,41 +545,62 @@ export default function AdminDashboard() {
       )}
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-            <TabsTrigger value="downloads">Downloads</TabsTrigger>
-            <TabsTrigger value="materials">Materiais</TabsTrigger>
-            <TabsTrigger value="publication">Publicação</TabsTrigger>
-            <TabsTrigger value="monitoring">Monitoramento</TabsTrigger>
+            <TabsTrigger value="users">Usuários</TabsTrigger>
+            <TabsTrigger value="congregations">Congregações</TabsTrigger>
+            <TabsTrigger value="system">Sistema</TabsTrigger>
           </TabsList>
 
           {/* Visão Geral */}
           <TabsContent value="overview" className="space-y-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-center text-muted-foreground">
+                🎯 Sistema Ministerial Global - Padronização Mundial
+              </h3>
+              <div className="text-center text-sm text-muted-foreground mt-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <strong>📊 Admin Geral:</strong> Disponibiliza programação oficial semanal (SEM nomes de estudantes) <br/>
+                <strong>🎓 Instrutores:</strong> Recebem programação automaticamente + fazem designações locais reais
+              </div>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Congregações</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium">Congregações Conectadas</CardTitle>
+                  <Globe className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{systemStats?.total_congregations || 0}</div>
+                  <div className="text-2xl font-bold">{staticStats.total_congregations}</div>
                   <p className="text-xs text-muted-foreground">
-                    Total registradas
+                    Recebendo programação oficial
                   </p>
                 </CardContent>
               </Card>
 
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Downloads</CardTitle>
-                  <Download className="h-4 w-4 text-muted-foreground" />
+                  <CardTitle className="text-sm font-medium">Semanas Programadas</CardTitle>
+                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{systemStats?.total_downloads || 0}</div>
+                  <div className="text-2xl font-bold">12</div>
                   <p className="text-xs text-muted-foreground">
-                    Materiais baixados
+                    Próximas 3 meses
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Idiomas Disponíveis</CardTitle>
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">2</div>
+                  <p className="text-xs text-muted-foreground">
+                    Português e Inglês
                   </p>
                 </CardContent>
               </Card>
@@ -512,200 +608,527 @@ export default function AdminDashboard() {
               <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Última Sincronização</CardTitle>
-                  <Clock className="h-4 w-4 text-muted-foreground" />
+                  <RefreshCw className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">
-                    {systemStats?.last_sync ? new Date(systemStats.last_sync).toLocaleDateString('pt-BR') : 'N/A'}
-                  </div>
+                  <div className="text-2xl font-bold">✅</div>
                   <p className="text-xs text-muted-foreground">
-                    {systemStats?.last_sync ? new Date(systemStats.last_sync).toLocaleTimeString('pt-BR') : ''}
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Status</CardTitle>
-                  <Activity className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-600">Online</div>
-                  <p className="text-xs text-muted-foreground">
-                    Sistema operacional
+                    Hoje, {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                   </p>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Ações Rápidas</CardTitle>
-                <CardDescription>
-                  Gerenciamento rápido do sistema
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Button variant="outline" className="h-20 flex-col">
-                  <Globe className="h-6 w-6 mb-2" />
-                  <span>Verificar JW.org</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex-col">
-                  <Package className="h-6 w-6 mb-2" />
-                  <span>Gerenciar Materiais</span>
-                </Button>
-                <Button variant="outline" className="h-20 flex-col">
-                  <Settings className="h-6 w-6 mb-2" />
-                  <span>Configurações</span>
-                </Button>
-              </CardContent>
-            </Card>
-          </TabsContent>
+            {/* Ações Rápidas */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Status do Sistema */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Status do Sistema</CardTitle>
+                  <CardDescription>
+                    Informações sobre a última verificação e status geral
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Última Verificação:</span>
+                    <span className="text-sm text-muted-foreground">
+                      {lastCheck ? new Date(lastCheck).toLocaleString('pt-BR') : 'Nunca'}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Status:</span>
+                    <Badge variant="outline" className="text-green-600">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Operacional
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Supabase:</span>
+                    <Badge variant="outline" className="text-green-600">
+                      <Database className="h-3 w-3 mr-1" />
+                      Conectado
+                    </Badge>
+                  </div>
+                </CardContent>
+              </Card>
 
-          {/* Downloads */}
-          <TabsContent value="downloads" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Configuração de Downloads</CardTitle>
-                <CardDescription>
-                  Configure idiomas e URLs para download automático
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium">Português (Brasil)</label>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      https://www.jw.org/pt/biblioteca/jw-apostila-do-mes/
+              {/* JW.org Downloads */}
+              <Card className="bg-green-50 border-green-200">
+                <CardHeader>
+                  <CardTitle className="text-green-800">📚 JW.org Downloads</CardTitle>
+                  <CardDescription className="text-green-700">
+                    Gerenciar materiais oficiais
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Apostila MWB Atual:</span>
+                    <Badge variant="outline" className="text-green-600">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Disponível
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Última verificação:</span>
+                    <span className="text-sm text-green-700">Hoje, 10:30</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button size="sm" variant="outline" className="border-green-300 text-green-700" onClick={handleMWBAvailable}>
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                      Disponibilizar MWB Atual
+                    </Button>
+                    <Button size="sm" variant="outline" className="border-green-300 text-green-700" onClick={handleConfigureJWorgURLs}>
+                      <Settings className="h-3 w-3 mr-1" />
+                      Configurar URLs JW.org
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Sistema S-38 - Designações */}
+              <Card className="bg-purple-50 border-purple-200">
+                <CardHeader>
+                  <CardTitle className="text-purple-800">⚙️ Sistema S-38</CardTitle>
+                  <CardDescription className="text-purple-700">
+                    Estrutura das reuniões ministeriais
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-sm text-purple-700 space-y-2">
+                    <p>📚 <strong>Função do Admin:</strong> Disponibilizar apostilas MWB</p>
+                    <p>👥 <strong>Para Instrutores:</strong> Designar estudantes para partes</p>
+                    <p>🎯 <strong>Partes da Reunião:</strong></p>
+                    <div className="grid grid-cols-2 gap-1 text-xs ml-2">
+                      <div>• Chairman</div>
+                      <div>• Treasures</div>
+                      <div>• Gems</div>
+                      <div>• Reading</div>
+                      <div>• Starting</div>
+                      <div>• Following</div>
+                      <div>• Making</div>
+                      <div>• Explaining</div>
+                      <div>• Talk</div>
                     </div>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium">Inglês (EUA)</label>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      https://www.jw.org/en/library/jw-meeting-workbook/
-                    </div>
+                </CardContent>
+              </Card>
+
+              {/* Debug / Integração */}
+              <Card className="bg-slate-50 border-slate-200">
+                <CardHeader>
+                  <CardTitle className="text-slate-800">🧪 Debug / Integração</CardTitle>
+                  <CardDescription className="text-slate-700">
+                    Ferramentas rápidas para validar integrações e idioma
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Idioma Atual:</span>
+                    <Badge variant="outline" className="text-slate-700">
+                      {(jworg as any)?.currentLanguage === 'en' ? '🇺🇸 English' : '🇧🇷 Português'}
+                    </Badge>
                   </div>
-                </div>
-                <Separator />
-                <div className="flex gap-2">
-                  <Button>
-                    <Download className="h-4 w-4 mr-2" />
-                    Verificar Novas Versões
-                  </Button>
-                  <Button variant="outline">
-                    <Settings className="h-4 w-4 mr-2" />
-                    Configurar URLs
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+                  <div className="flex flex-wrap gap-2">
+                    <Button size="sm" variant="outline" onClick={toggleLanguage}>
+                      Alternar Idioma
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={updateMaterials}>
+                      Atualizar Materiais
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={handleTestJWorgIntegration}>
+                      Testar Integração JW.org
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={checkForUpdates} disabled={loading}>
+                      Atualizar Contagens
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
 
-          {/* Materiais */}
-          <TabsContent value="materials" className="space-y-6">
+          {/* Usuários */}
+          <TabsContent value="users" className="space-y-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-center text-muted-foreground">
+                👥 Gestão de Usuários para Acesso às Apostilas MWB
+              </h3>
+              <p className="text-center text-sm text-muted-foreground mt-2">
+                🎯 Função Principal: Admin gerencia usuários → Instrutores acessam apostilas
+              </p>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Estatísticas de Usuários */}
             <Card>
               <CardHeader>
-                <CardTitle>Materiais Disponíveis</CardTitle>
-                <CardDescription>
-                  Lista de materiais baixados e seus status
-                </CardDescription>
+                  <CardTitle>Estatísticas</CardTitle>
+                  <CardDescription>Resumo dos usuários</CardDescription>
               </CardHeader>
-              <CardContent>
-                {mwbVersions.length === 0 ? (
-                  <div className="text-center py-8">
-                    <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">Nenhum material encontrado</p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Execute a verificação de atualizações para baixar materiais
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {mwbVersions.map((version) => (
-                      <div key={version.id} className="flex items-center justify-between p-3 border rounded-lg">
-                        <div>
-                          <div className="font-medium">{version.version_code}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {version.language} • {version.period_start} - {version.period_end}
-                          </div>
-                        </div>
-                        <Badge variant={version.status === 'active' ? 'default' : 'secondary'}>
-                          {version.status}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Publicação */}
-          <TabsContent value="publication" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Publicação de Materiais</CardTitle>
-                <CardDescription>
-                  Publique materiais para que as congregações possam acessar
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-center py-8">
-                  <Upload className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground">Nenhum material para publicação</p>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Baixe materiais primeiro para poder publicá-los
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Monitoramento */}
-          <TabsContent value="monitoring" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Monitoramento do Sistema</CardTitle>
-                <CardDescription>
-                  Status e métricas do sistema
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <CardContent>
+                  <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Status do Banco</span>
-                      <Badge variant="default" className="bg-green-100 text-green-800">
-                        <Database className="h-3 w-3 mr-1" />
-                        Online
+                      <span className="text-sm">Total de Usuários:</span>
+                      <Badge variant="outline">{staticStats.total_users}</Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Admins:</span>
+                      <Badge variant="outline" className="bg-red-50 text-red-700">
+                        {isAdmin ? 1 : 0}
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Última Verificação</span>
-                      <span className="text-sm text-muted-foreground">
-                        {lastCheck ? new Date(lastCheck).toLocaleString('pt-BR') : 'Nunca'}
-                      </span>
+                      <span className="text-sm">Instrutores:</span>
+                      <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                        {staticStats.total_users - (isAdmin ? 1 : 0)}
+                      </Badge>
                     </div>
                   </div>
-                  <div className="space-y-2">
+                </CardContent>
+              </Card>
+
+              {/* Usuários Registrados */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Usuários Registrados</CardTitle>
+                  <CardDescription>Últimos usuários cadastrados no sistema</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <Users className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">{profile?.nome_completo || 'Roberto Araujo da Silva'}</p>
+                          <p className="text-sm text-muted-foreground">Administrator</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="bg-red-50 text-red-700">
+                        Admin
+                      </Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Ações Administrativas */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Ações Administrativas</CardTitle>
+                <CardDescription>
+                  Gerenciar usuários e permissões
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Button className="w-full justify-start" variant="outline" onClick={handleListUsers}>
+                    <Users className="h-4 w-4 mr-2" />
+                    Listar Todos os Usuários
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline" onClick={handleManagePermissions}>
+                    <Settings className="h-4 w-4 mr-2" />
+                    Gerenciar Permissões
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline" onClick={handleActivityReport}>
+                    <Activity className="h-4 w-4 mr-2" />
+                    Relatório de Atividades
+                  </Button>
+                  <Button className="w-full justify-start" variant="outline" onClick={handleBackupData}>
+                    <Database className="h-4 w-4 mr-2" />
+                    Backup de Dados
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Congregações */}
+          <TabsContent value="congregations" className="space-y-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-center text-muted-foreground">
+                🏢 Gestão de Congregações para Acesso às Apostilas MWB
+              </h3>
+              <p className="text-center text-sm text-muted-foreground mt-2">
+                🎯 Função Principal: Admin gerencia congregações → Instrutores acessam apostilas
+              </p>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Estatísticas de Congregações */}
+            <Card>
+              <CardHeader>
+                  <CardTitle>Estatísticas</CardTitle>
+                  <CardDescription>Resumo das congregações</CardDescription>
+              </CardHeader>
+              <CardContent>
+                  <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Armazenamento</span>
-                      <span className="text-sm text-muted-foreground">0 MB</span>
+                      <span className="text-sm">Total de Congregações:</span>
+                      <Badge variant="outline">{staticStats.total_congregations}</Badge>
+                  </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Congregações Ativas:</span>
+                      <Badge variant="outline" className="bg-green-50 text-green-700">
+                        {staticStats.active_congregations}
+                      </Badge>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium">Logs do Sistema</span>
-                      <Button variant="outline" size="sm">
-                        Ver Logs
-                      </Button>
+                      <span className="text-sm">Total de Estudantes:</span>
+                      <Badge variant="outline">{staticStats.total_estudantes}</Badge>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Lista de Congregações */}
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Congregações Registradas</CardTitle>
+                  <CardDescription>Lista das congregações no sistema</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <Package className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium">Sistema Ministerial Global</p>
+                          <p className="text-sm text-muted-foreground">Congregação Principal</p>
+                          </div>
+                        </div>
+                      <Badge variant="outline" className="bg-green-50 text-green-700">
+                        Ativa
+                        </Badge>
+                      </div>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <Button variant="outline" className="w-full" onClick={() => handleManageCongregation('Sistema Ministerial Global')}>
+                      <Users className="h-4 w-4 mr-2" />
+                      Gerenciar
+                    </Button>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <Button variant="outline" className="w-full" onClick={handleAddCongregation}>
+                      <Users className="h-4 w-4 mr-2" />
+                      Adicionar Nova Congregação
+                    </Button>
+                  </div>
+                  
+                  <div className="mt-4">
+                    <Button variant="outline" className="w-full">
+                      <Users className="h-4 w-4 mr-2" />
+                      Expandir
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
+          {/* Sistema */}
+          <TabsContent value="system" className="space-y-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-center text-muted-foreground">
+                ⚙️ Monitoramento e Configurações do Sistema
+              </h3>
+              <p className="text-center text-sm text-muted-foreground mt-2">
+                🎯 Função Principal: Admin monitora sistema → Instrutores recebem apostilas estáveis
+              </p>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Downloads JW.org */}
+              <Card className="bg-green-50 border-green-200">
+              <CardHeader>
+                  <CardTitle className="text-green-800">📚 JW.org Downloads</CardTitle>
+                  <CardDescription className="text-green-700">
+                    Gerenciar materiais oficiais
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Apostila MWB Atual:</span>
+                    <Badge variant="outline" className="text-green-600">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Disponível
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Última verificação:</span>
+                    <span className="text-sm text-green-700">Hoje, 10:30</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button size="sm" variant="outline" className="border-green-300 text-green-700" onClick={handleSyncCongregations}>
+                      <RefreshCw className="h-3 w-3 mr-1" />
+                      Sincronizar com Congregações
+                    </Button>
+                    <Button size="sm" variant="outline" className="border-green-300 text-green-700" onClick={handleViewFullProgram}>
+                      <Settings className="h-3 w-3 mr-1" />
+                      Ver Programação Completa
+                    </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+              {/* Configurações Gerais */}
+            <Card>
+              <CardHeader>
+                  <CardTitle>Configurações Gerais</CardTitle>
+                <CardDescription>
+                    Parâmetros do sistema
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                    <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Backup Automático:</span>
+                    <Badge variant="outline" className="bg-green-50 text-green-700">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Diário às 02:00
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Notificações:</span>
+                    <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                      <CheckCircle className="h-3 w-3 mr-1" />
+                      Email + Sistema
+                    </Badge>
+                    </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Manutenção:</span>
+                    <span className="text-sm text-muted-foreground">Última: Ontem</span>
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button size="sm" variant="outline">
+                      <Settings className="h-3 w-3 mr-1" />
+                      Configurar
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Métricas do Sistema */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Métricas do Sistema</CardTitle>
+                <CardDescription>
+                  Monitoramento em tempo real
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <div className="p-3 border rounded-lg text-center">
+                    <p className="text-2xl font-bold text-green-600">99.9%</p>
+                    <p className="text-sm text-muted-foreground">Uptime</p>
+                  </div>
+                  <div className="p-3 border rounded-lg text-center">
+                    <p className="text-2xl font-bold text-blue-600">~120ms</p>
+                    <p className="text-sm text-muted-foreground">Latência</p>
+                  </div>
+                  <div className="p-3 border rounded-lg text-center">
+                    <p className="text-2xl font-bold text-green-600">25%</p>
+                    <p className="text-sm text-muted-foreground">CPU</p>
+                  </div>
+                  <div className="p-3 border rounded-lg text-center">
+                    <p className="text-2xl font-bold text-blue-600">33%</p>
+                    <p className="text-sm text-muted-foreground">Memória</p>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                    <span className="text-sm">CPU:</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="w-24 h-2 bg-gray-200 rounded-full">
+                        <div className="w-1/4 h-2 bg-green-500 rounded-full"></div>
+                    </div>
+                        <span className="text-sm">25%</span>
+                  </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Memória:</span>
+                      <div className="flex items-center space-x-2">
+                        <div className="w-24 h-2 bg-gray-200 rounded-full">
+                          <div className="w-1/3 h-2 bg-blue-500 rounded-full"></div>
+                    </div>
+                        <span className="text-sm">33%</span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm">Banco:</span>
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span className="text-sm">Conectado</span>
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
+
+              {/* Logs e Atividades */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Logs Recentes</CardTitle>
+                  <CardDescription>
+                    Últimas atividades do sistema
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    <div className="flex items-start space-x-3 p-2 border rounded-lg">
+                      <CheckCircle className="h-4 w-4 text-green-500 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Sistema iniciado</p>
+                        <p className="text-xs text-muted-foreground">Hoje, 08:00</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-3 p-2 border rounded-lg">
+                      <Activity className="h-4 w-4 text-blue-500 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Backup automático executado</p>
+                        <p className="text-xs text-muted-foreground">Hoje, 02:00</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-3 p-2 border rounded-lg">
+                      <Users className="h-4 w-4 text-green-500 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Novo usuário registrado</p>
+                        <p className="text-xs text-muted-foreground">Ontem, 16:30</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start space-x-3 p-2 border rounded-lg">
+                      <AlertCircle className="h-4 w-4 text-yellow-500 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">Manutenção programada</p>
+                        <p className="text-xs text-muted-foreground">Ontem, 03:00</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4">
+                    <Button variant="outline" className="w-full" onClick={handleViewAllLogs}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Ver Todos os Logs
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
           </TabsContent>
         </Tabs>
       </div>
     </div>
   );
 }
+*/

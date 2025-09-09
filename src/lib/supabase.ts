@@ -41,26 +41,34 @@ const validateEnvironment = () => {
   return { supabaseUrl, supabaseAnonKey };
 };
 
-// Criar cliente Supabase com validação
+// Criar cliente Supabase com validação em modo singleton (HMR-safe)
 let supabase: ReturnType<typeof createClient>;
 
 try {
   const { supabaseUrl, supabaseAnonKey } = validateEnvironment();
-  
-  supabase = createClient(supabaseUrl, supabaseAnonKey, {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true
-    }
-  });
 
-  // Log de sucesso apenas em desenvolvimento
-  if (import.meta.env.DEV) {
-    console.log('✅ Supabase client configurado com sucesso');
-    console.log('🔗 URL:', import.meta.env.VITE_SUPABASE_URL);
-    console.log('🔑 Chave:', import.meta.env.VITE_SUPABASE_ANON_KEY?.substring(0, 20) + '...');
+  const globalKey = '__SUPABASE_SINGLETON__';
+  const g = globalThis as unknown as Record<string, any>;
+
+  if (!g[globalKey]) {
+    g[globalKey] = createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        // Evita processar o fragmento de URL em cada reload, reduz callbacks duplicados
+        detectSessionInUrl: false,
+      },
+      // Mantém defaults estáveis; ajuste de realtime/db se necessário
+    });
+
+    if (import.meta.env.DEV) {
+      console.log('✅ Supabase client criado (singleton)');
+    }
+  } else if (import.meta.env.DEV) {
+    console.log('♻️ Reutilizando Supabase client existente (singleton)');
   }
+
+  supabase = g[globalKey];
 } catch (error) {
   console.error('❌ Erro ao configurar Supabase:', error);
   throw error;

@@ -1,11 +1,19 @@
 const { createClient } = require('@supabase/supabase-js');
+require('dotenv').config();
 
 // Configurações do Supabase
-const supabaseUrl = process.env.VITE_SUPABASE_URL || 'https://nwpuurgwnnuejqinkvrh.supabase.co';
-const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjIwNjUsImV4cCI6MjA3MDAzODA2NX0.UHjSvXYY_c-_ydAIfELRUs4CMEBLKiztpBGQBNPHfak';
+const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || 'https://nwpuurgwnnuejqinkvrh.supabase.co';
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjIwNjUsImV4cCI6MjA3MDAzODA2NX0.UHjSvXYY_c-_ydAIfELRUs4CMEBLKiztpBGQBNPHfak';
 
-// Criar cliente Supabase
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Criar cliente Supabase com service key para operações do backend
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+// Log da configuração (sem expor a chave)
+console.log('🔧 Supabase configurado:', {
+  url: supabaseUrl,
+  keyType: supabaseServiceKey.includes('service_role') ? 'SERVICE_ROLE' : 'ANON_KEY',
+  keyLength: supabaseServiceKey.length
+});
 
 // Função para testar conexão
 async function testConnection() {

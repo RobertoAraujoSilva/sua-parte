@@ -11,7 +11,20 @@ cypress/downloads/
 # Production
 build/
 dist/
+dist-electron/
 out/
+
+# Electron build artifacts
+release/
+app/dist/
+app/build/
+*.asar
+*.exe
+*.dmg
+*.AppImage
+*.deb
+*.rpm
+*.snap
 
 # Environment variables
 .env
@@ -109,3 +122,8 @@ backend/config.env
 
 # Supabase
 .supabase/
+supabase.temp
+
+# Large documentation files
+docs/Oficial/*.daisy.zip
+docs/Oficial/*.epub

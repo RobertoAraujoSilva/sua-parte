@@ -159,7 +159,7 @@ const Estudantes = () => {
         <div className="p-4">
           <EmptyState
             title={t('errors.loadingFailed')}
-            subtitle={String(error).includes("timeout") ? t('errors.timeout') : t('errors.unknownError')}
+            description={String(error).includes("timeout") ? t('errors.timeout') : t('errors.unknownError')}
             action={<Button onClick={() => refetch()}>{t('common.refresh')}</Button>}
           />
         </div>
