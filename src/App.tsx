@@ -2,6 +2,7 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 import AdminDashboard from './components/dashboards/AdminDashboard';
 import InstructorDashboard from './components/dashboards/InstructorDashboard';
 import StudentDashboard from './components/dashboards/StudentDashboard';
@@ -19,12 +20,16 @@ function App() {
           <Route path="/auth" element={<Auth />} />
           <Route path="/admin" element={
             <ProtectedRoute allowedRoles={['admin']}>
-              <AdminDashboard />
+              <ErrorBoundary>
+                <AdminDashboard />
+              </ErrorBoundary>
             </ProtectedRoute>
           } />
           <Route path="/dashboard" element={
             <ProtectedRoute allowedRoles={['instrutor']}>
-              <InstructorDashboard />
+              <ErrorBoundary>
+                <InstructorDashboard />
+              </ErrorBoundary>
             </ProtectedRoute>
           } />
           <Route path="/" element={<Auth />} />

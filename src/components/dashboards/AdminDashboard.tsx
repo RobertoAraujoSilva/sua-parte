@@ -30,8 +30,9 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import useBackendAPI from '@/hooks/useBackendAPI';
+import { useSupabaseMaterials } from '@/hooks/useSupabaseMaterials';
 import CongregationManager from '@/components/CongregationManager';
-import ProgramPublisher from '@/components/ProgramPublisher';
+import ProgramManager from '@/components/ProgramManager';
 
 interface AdminStats {
   totalCongregations: number;
@@ -73,6 +74,7 @@ interface Material {
 const AdminDashboard: React.FC = () => {
   const { user, profile } = useAuth();
   const backendAPI = useBackendAPI();
+  const supabaseMaterials = useSupabaseMaterials();
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState<AdminStats>({
     totalCongregations: 0,
@@ -128,9 +130,9 @@ const AdminDashboard: React.FC = () => {
       // Transform data to match our interface
       const transformedPrograms: ProgramSchedule[] = (data || []).map(program => ({
         id: program.id,
-        week: `Semana ${program.semana}`,
-        date: program.data_reuniao || '',
-        theme: program.tema_reuniao || 'Tema não definido',
+        week: `Semana ${program.week || '1'}`,
+        date: program.date || new Date().toISOString().split('T')[0],
+        theme: program.theme || 'Tema não definido',
         parts: [], // Would need to parse from program data
         status: program.status === 'ativo' ? 'published' : 'draft',
         language: 'pt-BR'
@@ -142,16 +144,45 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  // Load real materials from backend API using custom hook
+  // Load materials from Supabase Storage
   const loadMaterials = async () => {
-    // First, test backend connectivity
+    // Try Supabase Storage first
+    await supabaseMaterials.loadMaterials();
+    
+    if (supabaseMaterials.materials.length > 0) {
+      setBackendConnected(true);
+      setUsingRealData(true);
+      
+      const transformedMaterials: Material[] = supabaseMaterials.materials.map((material) => {
+        let displayName = material.name
+          .replace(/[<>"'&]/g, '')
+          .replace(/\.(pdf|jwpub|rtf|zip)$/i, '')
+          .replace(/_/g, ' ')
+          .replace(/mwb /gi, 'MWB ')
+          .replace(/\b\w/g, (l: string) => l.toUpperCase());
+
+        return {
+          id: material.name,
+          name: `📄 ${displayName}`,
+          type: material.type,
+          language: material.language,
+          size: `${(material.size / 1024 / 1024).toFixed(1)} MB`,
+          downloadDate: material.downloadDate ? new Date(material.downloadDate).toISOString().split('T')[0] : '',
+          status: 'available' as const
+        };
+      });
+      
+      setMaterials(transformedMaterials);
+      return;
+    }
+    
+    // Fallback to backend API
     const isConnected = await backendAPI.testConnection();
     setBackendConnected(isConnected);
     
     if (!isConnected) {
       setUsingRealData(false);
       
-      // Use production mock data
       const { mockMaterials } = await import('@/data/mockMaterials');
       const transformedMaterials: Material[] = mockMaterials.map((material) => {
         const extension = material.filename.split('.').pop()?.toLowerCase();
@@ -519,12 +550,7 @@ const AdminDashboard: React.FC = () => {
                   </Button>
                 </div>
 
-                <ProgramPublisher 
-                  programs={programs} 
-                  onPublish={() => {
-                    loadPrograms();
-                  }}
-                />
+                <ProgramManager />
               </CardContent>
             </Card>
           </TabsContent>
@@ -582,8 +608,10 @@ const AdminDashboard: React.FC = () => {
                               {material.status === 'available' ? 'Disponível' :
                                material.status === 'downloading' ? 'Baixando...' : 'Erro'}
                             </Badge>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4" />
+                            <Button variant="outline" size="sm" asChild>
+                              <a href={supabaseMaterials.materials.find(m => m.name === material.id)?.url} target="_blank" rel="noopener noreferrer">
+                                <Eye className="h-4 w-4" />
+                              </a>
                             </Button>
                           </div>
                         </div>
