@@ -120,7 +120,7 @@ export function useAdminCache(): UseAdminCacheReturn {
         [] // Fallback: array vazio
       );
 
-      setProfiles(data as Profile[]);
+      setProfiles(data as any[]);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar perfis';
       setError(errorMessage);

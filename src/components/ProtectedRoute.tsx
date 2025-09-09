@@ -98,14 +98,7 @@ const ProtectedRoute = ({
     if (requireAuth && !user) {
       console.log('🚫 ProtectedRoute: No user, redirecting to auth');
       navigate('/auth');
-      // Renderizamos um componente de carregamento em vez de retornar undefined
-      return (
-        <LoadingScreen 
-          message="Redirecionando" 
-          subMessage="Direcionando para página de login..."
-          spinnerSize="h-8 w-8"
-        />
-      );
+      return;
     }
 
     // If user is logged in, check access
@@ -153,13 +146,7 @@ const ProtectedRoute = ({
         } else {
           navigate('/auth');
         }
-        return (
-           <LoadingScreen 
-             message="Redirecionando" 
-             subMessage="Direcionando para área apropriada..."
-             spinnerSize="h-8 w-8"
-           />
-         );
+        return;
         } else {
           console.log('✅ ProtectedRoute: Access granted for role:', userRole);
           setAccessCheckComplete(true);
@@ -182,22 +169,11 @@ const ProtectedRoute = ({
         // No role found - check if we should wait or timeout
         if (!profileTimeout) {
           console.log('⏳ ProtectedRoute: No role found, waiting for profile...');
-          return (
-            <LoadingScreen 
-              message="Verificando Permissões" 
-              subMessage="Carregando perfil do usuário..."
-            />
-          );
+          return;
         } else {
           console.log('❌ ProtectedRoute: Profile timeout reached, no role available, redirecting to auth');
           navigate('/auth');
-          return (
-            <LoadingScreen 
-              message="Redirecionando" 
-              subMessage="Configurando acesso ao sistema..."
-              spinnerSize="h-8 w-8"
-            />
-          );
+          return;
         }
       }
     }

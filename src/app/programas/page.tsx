@@ -59,7 +59,7 @@ export default function ProgramasPage() {
       const q = supabase
         .from("programas")
         .select("*", { count: "exact" })
-        .eq("user_id", userId)
+        .eq("user_id", userId as any)
         .ilike("titulo", `%${search}%`)
         .order("data_programa", { ascending: false })
         .range(from, to);
@@ -89,7 +89,7 @@ export default function ProgramasPage() {
       const { data, error } = await supabase
         .from("programas")
         .select("*")
-        .eq("user_id", userId);
+        .eq("user_id", userId as any);
       
       if (error) {
         console.error(error);
@@ -155,8 +155,8 @@ export default function ProgramasPage() {
     try {
       const { error } = await supabase
         .from("programas")
-        .update({ [field]: value })
-        .eq("id", row.id);
+        .update({ [field]: value } as any)
+        .eq("id", row.id as any);
       
       if (error) throw error;
       

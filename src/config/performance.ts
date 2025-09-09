@@ -153,8 +153,8 @@ export const analyzeBundle = () => {
   if (typeof window !== 'undefined') {
     const resources = performance.getEntriesByType('resource');
     const totalSize = resources.reduce((acc, resource) => {
-      if (resource.transferSize) {
-        return acc + resource.transferSize;
+      if ('transferSize' in resource && (resource as PerformanceResourceTiming).transferSize) {
+        return acc + (resource as PerformanceResourceTiming).transferSize;
       }
       return acc;
     }, 0);
@@ -165,13 +165,14 @@ export const analyzeBundle = () => {
     
     // Top 5 largest resources
     const largestResources = resources
-      .filter(r => r.transferSize)
-      .sort((a, b) => (b.transferSize || 0) - (a.transferSize || 0))
+      .filter(r => 'transferSize' in r && (r as PerformanceResourceTiming).transferSize)
+      .sort((a, b) => ((b as PerformanceResourceTiming).transferSize || 0) - ((a as PerformanceResourceTiming).transferSize || 0))
       .slice(0, 5);
 
     console.log('Top 5 Largest Resources:');
     largestResources.forEach((resource, index) => {
-      console.log(`${index + 1}. ${resource.name}: ${(resource.transferSize! / 1024).toFixed(2)} KB`);
+      const size = (resource as PerformanceResourceTiming).transferSize || 0;
+      console.log(`${index + 1}. ${resource.name}: ${(size / 1024).toFixed(2)} KB`);
     });
   }
 };
