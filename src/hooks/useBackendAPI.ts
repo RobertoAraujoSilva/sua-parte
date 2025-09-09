@@ -34,7 +34,7 @@ const useBackendAPI = (config?: Partial<BackendAPIConfig>) => {
   const [error, setError] = useState<string | null>(null);
 
   const defaultConfig: BackendAPIConfig = {
-    baseUrl: 'http://localhost:3001',
+    baseUrl: import.meta.env.PROD ? '' : 'http://localhost:3001',
     timeout: 10000,
     ...config
   };
@@ -152,6 +152,11 @@ const useBackendAPI = (config?: Partial<BackendAPIConfig>) => {
 
   // Test backend connectivity
   const testConnection = useCallback(async (): Promise<boolean> => {
+    // In production, return false to use mock data
+    if (import.meta.env.PROD || !defaultConfig.baseUrl) {
+      return false;
+    }
+    
     try {
       const response = await fetch(`${defaultConfig.baseUrl}/api/admin/status`, {
         method: 'GET',
@@ -163,7 +168,6 @@ const useBackendAPI = (config?: Partial<BackendAPIConfig>) => {
       
       return response.ok;
     } catch (error) {
-      console.error('❌ Backend connection test failed:', error);
       return false;
     }
   }, [defaultConfig.baseUrl, user]);

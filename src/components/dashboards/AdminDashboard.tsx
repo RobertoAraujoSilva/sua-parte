@@ -144,38 +144,46 @@ const AdminDashboard: React.FC = () => {
 
   // Load real materials from backend API using custom hook
   const loadMaterials = async () => {
-    // Loading materials from backend
-    
     // First, test backend connectivity
     const isConnected = await backendAPI.testConnection();
     setBackendConnected(isConnected);
     
     if (!isConnected) {
-      // Backend not available, using mock data
       setUsingRealData(false);
       
-      // Use mock data when backend is not available
-      const mockMaterials: Material[] = [
-        {
-          id: 'mock-1',
-          name: '⚠️ Backend Offline - Dados de Exemplo',
-          type: 'PDF',
-          language: 'pt-BR',
-          size: '0 KB',
-          downloadDate: '',
-          status: 'error'
-        },
-        {
-          id: 'mock-2',
-          name: 'Para ver dados reais, inicie o backend (npm run dev:backend)',
-          type: 'PDF',
-          language: 'pt-BR',
-          size: '0 KB',
-          downloadDate: '',
-          status: 'error'
+      // Use production mock data
+      const { mockMaterials } = await import('@/data/mockMaterials');
+      const transformedMaterials: Material[] = mockMaterials.map((material) => {
+        const extension = material.filename.split('.').pop()?.toLowerCase();
+        let type: 'PDF' | 'JWPub' | 'RTF' = 'PDF';
+        
+        if (extension === 'jwpub') type = 'JWPub';
+        else if (extension === 'rtf') type = 'RTF';
+        
+        let language = 'pt-BR';
+        if (material.filename.includes('_E_') || material.filename.includes('_E.')) {
+          language = 'en';
         }
-      ];
-      setMaterials(mockMaterials);
+
+        let displayName = material.filename
+          .replace(/[<>"'&]/g, '')
+          .replace(/\.(pdf|jwpub|rtf|zip)$/i, '')
+          .replace(/_/g, ' ')
+          .replace(/mwb /gi, 'MWB ')
+          .replace(/\b\w/g, (l: string) => l.toUpperCase());
+
+        return {
+          id: material.filename,
+          name: `📄 ${displayName}`,
+          type,
+          language,
+          size: material.sizeFormatted,
+          downloadDate: new Date(material.modifiedAt).toISOString().split('T')[0],
+          status: 'available' as const
+        };
+      });
+      
+      setMaterials(transformedMaterials);
       return;
     }
 

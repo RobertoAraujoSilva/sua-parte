@@ -148,11 +148,9 @@ export function ProgramDisplay({
                         <span className="text-xs text-gray-500">{designacao.estudante.cargo}</span>
                       </div>
                     ) : (
-                      <React.Fragment>
-                        <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-800">
-                          [Para designar]
-                        </Badge>
-                      </React.Fragment>
+                      <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-800">
+                        [Para designar]
+                      </Badge>
                     )}
                   </TableCell>
                   <TableCell>
