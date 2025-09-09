@@ -310,11 +310,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log('🚪 Signing out user');
       setLoading(true);
 
+      // Verificar se há uma sessão ativa antes de tentar logout
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        console.log('⚠️ No active session found, clearing local state only');
+        setUser(null);
+        setProfile(null);
+        setAuthError(null);
+        return { error: null };
+      }
+
       const { error } = await supabase.auth.signOut();
 
       if (error) {
         console.error('❌ Sign out error:', error);
-        setAuthError(`Erro no logout: ${error.message}`);
+        // Mesmo com erro, limpar estado local
+        setUser(null);
+        setProfile(null);
+        setAuthError(null);
         return { error };
       }
 
@@ -325,7 +339,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { error: null };
     } catch (err) {
       console.error('❌ Unexpected error during sign out:', err);
-      setAuthError('Erro inesperado durante o logout');
+      // Mesmo com erro, limpar estado local
+      setUser(null);
+      setProfile(null);
+      setAuthError(null);
       return { error: err as AuthError };
     } finally {
       setLoading(false);
