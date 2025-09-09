@@ -13,6 +13,8 @@
  * - ✅ Metrics & monitoring
  */
 
+import { Estudante } from '@/types/estudante';
+
 interface CacheConfig {
   ttl: number;
   maxSize: number;
@@ -385,7 +387,7 @@ export class CacheAsideManagerEnhanced<T> {
  */
 export class EnhancedCacheFactory {
   // Cache para dados críticos (maior TTL, sem circuit breaker)
-  static readonly profiles = new CacheAsideManagerEnhanced({
+  static readonly profiles = new CacheAsideManagerEnhanced<any>({
     ttl: 15 * 60 * 1000, // 15 minutos
     maxSize: 500,
     enableCircuitBreaker: false, // Dados críticos sempre tentam buscar
@@ -393,7 +395,7 @@ export class EnhancedCacheFactory {
   });
 
   // Cache para listagens (TTL menor, circuit breaker ativo)
-  static readonly estudantes = new CacheAsideManagerEnhanced({
+  static readonly estudantes = new CacheAsideManagerEnhanced<Estudante[]>({
     ttl: 5 * 60 * 1000, // 5 minutos
     maxSize: 1000,
     enableCircuitBreaker: true,
@@ -401,7 +403,7 @@ export class EnhancedCacheFactory {
   });
 
   // Cache para métricas (TTL muito baixo, fallback sempre disponível)
-  static readonly metrics = new CacheAsideManagerEnhanced({
+  static readonly metrics = new CacheAsideManagerEnhanced<any>({
     ttl: 2 * 60 * 1000, // 2 minutos
     maxSize: 100,
     enableCircuitBreaker: true,
@@ -409,7 +411,7 @@ export class EnhancedCacheFactory {
   });
 
   // Cache para configurações (TTL alto, alta prioridade)
-  static readonly settings = new CacheAsideManagerEnhanced({
+  static readonly settings = new CacheAsideManagerEnhanced<any>({
     ttl: 30 * 60 * 1000, // 30 minutos
     maxSize: 200,
     enableCircuitBreaker: false,

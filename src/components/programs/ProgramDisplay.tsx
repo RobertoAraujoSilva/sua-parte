@@ -4,9 +4,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
-import { Skeleton } from '@/components/ui/skeleton';
 
-type Parte = {
+// Tipos de dados
+export type Parte = {
   numero_parte: number;
   titulo_parte: string;
   tipo_parte: string;
@@ -15,12 +15,12 @@ type Parte = {
   requer_ajudante?: boolean;
 };
 
-type Designacao = {
+export type Designacao = {
   estudante?: { nome: string; cargo: string };
   ajudante?: { nome: string; cargo: string };
 };
 
-type ProgramDisplayProps = {
+export type ProgramDisplayProps = {
   partes?: Parte[];
   isEditable?: boolean;
   onEditDesignacao?: (designacao: any) => void;
@@ -78,9 +78,9 @@ export function ProgramDisplay({
     <Card className="w-full shadow-md">
       <CardHeader className="bg-jw-navy text-white">
         <div className="flex justify-between items-center">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onNavigatePrevious}
             disabled={!onNavigatePrevious}
             className="text-white hover:bg-jw-navy-light"
@@ -88,15 +88,15 @@ export function ProgramDisplay({
             <ChevronLeft className="w-5 h-5" />
             Semana Anterior
           </Button>
-          
+
           <CardTitle className="text-center flex items-center gap-2">
             <Calendar className="w-5 h-5" />
             Semana de {dataFormatada} a {dataFimFormatada}
           </CardTitle>
-          
-          <Button 
-            variant="ghost" 
-            size="sm" 
+
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={onNavigateNext}
             disabled={!onNavigateNext}
             className="text-white hover:bg-jw-navy-light"
@@ -148,9 +148,11 @@ export function ProgramDisplay({
                         <span className="text-xs text-gray-500">{designacao.estudante.cargo}</span>
                       </div>
                     ) : (
-                      <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-800">
-                        [Para designar]
-                      </Badge>
+                      <React.Fragment>
+                        <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-800">
+                          [Para designar]
+                        </Badge>
+                      </React.Fragment>
                     )}
                   </TableCell>
                   <TableCell>
@@ -171,16 +173,21 @@ export function ProgramDisplay({
                   </TableCell>
                   {isEditable && (
                     <TableCell>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => onEditDesignacao && onEditDesignacao(designacao || {
-                          numero_parte: parte.numero_parte,
-                          titulo_parte: parte.titulo_parte,
-                          tipo_parte: parte.tipo_parte,
-                          tempo_minutos: parte.tempo_minutos,
-                          cena: parte.cena
-                        })}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          onEditDesignacao &&
+                          onEditDesignacao(
+                            designacao || {
+                              numero_parte: parte.numero_parte,
+                              titulo_parte: parte.titulo_parte,
+                              tipo_parte: parte.tipo_parte,
+                              tempo_minutos: parte.tempo_minutos,
+                              cena: parte.cena,
+                            }
+                          )
+                        }
                       >
                         Editar
                       </Button>
@@ -191,55 +198,6 @@ export function ProgramDisplay({
             })}
           </TableBody>
         </Table>
-      </CardContent>
-    </Card>
-  );
-}
-
-                      <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-800">
-                        [Para designar]
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {parte.requer_ajudante ? (
-                      designacao?.ajudante ? (
-                        <div className="flex flex-col">
-                          export * from './ProgramDisplay.fixed';
-                          </div>
-                        ) : (
-                          <Badge variant="outline" className="bg-yellow-50 border-yellow-200 text-yellow-800">
-                            [Assistente]
-                          </Badge>
-                        )
-                      ) : (
-                        <span className="text-gray-400">—</span>
-                      )}
-                    </TableCell>
-                    
-                    {isEditable && (
-                      <TableCell>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => onEditDesignacao && onEditDesignacao(designacao || {
-                            numero_parte: parte.numero_parte,
-                            titulo_parte: parte.titulo_parte,
-                            tipo_parte: parte.tipo_parte,
-                            tempo_minutos: parte.tempo_minutos,
-                            cena: parte.cena
-                          })}
-                        >
-                          Editar
-                        </Button>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        )}
       </CardContent>
     </Card>
   );

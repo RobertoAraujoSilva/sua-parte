@@ -17,14 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
  * - ✅ Health monitoring integrado
  */
 
-interface Estudante {
-  id: string;
-  nome: string;
-  sobrenome: string;
-  congregacao_id?: string;
-  ativo: boolean | null;
-  created_at: string;
-}
+import { Estudante } from '@/types/estudante';
 
 interface UseEstudantesEnhancedReturn {
   // Data
@@ -87,7 +80,7 @@ export function useCacheAsideEstudantesEnhanced(): UseEstudantesEnhancedReturn {
           const { data, error } = await supabase
             .from('estudantes')
             .select('*')
-            .eq('ativo', true as boolean)
+            .eq('ativo', true)
             .order('nome', { ascending: true });
 
           if (error) {
@@ -95,7 +88,7 @@ export function useCacheAsideEstudantesEnhanced(): UseEstudantesEnhancedReturn {
             throw new Error(`Database error: ${error.message}`);
           }
 
-          return data || [];
+          return data as Estudante[] || [];
         },
         fallbackEstudantes // 🛡️ Fallback data sempre disponível
       );
