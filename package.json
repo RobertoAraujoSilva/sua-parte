@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 8080 --strictPort",
-    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:all": "npm run kill-ports && concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "kill-ports": "scripts\\kill-ports.bat",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "vite --port 8080 --strictPort",

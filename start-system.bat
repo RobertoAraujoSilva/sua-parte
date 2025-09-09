@@ -10,17 +10,17 @@ for /f "tokens=5" %%a in ('netstat -ano ^| findstr :8787') do taskkill /PID %%a 
 echo ✅ Portas limpas!
 timeout /t 2 >nul
 
-echo 🎯 Iniciando Backend (porta 8787)...
-set PORT=8787
-start "Backend" cmd /k "cd backend && set PORT=8787 && npm run dev"
+echo 🎯 Iniciando Backend (porta 3000)...
+set PORT=3000
+start "Backend" cmd /k "cd backend && set PORT=3000 && npm run dev"
 
 timeout /t 3 >nul
 
-echo 🌐 Iniciando Frontend (porta 5173)...
+echo 🌐 Iniciando Frontend (porta 8080)...
 start "Frontend" cmd /k "npm run dev:frontend-only"
 
 echo 🎉 Sistema iniciado!
-echo 📱 Frontend: http://localhost:5173
-echo 🔧 Backend: http://localhost:8787
-echo 👑 Admin: http://localhost:5173/admin
+echo 📱 Frontend: http://localhost:8080
+echo 🔧 Backend: http://localhost:3000
+echo 👑 Admin: http://localhost:8080/admin
 pause
