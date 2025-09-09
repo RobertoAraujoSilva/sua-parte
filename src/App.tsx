@@ -1,12 +1,41 @@
 
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
-import WorkingDashboard from './components/WorkingDashboard';
-
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminDashboard from './components/dashboards/AdminDashboard';
+import InstructorDashboard from './components/dashboards/InstructorDashboard';
+import StudentDashboard from './components/dashboards/StudentDashboard';
+import Auth from './pages/Auth';
 
 function App() {
   return (
     <AuthProvider>
-      <WorkingDashboard />
+      <Router>
+        <Routes>
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/admin" element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/dashboard" element={
+            <ProtectedRoute allowedRoles={['instrutor']}>
+              <InstructorDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/" element={
+            <ProtectedRoute allowedRoles={['instrutor']}>
+              <InstructorDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/estudante/:id" element={
+            <ProtectedRoute allowedRoles={['estudante']}>
+              <StudentDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
     </AuthProvider>
   );
 }

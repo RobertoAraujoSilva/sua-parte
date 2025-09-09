@@ -27,6 +27,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import AssignmentSystem from '@/components/AssignmentSystem';
+import { cacheGet, cacheSet, isOnline } from '@/utils/offlineCache';
 
 interface InstructorStats {
   totalStudents: number;
@@ -89,10 +91,20 @@ const InstructorDashboard: React.FC = () => {
   const [students, setStudents] = useState<Student[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [offline, setOffline] = useState(!isOnline());
 
   // Load instructor statistics
   const loadStats = async () => {
     if (!user?.id) return;
+
+    // Try cache first if offline
+    if (!isOnline()) {
+      const cached = cacheGet(`instructor_stats_${user.id}`);
+      if (cached) {
+        setStats(cached);
+        return;
+      }
+    }
 
     try {
       const [studentsResult, assignmentsResult, programsResult] = await Promise.all([
@@ -108,14 +120,17 @@ const InstructorDashboard: React.FC = () => {
         .eq('user_id', user.id)
         .eq('confirmado', false);
 
-      setStats({
+      const statsData = {
         totalStudents: studentsResult.count || 0,
         totalAssignments: assignmentsResult.count || 0,
         pendingConfirmations: pendingData?.length || 0,
         completedAssignments: (assignmentsResult.count || 0) - (pendingData?.length || 0),
         activePrograms: programsResult.count || 0,
         lastSync: new Date().toISOString()
-      });
+      };
+      
+      setStats(statsData);
+      cacheSet(`instructor_stats_${user.id}`, statsData);
     } catch (error) {
       console.error('Error loading instructor stats:', error);
     }
@@ -258,6 +273,21 @@ const InstructorDashboard: React.FC = () => {
     };
 
     initializeData();
+
+    // Listen for online/offline events
+    const handleOnline = () => {
+      setOffline(false);
+      initializeData(); // Refresh data when back online
+    };
+    const handleOffline = () => setOffline(true);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, [user?.id]);
 
   if (loading) {
@@ -283,6 +313,16 @@ const InstructorDashboard: React.FC = () => {
               </p>
             </div>
           </div>
+
+          {/* Offline Status */}
+          {offline && (
+            <Alert className="mb-4 border-orange-200 bg-orange-50">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Modo Offline</strong> - Exibindo dados em cache. Conecte-se à internet para sincronizar.
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Local Statistics */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
@@ -364,10 +404,13 @@ const InstructorDashboard: React.FC = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button className="w-full justify-start">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Nova Designação
-                  </Button>
+                  <AssignmentSystem 
+                    programId={programs[0]?.id || ''} 
+                    onAssignmentCreated={() => {
+                      loadAssignments();
+                      loadStats();
+                    }}
+                  />
                   <Button variant="outline" className="w-full justify-start">
                     <Users className="mr-2 h-4 w-4" />
                     Cadastrar Estudante

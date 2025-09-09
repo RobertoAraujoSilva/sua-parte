@@ -30,6 +30,8 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import useBackendAPI from '@/hooks/useBackendAPI';
+import CongregationManager from '@/components/CongregationManager';
+import ProgramPublisher from '@/components/ProgramPublisher';
 
 interface AdminStats {
   totalCongregations: number;
@@ -91,7 +93,7 @@ const AdminDashboard: React.FC = () => {
   const loadStats = async () => {
     try {
       const [congregationsResult, instructorsResult, studentsResult, programsResult, assignmentsResult] = await Promise.all([
-        supabase.from('profiles').select('id', { count: 'exact' }).eq('role', 'instrutor'),
+        supabase.from('profiles').select('id', { count: 'exact' }).eq('role', 'admin'),
         supabase.from('profiles').select('id', { count: 'exact' }).eq('role', 'instrutor'),
         supabase.from('profiles').select('id', { count: 'exact' }).eq('role', 'estudante'),
         supabase.from('programas').select('id', { count: 'exact' }),
@@ -142,14 +144,14 @@ const AdminDashboard: React.FC = () => {
 
   // Load real materials from backend API using custom hook
   const loadMaterials = async () => {
-    console.log('🔄 Loading materials from backend...');
+    // Loading materials from backend
     
     // First, test backend connectivity
     const isConnected = await backendAPI.testConnection();
     setBackendConnected(isConnected);
     
     if (!isConnected) {
-      console.log('❌ Backend not available, using mock data');
+      // Backend not available, using mock data
       setUsingRealData(false);
       
       // Use mock data when backend is not available
@@ -202,8 +204,9 @@ const AdminDashboard: React.FC = () => {
             language = 'pt-BR';
           }
 
-          // Clean up filename for display
+          // Clean up filename for display (sanitized)
           let displayName = material.filename
+            .replace(/[<>"'&]/g, '') // Remove XSS characters
             .replace(/\.(pdf|jwpub|rtf|zip)$/i, '')
             .replace(/_/g, ' ')
             .replace(/mwb /gi, 'MWB ')
@@ -221,13 +224,12 @@ const AdminDashboard: React.FC = () => {
         });
 
         setMaterials(transformedMaterials);
-        console.log(`✅ Loaded ${transformedMaterials.length} REAL materials from backend`);
-        console.log('📁 Files from docs/Oficial:', transformedMaterials.map(m => m.id));
+        // Loaded materials from backend successfully
       } else {
         throw new Error('Invalid response format from backend');
       }
     } catch (error) {
-      console.error('❌ Error loading materials from backend API:', error);
+      // Error loading materials from backend API
       setUsingRealData(false);
       
       // Fallback to mock data
@@ -257,18 +259,18 @@ const AdminDashboard: React.FC = () => {
 
   // Function to trigger material sync
   const handleSyncMaterials = async () => {
-    console.log('🔄 Triggering material sync...');
+    // Triggering material sync
     try {
       const response = await backendAPI.materials.syncAll();
       if (response.success) {
-        console.log('✅ Sync completed:', response.data);
+        // Sync completed successfully
         // Reload materials after sync
         await loadMaterials();
       } else {
-        console.error('❌ Sync failed:', response.error);
+        // Sync failed
       }
     } catch (error) {
-      console.error('❌ Sync error:', error);
+      // Sync error occurred
     }
   };
 
@@ -509,31 +511,12 @@ const AdminDashboard: React.FC = () => {
                   </Button>
                 </div>
 
-                <div className="space-y-4">
-                  {programs.map((program) => (
-                    <Card key={program.id} className="border-l-4 border-l-blue-500">
-                      <CardContent className="pt-4">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h4 className="font-semibold">{program.week}</h4>
-                            <p className="text-sm text-muted-foreground">{program.date}</p>
-                            <p className="text-sm mt-1">{program.theme}</p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge 
-                              variant={program.status === 'published' ? 'default' : 'secondary'}
-                            >
-                              {program.status === 'published' ? 'Publicado' : 'Rascunho'}
-                            </Badge>
-                            <Button variant="outline" size="sm">
-                              <Edit3 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                <ProgramPublisher 
+                  programs={programs} 
+                  onPublish={() => {
+                    loadPrograms();
+                  }}
+                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -617,12 +600,7 @@ const AdminDashboard: React.FC = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Funcionalidade em desenvolvimento. Por enquanto, o sistema suporta uma congregação.
-                  </AlertDescription>
-                </Alert>
+                <CongregationManager />
               </CardContent>
             </Card>
           </TabsContent>

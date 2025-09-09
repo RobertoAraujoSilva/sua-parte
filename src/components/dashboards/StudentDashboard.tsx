@@ -254,6 +254,10 @@ const StudentDashboard: React.FC = () => {
 
   // Handle assignment confirmation/decline
   const handleAssignmentResponse = async (assignmentId: string, response: 'confirm' | 'decline') => {
+    if (!assignmentId || !['confirm', 'decline'].includes(response)) {
+      return;
+    }
+    
     try {
       const { error } = await supabase
         .from('designacoes')
