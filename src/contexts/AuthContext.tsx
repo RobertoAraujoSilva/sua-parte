@@ -290,96 +290,66 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Get initial session with refresh token error handling
     const getInitialSession = async () => {
       try {
-        console.log('🔄 Getting initial session...');
-
-        const { session, error, recovered } = await recoverSessionWithErrorHandling();
-
-        if (!recovered) {
-          console.log('❌ Session recovery failed, user will need to log in again');
-          setLoading(false);
-          setInitialLoadComplete(true); // Mark initial load as complete
-          return;
-        }
+        const { data: { session }, error } = await supabase.auth.getSession();
 
         if (error) {
-          console.error('❌ Error getting initial session:', error);
+          if (error.message.includes('Invalid Refresh Token') || error.message.includes('Refresh Token Not Found')) {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            sessionStorage.clear();
+          }
           setLoading(false);
-          setInitialLoadComplete(true); // Mark initial load as complete
-          return;
-        }
-
-        if (!session) {
-          console.log('ℹ️ No session found');
-          setLoading(false);
-          setInitialLoadComplete(true); // Mark initial load as complete
+          setInitialLoadComplete(true);
           return;
         }
 
         if (session?.user) {
-          console.log('✅ Initial session found');
           setSession(session);
           setUser(session.user);
-
-          // Fetch profile
-          fetchProfile(session.user.id)
-            .then(userProfile => {
-              console.log('✅ Initial profile loaded successfully');
-              setProfile(userProfile);
-            })
-            .catch((error: unknown) => {
-              const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-              console.error('❌ Initial profile fetch failed:', errorMessage);
-            });
-        } else {
-          console.log('ℹ️ No initial session found');
+          const userProfile = await fetchProfile(session.user.id);
+          setProfile(userProfile);
         }
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error('Error in getInitialSession:', errorMessage);
+        if (errorMessage.includes('Invalid Refresh Token')) {
+          await supabase.auth.signOut();
+          localStorage.clear();
+          sessionStorage.clear();
+        }
       } finally {
         setLoading(false);
-        setInitialLoadComplete(true); // Mark initial load as complete
+        setInitialLoadComplete(true);
       }
     };
 
     getInitialSession();
 
-    // Listen for auth changes with refresh token error handling
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('🔄 Auth state changed:', event, session?.user?.email);
-        
-        // Skip INITIAL_SESSION during initial load to prevent race conditions
         if (!initialLoadComplete && event === 'INITIAL_SESSION') {
-          console.log('⏭️ Skipping INITIAL_SESSION event (already handled by getInitialSession)');
           return;
         }
 
         try {
           if (session?.user) {
-            console.log('👤 Setting user and session...');
             setSession(session);
             setUser(session.user);
-
-            // Fetch profile with error handling
-            await withRefreshTokenErrorHandling(async () => {
-              const userProfile = await fetchProfile(session.user.id);
-              console.log('📋 Profile loaded:', userProfile);
-              setProfile(userProfile);
-            });
+            const userProfile = await fetchProfile(session.user.id);
+            setProfile(userProfile);
           } else {
-            console.log('🚪 User signed out, clearing data...');
             setSession(null);
             setUser(null);
             setProfile(null);
           }
         } catch (error: unknown) {
           const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          console.error('❌ Auth state change error:', errorMessage);
-          
-          // If it's a refresh token error, the global handler will take care of it
-          if (errorMessage.includes('Authentication session expired')) {
-            return; // Don't set loading to false, let the logout process handle it
+          if (errorMessage.includes('Invalid Refresh Token')) {
+            await supabase.auth.signOut();
+            localStorage.clear();
+            sessionStorage.clear();
+            setSession(null);
+            setUser(null);
+            setProfile(null);
           }
         }
 
@@ -426,21 +396,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await withRefreshTokenErrorHandling(async () => {
-        const result = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        return result;
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
 
       if (error) {
-        console.error('SignIn error:', error);
+        if (error.message.includes('Invalid Refresh Token')) {
+          await supabase.auth.signOut();
+          localStorage.clear();
+          sessionStorage.clear();
+        }
       }
 
       return { error };
     } catch (error) {
-      console.error('SignIn exception:', error);
       return { error };
     }
   };

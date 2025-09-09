@@ -6,6 +6,10 @@ import AdminDashboard from './components/dashboards/AdminDashboard';
 import InstructorDashboard from './components/dashboards/InstructorDashboard';
 import StudentDashboard from './components/dashboards/StudentDashboard';
 import Auth from './pages/Auth';
+import { setupGlobalAuthErrorHandler } from './utils/authErrorHandler';
+
+// Setup global error handler
+setupGlobalAuthErrorHandler();
 
 function App() {
   return (
