@@ -51,13 +51,11 @@ export async function executeCommand (
   options: { timeout?: number; cwd?: string } = {}
 ): Promise<{ success: boolean; output: string; error?: string }>
 {
-  // In browser environment, we can't execute shell commands directly
-  // This is a placeholder that returns a mock result
-  // Individual verifiers should implement their own command execution logic
+  // Em ambiente browser, execução de comandos não é suportada.
   return {
     success: false,
     output: '',
-    error: 'Command execution not available in browser environment'
+    error: 'Execução de comandos indisponível no ambiente browser.'
   };
 }
 
@@ -116,9 +114,7 @@ export async function parsePackageJson ( filePath: string ): Promise<any>
  */
 export async function isPackageInstalled ( packageName: string, cwd?: string ): Promise<boolean>
 {
-  // In browser environment, we can't directly check the file system
-  // This is a placeholder that always returns false
-  // Individual verifiers should implement their own package checking logic
+  // Em ambiente browser, não é possível verificar pacotes instalados.
   return false;
 }
 
@@ -249,9 +245,8 @@ export function sanitizePath ( filePath: string ): string
  */
 export async function ensureDirectory ( dirPath: string ): Promise<void>
 {
-  // In browser environment, we can't create directories
-  // This is a no-op placeholder
-  console.log( `Directory creation not available in browser environment: ${ dirPath }` );
+  // Em ambiente browser, criação de diretórios não é suportada.
+  // Função intencionalmente vazia.
 }
 
 /**
