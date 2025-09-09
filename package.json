@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port 5173 --strictPort",
-    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:all": "npm run kill-ports && concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "kill-ports": "scripts\\kill-ports.bat",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "vite --port 5173 --strictPort",
     "dev:backend-only": "cd backend && npm run dev",
@@ -17,7 +18,7 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "typecheck": "tsc -p tsconfig.json",
-    "preview": "vite preview --port 5173 --strictPort",
+    "preview": "vite preview --port 8080 --strictPort",
     "start": "serve -s dist -l $PORT",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
@@ -75,7 +76,7 @@
     "test": "cypress run",
     "test:open": "cypress open",
     "test:component": "cypress run --component",
-    "test:performance": "lighthouse http://localhost:8080/admin --output html --output-path ./lighthouse-report.html",
+    "test:performance": "lighthouse http://localhost:5173/admin --output html --output-path ./lighthouse-report.html",
     "optimize": "npm run build:prod && npm run analyze"
   },
   "dependencies": {

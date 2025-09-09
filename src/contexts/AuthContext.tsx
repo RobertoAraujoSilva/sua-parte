@@ -99,6 +99,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .eq('id', userId)
         .maybeSingle();
         
+      // Verificar se houve erro na requisição
+      if (profileError) {
+        console.error('❌ Error loading profile:', profileError);
+        setAuthError(`Erro ao carregar perfil: ${profileError.message}`);
+        return;
+      }
+      
+      // Verificar se o perfil foi encontrado
+      if (!profileData) {
+        console.warn('⚠️ No profile found for user:', userId);
+        setAuthError('Perfil não encontrado. Entre em contato com o administrador.');
+        return;
+      }
+        
       // Verificar se houve erro de API key
       if (profileError && profileError.message?.includes('No API key found')) {
         console.error('❌ Erro de API key no Supabase:', profileError);

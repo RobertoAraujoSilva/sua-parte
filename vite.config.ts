@@ -7,11 +7,11 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '')
   const backendUrl = (env.VITE_API_BASE_URL || '').replace(/\/$/, '')
   const forceMock = env.VITE_FORCE_MOCK === '1' || env.VITE_FORCE_MOCK === 'true'
-  const isSelfProxy = /localhost:8080|127\.0\.0\.1:8080/.test(backendUrl)
+  const isSelfProxy = /localhost:5173|127\.0\.0\.1:5173/.test(backendUrl)
   const hasProxy = Boolean(backendUrl) && !isSelfProxy && !forceMock
   
   if (isSelfProxy) {
-    console.warn('[dev] VITE_API_BASE_URL aponta para localhost:8080; proxy desabilitado e mocks de API ativados.');
+    console.warn('[dev] VITE_API_BASE_URL aponta para localhost:5173; proxy desabilitado e mocks de API ativados.');
   }
   const devMockPlugin: Plugin | null = hasProxy ? null : {
     name: 'dev-mock-api',

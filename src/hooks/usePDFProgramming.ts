@@ -98,13 +98,21 @@ export function usePDFProgramming() {
       console.log('🔍 Escaneando PDFs na pasta oficial...');
       console.log('🔗 URL da API:', getApiBaseUrl());
       
-      const apiUrl = `${getApiBaseUrl()}/api/admin/scan-pdfs`;
+      // Em dev, use caminho relativo e deixe o Vite proxy encaminhar
+      const baseUrl = getApiBaseUrl();
+      if (!import.meta.env.DEV && !baseUrl) {
+        throw new Error('URL da API não configurada. Verifique a variável de ambiente VITE_API_BASE_URL.');
+      }
+      const apiUrl = import.meta.env.DEV
+        ? `/api/admin/scan-pdfs`
+        : `${baseUrl}/api/admin/scan-pdfs`;
       console.log('🔗 Endpoint completo:', apiUrl);
       
       const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
           'Authorization': 'Bearer test' // TODO: Implementar autenticação real
         }
       });
@@ -148,7 +156,13 @@ export function usePDFProgramming() {
       console.log('📖 Extraindo programação do PDF:', pdf.fileName);
       console.log('🔗 URL da API:', getApiBaseUrl());
       
-      const apiUrl = `${getApiBaseUrl()}/api/admin/parse-pdf`;
+      const parseBase = getApiBaseUrl();
+      if (!import.meta.env.DEV && !parseBase) {
+        throw new Error('URL da API não configurada. Verifique a variável de ambiente VITE_API_BASE_URL.');
+      }
+      const apiUrl = import.meta.env.DEV
+        ? `/api/admin/parse-pdf`
+        : `${parseBase}/api/admin/parse-pdf`;
       console.log('🔗 Endpoint completo:', apiUrl);
       
       const response = await fetch(apiUrl, {
@@ -195,7 +209,14 @@ export function usePDFProgramming() {
     try {
       console.log('✅ Validando PDF:', pdf.fileName);
       
-      const response = await fetch(`${getApiBaseUrl()}/api/admin/validate-pdf`, {
+      const validateBase = getApiBaseUrl();
+      if (!import.meta.env.DEV && !validateBase) {
+        throw new Error('URL da API não configurada. Verifique a variável de ambiente VITE_API_BASE_URL.');
+      }
+      const validateUrl = import.meta.env.DEV
+        ? `/api/admin/validate-pdf`
+        : `${validateBase}/api/admin/validate-pdf`;
+      const response = await fetch(validateUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -241,7 +262,14 @@ export function usePDFProgramming() {
     try {
       console.log('💾 Salvando programação extraída...');
       
-      const response = await fetch(`${getApiBaseUrl()}/api/admin/save-programming`, {
+      const saveBase = getApiBaseUrl();
+      if (!import.meta.env.DEV && !saveBase) {
+        throw new Error('URL da API não configurada. Verifique a variável de ambiente VITE_API_BASE_URL.');
+      }
+      const saveUrl = import.meta.env.DEV
+        ? `/api/admin/save-programming`
+        : `${saveBase}/api/admin/save-programming`;
+      const response = await fetch(saveUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -283,7 +311,10 @@ export function usePDFProgramming() {
     try {
       console.log('📋 Listando programações salvas...');
       
-      const url = status ? `${getApiBaseUrl()}/api/admin/programmings?status=${status}` : `${getApiBaseUrl()}/api/admin/programmings`;
+      const listBase = getApiBaseUrl();
+      const url = import.meta.env.DEV
+        ? (status ? `/api/admin/programmings?status=${status}` : `/api/admin/programmings`)
+        : (status ? `${listBase}/api/admin/programmings?status=${status}` : `${listBase}/api/admin/programmings`);
       
       const response = await fetch(url, {
         method: 'GET',
