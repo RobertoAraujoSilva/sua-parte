@@ -1,0 +1,555 @@
+/* Responsive Layout Utilities */
+/* Integration with PageShell CSS Variables */
+
+/* Container width utilities - now compatible with PageShell */
+.responsive-container {
+  @apply mx-auto;
+  width: min(95%, 1920px);
+  /* Use PageShell variables when available */
+  width: var(--shell-max-w, min(95%, 1920px));
+}
+
+@screen xs {
+  .responsive-container { 
+    width: min(100%, calc(100vw - 2rem)); 
+  }
+}
+
+@screen sm {
+  .responsive-container { 
+    width: min(85%, calc(100vw - 2rem)); 
+  }
+}
+
+@screen md {
+  .responsive-container { 
+    width: min(90%, calc(100vw - 2rem)); 
+  }
+}
+
+@screen lg {
+  .responsive-container { 
+    width: min(92%, calc(100vw - 2rem)); 
+  }
+}
+
+@screen xl {
+  .responsive-container { 
+    width: min(94%, calc(100vw - 2rem)); 
+  }
+}
+
+@screen 2xl {
+  .responsive-container { 
+    width: min(95%, calc(100vw - 2rem)); 
+  }
+}
+
+@screen 3xl {
+  .responsive-container { 
+    width: min(96%, calc(100vw - 2rem)); 
+  }
+}
+
+/* Adaptive Grid - now compatible with PageShell */
+.adaptive-grid {
+  display: grid;
+  gap: var(--content-gap, 1rem);
+  grid-template-columns: repeat(auto-fit, minmax(var(--min-item-width, 300px), 1fr));
+}
+
+@screen xs {
+  .adaptive-grid {
+    grid-template-columns: repeat(auto-fit, minmax(var(--min-item-width, 280px), 1fr));
+    gap: 0.75rem;
+  }
+}
+
+@screen sm {
+  .adaptive-grid {
+    grid-template-columns: repeat(auto-fit, minmax(var(--min-item-width, 300px), 1fr));
+    gap: 1rem;
+  }
+}
+
+@screen lg {
+  .adaptive-grid {
+    gap: 1.5rem;
+  }
+}
+
+/* Responsive Table - now compatible with PageShell */
+.responsive-table {
+  @apply w-full overflow-x-auto;
+  /* Use PageShell height calculation when available */
+  height: var(--table-height, auto);
+}
+
+.responsive-table table {
+  @apply min-w-full;
+  min-width: max-content;
+}
+
+.responsive-table::-webkit-scrollbar {
+  height: 6px;
+}
+
+.responsive-table::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+.responsive-table::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded;
+}
+
+.responsive-table::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+
+/* Mobile: hide scrollbar */
+@screen xs {
+  .responsive-table::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .responsive-table {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Density Classes - now compatible with PageShell CSS variables */
+.density-compact {
+  --spacing: var(--content-gap, 0.5rem);
+  --text-size: 0.875rem;
+  --padding: var(--cell-px, 0.5rem);
+  --button-size: 2rem;
+  --header-height: var(--toolbar-h, 2.5rem);
+}
+
+.density-comfortable {
+  --spacing: var(--content-gap, 1rem);
+  --text-size: 1rem;
+  --padding: var(--cell-px, 1rem);
+  --button-size: 2.5rem;
+  --header-height: var(--toolbar-h, 3rem);
+}
+
+.density-spacious {
+  --spacing: var(--section-gap, 1.5rem);
+  --text-size: 1.125rem;
+  --padding: var(--cell-px, 1.5rem);
+  --button-size: 3rem;
+  --header-height: var(--toolbar-h, 3.5rem);
+}
+
+/* Responsive Text Utilities */
+.text-responsive-xs {
+  @apply text-xs;
+}
+
+.text-responsive-sm {
+  @apply text-sm;
+}
+
+.text-responsive-base {
+  @apply text-base;
+}
+
+@screen lg {
+  .text-responsive-xs {
+    @apply text-xs;
+  }
+  
+  .text-responsive-sm {
+    @apply text-xs;
+  }
+  
+  .text-responsive-base {
+    @apply text-sm;
+  }
+}
+
+/* Responsive Spacing */
+.space-responsive-tight > * + * {
+  margin-top: 0.5rem;
+}
+
+.space-responsive-normal > * + * {
+  margin-top: 1rem;
+}
+
+.space-responsive-loose > * + * {
+  margin-top: 1.5rem;
+}
+
+@screen lg {
+  .space-responsive-tight > * + * {
+    margin-top: 0.25rem;
+  }
+  
+  .space-responsive-normal > * + * {
+    margin-top: 0.75rem;
+  }
+  
+  .space-responsive-loose > * + * {
+    margin-top: 1rem;
+  }
+}
+
+/* Touch Target Utilities */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+@screen lg {
+  .touch-target {
+    min-height: 32px;
+    min-width: 32px;
+  }
+}
+
+/* Responsive Grid Columns */
+.grid-responsive-1 {
+  @apply grid-cols-1;
+}
+
+.grid-responsive-2 {
+  @apply grid-cols-1 sm:grid-cols-2;
+}
+
+.grid-responsive-3 {
+  @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+}
+
+.grid-responsive-4 {
+  @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+}
+
+.grid-responsive-6 {
+  @apply grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6;
+}
+
+/* Responsive Padding */
+.p-responsive {
+  @apply p-4 sm:p-6 lg:p-8 xl:p-12;
+}
+
+.px-responsive {
+  @apply px-4 sm:px-6 lg:px-8 xl:px-12;
+}
+
+.py-responsive {
+  @apply py-4 sm:py-6 lg:py-8 xl:py-12;
+}
+
+/* Responsive Margins */
+.m-responsive {
+  @apply m-4 sm:m-6 lg:m-8 xl:m-12;
+}
+
+.mx-responsive {
+  @apply mx-4 sm:mx-6 lg:mx-8 xl:mx-12;
+}
+
+.my-responsive {
+  @apply my-4 sm:my-6 lg:my-8 xl:my-12;
+}
+
+/* Responsive Gaps */
+.gap-responsive {
+  @apply gap-3 sm:gap-4 lg:gap-6 xl:gap-8;
+}
+
+/* Safe Area Support */
+.pb-safe {
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+}
+
+.mb-safe {
+  margin-bottom: calc(1rem + env(safe-area-inset-bottom));
+}
+
+/* Scrollbar Utilities */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  @apply bg-gray-100;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}
+
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
+/* PageShell Integration Classes */
+/* These classes ensure backward compatibility with existing responsive components */
+
+/* Legacy responsive container integration */
+.responsive-container.page-shell-integrated {
+  width: var(--shell-max-w);
+  padding: 0 var(--shell-gutter);
+}
+
+/* Legacy adaptive grid integration */
+.adaptive-grid.page-shell-integrated {
+  gap: var(--content-gap);
+}
+
+.adaptive-grid.page-shell-integrated[data-density="compact"] {
+  gap: calc(var(--content-gap) * 0.75);
+}
+
+.adaptive-grid.page-shell-integrated[data-density="comfortable"] {
+  gap: var(--content-gap);
+}
+
+/* Legacy responsive table integration */
+.responsive-table.page-shell-integrated {
+  height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 2));
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.responsive-table.page-shell-integrated table {
+  font-size: calc(var(--text-size, 1rem) * 0.9);
+}
+
+.responsive-table.page-shell-integrated th,
+.responsive-table.page-shell-integrated td {
+  height: var(--row-h);
+  padding: var(--cell-py) var(--cell-px);
+}
+
+/* Legacy density class integration with PageShell */
+[data-density="compact"] .density-compact {
+  --spacing: calc(var(--content-gap) * 0.75);
+  --padding: var(--cell-px);
+  --header-height: var(--toolbar-h);
+}
+
+[data-density="comfortable"] .density-comfortable {
+  --spacing: var(--content-gap);
+  --padding: var(--cell-px);
+  --header-height: var(--toolbar-h);
+}
+
+/* Responsive header integration with PageShell */
+.responsive-header.page-shell-integrated {
+  height: var(--hero-h);
+  backdrop-filter: var(--toolbar-blur);
+}
+
+/* Touch target adjustments for PageShell */
+.page-shell .touch-target {
+  min-height: var(--row-h);
+  min-width: var(--row-h);
+}
+
+/* Grid responsive classes with PageShell variables */
+.page-shell .grid-responsive-1 {
+  gap: var(--content-gap);
+}
+
+.page-shell .grid-responsive-2 {
+  gap: var(--content-gap);
+}
+
+.page-shell .grid-responsive-3 {
+  gap: var(--content-gap);
+}
+
+.page-shell .grid-responsive-4 {
+  gap: var(--content-gap);
+}
+
+.page-shell .grid-responsive-6 {
+  gap: var(--content-gap);
+}
+
+/* Responsive padding integration */
+.page-shell .p-responsive {
+  padding: var(--shell-gutter);
+}
+
+.page-shell .px-responsive {
+  padding-left: var(--shell-gutter);
+  padding-right: var(--shell-gutter);
+}
+
+.page-shell .py-responsive {
+  padding-top: calc(var(--content-gap) * 2);
+  padding-bottom: calc(var(--content-gap) * 2);
+}
+
+/* Responsive margins integration */
+.page-shell .m-responsive {
+  margin: var(--content-gap);
+}
+
+.page-shell .mx-responsive {
+  margin-left: var(--shell-gutter);
+  margin-right: var(--shell-gutter);
+}
+
+.page-shell .my-responsive {
+  margin-top: var(--content-gap);
+  margin-bottom: var(--content-gap);
+}
+
+/* Gap responsive integration */
+.page-shell .gap-responsive {
+  gap: var(--content-gap);
+}
+
+/* Scrollbar integration with PageShell theme */
+.page-shell .scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.page-shell .scrollbar-thin::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.page-shell .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+.page-shell .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+/* Dark mode integration */
+@media (prefers-color-scheme: dark) {
+  .page-shell .scrollbar-thin::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .page-shell .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .page-shell .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  .responsive-table.page-shell-integrated {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Transition integration for smooth density changes */
+.page-shell * {
+  transition: 
+    height 0.2s ease-in-out,
+    padding 0.2s ease-in-out,
+    margin 0.2s ease-in-out,
+    font-size 0.2s ease-in-out,
+    gap 0.2s ease-in-out;
+}
+
+/* Prevent transitions on initial load */
+.page-shell.preload * {
+  transition: none !important;
+}
+
+/* Responsive breakpoint adjustments for PageShell integration */
+@media (max-width: 768px) {
+  .responsive-container.page-shell-integrated {
+    width: 100vw;
+    padding: 0 var(--shell-gutter);
+  }
+  
+  .adaptive-grid.page-shell-integrated {
+    gap: calc(var(--content-gap) * 0.75);
+  }
+  
+  .responsive-table.page-shell-integrated {
+    height: calc(100svh - var(--toolbar-h) - var(--footer-h) - var(--shell-gutter));
+    border-radius: 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-table.page-shell-integrated {
+    height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 0.5));
+    border-radius: 4px;
+  }
+}
+
+/* Large screen optimizations for PageShell integration */
+@media (min-width: 1920px) {
+  .responsive-container.page-shell-integrated {
+    width: var(--shell-max-w);
+  }
+  
+  .responsive-table.page-shell-integrated {
+    height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 2.5));
+  }
+}
+
+/* Utility classes for manual integration */
+.integrate-with-pageshell {
+  /* Apply PageShell integration automatically */
+}
+
+.integrate-with-pageshell.responsive-container {
+  width: var(--shell-max-w);
+  padding: 0 var(--shell-gutter);
+}
+
+.integrate-with-pageshell.adaptive-grid {
+  gap: var(--content-gap);
+}
+
+.integrate-with-pageshell.responsive-table {
+  height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 2));
+}
+
+/* Hook integration classes */
+.use-responsive-shell {
+  /* Marker class for components using useResponsiveShell hook */
+}
+
+.use-responsive-shell .container {
+  width: var(--shell-max-w);
+  margin: 0 auto;
+  padding: 0 var(--shell-gutter);
+}
+
+.use-responsive-shell .table-container {
+  height: calc(100svh - var(--toolbar-h) - var(--footer-h) - (var(--shell-gutter) * 2));
+  overflow: auto;
+}
+
+.use-responsive-shell .grid-container {
+  display: grid;
+  gap: var(--content-gap);
+}
+
+.use-responsive-shell .toolbar-container {
+  height: var(--toolbar-h);
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  gap: var(--content-gap);
+  align-items: center;
+  padding: 0 var(--shell-gutter);
+}

@@ -1,0 +1,711 @@
+{
+  "common": {
+    "appName": "Ministerial System",
+    "welcome": "Welcome",
+    "dashboard": "Dashboard",
+    "students": "Students",
+    "programs": "Programs",
+    "assignments": "Assignments",
+    "logout": "Logout",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "refresh": "Refresh",
+    "export": "Export",
+    "generate": "Generate",
+    "regenerate": "Regenerate",
+    "preview": "Preview",
+    "loading": "Loading...",
+    "saving": "Saving...",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No",
+    "active": "Active",
+    "inactive": "Inactive",
+    "all": "All",
+    "total": "Total",
+    "date": "Date",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "age": "Age",
+    "gender": "Gender",
+    "role": "Role",
+    "status": "Status",
+    "actions": "Actions",
+    "settings": "Settings",
+    "help": "Help",
+    "support": "Support",
+    "step": "Step",
+    "tip": "Tip",
+    "notInformed": "Not informed",
+    "years": "years",
+    "backToDashboard": "Back to Dashboard"
+  },
+  "navigation": {
+    "home": "Home",
+    "features": "Features",
+    "faq": "FAQ",
+    "congregations": "Congregations",
+    "support": "Support",
+    "about": "About",
+    "donate": "Donate",
+    "dashboard": "Dashboard",
+    "students": "Students",
+    "programs": "Programs",
+    "assignments": "Assignments",
+    "reports": "Reports",
+    "myPortal": "My Portal",
+    "instructor": "Instructor",
+    "student": "Student",
+    "getStarted": "Get Started",
+    "login": "Login",
+    "INÍCIO": "Home",
+    "FUNCIONALIDADES": "Features",
+    "CONGREGAÇÕES": "Congregations",
+    "SUPORTE": "Support",
+    "SOBRE": "About",
+    "DOAR": "Donate"
+  },
+  "language": {
+    "portuguese": "Portuguese",
+    "english": "English",
+    "switchToEnglish": "Switch to English",
+    "switchToPortuguese": "Switch to Portuguese"
+  },
+  "students": {
+    "title": "Student Management",
+    "subtitle": "Register and manage Theocratic Ministry School students with automatic qualification validations and congregation rules.",
+    "tabs": {
+      "list": "List",
+      "new": "New",
+      "import": "Import",
+      "statistics": "Statistics",
+      "spreadsheet": "Spreadsheet",
+      "instructorPanel": "Instructor Panel"
+    },
+    "importSpreadsheet": "Import Spreadsheet",
+    "newStudent": "New Student",
+    "filters": "Filters",
+    "searchByName": "Search by name...",
+    "filterByRole": "Filter by role",
+    "allRoles": "All roles",
+    "noStudentsFound": "No students found",
+    "adjustFiltersOrRegister": "Try adjusting the filters or register a new student.",
+    "registerNewStudent": "Register New Student",
+    "totalStudents": "Total Students",
+    "activeStudents": "Active Students",
+    "inactiveStudents": "Inactive Students",
+    "minors": "Minors",
+    "minor": "Minor",
+    "baptizedOn": "Baptized on",
+    "responsible": "Responsible",
+    "responsibleFor": "Responsible for",
+    "qualifications": "Qualifications",
+    "observations": "Observations",
+    "confirmDelete": "Confirm deletion",
+    "deleteConfirmation": "Are you sure you want to delete student {{name}}?",
+    "cannotDeleteParent": "This student is responsible for minors and cannot be deleted.",
+    "actionCannotBeUndone": "This action cannot be undone.",
+    "deleting": "Deleting...",
+    "qualificationTypes": {
+      "initialCall": "Initial Call",
+      "returnVisit": "Return Visit",
+      "bibleStudy": "Bible Study"
+    },
+    "roles": {
+      "elder": "Elder",
+      "ministerialServant": "Ministerial Servant",
+      "regularPioneer": "Regular Pioneer",
+      "publisher": "Publisher",
+      "unbaptizedPublisher": "Unbaptized Publisher",
+      "student": "Student"
+    },
+    "genders": {
+      "male": "Male",
+      "female": "Female"
+    }
+  },
+  "dashboard": {
+    "title": "Control Panel",
+    "subtitle": "Manage ministerial assignments intelligently and efficiently",
+    "quickActions": "Quick Actions",
+    "newStudent": "New Student",
+    "importProgram": "Import Program",
+    "generateAssignments": "Generate Assignments",
+    "importSpreadsheet": "Import Spreadsheet",
+    "manageStudentsDesc": "Manage ministry school students",
+    "manageProgramsDesc": "Import and manage weekly programs",
+    "manageAssignmentsDesc": "Generate and view automatic assignments",
+    "manageMeetingsDesc": "Manage meetings, special events and administrative assignments",
+    "reportsDesc": "Participation and engagement reports",
+    "manageStudents": "Manage Students",
+    "viewPrograms": "View Programs",
+    "viewAssignments": "View Assignments",
+    "manageMeetings": "Manage Meetings",
+    "viewReports": "View Reports",
+    "meetings": "Meetings",
+    "totalStudents": "Total Students",
+    "activePrograms": "Active Programs",
+    "generatedAssignments": "Generated Assignments",
+    "registeredInSystem": "Registered in system",
+    "scheduledWeeks": "Scheduled weeks",
+    "thisMonth": "This month"
+  },
+  "programs": {
+    "title": "Programs",
+    "subtitle": "Manage Theocratic Ministry School programs",
+    "importProgram": "Import Program",
+    "newProgram": "New Program",
+    "uploadPdf": "Upload PDF",
+    "pasteContent": "Paste Content",
+    "programName": "Program Name",
+    "weekOf": "Week of",
+    "parts": "Parts",
+    "generateAssignments": "Generate Assignments",
+    "preview": "Preview",
+    "edit": "Edit",
+    "delete": "Delete",
+    "noPrograms": "No programs found",
+    "uploadInstructions": "Upload workbook PDF or paste content from JW.org"
+  },
+  "assignments": {
+    "title": "Assignments",
+    "subtitle": "Manage Ministry School assignments",
+    "generateNew": "Generate New",
+    "regenerate": "Regenerate",
+    "approve": "Approve",
+    "reject": "Reject",
+    "exportPdf": "Export PDF",
+    "student": "Student",
+    "assistant": "Assistant",
+    "part": "Part",
+    "theme": "Theme",
+    "type": "Type",
+    "date": "Date",
+    "status": "Status",
+    "pending": "Pending",
+    "approved": "Approved",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  },
+  "reports": {
+    "title": "Reports",
+    "subtitle": "System reports and statistics",
+    "studentProgress": "Student Progress",
+    "assignmentHistory": "Assignment History",
+    "participation": "Participation",
+    "performance": "Performance",
+    "exportReport": "Export Report",
+    "dateRange": "Date Range",
+    "filterBy": "Filter By",
+    "generateReport": "Generate Report"
+  },
+  "portal": {
+    "title": "Student Portal",
+    "subtitle": "Your assignments and progress",
+    "myAssignments": "My Assignments",
+    "upcomingAssignments": "Upcoming Assignments",
+    "completedAssignments": "Completed Assignments",
+    "myProgress": "My Progress",
+    "qualifications": "Qualifications",
+    "feedback": "Feedback",
+    "confirmParticipation": "Confirm Participation",
+    "requestChange": "Request Change"
+  },
+  "auth": {
+    "login": "Login",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account? Sign up",
+    "hasAccount": "Already have an account? Sign in",
+    "resetPassword": "Reset Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "loginSuccess": "Login successful!",
+    "loginError": "Login error",
+    "signupSuccess": "Registration successful!",
+    "signupError": "Registration error",
+    "invalidCredentials": "Invalid credentials",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "passwordTooShort": "Password must be at least 6 characters",
+    "emailInvalid": "Invalid email",
+    "loggingIn": "Signing in...",
+    "accountType": "Account Type",
+    "selected": "Selected",
+    "fullName": "Full Name",
+    "fullNamePlaceholder": "Enter your full name",
+    "birthDate": "Birth Date",
+    "age": "Age",
+    "years": "years",
+    "congregationPlaceholder": "Your congregation name",
+    "roleOptional": "Role (Optional)",
+    "selectRole": "Select role",
+    "congregationRole": "Congregation Role",
+    "passwordMinLength": "Minimum 6 characters",
+    "creatingAccount": "Creating account...",
+    "createAccount": "Create Account",
+    "roles": {
+      "instrutor": {
+        "title": "Instructor/Assigner",
+        "description": "Full access to manage students, programs and assignments"
+      },
+      "estudante": {
+        "title": "Student",
+        "description": "Access to personal portal to view your assignments"
+      },
+      "superintendent": "School Superintendent",
+      "assistantCounselor": "Assistant Counselor"
+    }
+  },
+  "forms": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "submit": "Submit",
+    "reset": "Reset",
+    "required": "Required",
+    "optional": "Optional",
+    "pleaseWait": "Please wait...",
+    "processing": "Processing...",
+    "success": "Success!",
+    "error": "Error!",
+    "validation": {
+      "required": "This field is required",
+      "email": "Invalid email",
+      "minLength": "Minimum {{min}} characters",
+      "maxLength": "Maximum {{max}} characters",
+      "numeric": "Numbers only",
+      "phone": "Invalid phone number"
+    }
+  },
+  "errors": {
+    "loadingFailed": "Loading failed",
+    "timeout": "Timeout",
+    "unknownError": "Unknown error",
+    "networkError": "Network error",
+    "serverError": "Server error",
+    "notFound": "Not found",
+    "unauthorized": "Unauthorized",
+    "forbidden": "Access denied"
+  },
+  "notifications": {
+    "newAssignment": "New assignment received",
+    "assignmentChanged": "Assignment changed",
+    "assignmentCancelled": "Assignment cancelled",
+    "programImported": "Program imported successfully",
+    "studentAdded": "Student added",
+    "studentUpdated": "Student updated",
+    "reportGenerated": "Report generated"
+  },
+  "terms": {
+    "bibleReading": "Bible Reading",
+    "talk": "Talk"
+  },
+  "initialSetup": {
+    "title": "Initial Setup",
+    "subtitle": "Let's configure your profile to start using the system",
+    "steps": {
+      "personalInfo": "Personal Information",
+      "congregation": "Congregation",
+      "preferences": "Preferences"
+    },
+    "stepDescriptions": {
+      "personalInfo": "Enter your personal information",
+      "congregation": "Your congregation details",
+      "preferences": "Configure your system preferences"
+    },
+    "fields": {
+      "fullName": "Full Name",
+      "fullNamePlaceholder": "Your full name",
+      "email": "Email",
+      "emailPlaceholder": "your.email@example.com",
+      "emailNote": "Email cannot be changed after registration",
+      "role": "Role/Privilege",
+      "selectRole": "Select your role",
+      "congregationName": "Congregation Name",
+      "congregationPlaceholder": "Ex: Central Congregation",
+      "congregationNote": "The congregation name will be used in reports and documents generated by the system."
+    },
+    "preferences": {
+      "autoGenerate": "Automatically generate assignments after importing program",
+      "emailNotifications": "Receive email notifications",
+      "showTutorials": "Show system tutorials and tips",
+      "note": "You can change these preferences anytime in settings."
+    },
+    "navigation": {
+      "previous": "Previous",
+      "next": "Next",
+      "finish": "Finish Setup",
+      "saving": "Saving..."
+    },
+    "roles": {
+      "anciao": "Elder",
+      "servo_ministerial": "Ministerial Servant",
+      "instrutor": "TMS Instructor",
+      "pioneiro_regular": "Regular Pioneer",
+      "publicador_batizado": "Baptized Publisher"
+    }
+  },
+  "firstProgram": {
+    "badge": "Final Step - Practical Tutorial",
+    "title": "Let's Create Your First Program! 🎯",
+    "subtitle": "Follow this practical tutorial to create your first program with automatic assignments",
+    "steps": {
+      "step1": {
+        "title": "1. Register Students",
+        "description": "First, let's add students from the Theocratic Ministry School",
+        "action": "Go to Students",
+        "tips": [
+          "Add full name and position of each student",
+          "Mark family relationships for ministry parts",
+          "Configure qualifications according to S-38-T guidelines"
+        ]
+      },
+      "step2": {
+        "title": "2. Import a Program",
+        "description": "Now let's import the program from the Life and Ministry workbook",
+        "action": "Go to Programs",
+        "tips": [
+          "Upload the official PDF from the workbook",
+          "Or paste content directly from JW.org",
+          "The system automatically identifies the 12 meeting parts"
+        ]
+      },
+      "step3": {
+        "title": "3. Generate Assignments",
+        "description": "Finally, the system will automatically create all assignments",
+        "action": "See How It Works",
+        "tips": [
+          "Click 'Generate Assignments' on the imported program",
+          "Review assignments on the preview page",
+          "Approve when satisfied with the result"
+        ]
+      }
+    },
+    "tipsTitle": "Important tips:",
+    "featuresTitle": "Why is the Ministerial System Special?",
+    "features": {
+      "compliance": {
+        "title": "S-38-T Compliance",
+        "description": "All assignments strictly follow organizational guidelines"
+      },
+      "ai": {
+        "title": "Artificial Intelligence",
+        "description": "Intelligent algorithm distributes assignments in a balanced way"
+      },
+      "structure": {
+        "title": "Complete Structure",
+        "description": "Full support for the 12-part weekly meeting structure"
+      }
+    },
+    "tip": "If you already have students registered, you can start directly by importing a program. The system works best with at least 8-10 students registered.",
+    "startWithStudents": "Start with Students",
+    "goToDashboard": "Go to Dashboard",
+    "helpNote": "You can access this tutorial again anytime from the Help menu"
+  },
+  "hero": {
+    "title": "Intelligent Automation of",
+    "titleHighlight": "Ministerial Assignments",
+    "subtitle": "Complete system for Jehovah's Witnesses congregations to organize Life and Ministry Meeting assignments with efficiency and compliance.",
+    "getStarted": "Get Started Now",
+    "viewDemo": "View Demo",
+    "stats": {
+      "congregations": "Congregations Served",
+      "timeReduction": "Manual Time Reduction",
+      "availability": "Continuous Availability"
+    }
+  },
+  "features": {
+    "title": "Key Features",
+    "subtitle": "Everything your congregation needs to automate and optimize the ministerial assignment process with full compliance.",
+    "studentManagement": {
+      "title": "Complete Student Management",
+      "description": "Detailed registration with validation of positions, family relationships, and congregational qualifications for accurate assignments."
+    },
+    "programImport": {
+      "title": "Weekly Program Import",
+      "description": "Automatic import from official PDFs of the Life and Ministry workbook with intelligent parsing."
+    },
+    "notifications": {
+      "title": "Automatic Notifications",
+      "description": "Send via email and WhatsApp with assignment details, scenes, and specific instructions for each student."
+    },
+    "reports": {
+      "title": "Reports and Analytics",
+      "description": "Complete dashboard with participation history, engagement metrics, and reports for coordinators."
+    },
+    "compliance": {
+      "title": "Rule Compliance",
+      "description": "Intelligent algorithm that respects all guidelines of the Theocratic Ministry School and congregational regulations."
+    },
+    "studentPortal": {
+      "title": "Student Portal",
+      "description": "Responsive interface for students to view assignments, confirm participation, and contribute via donations."
+    }
+  },
+  "benefits": {
+    "title": "Transform Your Congregation's Organization",
+    "subtitle": "Drastically reduce time spent on administrative tasks and focus on what really matters: spiritual development.",
+    "timeEfficiency": {
+      "title": "Significant Time Savings",
+      "description": "From hours to minutes: what used to take an entire afternoon of work is now resolved in less than 5 minutes per week."
+    },
+    "compliance": {
+      "title": "Guaranteed Compliance",
+      "description": "Intelligent algorithm that automatically respects all congregational rules, gender, position, and family relationships."
+    },
+    "engagement": {
+      "title": "Student Engagement",
+      "description": "Dedicated portal where students track their assignments, confirm participation, and contribute to sustainability."
+    },
+    "sustainability": {
+      "title": "Sustainability via Donations",
+      "description": "Self-funded system through voluntary contributions, ensuring continuity without fixed costs for congregations."
+    },
+    "cta": {
+      "title": "Get Started Today",
+      "description": "Register your congregation and experience the efficiency of ministerial automation. Complete setup in less than 30 minutes.",
+      "button": "Start for Free",
+      "note": "System sustained by voluntary donations"
+    },
+    "features": {
+      "studentManagement": "Student registration",
+      "programImport": "Program import",
+      "notifications": "Automatic notifications",
+      "studentPortal": "Student portal",
+      "reports": "Complete reports",
+      "included": "Included"
+    }
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Find answers to the most common questions about the Ministerial System",
+    "searchPlaceholder": "Search questions...",
+    "categories": "Categories",
+    "question": "question",
+    "noResults": "No results found",
+    "tryOtherTerms": "Try using other search terms",
+    "needHelp": "Need more help?",
+    "supportTeam": "Our support team is ready to help you",
+    "contact": "Contact Us",
+    "viewFeatures": "View Features",
+    "categoryTitles": {
+      "overview": "Overview",
+      "students": "Student Registration",
+      "programs": "Program Import",
+      "algorithm": "Assignment Algorithm",
+      "communication": "Communication & Security"
+    },
+    "categoryDescriptions": {
+      "overview": "General information about the system",
+      "students": "How to manage students and qualifications",
+      "programs": "Importing and creating programs",
+      "algorithm": "How automatic distribution works",
+      "communication": "Notifications and data security"
+    },
+    "categoryTitlesHardcoded": {
+      "overview": "Overview",
+      "students": "Student Registration",
+      "programs": "Program Import",
+      "algorithm": "Assignment Algorithm",
+      "communication": "Communication & Security"
+    },
+    "questions": {
+      "whatIs": "What is the Ministerial System?",
+      "whoCanUse": "Who can use the system?",
+      "cost": "Is the system free?",
+      "requirements": "What are the technical requirements?"
+    },
+    "answers": {
+      "whatIs": "The Ministerial System is a complete platform to automate the management of Theocratic Ministry School assignments. It respects all S-38-T organizational guidelines and facilitates the work of superintendents.",
+      "whoCanUse": "The system is intended for Theocratic Ministry School superintendents and their assistants. Students have limited access to the student portal to view their assignments.",
+      "cost": "Yes! The system is completely free. We accept voluntary donations to maintain and improve the platform, but usage is free for all congregations.",
+      "requirements": "Just a modern browser (Chrome, Firefox, Safari, Edge) and internet connection. Works on computers, tablets, and smartphones."
+    }
+  },
+  "featuresPage": {
+    "title": "Features",
+    "titleHighlight": "Complete",
+    "subtitle": "Everything your congregation needs to automate and optimize the ministerial assignment process with full compliance.",
+    "studentManagement": {
+      "title": "Complete Student Management",
+      "description": "Detailed registration with validation of positions, family relationships and congregational qualifications for accurate assignments.",
+      "benefits": {
+        "qualifications": "Ministerial qualification control",
+        "family": "Family relationship management",
+        "history": "Participation history",
+        "validation": "Automatic rule validation"
+      }
+    },
+    "programImport": {
+      "title": "Weekly Program Import",
+      "description": "Automatic import from official PDFs of the Life and Ministry workbook with intelligent parsing.",
+      "benefits": {
+        "recognition": "Automatic PDF recognition",
+        "extraction": "Intelligent data extraction",
+        "sync": "Calendar synchronization",
+        "validation": "Content validation"
+      }
+    },
+    "notifications": {
+      "title": "Automatic Notifications",
+      "description": "Send via email and WhatsApp with assignment details, scenes and specific instructions for each student.",
+      "benefits": {
+        "email": "Personalized email",
+        "whatsapp": "WhatsApp integration",
+        "reminders": "Automatic reminders",
+        "confirmation": "Receipt confirmation"
+      }
+    },
+    "reports": {
+      "title": "Reports and Analytics",
+      "description": "Complete dashboard with participation history, engagement metrics and reports for coordinators.",
+      "benefits": {
+        "metrics": "Participation metrics",
+        "custom": "Custom reports",
+        "performance": "Performance analysis",
+        "export": "Data export"
+      }
+    },
+    "compliance": {
+      "title": "Rule Compliance",
+      "description": "Intelligent algorithm that respects all guidelines of the Theocratic Ministry School and congregational regulations.",
+      "benefits": {
+        "automatic": "Automatic rule validation",
+        "guidelines": "Respect for guidelines",
+        "gender": "Gender control",
+        "privileges": "Privilege management"
+      }
+    },
+    "studentPortal": {
+      "title": "Student Portal",
+      "description": "Responsive interface for students to view assignments, confirm participation and contribute via donations.",
+      "benefits": {
+        "mobile": "Optimized mobile access",
+        "confirmation": "Participation confirmation",
+        "history": "Personal history",
+        "donations": "Donation system"
+      }
+    },
+    "technical": {
+      "title": "Technical Specifications",
+      "performance": {
+        "title": "Performance",
+        "realTime": "Real-time processing",
+        "availability": "99.9% availability",
+        "backup": "Daily automatic backup",
+        "sync": "Instant synchronization"
+      },
+      "security": {
+        "title": "Security",
+        "encryption": "End-to-end encryption",
+        "auth": "Secure authentication",
+        "access": "Access control",
+        "audit": "Complete audit"
+      },
+      "compatibility": {
+        "title": "Compatibility",
+        "webMobile": "Web and mobile access",
+        "whatsapp": "WhatsApp integration",
+        "pdf": "PDF import",
+        "export": "Data export"
+      }
+    }
+  },
+  "congregationsPage": {
+    "title": "Congregations",
+    "titleHighlight": "Partners",
+    "subtitle": "Over 100 congregations already experience the efficiency of ministerial automation. Join this growing community of organized servants.",
+    "stats": {
+      "activeCongregations": "Active Congregations",
+      "registeredStudents": "Registered Students",
+      "generatedAssignments": "Generated Assignments",
+      "satisfaction": "Satisfaction"
+    },
+    "testimonials": {
+      "title": "Congregation Testimonials",
+      "members": "members",
+      "usingFor": "Using for",
+      "months": "months",
+      "congregations": {
+        "central": {
+          "name": "Central Congregation",
+          "city": "São Paulo, SP",
+          "coordinator": "Brother Silva",
+          "testimonial": "The Ministerial System revolutionized our organization. We reduced assignment preparation time from 3 hours to 15 minutes!"
+        },
+        "north": {
+          "name": "North Congregation",
+          "city": "Rio de Janeiro, RJ",
+          "coordinator": "Brother Santos",
+          "testimonial": "Excellent tool! Students now receive their assignments automatically and can confirm participation via mobile."
+        },
+        "west": {
+          "name": "West Congregation",
+          "city": "Belo Horizonte, MG",
+          "coordinator": "Brother Oliveira",
+          "testimonial": "Compliance with congregational rules is perfect. We never had problems with inappropriate assignments again."
+        },
+        "south": {
+          "name": "South Congregation",
+          "city": "Porto Alegre, RS",
+          "coordinator": "Brother Costa",
+          "testimonial": "The student portal is fantastic. Young people are more engaged and organized with their ministerial participation."
+        }
+      }
+    },
+    "successStories": {
+      "title": "Success Stories",
+      "timeReduction": {
+        "title": "Reduction in Preparation Time",
+        "description": "Coordinators report that time spent organizing assignments has drastically reduced, allowing more focus on spiritual development."
+      },
+      "engagement": {
+        "title": "Increase in Engagement",
+        "description": "Students show greater participation and punctuality in assignments after implementing the notification system."
+      },
+      "compliance": {
+        "title": "Rule Compliance",
+        "description": "Zero inappropriate assignment errors since implementation, ensuring total compliance with congregational guidelines."
+      }
+    },
+    "cta": {
+      "title": "Your Congregation Could Be Next!",
+      "subtitle": "Join congregations that have already discovered how technology can assist in ministerial organization in a simple and efficient way.",
+      "button": "Start for Free"
+    }
+  },
+  "faqHardcoded": {
+    "question": "question",
+    "questions": "questions"
+  },
+  "footer": {
+    "appName": "Ministerial System",
+    "description": "Intelligent automation of ministerial assignments for Jehovah's Witnesses congregations, focused on efficiency and compliance.",
+    "dedication": "Developed with dedication to serve congregational needs and support ministerial work.",
+    "features": "Features",
+    "studentManagement": "Student Management",
+    "programImport": "Program Import",
+    "automaticAssignments": "Automatic Assignments",
+    "notifications": "Notifications",
+    "studentPortal": "Student Portal",
+    "reports": "Reports",
+    "support": "Support",
+    "usageTutorial": "Usage Tutorial",
+    "documentation": "Documentation",
+    "technicalContact": "Technical Contact",
+    "updates": "Updates",
+    "community": "Community",
+    "developedFor": "Developed to serve Jehovah's Witnesses congregations."
+  }
+}

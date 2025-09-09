@@ -1,0 +1,138 @@
+name: 🧪 Cypress E2E Tests - Sistema Ministerial
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  # Install dependencies and build application
+  install:
+    name: 📦 Install & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: 📦 Install Dependencies
+        run: npm ci
+
+      - name: 🏗️ Build Application
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+      - name: 💾 Cache Build
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist
+            node_modules
+          key: ${{ runner.os }}-build-${{ github.sha }}
+
+  # Parallel Cypress tests with matrix strategy
+  cypress-run:
+    name: 🧪 Cypress Tests (Container ${{ matrix.containers }})
+    runs-on: ubuntu-latest
+    needs: install
+
+    strategy:
+      fail-fast: false
+      matrix:
+        containers: [1, 2] # Run tests in parallel across 2 containers
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+
+      - name: 🔄 Restore Build Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist
+            node_modules
+          key: ${{ runner.os }}-build-${{ github.sha }}
+
+      - name: 🧪 Run Cypress Tests
+        uses: cypress-io/github-action@v6
+        with:
+          # Don't install dependencies (already cached)
+          install: false
+          # Start the preview server
+          start: npm run preview
+          # Wait for server to be ready
+          wait-on: 'http://localhost:4173'
+          wait-on-timeout: 120
+          # Use Chrome browser
+          browser: chrome
+          # Enable recording to Cypress Cloud
+          record: true
+          # Enable parallel execution
+          parallel: true
+          # Group name for Cypress Cloud
+          group: 'Sistema Ministerial E2E'
+          # Tag for this run
+          tag: 'github-actions,container-${{ matrix.containers }}'
+          # CI Build ID for parallel runs
+          ci-build-id: '${{ github.sha }}-${{ github.workflow }}-${{ github.event_name }}'
+        env:
+          # Cypress Cloud Configuration
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # Supabase Configuration
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+
+          # Cypress Test Credentials
+          CYPRESS_INSTRUCTOR_EMAIL: ${{ secrets.CYPRESS_INSTRUCTOR_EMAIL }}
+          CYPRESS_INSTRUCTOR_PASSWORD: ${{ secrets.CYPRESS_INSTRUCTOR_PASSWORD }}
+          CYPRESS_STUDENT_EMAIL: ${{ secrets.CYPRESS_STUDENT_EMAIL }}
+          CYPRESS_STUDENT_PASSWORD: ${{ secrets.CYPRESS_STUDENT_PASSWORD }}
+          FRANKLIN_EMAIL: ${{ secrets.FRANKLIN_EMAIL }}
+          FRANKLIN_PASSWORD: ${{ secrets.FRANKLIN_PASSWORD }}
+
+      - name: 📊 Upload Cypress Screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots-${{ matrix.containers }}
+          path: cypress/screenshots
+          retention-days: 7
+
+      - name: 📹 Upload Cypress Videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-videos-${{ matrix.containers }}
+          path: cypress/videos
+          retention-days: 7
+
+  # Summary job to check overall test results
+  test-results:
+    name: 📊 Test Results Summary
+    runs-on: ubuntu-latest
+    needs: cypress-run
+    if: always()
+
+    steps:
+      - name: 📋 Check Test Results
+        run: |
+          echo "Cypress tests completed"
+          echo "Check Cypress Cloud dashboard for detailed results"
+          echo "Dashboard: https://cloud.cypress.io/projects/o6ctse"

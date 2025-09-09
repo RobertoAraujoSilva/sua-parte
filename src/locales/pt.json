@@ -1,0 +1,806 @@
+{
+  "common": {
+    "appName": "Sistema Ministerial",
+    "welcome": "Bem-vindo",
+    "dashboard": "Dashboard",
+    "students": "Estudantes",
+    "programs": "Programas",
+    "assignments": "Designações",
+    "logout": "Sair",
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "search": "Buscar",
+    "refresh": "Atualizar",
+    "export": "Exportar",
+    "generate": "Gerar",
+    "regenerate": "Regenerar",
+    "preview": "Visualizar",
+    "loading": "Carregando...",
+    "saving": "Salvando...",
+    "back": "Voltar",
+    "next": "Próximo",
+    "previous": "Anterior",
+    "close": "Fechar",
+    "yes": "Sim",
+    "no": "Não",
+    "active": "Ativo",
+    "inactive": "Inativo",
+    "all": "Todos",
+    "total": "Total",
+    "date": "Data",
+    "name": "Nome",
+    "email": "Email",
+    "phone": "Telefone",
+    "age": "Idade",
+    "gender": "Gênero",
+    "role": "Cargo",
+    "status": "Status",
+    "actions": "Ações",
+    "settings": "Configurações",
+    "help": "Ajuda",
+    "support": "Suporte",
+    "step": "Passo",
+    "tip": "Dica",
+    "notInformed": "Não informado",
+    "years": "anos",
+    "backToDashboard": "Voltar ao Dashboard"
+  },
+  "navigation": {
+    "home": "Início",
+    "features": "Funcionalidades",
+    "faq": "FAQ",
+    "congregations": "Congregações",
+    "support": "Suporte",
+    "about": "Sobre",
+    "donate": "Doar",
+    "dashboard": "Dashboard",
+    "students": "Estudantes",
+    "programs": "Programas",
+    "assignments": "Designações",
+    "reports": "Relatórios",
+    "myPortal": "Meu Portal",
+    "instructor": "Instrutor",
+    "student": "Estudante",
+    "getStarted": "Começar",
+    "login": "Entrar",
+    "INÍCIO": "Início",
+    "FUNCIONALIDADES": "Funcionalidades",
+    "CONGREGAÇÕES": "Congregações",
+    "SUPORTE": "Suporte",
+    "SOBRE": "Sobre",
+    "DOAR": "Doar"
+  },
+  "language": {
+    "switchToEnglish": "Mudar para Inglês",
+    "switchToPortuguese": "Mudar para Português",
+    "english": "English",
+    "portuguese": "Português"
+  },
+  "students": {
+    "title": "Gestão de Estudantes",
+    "subtitle": "Cadastre e gerencie alunos da Escola do Ministério, com validações automáticas de qualificações e regras da congregação.",
+    "tabs": {
+      "list": "Lista",
+      "new": "Novo",
+      "import": "Importar",
+      "statistics": "Estatísticas",
+      "spreadsheet": "Planilha",
+      "instructorPanel": "Painel do Instrutor"
+    },
+    "importSpreadsheet": "Importar Planilha",
+    "newStudent": "Novo Estudante",
+    "filters": "Filtros",
+    "searchByName": "Buscar por nome...",
+    "filterByRole": "Filtrar por cargo",
+    "allRoles": "Todos os cargos",
+    "noStudentsFound": "Nenhum estudante encontrado",
+    "adjustFiltersOrRegister": "Tente ajustar os filtros ou cadastre um novo estudante.",
+    "registerNewStudent": "Cadastrar Novo Estudante",
+    "totalStudents": "Total de Estudantes",
+    "activeStudents": "Estudantes Ativos",
+    "inactiveStudents": "Estudantes Inativos",
+    "minors": "Menores de Idade",
+    "minor": "Menor",
+    "baptizedOn": "Batizado em",
+    "responsible": "Responsável",
+    "responsibleFor": "Responsável por",
+    "qualifications": "Qualificações",
+    "observations": "Observações",
+    "confirmDelete": "Confirmar exclusão",
+    "deleteConfirmation": "Tem certeza que deseja excluir o estudante {{name}}?",
+    "cannotDeleteParent": "Este estudante é responsável por menores e não pode ser excluído.",
+    "actionCannotBeUndone": "Esta ação não pode ser desfeita.",
+    "deleting": "Excluindo...",
+    "qualificationTypes": {
+      "initialCall": "Primeira Conversa",
+      "returnVisit": "Revisita",
+      "bibleStudy": "Estudo Bíblico"
+    },
+    "roles": {
+      "elder": "Ancião",
+      "ministerialServant": "Servo Ministerial",
+      "regularPioneer": "Pioneiro Regular",
+      "publisher": "Publicador Batizado",
+      "unbaptizedPublisher": "Publicador Não Batizado",
+      "student": "Estudante Novo"
+    },
+    "genders": {
+      "male": "Masculino",
+      "female": "Feminino"
+    }
+  },
+  "dashboard": {
+    "title": "Painel de Controle",
+    "subtitle": "Gerencie designações ministeriais de forma inteligente e eficiente",
+    "quickActions": "Ações Rápidas",
+    "newStudent": "Novo Estudante",
+    "importProgram": "Importar Programa",
+    "generateAssignments": "Gerar Designações",
+    "importSpreadsheet": "Importar Planilha",
+    "manageStudentsDesc": "Gerenciar estudantes da escola ministerial",
+    "manageProgramsDesc": "Importar e gerenciar programas semanais",
+    "manageAssignmentsDesc": "Gerar e visualizar designações automáticas",
+    "manageMeetingsDesc": "Gerenciar reuniões, eventos especiais e designações administrativas",
+    "reportsDesc": "Relatórios de participação e engajamento",
+    "manageStudents": "Gerenciar Estudantes",
+    "viewPrograms": "Ver Programas",
+    "viewAssignments": "Ver Designações",
+    "manageMeetings": "Gerenciar Reuniões",
+    "viewReports": "Ver Relatórios",
+    "meetings": "Reuniões",
+    "totalStudents": "Total de Estudantes",
+    "activePrograms": "Programas Ativos",
+    "generatedAssignments": "Designações Geradas",
+    "registeredInSystem": "Cadastrados no sistema",
+    "scheduledWeeks": "Semanas programadas",
+    "thisMonth": "Neste mês"
+  },
+  "programs": {
+    "title": "Programas",
+    "subtitle": "Gerencie programas da Escola do Ministério Teocrático",
+    "importProgram": "Importar Programa",
+    "newProgram": "Novo Programa",
+    "uploadPdf": "Enviar PDF",
+    "pasteContent": "Colar Conteúdo",
+    "programName": "Nome do Programa",
+    "weekOf": "Semana de",
+    "parts": "Partes",
+    "generateAssignments": "Gerar Designações",
+    "preview": "Visualizar",
+    "edit": "Editar",
+    "delete": "Excluir",
+    "noPrograms": "Nenhum programa encontrado",
+    "uploadInstructions": "Faça upload do PDF da apostila ou cole o conteúdo do JW.org"
+  },
+  "assignments": {
+    "title": "Designações",
+    "subtitle": "Gerencie designações da Escola do Ministério",
+    "generateNew": "Gerar Novas",
+    "regenerate": "Regenerar",
+    "approve": "Aprovar",
+    "reject": "Rejeitar",
+    "exportPdf": "Exportar PDF",
+    "student": "Estudante",
+    "assistant": "Ajudante",
+    "part": "Parte",
+    "theme": "Tema",
+    "type": "Tipo",
+    "date": "Data",
+    "status": "Status",
+    "pending": "Pendente",
+    "approved": "Aprovado",
+    "completed": "Concluído",
+    "cancelled": "Cancelado"
+  },
+  "reports": {
+    "title": "Relatórios",
+    "subtitle": "Relatórios e estatísticas do sistema",
+    "studentProgress": "Progresso dos Estudantes",
+    "assignmentHistory": "Histórico de Designações",
+    "participation": "Participação",
+    "performance": "Desempenho",
+    "exportReport": "Exportar Relatório",
+    "dateRange": "Período",
+    "filterBy": "Filtrar por",
+    "generateReport": "Gerar Relatório"
+  },
+  "portal": {
+    "title": "Portal do Estudante",
+    "subtitle": "Suas designações e progresso",
+    "myAssignments": "Minhas Designações",
+    "upcomingAssignments": "Próximas Designações",
+    "completedAssignments": "Designações Concluídas",
+    "myProgress": "Meu Progresso",
+    "qualifications": "Qualificações",
+    "feedback": "Feedback",
+    "confirmParticipation": "Confirmar Participação",
+    "requestChange": "Solicitar Alteração"
+  },
+  "auth": {
+    "login": "Entrar",
+    "email": "Email",
+    "password": "Senha",
+    "signIn": "Fazer Login",
+    "signUp": "Cadastrar",
+    "forgotPassword": "Esqueceu a senha?",
+    "noAccount": "Não tem conta? Cadastre-se",
+    "hasAccount": "Já tem conta? Faça login",
+    "resetPassword": "Redefinir Senha",
+    "newPassword": "Nova Senha",
+    "confirmPassword": "Confirmar Senha",
+    "loginSuccess": "Login realizado com sucesso!",
+    "loginError": "Erro ao fazer login",
+    "signupSuccess": "Cadastro realizado com sucesso!",
+    "signupError": "Erro ao cadastrar",
+    "invalidCredentials": "Credenciais inválidas",
+    "emailRequired": "Email é obrigatório",
+    "passwordRequired": "Senha é obrigatória",
+    "passwordTooShort": "Senha deve ter pelo menos 6 caracteres",
+    "emailInvalid": "Email inválido",
+    "loggingIn": "Entrando...",
+    "accountType": "Tipo de Conta",
+    "selected": "Selecionado",
+    "fullName": "Nome Completo",
+    "fullNamePlaceholder": "Digite seu nome completo",
+    "birthDate": "Data de Nascimento",
+    "age": "Idade",
+    "years": "anos",
+    "congregationPlaceholder": "Nome da sua congregação",
+    "roleOptional": "Cargo (Opcional)",
+    "selectRole": "Selecione o cargo",
+    "congregationRole": "Cargo na Congregação",
+    "passwordMinLength": "Mínimo 6 caracteres",
+    "creatingAccount": "Criando conta...",
+    "createAccount": "Criar Conta",
+    "validation": {
+      "birthDateRequired": "Data de nascimento é obrigatória.",
+      "birthDateFuture": "Data de nascimento não pode ser no futuro.",
+      "ageMinimum": "Idade mínima para participar da Escola do Ministério é 6 anos.",
+      "ageMaximum": "Por favor, verifique a data de nascimento informada.",
+      "allFieldsRequired": "Por favor, preencha todos os campos obrigatórios.",
+      "roleRequired": "Por favor, selecione seu cargo na congregação.",
+      "passwordMismatch": "As senhas não coincidem.",
+      "passwordMinLength": "A senha deve ter pelo menos 6 caracteres.",
+      "emailAlreadyExists": "Este e-mail já está cadastrado. Tente fazer login.",
+      "unexpectedError": "Ocorreu um erro inesperado. Tente novamente."
+    },
+    "messages": {
+      "accountCreated": "Cadastro realizado!",
+      "accountCreatedDesc": "Sua conta foi criada com sucesso. Você já pode fazer login.",
+      "signupError": "Erro no cadastro",
+      "credentialsFilled": "Credenciais preenchidas",
+      "credentialsFilledDesc": "Credenciais de {{type}} carregadas."
+    },
+    "roles": {
+      "instrutor": {
+        "title": "Instrutor/Designador",
+        "description": "Acesso completo para gerenciar estudantes, programas e designações"
+      },
+      "estudante": {
+        "title": "Estudante",
+        "description": "Acesso ao portal pessoal para visualizar suas designações"
+      },
+      "superintendent": "Superintendente da Escola",
+      "assistantCounselor": "Conselheiro Assistente"
+    }
+  },
+  "forms": {
+    "save": "Salvar",
+    "cancel": "Cancelar",
+    "submit": "Enviar",
+    "reset": "Limpar",
+    "required": "Obrigatório",
+    "optional": "Opcional",
+    "pleaseWait": "Aguarde...",
+    "processing": "Processando...",
+    "success": "Sucesso!",
+    "error": "Erro!",
+    "validation": {
+      "required": "Este campo é obrigatório",
+      "email": "Email inválido",
+      "minLength": "Mínimo {{min}} caracteres",
+      "maxLength": "Máximo {{max}} caracteres",
+      "numeric": "Apenas números",
+      "phone": "Telefone inválido"
+    }
+  },
+  "errors": {
+    "loadingFailed": "Falha ao carregar",
+    "timeout": "Tempo esgotado",
+    "unknownError": "Erro desconhecido",
+    "networkError": "Erro de rede",
+    "serverError": "Erro do servidor",
+    "notFound": "Não encontrado",
+    "unauthorized": "Não autorizado",
+    "forbidden": "Acesso negado"
+  },
+  "notifications": {
+    "newAssignment": "Nova designação recebida",
+    "assignmentChanged": "Designação alterada",
+    "assignmentCancelled": "Designação cancelada",
+    "programImported": "Programa importado com sucesso",
+    "studentAdded": "Estudante adicionado",
+    "studentUpdated": "Estudante atualizado",
+    "reportGenerated": "Relatório gerado"
+  },
+  "terms": {
+    "bibleReading": "Leitura da Bíblia",
+    "talk": "Discurso",
+    "theocraticMinistrySchool": "Escola do Ministério Teocrático",
+    "congregation": "Congregação",
+    "anciao": "Ancião",
+    "servo_ministerial": "Servo Ministerial",
+    "pioneiro_regular": "Pioneiro Regular",
+    "publicador_batizado": "Publicador Batizado",
+    "publicador_nao_batizado": "Publicador Não Batizado",
+    "estudante_novo": "Estudante Novo",
+    "instructor": "Instrutor"
+  },
+  "initialSetup": {
+    "title": "Configuração Inicial",
+    "subtitle": "Vamos configurar seu perfil para começar a usar o sistema",
+    "steps": {
+      "personalInfo": "Informações Pessoais",
+      "congregation": "Congregação",
+      "preferences": "Preferências"
+    },
+    "stepDescriptions": {
+      "personalInfo": "Informe seus dados pessoais",
+      "congregation": "Dados da sua congregação",
+      "preferences": "Configure suas preferências do sistema"
+    },
+    "fields": {
+      "fullName": "Nome Completo",
+      "fullNamePlaceholder": "Seu nome completo",
+      "email": "Email",
+      "emailPlaceholder": "seu.email@exemplo.com",
+      "emailNote": "Email não pode ser alterado após o cadastro",
+      "role": "Cargo/Privilégio",
+      "selectRole": "Selecione seu cargo",
+      "congregationName": "Nome da Congregação",
+      "congregationPlaceholder": "Ex: Congregação Central",
+      "congregationNote": "O nome da congregação será usado nos relatórios e documentos gerados pelo sistema."
+    },
+    "preferences": {
+      "autoGenerate": "Gerar designações automaticamente após importar programa",
+      "emailNotifications": "Receber notificações por email",
+      "showTutorials": "Mostrar tutoriais e dicas do sistema",
+      "note": "Você pode alterar essas preferências a qualquer momento nas configurações."
+    },
+    "navigation": {
+      "previous": "Anterior",
+      "next": "Próximo",
+      "finish": "Finalizar Configuração",
+      "saving": "Salvando..."
+    },
+    "roles": {
+      "anciao": "Ancião",
+      "servo_ministerial": "Servo Ministerial",
+      "instrutor": "Instrutor da EMT",
+      "pioneiro_regular": "Pioneiro Regular",
+      "publicador_batizado": "Publicador Batizado"
+    }
+  },
+  "firstProgram": {
+    "badge": "Último Passo - Tutorial Prático",
+    "title": "Vamos Criar Seu Primeiro Programa! 🎯",
+    "subtitle": "Siga este tutorial prático para criar seu primeiro programa com designações automáticas",
+    "steps": {
+      "step1": {
+        "title": "1. Cadastre os Estudantes",
+        "description": "Primeiro, vamos adicionar os estudantes da Escola do Ministério Teocrático",
+        "action": "Ir para Estudantes",
+        "tips": [
+          "Adicione nome completo e cargo de cada estudante",
+          "Marque relacionamentos familiares para partes do ministério",
+          "Configure qualificações conforme diretrizes S-38-T"
+        ]
+      },
+      "step2": {
+        "title": "2. Importe um Programa",
+        "description": "Agora vamos importar o programa da apostila Vida e Ministério Cristão",
+        "action": "Ir para Programas",
+        "tips": [
+          "Faça upload do PDF oficial da apostila",
+          "Ou cole o conteúdo diretamente do JW.org",
+          "O sistema identifica automaticamente as 12 partes da reunião"
+        ]
+      },
+      "step3": {
+        "title": "3. Gere as Designações",
+        "description": "Por fim, o sistema criará automaticamente todas as designações",
+        "action": "Ver Como Funciona",
+        "tips": [
+          "Clique em 'Gerar Designações' no programa importado",
+          "Revise as designações na página de preview",
+          "Aprove quando estiver satisfeito com o resultado"
+        ]
+      }
+    },
+    "tipsTitle": "Dicas importantes:",
+    "featuresTitle": "Por que o Sistema Ministerial é Especial?",
+    "features": {
+      "compliance": {
+        "title": "Conformidade S-38-T",
+        "description": "Todas as designações seguem rigorosamente as diretrizes organizacionais"
+      },
+      "ai": {
+        "title": "Inteligência Artificial",
+        "description": "Algoritmo inteligente distribui designações de forma balanceada"
+      },
+      "structure": {
+        "title": "Estrutura Completa",
+        "description": "Suporte total à estrutura de 12 partes da reunião semanal"
+      }
+    },
+    "tip": "Se você já tem estudantes cadastrados, pode começar diretamente importando um programa. O sistema funciona melhor com pelo menos 8-10 estudantes cadastrados.",
+    "startWithStudents": "Começar com Estudantes",
+    "goToDashboard": "Ir para Dashboard",
+    "helpNote": "Você pode acessar este tutorial novamente a qualquer momento no menu Ajuda"
+  },
+  "welcome": {
+    "welcomeUser": "Bem-vindo, {{name}}!",
+    "title": "Bem-vindo ao Sistema Ministerial",
+    "subtitle": "Vamos configurar seu ambiente para começar a usar todos os recursos.",
+    "howItWorks": "Como funciona",
+    "howItWorksDesc": "Um fluxo simples em três passos para colocar tudo em funcionamento.",
+    "letsStart": "Vamos começar",
+    "letsStartDesc": "Siga as etapas abaixo ou pule para o Dashboard.",
+    "stepsTitle": "Etapas iniciais",
+    "stepsSubtitle": "Siga este passo a passo para começar",
+    "step1Title": "Cadastre os Estudantes",
+    "step1Desc": "Adicione estudantes com dados básicos e relacionamentos.",
+    "step2Title": "Importe um Programa",
+    "step2Desc": "Faça upload do PDF da apostila ou cole o conteúdo.",
+    "step3Title": "Gere as Designações",
+    "step3Desc": "Crie automaticamente as designações a partir do programa.",
+    "benefitsTitle": "Benefícios do Onboarding",
+    "benefitsSubtitle": "Completar essas etapas traz as seguintes vantagens:",
+    "benefits": [
+      "Configuração guiada e mais rápida",
+      "Menos erros nas primeiras designações",
+      "Experiência consistente para a congregação"
+    ],
+    "complianceTitle": "Conformidade desde o início",
+    "complianceSubtitle": "O sistema já aplica as regras da EMT durante a configuração.",
+    "genderRestrictions": "Restrições de gênero",
+    "genderRestrictionsDesc": "As designações respeitam as diretrizes de participação por gênero.",
+    "qualifications": "Qualificações congregacionais",
+    "qualificationsDesc": "Regras e qualificações são validadas automaticamente.",
+    "familyRelationships": "Relacionamentos familiares",
+    "familyRelationshipsDesc": "Evita combinações indevidas em partes conjuntas.",
+    "startSetup": "Iniciar Configuração",
+    "skipToDashboard": "Pular e ir para o Dashboard",
+    "setupTime": "Configuração completa em menos de 10 minutos.",
+    "configuring": "Configurando..."
+  },
+  "hero": {
+    "title": "Automação Inteligente de",
+    "titleHighlight": "Designações Ministeriais",
+    "subtitle": "Sistema completo para congregações das Testemunhas de Jeová organizarem as designações da Reunião Vida e Ministério com eficiência e conformidade.",
+    "getStarted": "Começar Agora",
+    "viewDemo": "Ver Demo",
+    "stats": {
+      "congregations": "Congregações Atendidas",
+      "timeReduction": "Redução de Tempo Manual",
+      "availability": "Disponibilidade Contínua"
+    }
+  },
+  "features": {
+    "title": "Principais Funcionalidades",
+    "subtitle": "Tudo que sua congregação precisa para automatizar e otimizar o processo de designações ministeriais com total conformidade.",
+    "studentManagement": {
+      "title": "Gestão Completa de Estudantes",
+      "description": "Cadastro detalhado com validação de cargos, relacionamentos familiares e qualificações congregacionais para designações precisas."
+    },
+    "programImport": {
+      "title": "Importação de Programas Semanais",
+      "description": "Importação automática de PDFs oficiais da apostila Vida e Ministério com análise inteligente."
+    },
+    "notifications": {
+      "title": "Notificações Automáticas",
+      "description": "Envio via email e WhatsApp com detalhes da designação, cenários e instruções específicas para cada estudante."
+    },
+    "reports": {
+      "title": "Relatórios e Análises",
+      "description": "Dashboard completo com histórico de participação, métricas de engajamento e relatórios para coordenadores."
+    },
+    "compliance": {
+      "title": "Conformidade com Regras",
+      "description": "Algoritmo inteligente que respeita todas as diretrizes da Escola do Ministério Teocrático e regulamentos congregacionais."
+    },
+    "studentPortal": {
+      "title": "Portal do Estudante",
+      "description": "Interface responsiva para estudantes visualizarem designações, confirmarem participação e contribuírem via doações."
+    }
+  },
+  "faq": {
+    "title": "Perguntas Frequentes",
+    "subtitle": "Encontre respostas para as dúvidas mais comuns sobre o Sistema Ministerial",
+    "searchPlaceholder": "Buscar perguntas...",
+    "categories": "Categorias",
+    "question": "pergunta",
+    "questions": "perguntas",
+    "noResults": "Nenhum resultado encontrado",
+    "tryOtherTerms": "Tente usar outros termos de busca",
+    "needHelp": "Precisa de mais ajuda?",
+    "supportTeam": "Nossa equipe de suporte está pronta para ajudar você",
+    "contact": "Entrar em Contato",
+    "viewFeatures": "Ver Funcionalidades",
+    "categoryTitles": {
+      "overview": "Visão Geral",
+      "students": "Cadastro de Estudantes",
+      "programs": "Leitura das Apostilas",
+      "algorithm": "Algoritmo de Distribuição",
+      "communication": "Comunicação e Segurança"
+    },
+    "categoryDescriptions": {
+      "overview": "Informações gerais sobre o sistema",
+      "students": "Como gerenciar estudantes e qualificações",
+      "programs": "Importação e criação de programas",
+      "algorithm": "Como funciona a distribuição automática",
+      "communication": "Notificações e segurança dos dados"
+    },
+    "categoryTitlesHardcoded": {
+      "overview": "Visão Geral",
+      "students": "Cadastro de Estudantes",
+      "programs": "Leitura das Apostilas",
+      "algorithm": "Algoritmo de Distribuição",
+      "communication": "Comunicação e Segurança"
+    },
+    "questions": {
+      "whatIs": "O que é o Sistema Ministerial?",
+      "whoCanUse": "Quem pode usar o sistema?",
+      "cost": "O sistema é gratuito?",
+      "requirements": "Quais são os requisitos técnicos?"
+    },
+    "answers": {
+      "whatIs": "O Sistema Ministerial é uma plataforma completa para automatizar a gestão de designações da Escola do Ministério Teocrático. Ele respeita todas as diretrizes organizacionais S-38-T e facilita o trabalho dos superintendentes.",
+      "whoCanUse": "O sistema é destinado aos superintendentes da Escola do Ministério Teocrático e seus assistentes. Estudantes têm acesso limitado ao portal do estudante para visualizar suas designações.",
+      "cost": "Sim! O sistema é completamente gratuito. Aceitamos doações voluntárias para manter e melhorar a plataforma, mas o uso é livre para todas as congregações.",
+      "requirements": "Apenas um navegador moderno (Chrome, Firefox, Safari, Edge) e conexão com a internet. Funciona em computadores, tablets e smartphones."
+    }
+  },
+  "benefits": {
+    "title": "Transforme a Organização da Sua Congregação",
+    "subtitle": "Reduza drasticamente o tempo gasto em tarefas administrativas e foque no que realmente importa: o desenvolvimento espiritual.",
+    "timeEfficiency": {
+      "title": "Economia Significativa de Tempo",
+      "description": "De horas para minutos: o que antes levava uma tarde inteira de trabalho agora é resolvido em menos de 5 minutos por semana."
+    },
+    "compliance": {
+      "title": "Conformidade Garantida",
+      "description": "Algoritmo inteligente que respeita automaticamente todas as regras congregacionais, gênero, cargo e relacionamentos familiares."
+    },
+    "engagement": {
+      "title": "Engajamento dos Estudantes",
+      "description": "Portal dedicado onde estudantes acompanham suas designações, confirmam participação e contribuem para a sustentabilidade."
+    },
+    "sustainability": {
+      "title": "Sustentabilidade via Doações",
+      "description": "Sistema autofinanciado através de contribuições voluntárias, garantindo continuidade sem custos fixos para congregações."
+    },
+    "cta": {
+      "title": "Comece Hoje Mesmo",
+      "description": "Cadastre sua congregação e experimente a eficiência da automação ministerial. Configuração completa em menos de 30 minutos.",
+      "button": "Começar Gratuitamente",
+      "note": "Sistema sustentado por doações voluntárias"
+    },
+    "features": {
+      "studentManagement": "Cadastro de estudantes",
+      "programImport": "Importação de programas",
+      "notifications": "Notificações automáticas",
+      "studentPortal": "Portal do estudante",
+      "reports": "Relatórios completos",
+      "included": "Incluído"
+    }
+  },
+  "featuresPage": {
+    "title": "Funcionalidades",
+    "titleHighlight": "Completas",
+    "subtitle": "Tudo que sua congregação precisa para automatizar e otimizar o processo de designações ministeriais com total conformidade.",
+    "studentManagement": {
+      "title": "Gestão Completa de Estudantes",
+      "description": "Cadastro detalhado com validação de cargos, parentesco e qualificações congregacionais para designações precisas.",
+      "benefits": {
+        "qualifications": "Controle de qualificações ministeriais",
+        "family": "Gestão de relações familiares",
+        "history": "Histórico de participações",
+        "validation": "Validação automática de regras"
+      }
+    },
+    "programImport": {
+      "title": "Importação de Programas Semanais",
+      "description": "Importação automática a partir de PDFs oficiais da apostila Vida e Ministério Cristão com parsing inteligente.",
+      "benefits": {
+        "recognition": "Reconhecimento automático de PDFs",
+        "extraction": "Extração inteligente de dados",
+        "sync": "Sincronização com calendário",
+        "validation": "Validação de conteúdo"
+      }
+    },
+    "notifications": {
+      "title": "Notificações Automáticas",
+      "description": "Envio por e-mail e WhatsApp com detalhes da designação, cena e instruções específicas para cada estudante.",
+      "benefits": {
+        "email": "E-mail personalizado",
+        "whatsapp": "Integração WhatsApp",
+        "reminders": "Lembretes automáticos",
+        "confirmation": "Confirmação de recebimento"
+      }
+    },
+    "reports": {
+      "title": "Relatórios e Análises",
+      "description": "Dashboard completo com histórico de participação, métricas de engajamento e relatórios para coordenadores.",
+      "benefits": {
+        "metrics": "Métricas de participação",
+        "custom": "Relatórios personalizados",
+        "performance": "Análise de desempenho",
+        "export": "Exportação de dados"
+      }
+    },
+    "compliance": {
+      "title": "Conformidade com Regras",
+      "description": "Algoritmo inteligente que respeita todas as diretrizes da Escola do Ministério Teocrático e regulamentos congregacionais.",
+      "benefits": {
+        "automatic": "Validação de regras automática",
+        "guidelines": "Respeito às diretrizes",
+        "gender": "Controle de gênero",
+        "privileges": "Gestão de privilégios"
+      }
+    },
+    "studentPortal": {
+      "title": "Portal do Estudante",
+      "description": "Interface responsiva para estudantes visualizarem designações, confirmarem participação e contribuírem via doações.",
+      "benefits": {
+        "mobile": "Acesso móvel otimizado",
+        "confirmation": "Confirmação de participação",
+        "history": "Histórico pessoal",
+        "donations": "Sistema de doações"
+      }
+    },
+    "technical": {
+      "title": "Especificações Técnicas",
+      "performance": {
+        "title": "Performance",
+        "realTime": "Processamento em tempo real",
+        "availability": "99.9% de disponibilidade",
+        "backup": "Backup automático diário",
+        "sync": "Sincronização instantânea"
+      },
+      "security": {
+        "title": "Segurança",
+        "encryption": "Criptografia end-to-end",
+        "auth": "Autenticação segura",
+        "access": "Controle de acesso",
+        "audit": "Auditoria completa"
+      },
+      "compatibility": {
+        "title": "Compatibilidade",
+        "webMobile": "Acesso web e mobile",
+        "whatsapp": "Integração WhatsApp",
+        "pdf": "Importação PDF",
+        "export": "Exportação de dados"
+      }
+    }
+  },
+  "congregationsPage": {
+    "title": "Congregações",
+    "titleHighlight": "Parceiras",
+    "subtitle": "Mais de 100 congregações já experimentam a eficiência da automação ministerial. Junte-se a esta comunidade crescente de servos organizados.",
+    "stats": {
+      "activeCongregations": "Congregações Ativas",
+      "registeredStudents": "Estudantes Cadastrados",
+      "generatedAssignments": "Designações Geradas",
+      "satisfaction": "Satisfação"
+    },
+    "testimonials": {
+      "title": "Depoimentos das Congregações",
+      "members": "membros",
+      "usingFor": "Usando há",
+      "months": "meses",
+      "congregations": {
+        "central": {
+          "name": "Congregação Central",
+          "city": "São Paulo, SP",
+          "coordinator": "Irmão Silva",
+          "testimonial": "O Sistema Ministerial revolucionou nossa organização. Reduzimos o tempo de preparação das designações de 3 horas para 15 minutos!"
+        },
+        "north": {
+          "name": "Congregação Norte",
+          "city": "Rio de Janeiro, RJ",
+          "coordinator": "Irmão Santos",
+          "testimonial": "Excelente ferramenta! Os estudantes agora recebem suas designações automaticamente e podem confirmar participação pelo celular."
+        },
+        "west": {
+          "name": "Congregação Oeste",
+          "city": "Belo Horizonte, MG",
+          "coordinator": "Irmão Oliveira",
+          "testimonial": "A conformidade com as regras congregacionais é perfeita. Nunca mais tivemos problemas com designações inadequadas."
+        },
+        "south": {
+          "name": "Congregação Sul",
+          "city": "Porto Alegre, RS",
+          "coordinator": "Irmão Costa",
+          "testimonial": "O portal do estudante é fantástico. Os jovens estão mais engajados e organizados com suas participações ministeriais."
+        }
+      }
+    },
+    "successStories": {
+      "title": "Histórias de Sucesso",
+      "timeReduction": {
+        "title": "Redução no Tempo de Preparação",
+        "description": "Coordenadores relatam que o tempo gasto organizando designações reduziu drasticamente, permitindo mais foco no desenvolvimento espiritual."
+      },
+      "engagement": {
+        "title": "Aumento no Engajamento",
+        "description": "Estudantes demonstram maior participação e pontualidade nas designações após implementação do sistema de notificações."
+      },
+      "compliance": {
+        "title": "Conformidade com Regras",
+        "description": "Zero erros de designação inadequada desde a implementação, garantindo total conformidade com as diretrizes congregacionais."
+      }
+    },
+    "cta": {
+      "title": "Sua Congregação Pode Ser a Próxima!",
+      "subtitle": "Junte-se às congregações que já descobriram como a tecnologia pode auxiliar na organização ministerial de forma simples e eficiente.",
+      "button": "Começar Gratuitamente"
+    }
+  },
+  "faqHardcoded": {
+    "question": "pergunta",
+    "questions": "perguntas",
+    "comingSoon": "Em breve...",
+    "moreQuestions": "Mais perguntas serão adicionadas em breve."
+  },
+  "footer": {
+    "appName": "Sistema Ministerial",
+    "description": "Automação inteligente de designações ministeriais para congregações das Testemunhas de Jeová, focada em eficiência e conformidade.",
+    "dedication": "Desenvolvido com dedicação para servir às necessidades congregacionais e apoiar o trabalho ministerial.",
+    "features": "Funcionalidades",
+    "studentManagement": "Gestão de Estudantes",
+    "programImport": "Importação de Programas",
+    "automaticAssignments": "Designações Automáticas",
+    "notifications": "Notificações",
+    "studentPortal": "Portal do Estudante",
+    "reports": "Relatórios",
+    "support": "Suporte",
+    "usageTutorial": "Tutorial de Uso",
+    "documentation": "Documentação",
+    "technicalContact": "Contato Técnico",
+    "updates": "Atualizações",
+    "community": "Comunidade",
+    "developedFor": "Desenvolvido para servir às congregações das Testemunhas de Jeová.",
+    "testimonialQuote": "\"{testimonial}\"",
+    "testimonialAuthor": "— {author}",
+    "checkmark": "✅"
+  },
+  "configuracaoInicial": {
+    "toast": {
+      "success": {
+        "title": "Configuração Concluída!",
+        "description": "Seu perfil foi configurado com sucesso. Vamos ao primeiro programa!"
+      },
+      "error": {
+        "title": "Erro na Configuração",
+        "description": "Não foi possível salvar as configurações. Tente novamente."
+      }
+    }
+  },
+  "congregacoes": {
+    "stats": {
+      "activeCongregationsValue": "100+",
+      "registeredStudentsValue": "2.500+",
+      "generatedAssignmentsValue": "50.000+",
+      "satisfactionValue": "98%"
+    },
+    "successStories": {
+      "timeReductionValue": "95%",
+      "engagementValue": "87%",
+      "complianceValue": "100%"
+    }
+  }
+}

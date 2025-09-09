@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Mauricio Signup - Sistema Ministerial</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .error { background: #ffe6e6; border-left: 4px solid #ff0000; }
+        .success { background: #e6ffe6; border-left: 4px solid #00aa00; }
+        .info { background: #e6f3ff; border-left: 4px solid #0066cc; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; width: 300px; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test Mauricio Signup - Sistema Ministerial</h1>
+    <p>This tool tests the signup process for Mauricio to debug the database error.</p>
+    
+    <div class="form-group">
+        <label for="email">Email:</label>
+        <input type="email" id="email" value="cetisergiopessoa@gmail.com">
+    </div>
+    
+    <div class="form-group">
+        <label for="password">Password:</label>
+        <input type="password" id="password" value="test123456">
+    </div>
+    
+    <div class="form-group">
+        <label for="nome">Nome Completo:</label>
+        <input type="text" id="nome" value="Mauricio Williams Ferreira de Lima">
+    </div>
+    
+    <div class="form-group">
+        <label for="congregacao">Congregação:</label>
+        <input type="text" id="congregacao" value="Market Harborough">
+    </div>
+    
+    <div class="form-group">
+        <label for="cargo">Cargo Ministerial:</label>
+        <select id="cargo">
+            <option value="publicador_nao_batizado">Publicador Não Batizado</option>
+            <option value="publicador_batizado" selected>Publicador Batizado</option>
+            <option value="pioneiro_regular">Pioneiro Regular</option>
+            <option value="servo_ministerial">Servo Ministerial</option>
+            <option value="anciao">Ancião</option>
+            <option value="estudante_novo">Estudante Novo</option>
+        </select>
+    </div>
+    
+    <div class="form-group">
+        <label for="role">Tipo de Usuário:</label>
+        <select id="role">
+            <option value="estudante" selected>Estudante</option>
+            <option value="instrutor">Instrutor</option>
+        </select>
+    </div>
+    
+    <div>
+        <button onclick="testSignup()">Test Signup</button>
+        <button onclick="testSignupWithDifferentEmail()">Test with Different Email</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+    
+    <div id="logs"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
+        
+        const SUPABASE_URL = 'https://nwpuurgwnnuejqinkvrh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjIwNjUsImV4cCI6MjA3MDAzODA2NX0.UHjSvXYY_c-_ydAIfELRUs4CMEBLKiztpBGQBNPHfak';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            logsDiv.appendChild(logDiv);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+        
+        async function testSignup() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const nome = document.getElementById('nome').value;
+            const congregacao = document.getElementById('congregacao').value;
+            const cargo = document.getElementById('cargo').value;
+            const role = document.getElementById('role').value;
+            
+            if (!email || !password || !nome) {
+                log('❌ Please fill in all required fields', 'error');
+                return;
+            }
+            
+            clearLogs();
+            log('🚀 Starting signup test for Mauricio...', 'info');
+            log(`📧 Email: ${email}`, 'info');
+            log(`👤 Name: ${nome}`, 'info');
+            log(`⛪ Congregation: ${congregacao}`, 'info');
+            log(`📋 Ministerial Role: ${cargo}`, 'info');
+            log(`🎭 System Role: ${role}`, 'info');
+            
+            try {
+                log('1️⃣ Attempting signup...', 'info');
+                
+                const { data, error } = await supabase.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            nome_completo: nome,
+                            congregacao: congregacao,
+                            cargo: cargo,
+                            role: role
+                        }
+                    }
+                });
+                
+                if (error) {
+                    log(`❌ Signup failed: ${error.message}`, 'error');
+                    log(`🔍 Error code: ${error.status || 'N/A'}`, 'error');
+                    log(`📋 Error details: ${JSON.stringify(error)}`, 'error');
+                    
+                    if (error.message.includes('Database error saving new user')) {
+                        log('🎯 This is the database error we are investigating!', 'error');
+                        log('💡 The trigger function likely failed during profile creation', 'error');
+                    } else if (error.message.includes('User already registered')) {
+                        log('ℹ️ User already exists - trying to sign in instead...', 'info');
+                        await testSignIn(email, password);
+                    }
+                    return;
+                }
+                
+                log('✅ Signup successful!', 'success');
+                log(`👤 User ID: ${data.user?.id}`, 'success');
+                log(`📧 Email confirmed: ${data.user?.email_confirmed_at ? 'Yes' : 'No'}`, 'info');
+                
+                // Test profile creation
+                if (data.user?.id) {
+                    log('2️⃣ Checking profile creation...', 'info');
+                    
+                    // Wait for trigger to complete
+                    await new Promise(resolve => setTimeout(resolve, 3000));
+                    
+                    const { data: profile, error: profileError } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', data.user.id)
+                        .single();
+                    
+                    if (profileError) {
+                        log(`❌ Profile not found: ${profileError.message}`, 'error');
+                        log('🔍 This indicates the trigger failed to create the profile', 'error');
+                    } else {
+                        log('✅ Profile created successfully!', 'success');
+                        log(`📋 Profile ID: ${profile.id}`, 'success');
+                        log(`👤 Name: ${profile.nome_completo}`, 'success');
+                        log(`⛪ Congregation: ${profile.congregacao}`, 'success');
+                        log(`📋 Ministerial Role: ${profile.cargo}`, 'success');
+                        log(`🎭 System Role: ${profile.role}`, 'success');
+                    }
+                }
+                
+                log('🎉 Test completed successfully!', 'success');
+                
+            } catch (error) {
+                log(`❌ Test failed with exception: ${error.message}`, 'error');
+                console.error('Full error:', error);
+            }
+        }
+        
+        async function testSignIn(email, password) {
+            log('🔐 Attempting sign in...', 'info');
+            
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+            
+            if (error) {
+                log(`❌ Sign in failed: ${error.message}`, 'error');
+            } else {
+                log('✅ Sign in successful!', 'success');
+                log(`👤 User ID: ${data.user?.id}`, 'success');
+            }
+        }
+        
+        async function testSignupWithDifferentEmail() {
+            // Use a different email for testing
+            const timestamp = Date.now();
+            document.getElementById('email').value = `mauricio.test.${timestamp}@example.com`;
+            await testSignup();
+        }
+        
+        // Make functions available globally
+        window.testSignup = testSignup;
+        window.testSignupWithDifferentEmail = testSignupWithDifferentEmail;
+        window.clearLogs = clearLogs;
+        
+        // Initial log
+        log('🔧 Mauricio signup test tool loaded. Click "Test Signup" to begin.', 'info');
+    </script>
+</body>
+</html>

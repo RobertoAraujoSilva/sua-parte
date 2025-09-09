@@ -1,0 +1,138 @@
+{
+  "sarah": {
+    "email": "franklima.flm@gmail.com",
+    "password": "test@123",
+    "profile": {
+      "nomeCompleto": "Sarah Rackel Ferreira Lima",
+      "dateOfBirth": "2009-09-25",
+      "congregacao": "Market Harborough",
+      "cargo": "publicador_nao_batizado",
+      "role": "estudante"
+    },
+    "expectedUrls": {
+      "portal": "/estudante/",
+      "auth": "/auth"
+    },
+    "ageInfo": {
+      "birthYear": 2009,
+      "birthMonth": 9,
+      "birthDay": 25,
+      "expectedAgeRange": {
+        "min": 14,
+        "max": 15
+      }
+    }
+  },
+  "testScenarios": {
+    "validRegistration": {
+      "description": "Complete registration with all valid data",
+      "expectedOutcome": "successful_registration"
+    },
+    "birthDateValidation": {
+      "validDates": [
+        {
+          "date": "2009-09-25",
+          "description": "Sarah's actual birth date",
+          "expectedAge": 14,
+          "shouldPass": true
+        },
+        {
+          "date": "2010-01-01",
+          "description": "Valid child age",
+          "expectedAge": 13,
+          "shouldPass": true
+        }
+      ],
+      "invalidDates": [
+        {
+          "date": "2020-01-01",
+          "description": "Too young (4 years old)",
+          "expectedAge": 4,
+          "shouldPass": false,
+          "expectedError": "Idade mínima para participar da Escola do Ministério é 6 anos"
+        },
+        {
+          "date": "1900-01-01",
+          "description": "Too old (124 years old)",
+          "expectedAge": 124,
+          "shouldPass": false,
+          "expectedError": "Por favor, verifique a data de nascimento informada"
+        },
+        {
+          "date": "2025-01-01",
+          "description": "Future date",
+          "expectedAge": 0,
+          "shouldPass": false,
+          "expectedError": "Data de nascimento não pode ser no futuro"
+        }
+      ]
+    }
+  },
+  "expectedTexts": {
+    "welcome": "Bem-vindo",
+    "studentPortal": "Portal do Estudante",
+    "ministrySchool": "Escola do Ministério",
+    "personalInfo": "Informações Pessoais",
+    "birthDate": "Data de Nascimento",
+    "age": "anos",
+    "congregation": "Market Harborough",
+    "role": "Publicador Não Batizado"
+  },
+  "selectors": {
+    "registration": {
+      "signupTab": "[data-testid=\"signup-tab\"], button:contains(\"Criar Conta\"), [role=\"tab\"]:contains(\"Criar\")",
+      "studentAccountType": "div:contains(\"Estudante\")",
+      "fullNameInput": "input[id*=\"nome\"], input[placeholder*=\"nome\"], label:contains(\"Nome Completo\")",
+      "birthDateInput": "input[type=\"date\"], input[id*=\"birth\"], label:contains(\"Data de Nascimento\")",
+      "congregationInput": "input[id*=\"congregacao\"], input[placeholder*=\"congregação\"], label:contains(\"Congregação\")",
+      "cargoSelect": "select, [role=\"combobox\"], button:contains(\"Selecione seu cargo\")",
+      "emailInput": "input[type=\"email\"], input[id*=\"email\"], label:contains(\"E-mail\")",
+      "passwordInput": "input[type=\"password\"], input[id*=\"password\"]:first, label:contains(\"Senha\")",
+      "confirmPasswordInput": "input[type=\"password\"], input[id*=\"confirm\"], label:contains(\"Confirmar\")",
+      "submitButton": "button[type=\"submit\"], button:contains(\"Criar Conta\"), button:contains(\"Cadastrar\")"
+    },
+    "login": {
+      "signinTab": "[data-testid=\"signin-tab\"], button:contains(\"Entrar\"), [role=\"tab\"]:contains(\"Entrar\")",
+      "emailInput": "input[type=\"email\"]",
+      "passwordInput": "input[type=\"password\"]",
+      "submitButton": "button[type=\"submit\"], button:contains(\"Entrar\")"
+    },
+    "portal": {
+      "welcomeMessage": "body:contains(\"Sarah\")",
+      "personalInfoSection": "div:contains(\"Informações Pessoais\")",
+      "birthDateDisplay": "span:contains(\"25/09/2009\"), span:contains(\"2009-09-25\")",
+      "ageDisplay": "span:contains(\"anos\")",
+      "congregationDisplay": "span:contains(\"Market Harborough\")"
+    },
+    "validation": {
+      "ageDisplay": "p:contains(\"anos\"), span:contains(\"anos\")",
+      "errorMessage": "p:contains(\"mínima\"), p:contains(\"futuro\"), p:contains(\"erro\")",
+      "successMessage": "p:contains(\"anos\"):not(:contains(\"mínima\"))"
+    }
+  },
+  "timeouts": {
+    "pageLoad": 30000,
+    "elementVisible": 10000,
+    "authResponse": 20000,
+    "redirect": 30000,
+    "profileCreation": 5000
+  },
+  "databaseValidation": {
+    "expectedFields": [
+      "id",
+      "nome_completo",
+      "date_of_birth",
+      "congregacao",
+      "cargo",
+      "role",
+      "email"
+    ],
+    "expectedValues": {
+      "nome_completo": "Sarah Rackel Ferreira Lima",
+      "date_of_birth": "2009-09-25",
+      "congregacao": "Market Harborough",
+      "cargo": "publicador_nao_batizado",
+      "role": "estudante"
+    }
+  }
+}

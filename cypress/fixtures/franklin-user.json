@@ -1,0 +1,61 @@
+{
+  "franklin": {
+    "email": "franklinmarceloferreiradelima@gmail.com",
+    "password": "13a21r15",
+    "userId": "77c99e53-500b-4140-b7fc-a69f96b216e1",
+    "profile": {
+      "nomeCompleto": "Franklin Marcelo Ferreira de Lima",
+      "congregacao": "Market Harborough",
+      "cargo": "publicador_nao_batizado",
+      "role": "estudante",
+      "dateOfBirth": "1995-03-15"
+    },
+    "expectedUrls": {
+      "portal": "/estudante/77c99e53-500b-4140-b7fc-a69f96b216e1",
+      "auth": "/auth"
+    }
+  },
+  "testData": {
+    "invalidCredentials": {
+      "email": "franklinmarceloferreiradelima@gmail.com",
+      "password": "senhaincorreta123"
+    },
+    "nonExistentUser": {
+      "email": "usuario.inexistente@example.com",
+      "password": "senha123"
+    }
+  },
+  "expectedTexts": {
+    "welcome": "Bem-vindo",
+    "studentPortal": "Portal do Estudante",
+    "ministrySchool": "Escola do Ministério",
+    "assignments": "designações",
+    "schedule": "cronograma",
+    "congregation": "Market Harborough",
+    "role": "Publicador Não Batizado"
+  },
+  "selectors": {
+    "loginForm": {
+      "email": "input[type=\"email\"]",
+      "password": "input[type=\"password\"]",
+      "submitButton": "button[type=\"submit\"]"
+    },
+    "portal": {
+      "welcomeMessage": "[data-testid=\"welcome-message\"], h1, h2",
+      "userInfo": "[data-testid=\"user-info\"]",
+      "navigation": "nav, [data-testid=\"navigation\"]",
+      "logoutButton": "[data-testid=\"logout\"], button:contains(\"Sair\"), button:contains(\"Logout\")"
+    },
+    "common": {
+      "loading": ".loading, [data-testid=\"loading\"]",
+      "error": ".error, [data-testid=\"error\"]",
+      "success": ".success, [data-testid=\"success\"]"
+    }
+  },
+  "timeouts": {
+    "pageLoad": 30000,
+    "elementVisible": 10000,
+    "authResponse": 20000,
+    "redirect": 30000
+  }
+}

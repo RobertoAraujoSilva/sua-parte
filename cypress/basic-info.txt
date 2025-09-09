@@ -1,0 +1,27 @@
+Total de elementos: 248
+Elementos com texto: 151
+
+1. html: "document.domain = 'localhost'; (()=>{"use strict";const e=window.Cypress=parent.Cypress;if(!e)throw "
+2. head: "document.domain = 'localhost'; (()=>{"use strict";const e=window.Cypress=parent.Cypress;if(!e)throw "
+3. script: "document.domain = 'localhost'; (()=>{"use strict";const e=window.Cypress=parent.Cypress;if(!e)throw "
+4. script: "import { injectIntoGlobalHook } from "/@react-refresh";
+injectIntoGlobalHook(window);
+window.$Refres"
+5. title: "Sistema Ministerial"
+6. style: ":where(html[dir="ltr"]),:where([data-sonner-toaster][dir="ltr"]){--toast-icon-margin-start: -3px;--t"
+7. style: ".ag-filter-panel-buttons {
+  display: flex;
+  justify-content: flex-end;
+  overflow: hidden;
+  paddi"
+8. style: "@font-face {
+  font-family: "agGridAlpine";
+  src: url(data:font/woff2;charset=utf-8;base64,d09GMgAB"
+9. style: "*, ::before, ::after {
+  --tw-border-spacing-x: 0;
+  --tw-border-spacing-y: 0;
+  --tw-translate-x: 0"
+10. style: "/* Responsive Layout Utilities */
+/* Integration with PageShell CSS Variables */
+
+/* Container wi"

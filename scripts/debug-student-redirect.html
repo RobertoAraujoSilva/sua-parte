@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .error { background: #ffe6e6; border-left: 4px solid #ff0000; }
+        .success { background: #e6ffe6; border-left: 4px solid #00aa00; }
+        .info { background: #e6f3ff; border-left: 4px solid #0066cc; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; width: 300px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Student Login Debug Tool</h1>
+    <p>This tool helps debug the student login redirect issue for Franklin.</p>
+    
+    <div>
+        <h3>Test Student Login</h3>
+        <input type="email" id="email" placeholder="Email" value="franklinmarceloferreiradelima@gmail.com">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="testLogin()">Test Login Flow</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+    
+    <div id="logs"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
+        
+        const SUPABASE_URL = 'https://nwpuurgwnnuejqinkvrh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjIwNjUsImV4cCI6MjA3MDAzODA2NX0.UHjSvXYY_c-_ydAIfELRUs4CMEBLKiztpBGQBNPHfak';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            logsDiv.appendChild(logDiv);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+        
+        async function fetchProfile(userId) {
+            log(`🔍 Fetching profile for user ID: ${userId}`);
+            try {
+                const { data, error } = await supabase
+                    .from('user_profiles')
+                    .select('*')
+                    .eq('id', userId)
+                    .single();
+
+                if (error) {
+                    log(`❌ Error fetching profile: ${error.message} (Code: ${error.code})`, 'error');
+                    return null;
+                }
+
+                log(`✅ Profile fetched successfully: ${JSON.stringify(data)}`, 'success');
+                return data;
+            } catch (error) {
+                log(`❌ Exception fetching profile: ${error.message}`, 'error');
+                return null;
+            }
+        }
+        
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                log('❌ Please enter both email and password', 'error');
+                return;
+            }
+            
+            clearLogs();
+            log('🚀 Starting login test...', 'info');
+            
+            try {
+                // Step 1: Sign in
+                log('1️⃣ Attempting to sign in...');
+                const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (signInError) {
+                    log(`❌ Sign in failed: ${signInError.message}`, 'error');
+                    return;
+                }
+
+                log(`✅ Sign in successful!`, 'success');
+                log(`   User ID: ${signInData.user.id}`);
+                log(`   Email: ${signInData.user.email}`);
+                log(`   Email confirmed: ${signInData.user.email_confirmed_at ? 'Yes' : 'No'}`);
+
+                // Step 2: Fetch profile
+                log('2️⃣ Fetching user profile...');
+                const profile = await fetchProfile(signInData.user.id);
+                
+                if (!profile) {
+                    log('❌ Failed to fetch profile', 'error');
+                    return;
+                }
+
+                // Step 3: Check role logic
+                log('3️⃣ Checking role-based logic...');
+                const isEstudante = profile.role === 'estudante';
+                const isInstrutor = profile.role === 'instrutor';
+                
+                log(`   Profile role: ${profile.role}`);
+                log(`   isEstudante: ${isEstudante}`);
+                log(`   isInstrutor: ${isInstrutor}`);
+                
+                // Step 4: Simulate redirect logic
+                log('4️⃣ Simulating redirect logic...');
+                if (isInstrutor) {
+                    log('👨‍🏫 Would redirect instructor to: /dashboard', 'info');
+                } else if (isEstudante) {
+                    const redirectUrl = `/estudante/${signInData.user.id}`;
+                    log(`👨‍🎓 Would redirect student to: ${redirectUrl}`, 'success');
+                    log(`   Full URL would be: https://sua-parte.lovable.app${redirectUrl}`, 'success');
+                } else {
+                    log(`⚠️ Unknown role: ${profile.role}`, 'error');
+                }
+
+                // Step 5: Test auth state
+                log('5️⃣ Testing current auth state...');
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+                
+                if (sessionError) {
+                    log(`❌ Session error: ${sessionError.message}`, 'error');
+                } else {
+                    log(`✅ Session active: ${session ? 'Yes' : 'No'}`);
+                    if (session) {
+                        log(`   Session user ID: ${session.user.id}`);
+                        log(`   Session expires: ${new Date(session.expires_at * 1000).toLocaleString()}`);
+                    }
+                }
+
+                // Clean up
+                log('🚪 Signing out...');
+                await supabase.auth.signOut();
+                log('✅ Test completed successfully!', 'success');
+
+            } catch (error) {
+                log(`❌ Test failed with exception: ${error.message}`, 'error');
+            }
+        }
+        
+        // Make functions available globally
+        window.testLogin = testLogin;
+        window.clearLogs = clearLogs;
+        
+        // Initial log
+        log('🔧 Debug tool loaded. Enter credentials and click "Test Login Flow"', 'info');
+    </script>
+</body>
+</html>

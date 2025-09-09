@@ -1,0 +1,29 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@supabase/mcp-server-supabase@latest",
+        "--access-token",
+        "sbp_0437204347bbd8c2697ee3c5ebc850f1f1bfa75d"
+      ],
+      "disabled": false,
+      "autoApprove": [
+        "list_projects",
+        "list_tables",
+        "execute_sql",
+        "apply_migration"
+      ]
+    },
+    "context7": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@upstash/context7-mcp@latest"
+      ],
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}

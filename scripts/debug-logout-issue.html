@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logout Debug Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .warning { background-color: #fff3cd; color: #856404; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Logout Debug Tool</h1>
+    
+    <div class="debug-section">
+        <h2>Current Authentication Status</h2>
+        <div id="auth-status">Loading...</div>
+        <button onclick="checkAuthStatus()">Refresh Auth Status</button>
+    </div>
+
+    <div class="debug-section">
+        <h2>Test Logout Functionality</h2>
+        <button onclick="testLogout()">Test Logout</button>
+        <button onclick="testLogoutAndRedirect()">Test Logout + Redirect</button>
+        <button onclick="clearAllStorage()">Clear All Storage</button>
+        <div id="logout-status"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>Navigation Tests</h2>
+        <button onclick="goToDashboard()">Go to Dashboard</button>
+        <button onclick="goToHome()">Go to Home</button>
+        <button onclick="goToAuth()">Go to Auth</button>
+        <div id="navigation-status"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2>Debug Console</h2>
+        <button onclick="clearLogs()">Clear Logs</button>
+        <pre id="debug-logs"></pre>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
+
+        const SUPABASE_URL = 'https://nwpuurgwnnuejqinkvrh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ5NzI5NzQsImV4cCI6MjA1MDU0ODk3NH0.Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8Ej8';
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let logs = [];
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            logs.push(logEntry);
+            
+            const logElement = document.getElementById('debug-logs');
+            logElement.textContent = logs.join('\n');
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            console.log(logEntry);
+        }
+
+        window.clearLogs = function() {
+            logs = [];
+            document.getElementById('debug-logs').textContent = '';
+        }
+
+        window.checkAuthStatus = async function() {
+            log('🔍 Checking authentication status...');
+            
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                
+                if (error) {
+                    log(`❌ Session error: ${error.message}`, 'error');
+                    document.getElementById('auth-status').innerHTML = 
+                        `<div class="status error">❌ Session Error: ${error.message}</div>`;
+                    return;
+                }
+
+                if (session) {
+                    log(`✅ User is logged in: ${session.user.email}`);
+                    log(`   User ID: ${session.user.id}`);
+                    log(`   Role: ${session.user.user_metadata?.role || 'Not set'}`);
+                    log(`   Name: ${session.user.user_metadata?.nome_completo || 'Not set'}`);
+                    log(`   Session expires: ${new Date(session.expires_at * 1000).toLocaleString()}`);
+                    
+                    document.getElementById('auth-status').innerHTML = 
+                        `<div class="status success">✅ Logged in as: ${session.user.user_metadata?.nome_completo || session.user.email}<br>
+                         Role: ${session.user.user_metadata?.role || 'Not set'}<br>
+                         Email: ${session.user.email}</div>`;
+                } else {
+                    log('❌ No active session - user is not logged in');
+                    document.getElementById('auth-status').innerHTML = 
+                        `<div class="status error">❌ Not logged in</div>`;
+                }
+            } catch (error) {
+                log(`❌ Auth check failed: ${error.message}`, 'error');
+                document.getElementById('auth-status').innerHTML = 
+                    `<div class="status error">❌ Auth check failed: ${error.message}</div>`;
+            }
+        }
+
+        window.testLogout = async function() {
+            log('🚪 Testing logout functionality...');
+            
+            try {
+                const { error } = await supabase.auth.signOut();
+                
+                if (error) {
+                    log(`❌ Logout failed: ${error.message}`, 'error');
+                    document.getElementById('logout-status').innerHTML = 
+                        `<div class="status error">❌ Logout failed: ${error.message}</div>`;
+                } else {
+                    log('✅ Logout successful');
+                    document.getElementById('logout-status').innerHTML = 
+                        `<div class="status success">✅ Logout successful!</div>`;
+                    
+                    // Check auth status after logout
+                    setTimeout(checkAuthStatus, 1000);
+                }
+            } catch (error) {
+                log(`❌ Logout exception: ${error.message}`, 'error');
+                document.getElementById('logout-status').innerHTML = 
+                    `<div class="status error">❌ Logout exception: ${error.message}</div>`;
+            }
+        }
+
+        window.testLogoutAndRedirect = async function() {
+            log('🚪 Testing logout with redirect...');
+            
+            try {
+                const { error } = await supabase.auth.signOut();
+                
+                if (error) {
+                    log(`❌ Logout failed: ${error.message}`, 'error');
+                } else {
+                    log('✅ Logout successful, redirecting to home...');
+                    
+                    // Simulate the redirect
+                    setTimeout(() => {
+                        log('🏠 Redirecting to home page...');
+                        window.location.href = 'http://localhost:5173/';
+                    }, 1000);
+                }
+            } catch (error) {
+                log(`❌ Logout exception: ${error.message}`, 'error');
+            }
+        }
+
+        window.clearAllStorage = function() {
+            log('🧹 Clearing all browser storage...');
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Clear cookies
+            document.cookie.split(";").forEach(function(c) { 
+                document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+            });
+            
+            log('✅ All storage cleared');
+            setTimeout(checkAuthStatus, 1000);
+        }
+
+        window.goToDashboard = function() {
+            log('🎯 Navigating to dashboard...');
+            window.location.href = 'http://localhost:5173/dashboard';
+        }
+
+        window.goToHome = function() {
+            log('🏠 Navigating to home page...');
+            window.location.href = 'http://localhost:5173/';
+        }
+
+        window.goToAuth = function() {
+            log('🔑 Navigating to auth page...');
+            window.location.href = 'http://localhost:5173/auth';
+        }
+
+        // Listen for auth state changes
+        supabase.auth.onAuthStateChange((event, session) => {
+            log(`🔄 Auth state changed: ${event}`);
+            if (session) {
+                log(`   User: ${session.user.email}`);
+            } else {
+                log('   No session');
+            }
+        });
+
+        // Initial auth check
+        checkAuthStatus();
+
+        // Add instructions
+        log('📋 Instructions:');
+        log('1. Check current auth status');
+        log('2. Test logout functionality');
+        log('3. Verify redirect behavior');
+        log('4. Check if session is properly cleared');
+    </script>
+</body>
+</html>

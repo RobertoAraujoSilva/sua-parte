@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page Refresh - Sistema Ministerial</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .log { background: #f5f5f5; padding: 10px; margin: 10px 0; border-radius: 4px; }
+        .error { background: #ffe6e6; border-left: 4px solid #ff0000; }
+        .success { background: #e6ffe6; border-left: 4px solid #00aa00; }
+        .info { background: #e6f3ff; border-left: 4px solid #0066cc; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        input { padding: 8px; margin: 5px; width: 300px; }
+        .form-group { margin: 10px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .test-section { border: 1px solid #ddd; padding: 15px; margin: 15px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔄 Test Page Refresh - Sistema Ministerial</h1>
+    <p>This tool tests if the blank screen issue after page refresh has been fixed.</p>
+    
+    <div class="test-section">
+        <h3>📋 Test Instructions</h3>
+        <ol>
+            <li><strong>Login Test</strong>: Use the form below to login</li>
+            <li><strong>Refresh Test</strong>: After successful login, refresh the page (F5)</li>
+            <li><strong>Verify</strong>: Check that the page doesn't go blank</li>
+            <li><strong>Loading State</strong>: Verify you see a loading spinner instead of blank screen</li>
+        </ol>
+    </div>
+    
+    <div class="test-section">
+        <h3>🔐 Login Test</h3>
+        
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" value="franklinmarceloferreiradelima@gmail.com">
+        </div>
+        
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" value="13a21r15">
+        </div>
+        
+        <div>
+            <button onclick="testLogin()">Test Login</button>
+            <button onclick="testRefresh()">Simulate Page Refresh</button>
+            <button onclick="checkAuthState()">Check Auth State</button>
+            <button onclick="clearLogs()">Clear Logs</button>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h3>🧪 Automated Tests</h3>
+        <button onclick="runFullTest()">Run Full Refresh Test</button>
+        <button onclick="testLoadingStates()">Test Loading States</button>
+    </div>
+    
+    <div id="logs"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js';
+        
+        const SUPABASE_URL = 'https://nwpuurgwnnuejqinkvrh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjIwNjUsImV4cCI6MjA3MDAzODA2NX0.UHjSvXYY_c-_ydAIfELRUs4CMEBLKiztpBGQBNPHfak';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        function log(message, type = 'info') {
+            const logsDiv = document.getElementById('logs');
+            const logDiv = document.createElement('div');
+            logDiv.className = `log ${type}`;
+            logDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            logsDiv.appendChild(logDiv);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+            console.log(message);
+        }
+        
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+        
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                log('❌ Please enter email and password', 'error');
+                return;
+            }
+            
+            clearLogs();
+            log('🔐 Testing login...', 'info');
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+                
+                if (error) {
+                    log(`❌ Login failed: ${error.message}`, 'error');
+                    return;
+                }
+                
+                log('✅ Login successful!', 'success');
+                log(`👤 User ID: ${data.user.id}`, 'success');
+                log(`📧 Email: ${data.user.email}`, 'success');
+                log(`🎭 Role: ${data.user.user_metadata?.role || 'Not set'}`, 'info');
+                
+                log('🔄 Now try refreshing the page (F5) to test the fix!', 'info');
+                
+            } catch (error) {
+                log(`❌ Login error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testRefresh() {
+            log('🔄 Simulating page refresh...', 'info');
+            
+            // Check current auth state
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (!user) {
+                log('❌ No user logged in. Please login first.', 'error');
+                return;
+            }
+            
+            log('👤 User before refresh simulation:', 'info');
+            log(`   ID: ${user.id}`, 'info');
+            log(`   Email: ${user.email}`, 'info');
+            
+            // Simulate what happens on page refresh
+            log('🔄 Simulating session restoration...', 'info');
+            
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (session) {
+                log('✅ Session restored successfully!', 'success');
+                log(`   User ID: ${session.user.id}`, 'success');
+                log(`   Session valid: ${new Date(session.expires_at * 1000) > new Date()}`, 'success');
+            } else {
+                log('❌ Session not found after refresh simulation', 'error');
+            }
+        }
+        
+        async function checkAuthState() {
+            log('🔍 Checking current auth state...', 'info');
+            
+            try {
+                const { data: { user } } = await supabase.auth.getUser();
+                const { data: { session } } = await supabase.auth.getSession();
+                
+                if (user) {
+                    log('✅ User is authenticated', 'success');
+                    log(`   ID: ${user.id}`, 'success');
+                    log(`   Email: ${user.email}`, 'success');
+                    log(`   Role: ${user.user_metadata?.role || 'Not set'}`, 'info');
+                } else {
+                    log('❌ No authenticated user', 'error');
+                }
+                
+                if (session) {
+                    log('✅ Session exists', 'success');
+                    log(`   Expires: ${new Date(session.expires_at * 1000).toLocaleString()}`, 'info');
+                    log(`   Valid: ${new Date(session.expires_at * 1000) > new Date()}`, 'info');
+                } else {
+                    log('❌ No session found', 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Error checking auth state: ${error.message}`, 'error');
+            }
+        }
+        
+        async function runFullTest() {
+            clearLogs();
+            log('🧪 Running full page refresh test...', 'info');
+            
+            // Step 1: Check if already logged in
+            const { data: { user: initialUser } } = await supabase.auth.getUser();
+            
+            if (!initialUser) {
+                log('1️⃣ No user logged in, performing login first...', 'info');
+                await testLogin();
+                
+                // Wait for login to complete
+                await new Promise(resolve => setTimeout(resolve, 2000));
+            } else {
+                log('1️⃣ User already logged in', 'success');
+                log(`   User: ${initialUser.email}`, 'info');
+            }
+            
+            // Step 2: Test session restoration
+            log('2️⃣ Testing session restoration...', 'info');
+            await testRefresh();
+            
+            // Step 3: Verify auth state
+            log('3️⃣ Final auth state verification...', 'info');
+            await checkAuthState();
+            
+            log('🎉 Full test completed!', 'success');
+            log('💡 If all steps passed, the page refresh issue should be fixed.', 'info');
+        }
+        
+        async function testLoadingStates() {
+            clearLogs();
+            log('⏳ Testing loading states...', 'info');
+            
+            // This simulates what the ProtectedRoute component does
+            log('🔄 Simulating ProtectedRoute loading logic...', 'info');
+            
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (user) {
+                log('✅ User found, checking profile...', 'success');
+                
+                // Test profile fetching
+                try {
+                    const { data: profile, error } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', user.id)
+                        .single();
+                    
+                    if (error) {
+                        log(`⚠️ Profile fetch failed: ${error.message}`, 'error');
+                        log('🔄 This would trigger the loading timeout mechanism', 'info');
+                    } else {
+                        log('✅ Profile loaded successfully', 'success');
+                        log(`   Name: ${profile.nome_completo}`, 'success');
+                        log(`   Role: ${profile.role}`, 'success');
+                    }
+                } catch (error) {
+                    log(`❌ Profile fetch error: ${error.message}`, 'error');
+                }
+            } else {
+                log('❌ No user found', 'error');
+            }
+        }
+        
+        // Make functions available globally
+        window.testLogin = testLogin;
+        window.testRefresh = testRefresh;
+        window.checkAuthState = checkAuthState;
+        window.runFullTest = runFullTest;
+        window.testLoadingStates = testLoadingStates;
+        window.clearLogs = clearLogs;
+        
+        // Initial log
+        log('🔧 Page refresh test tool loaded.', 'info');
+        log('📋 Follow the test instructions above to verify the fix.', 'info');
+        
+        // Auto-check auth state on load
+        setTimeout(checkAuthState, 1000);
+    </script>
+</body>
+</html>

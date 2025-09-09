@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <title>Sistema Ministerial</title>
+    <meta name="description" content="Sistema de gestão para congregações das Testemunhas de Jeová" />
+    <meta name="author" content="Sistema Ministerial" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0b2a4a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Sistema Ministerial" />
+    <meta name="mobile-web-app-capable" content="yes" />
+
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.svg" />
+    <link rel="mask-icon" href="/masked-icon.svg" color="#1f2937" />
+
+    <meta property="og:title" content="Sistema Ministerial" />
+    <meta property="og:description" content="Sistema de gestão para congregações das Testemunhas de Jeová" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/pwa-512x512.svg" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Sistema Ministerial" />
+    <meta name="twitter:description" content="Sistema de gestão para congregações das Testemunhas de Jeová" />
+    <meta name="twitter:image" content="/pwa-512x512.svg" />
+  </head>
+
+  <body>
+    <div id="root"></div>
+    <script>
+      // Dev-only: aggressive SW + cache cleanup before app loads to stabilize Vite HMR
+      (function () {
+        const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        if (!isLocal) return;
+        const key = 'dev-cache-cleared-v1';
+        if (!sessionStorage.getItem(key)) {
+          sessionStorage.setItem(key, '1');
+          Promise.resolve()
+            .then(() => 'serviceWorker' in navigator ? navigator.serviceWorker.getRegistrations().then(rs => Promise.all(rs.map(r => r.unregister()))) : null)
+            .then(() => 'caches' in window ? caches.keys().then(keys => Promise.all(keys.map(k => caches.delete(k)))) : null)
+            .finally(() => {
+              // Force a single reload after cleanup to ensure fresh dev client
+              location.replace(location.href);
+            });
+        }
+      })();
+    </script>
+    <script>
+      // Recarrega se um chunk de lazy split falhar (evita “tela branca”)
+      window.addEventListener('error', function (e) {
+        if (/ChunkLoadError|Loading chunk \d+ failed/.test(e.message || '')) {
+          if (caches && caches.keys) { caches.keys().then(keys => keys.forEach(k => caches.delete(k))); }
+          location.reload();
+        }
+      });
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

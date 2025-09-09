@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Autenticação - Programas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background-color: #d4edda; color: #155724; }
+        .error { background-color: #f8d7da; color: #721c24; }
+        .info { background-color: #d1ecf1; color: #0c5460; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Teste de Autenticação - Sistema Ministerial</h1>
+        
+        <div id="status" class="status info">
+            Inicializando teste de autenticação...
+        </div>
+
+        <div>
+            <button onclick="testLogin()">🔑 Fazer Login (Instrutor)</button>
+            <button onclick="testStudentLogin()">👨‍🎓 Fazer Login (Estudante)</button>
+            <button onclick="checkAuth()">✅ Verificar Autenticação</button>
+            <button onclick="testProgramasAccess()">📚 Testar Acesso a Programas</button>
+            <button onclick="logout()">🚪 Logout</button>
+            <button onclick="clearLog()">🧹 Limpar Log</button>
+        </div>
+
+        <div id="log" class="log"></div>
+    </div>
+
+    <script type="module">
+        let supabaseClient = null;
+        
+        // Função para adicionar logs
+        function addLog(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logDiv.textContent += logEntry;
+            logDiv.scrollTop = logDiv.scrollHeight;
+            
+            console.log(message);
+        }
+
+        // Função para atualizar status
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type}`;
+        }
+
+        // Inicializar Supabase
+        async function initializeSupabase() {
+            try {
+                const { createClient } = await import('https://cdn.skypack.dev/@supabase/supabase-js');
+                
+                const url = 'https://nwpuurgwnnuejqinkvrh.supabase.co';
+                const key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjIwNjUsImV4cCI6MjA3MDAzODA2NX0.UHjSvXYY_c-_ydAIfELRUs4CMEBLKiztpBGQBNPHfak';
+
+                supabaseClient = createClient(url, key, {
+                    auth: {
+                        storage: localStorage,
+                        persistSession: true,
+                        autoRefreshToken: true,
+                        detectSessionInUrl: true,
+                        flowType: 'pkce',
+                        debug: true,
+                    }
+                });
+
+                addLog('✅ Supabase client inicializado com sucesso');
+                updateStatus('Supabase conectado - Pronto para testes', 'success');
+                
+                // Verificar se já existe uma sessão
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                if (session) {
+                    addLog(`🔐 Sessão existente encontrada: ${session.user.email}`);
+                    updateStatus(`Usuário logado: ${session.user.email}`, 'success');
+                }
+                
+                return true;
+            } catch (error) {
+                addLog(`❌ Erro ao inicializar Supabase: ${error.message}`, 'error');
+                updateStatus('Erro na conexão com Supabase', 'error');
+                return false;
+            }
+        }
+
+        // Função de login para instrutor
+        window.testLogin = async function() {
+            if (!supabaseClient) {
+                addLog('❌ Supabase não inicializado');
+                return;
+            }
+
+            const email = 'frankwebber33@hotmail.com';
+            const password = '13a21r15';
+
+            addLog(`🔑 Tentando login como instrutor: ${email}`);
+            updateStatus('Fazendo login...', 'info');
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) {
+                    addLog(`❌ Erro no login: ${error.message}`);
+                    updateStatus(`Erro no login: ${error.message}`, 'error');
+                    return;
+                }
+
+                addLog(`✅ Login realizado com sucesso!`);
+                addLog(`👤 Usuário: ${data.user.email}`);
+                addLog(`🔑 ID: ${data.user.id}`);
+                addLog(`📋 Metadata: ${JSON.stringify(data.user.user_metadata, null, 2)}`);
+                
+                updateStatus(`Login realizado: ${data.user.email}`, 'success');
+
+                // Verificar perfil
+                await checkProfile();
+
+            } catch (error) {
+                addLog(`❌ Exceção no login: ${error.message}`);
+                updateStatus(`Erro no login: ${error.message}`, 'error');
+            }
+        };
+
+        // Função de login para estudante
+        window.testStudentLogin = async function() {
+            if (!supabaseClient) {
+                addLog('❌ Supabase não inicializado');
+                return;
+            }
+
+            const email = 'franklinmarceloferreiradelima@gmail.com';
+            const password = '13a21r15';
+
+            addLog(`🔑 Tentando login como estudante: ${email}`);
+            updateStatus('Fazendo login...', 'info');
+
+            try {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
+                    email,
+                    password
+                });
+
+                if (error) {
+                    addLog(`❌ Erro no login: ${error.message}`);
+                    updateStatus(`Erro no login: ${error.message}`, 'error');
+                    return;
+                }
+
+                addLog(`✅ Login realizado com sucesso!`);
+                addLog(`👤 Usuário: ${data.user.email}`);
+                addLog(`🔑 ID: ${data.user.id}`);
+                addLog(`📋 Metadata: ${JSON.stringify(data.user.user_metadata, null, 2)}`);
+                
+                updateStatus(`Login realizado: ${data.user.email}`, 'success');
+
+                // Verificar perfil
+                await checkProfile();
+
+            } catch (error) {
+                addLog(`❌ Exceção no login: ${error.message}`);
+                updateStatus(`Erro no login: ${error.message}`, 'error');
+            }
+        };
+
+        // Verificar perfil do usuário
+        async function checkProfile() {
+            try {
+                const { data: { user } } = await supabaseClient.auth.getUser();
+                
+                if (!user) {
+                    addLog('❌ Nenhum usuário logado');
+                    return;
+                }
+
+                addLog(`🔍 Buscando perfil para usuário: ${user.id}`);
+
+                const { data: profile, error } = await supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', user.id)
+                    .single();
+
+                if (error) {
+                    addLog(`❌ Erro ao buscar perfil: ${error.message}`);
+                    addLog(`📋 Usando dados do metadata como fallback`);
+                    return;
+                }
+
+                if (profile) {
+                    addLog(`✅ Perfil encontrado:`);
+                    addLog(`📝 Nome: ${profile.nome_completo}`);
+                    addLog(`🏛️ Congregação: ${profile.congregacao}`);
+                    addLog(`👔 Cargo: ${profile.cargo}`);
+                    addLog(`🎭 Role: ${profile.role}`);
+                } else {
+                    addLog(`⚠️ Perfil não encontrado no banco de dados`);
+                }
+
+            } catch (error) {
+                addLog(`❌ Exceção ao verificar perfil: ${error.message}`);
+            }
+        }
+
+        // Verificar autenticação atual
+        window.checkAuth = async function() {
+            if (!supabaseClient) {
+                addLog('❌ Supabase não inicializado');
+                return;
+            }
+
+            try {
+                const { data: { session } } = await supabaseClient.auth.getSession();
+                
+                if (session) {
+                    addLog(`✅ Usuário autenticado: ${session.user.email}`);
+                    addLog(`🔑 ID: ${session.user.id}`);
+                    addLog(`⏰ Expires: ${new Date(session.expires_at * 1000).toLocaleString()}`);
+                    updateStatus(`Autenticado: ${session.user.email}`, 'success');
+                    
+                    await checkProfile();
+                } else {
+                    addLog('❌ Nenhum usuário autenticado');
+                    updateStatus('Não autenticado', 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Erro ao verificar autenticação: ${error.message}`);
+                updateStatus(`Erro: ${error.message}`, 'error');
+            }
+        };
+
+        // Testar acesso à página de programas
+        window.testProgramasAccess = async function() {
+            addLog('🔍 Testando acesso à página de programas...');
+            
+            try {
+                const response = await fetch('http://localhost:8080/programas');
+                addLog(`📡 Status da requisição: ${response.status}`);
+                
+                if (response.ok) {
+                    addLog('✅ Página de programas acessível');
+                    updateStatus('Página de programas OK', 'success');
+                } else {
+                    addLog(`❌ Erro ao acessar página: ${response.statusText}`);
+                    updateStatus(`Erro ${response.status}: ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Erro na requisição: ${error.message}`);
+                updateStatus(`Erro de rede: ${error.message}`, 'error');
+            }
+        };
+
+        // Logout
+        window.logout = async function() {
+            if (!supabaseClient) {
+                addLog('❌ Supabase não inicializado');
+                return;
+            }
+
+            try {
+                const { error } = await supabaseClient.auth.signOut();
+                
+                if (error) {
+                    addLog(`❌ Erro no logout: ${error.message}`);
+                    updateStatus(`Erro no logout: ${error.message}`, 'error');
+                } else {
+                    addLog('✅ Logout realizado com sucesso');
+                    updateStatus('Logout realizado', 'info');
+                }
+            } catch (error) {
+                addLog(`❌ Exceção no logout: ${error.message}`);
+                updateStatus(`Erro no logout: ${error.message}`, 'error');
+            }
+        };
+
+        // Limpar log
+        window.clearLog = function() {
+            document.getElementById('log').textContent = '';
+        };
+
+        // Inicializar quando a página carregar
+        window.addEventListener('load', async () => {
+            await initializeSupabase();
+        });
+    </script>
+</body>
+</html>
