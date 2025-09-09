@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import useBackendAPI from '@/hooks/useBackendAPI';
 
 interface AdminStats {
   totalCongregations: number;
@@ -69,6 +70,7 @@ interface Material {
 
 const AdminDashboard: React.FC = () => {
   const { user, profile } = useAuth();
+  const backendAPI = useBackendAPI();
   const [activeTab, setActiveTab] = useState('overview');
   const [stats, setStats] = useState<AdminStats>({
     totalCongregations: 0,
@@ -82,6 +84,8 @@ const AdminDashboard: React.FC = () => {
   const [programs, setPrograms] = useState<ProgramSchedule[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
+  const [backendConnected, setBackendConnected] = useState<boolean | null>(null);
+  const [usingRealData, setUsingRealData] = useState(false);
 
   // Load admin statistics
   const loadStats = async () => {
@@ -136,38 +140,136 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
-  // Mock materials data (would come from actual file storage)
-  const loadMaterials = () => {
-    const mockMaterials: Material[] = [
-      {
-        id: '1',
-        name: 'Apostila MWB Setembro-Outubro 2025',
-        type: 'PDF',
-        language: 'pt-BR',
-        size: '2.4 MB',
-        downloadDate: '2024-08-15',
-        status: 'available'
-      },
-      {
-        id: '2',
-        name: 'Meeting Workbook September-October 2025',
-        type: 'PDF',
-        language: 'en',
-        size: '2.1 MB',
-        downloadDate: '2024-08-15',
-        status: 'available'
-      },
-      {
-        id: '3',
-        name: 'Apostila MWB Novembro-Dezembro 2025',
-        type: 'PDF',
-        language: 'pt-BR',
-        size: '2.6 MB',
-        downloadDate: '',
-        status: 'downloading'
+  // Load real materials from backend API using custom hook
+  const loadMaterials = async () => {
+    console.log('🔄 Loading materials from backend...');
+    
+    // First, test backend connectivity
+    const isConnected = await backendAPI.testConnection();
+    setBackendConnected(isConnected);
+    
+    if (!isConnected) {
+      console.log('❌ Backend not available, using mock data');
+      setUsingRealData(false);
+      
+      // Use mock data when backend is not available
+      const mockMaterials: Material[] = [
+        {
+          id: 'mock-1',
+          name: '⚠️ Backend Offline - Dados de Exemplo',
+          type: 'PDF',
+          language: 'pt-BR',
+          size: '0 KB',
+          downloadDate: '',
+          status: 'error'
+        },
+        {
+          id: 'mock-2',
+          name: 'Para ver dados reais, inicie o backend (npm run dev:backend)',
+          type: 'PDF',
+          language: 'pt-BR',
+          size: '0 KB',
+          downloadDate: '',
+          status: 'error'
+        }
+      ];
+      setMaterials(mockMaterials);
+      return;
+    }
+
+    // Backend is available, load real data
+    try {
+      const response = await backendAPI.materials.list();
+      
+      if (response.success && response.data?.materials) {
+        setUsingRealData(true);
+        
+        // Transform backend data to match our interface
+        const transformedMaterials: Material[] = response.data.materials.map((material: any) => {
+          // Determine file type from extension
+          const extension = material.filename.split('.').pop()?.toLowerCase();
+          let type: 'PDF' | 'JWPub' | 'RTF' = 'PDF';
+          
+          if (extension === 'jwpub') type = 'JWPub';
+          else if (extension === 'rtf') type = 'RTF';
+          else if (extension === 'zip' && material.filename.includes('.daisy.')) type = 'PDF'; // DAISY files
+          
+          // Determine language from filename
+          let language = 'pt-BR';
+          if (material.filename.includes('_E_') || material.filename.includes('_E.')) {
+            language = 'en';
+          } else if (material.filename.includes('_T_')) {
+            language = 'pt-BR';
+          }
+
+          // Clean up filename for display
+          let displayName = material.filename
+            .replace(/\.(pdf|jwpub|rtf|zip)$/i, '')
+            .replace(/_/g, ' ')
+            .replace(/mwb /gi, 'MWB ')
+            .replace(/\b\w/g, (l: string) => l.toUpperCase());
+
+          return {
+            id: material.filename,
+            name: `📄 ${displayName}`,
+            type,
+            language,
+            size: material.sizeFormatted || '0 KB',
+            downloadDate: material.modifiedAt ? new Date(material.modifiedAt).toISOString().split('T')[0] : '',
+            status: 'available' as const
+          };
+        });
+
+        setMaterials(transformedMaterials);
+        console.log(`✅ Loaded ${transformedMaterials.length} REAL materials from backend`);
+        console.log('📁 Files from docs/Oficial:', transformedMaterials.map(m => m.id));
+      } else {
+        throw new Error('Invalid response format from backend');
       }
-    ];
-    setMaterials(mockMaterials);
+    } catch (error) {
+      console.error('❌ Error loading materials from backend API:', error);
+      setUsingRealData(false);
+      
+      // Fallback to mock data
+      const mockMaterials: Material[] = [
+        {
+          id: 'error-1',
+          name: '❌ Erro ao carregar materiais reais',
+          type: 'PDF',
+          language: 'pt-BR',
+          size: '0 KB',
+          downloadDate: '',
+          status: 'error'
+        },
+        {
+          id: 'error-2',
+          name: `Erro: ${backendAPI.error || 'Desconhecido'}`,
+          type: 'PDF',
+          language: 'pt-BR',
+          size: '0 KB',
+          downloadDate: '',
+          status: 'error'
+        }
+      ];
+      setMaterials(mockMaterials);
+    }
+  };
+
+  // Function to trigger material sync
+  const handleSyncMaterials = async () => {
+    console.log('🔄 Triggering material sync...');
+    try {
+      const response = await backendAPI.materials.syncAll();
+      if (response.success) {
+        console.log('✅ Sync completed:', response.data);
+        // Reload materials after sync
+        await loadMaterials();
+      } else {
+        console.error('❌ Sync failed:', response.error);
+      }
+    } catch (error) {
+      console.error('❌ Sync error:', error);
+    }
   };
 
   useEffect(() => {
@@ -207,6 +309,38 @@ const AdminDashboard: React.FC = () => {
               </p>
             </div>
           </div>
+
+          {/* Backend Status Alert */}
+          {backendConnected !== null && (
+            <Alert className={`mb-4 ${backendConnected ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}`}>
+              <Database className="h-4 w-4" />
+              <AlertDescription>
+                <div className="flex items-center justify-between">
+                  <span>
+                    {backendConnected ? (
+                      <>
+                        <strong>✅ Backend Conectado</strong> - Exibindo dados reais da pasta docs/Oficial
+                      </>
+                    ) : (
+                      <>
+                        <strong>❌ Backend Offline</strong> - Exibindo dados de exemplo. Inicie o backend para ver materiais reais.
+                      </>
+                    )}
+                  </span>
+                  {usingRealData && (
+                    <Badge variant="default" className="bg-green-600">
+                      Dados Reais
+                    </Badge>
+                  )}
+                  {!usingRealData && backendConnected === false && (
+                    <Badge variant="destructive">
+                      Dados Mock
+                    </Badge>
+                  )}
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
 
           {/* Global Statistics */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
