@@ -120,6 +120,38 @@ const ProgramManager: React.FC = () => {
         <div className="text-center p-8 text-muted-foreground">
           <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
           <p>Nenhuma programação encontrada. Faça upload dos arquivos MWB no Supabase Storage.</p>
+          <div className="mt-4">
+            <button 
+              onClick={() => {
+                // Add sample programs for demonstration
+                setPrograms([
+                  {
+                    week: '1',
+                    date: new Date().toISOString().split('T')[0],
+                    theme: 'Programa de Exemplo - Semana 1',
+                    parts: {
+                      treasures: [{ title: 'Tesouros da Palavra de Deus', time: '10 min' }],
+                      ministry: [{ title: 'Faça Seu Melhor no Ministério', time: '15 min' }],
+                      christianLife: [{ title: 'Nossa Vida Cristã', time: '15 min' }]
+                    }
+                  },
+                  {
+                    week: '2',
+                    date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    theme: 'Programa de Exemplo - Semana 2',
+                    parts: {
+                      treasures: [{ title: 'Tesouros da Palavra de Deus', time: '10 min' }],
+                      ministry: [{ title: 'Faça Seu Melhor no Ministério', time: '15 min' }],
+                      christianLife: [{ title: 'Nossa Vida Cristã', time: '15 min' }]
+                    }
+                  }
+                ]);
+              }}
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
+            >
+              Carregar Programas de Exemplo
+            </button>
+          </div>
         </div>
       )}
     </div>
