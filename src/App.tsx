@@ -27,17 +27,13 @@ function App() {
               <InstructorDashboard />
             </ProtectedRoute>
           } />
-          <Route path="/" element={
-            <ProtectedRoute allowedRoles={['instrutor']}>
-              <InstructorDashboard />
-            </ProtectedRoute>
-          } />
+          <Route path="/" element={<Auth />} />
           <Route path="/estudante/:id" element={
             <ProtectedRoute allowedRoles={['estudante']}>
               <StudentDashboard />
             </ProtectedRoute>
           } />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/auth" replace />} />
         </Routes>
       </Router>
     </AuthProvider>

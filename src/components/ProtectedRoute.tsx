@@ -63,15 +63,12 @@ const ProtectedRoute = ({
     }
   }, [user, profile, loading]);
   
-  // Sempre mostramos um componente de carregamento enquanto a verificação de acesso não estiver completa
-  if (!accessCheckComplete) {
-    return (
-      <LoadingScreen 
-        message="Verificando Acesso" 
-        subMessage="Configurando sua sessão..."
-      />
-    );
-  }
+  // Skip access check if not loading and allow immediate render
+  useEffect(() => {
+    if (!loading) {
+      setAccessCheckComplete(true);
+    }
+  }, [loading]);
 
   useEffect((): void => {
     console.log('🛡️ ProtectedRoute check:', {
