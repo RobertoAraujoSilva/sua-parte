@@ -3,11 +3,13 @@ const router = express.Router();
 const JWDownloader = require('../services/jwDownloader');
 const ProgramGenerator = require('../services/programGenerator');
 const MaterialManager = require('../services/materialManager');
+const PDFParser = require('../services/pdfParser');
 
 // Instanciar serviços
 const jwDownloader = new JWDownloader();
 const programGenerator = new ProgramGenerator();
 const materialManager = new MaterialManager();
+const pdfParser = new PDFParser();
 
 // Middleware de autenticação (simplificado para desenvolvimento)
 const requireAuth = (req, res, next) => {
@@ -335,6 +337,144 @@ router.post('/test/download', requireAuth, async (req, res) => {
     console.error('❌ Erro no teste de download:', error);
     res.status(500).json({ 
       error: 'Erro no teste de download',
+      details: error.message 
+    });
+  }
+});
+
+// =====================================================
+// ROTAS DE PDF PARSING
+// =====================================================
+
+// Escanear PDFs na pasta oficial
+router.get('/scan-pdfs', requireAuth, async (req, res) => {
+  try {
+    console.log('🔍 Escaneando PDFs na pasta oficial...');
+    const pdfs = await pdfParser.scanOfficialDirectory();
+    
+    res.json({
+      success: true,
+      message: 'PDFs escaneados com sucesso',
+      pdfs,
+      total: pdfs.length
+    });
+  } catch (error) {
+    console.error('❌ Erro ao escanear PDFs:', error);
+    res.status(500).json({ 
+      error: 'Erro ao escanear PDFs',
+      details: error.message 
+    });
+  }
+});
+
+// Extrair programação de um PDF específico
+router.post('/parse-pdf', requireAuth, async (req, res) => {
+  try {
+    const { filePath } = req.body;
+    
+    if (!filePath) {
+      return res.status(400).json({ error: 'Caminho do arquivo é obrigatório' });
+    }
+
+    console.log('📖 Extraindo programação do PDF:', filePath);
+    const programming = await pdfParser.parsePDFContent(filePath);
+    
+    res.json({
+      success: true,
+      message: 'Programação extraída com sucesso',
+      programming
+    });
+  } catch (error) {
+    console.error('❌ Erro ao extrair programação:', error);
+    res.status(500).json({ 
+      error: 'Erro ao extrair programação',
+      details: error.message 
+    });
+  }
+});
+
+// Validar PDF específico
+router.post('/validate-pdf', requireAuth, async (req, res) => {
+  try {
+    const { filePath } = req.body;
+    
+    if (!filePath) {
+      return res.status(400).json({ error: 'Caminho do arquivo é obrigatório' });
+    }
+
+    console.log('✅ Validando PDF:', filePath);
+    const isValid = await pdfParser.validatePDF(filePath);
+    
+    res.json({
+      success: true,
+      message: 'PDF validado com sucesso',
+      isValid,
+      filePath
+    });
+  } catch (error) {
+    console.error('❌ Erro ao validar PDF:', error);
+    res.status(500).json({ 
+      error: 'Erro ao validar PDF',
+      details: error.message 
+    });
+  }
+});
+
+// Salvar programação extraída
+router.post('/save-programming', requireAuth, async (req, res) => {
+  try {
+    const { programming } = req.body;
+    
+    if (!programming) {
+      return res.status(400).json({ error: 'Dados de programação são obrigatórios' });
+    }
+
+    console.log('💾 Salvando programação extraída...');
+    
+    // TODO: Implementar salvamento no banco de dados
+    // Por enquanto, apenas simular salvamento
+    const savedProgramming = {
+      ...programming,
+      id: `prog_${Date.now()}`,
+      savedAt: new Date().toISOString(),
+      status: 'draft'
+    };
+    
+    res.json({
+      success: true,
+      message: 'Programação salva com sucesso',
+      programming: savedProgramming
+    });
+  } catch (error) {
+    console.error('❌ Erro ao salvar programação:', error);
+    res.status(500).json({ 
+      error: 'Erro ao salvar programação',
+      details: error.message 
+    });
+  }
+});
+
+// Listar programações salvas
+router.get('/programmings', requireAuth, async (req, res) => {
+  try {
+    const { status } = req.query;
+    
+    console.log('📋 Listando programações salvas...');
+    
+    // TODO: Implementar busca no banco de dados
+    // Por enquanto, retornar lista vazia
+    const programmings = [];
+    
+    res.json({
+      success: true,
+      message: 'Programações listadas com sucesso',
+      programmings,
+      total: programmings.length
+    });
+  } catch (error) {
+    console.error('❌ Erro ao listar programações:', error);
+    res.status(500).json({ 
+      error: 'Erro ao listar programações',
       details: error.message 
     });
   }

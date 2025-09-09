@@ -17,7 +17,6 @@ const adminRoutes = require('./routes/admin');
 const materialsRoutes = require('./routes/materials');
 const programsRoutes = require('./routes/programs');
 const programacoesRoutes = require('./routes/programacoes');
-const programacoesRoutes = require('./routes/programacoes');
 const designacoesRoutes = require('./routes/designacoes');
 
 const app = express();
@@ -36,7 +35,6 @@ app.use('/materials', express.static(path.join(__dirname, '../docs/Oficial')));
 app.use('/api/admin', adminRoutes);
 app.use('/api/materials', materialsRoutes);
 app.use('/api/programs', programsRoutes);
-app.use('/api/programacoes', programacoesRoutes);
 app.use('/api/programacoes', programacoesRoutes);
 app.use('/api/designacoes', designacoesRoutes);
 

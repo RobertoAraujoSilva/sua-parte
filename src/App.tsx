@@ -38,6 +38,7 @@ import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
 import Equidade from "./pages/Equidade";
 import UnifiedDashboard from "./components/UnifiedDashboard";
+import AdminDashboardNew from "./pages/AdminDashboardNew";
 import CacheAsideDemo from "./pages/CacheAsideDemo";
 import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
@@ -249,7 +250,7 @@ const App = () => (
                   path="/admin"
                   element={
                     <ProtectedRoute allowedRoles={['admin']}>
-                      <UnifiedDashboard />
+                      <AdminDashboardNew />
                     </ProtectedRoute>
                   }
                 />
@@ -257,7 +258,7 @@ const App = () => (
                   path="/admin/*"
                   element={
                     <ProtectedRoute allowedRoles={['admin']}>
-                      <UnifiedDashboard />
+                      <AdminDashboardNew />
                     </ProtectedRoute>
                   }
                 />
