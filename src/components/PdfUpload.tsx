@@ -5,6 +5,8 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, FileText, CheckCircle, AlertCircle, X } from 'lucide-react';
 import { usePdfUpload } from '@/hooks/usePdfUpload';
+import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PdfUploadProps {
   onUploadComplete?: (result: any) => void;
@@ -47,10 +49,46 @@ export const PdfUpload: React.FC<PdfUploadProps> = ({
     setSelectedFile(file);
     onUploadStart?.();
     
+    // Parse first for UX feedback
     const result = await uploadPdf(file);
-    
+
+    let storagePath: string | undefined;
+
+    try {
+      // Upload to Supabase Storage (bucket: programas) with user-scoped path
+      const { data: userRes } = await supabase.auth.getUser();
+      const uid = userRes?.user?.id || 'anonymous';
+      const path = `${uid}/${file.name}`;
+
+      const { error: upError } = await supabase.storage
+        .from('programas')
+        .upload(path, file, { upsert: true, contentType: file.type || 'application/pdf' });
+
+      if (upError) {
+        console.warn('⚠️ Storage upload failed:', upError);
+        if (String(upError?.message || '').toLowerCase().includes('bucket not found')) {
+          toast({
+            title: 'Bucket de Storage ausente',
+            description: 'Crie o bucket "programas" no Supabase ou aplique as migrações de storage para habilitar o upload.',
+            variant: 'destructive'
+          });
+        } else {
+          toast({
+            title: 'Falha ao enviar PDF ao Storage',
+            description: upError.message || 'Erro desconhecido durante upload ao Storage',
+            variant: 'destructive'
+          });
+        }
+      } else {
+        storagePath = path;
+      }
+    } catch (e) {
+      console.warn('⚠️ Exception during storage upload:', e);
+    }
+
     if (result.success) {
-      onUploadComplete?.(result.data);
+      const payload = { ...result.data, storagePath };
+      onUploadComplete?.(payload);
     }
   };
 
@@ -139,6 +177,9 @@ export const PdfUpload: React.FC<PdfUploadProps> = ({
                 <p className="text-sm text-gray-500 mt-2">
                   {progress < 50 ? 'Fazendo upload...' : 'Extraindo informações do programa...'}
                 </p>
+                {import.meta.env.DEV && (
+                  <p className="text-[11px] text-gray-400 mt-1">Debug: upload → storage → parse</p>
+                )}
               </div>
             </div>
           )}
@@ -173,6 +214,16 @@ export const PdfUpload: React.FC<PdfUploadProps> = ({
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>
                         {result.error}
+                        {String(result.error || '').includes('Bucket "programas"') && (
+                          <>
+                            <br />
+                            <span className="text-[12px] opacity-80">
+                              Dica: crie o bucket no Supabase (Storage → Buckets) ou rode no SQL Editor:
+                              <code className="ml-1">SELECT storage.create_bucket('programas', public := true);</code>
+                              . Políticas em <code>supabase/migrations/20250910133500_fix_designacoes_rls_and_storage.sql</code>.
+                            </span>
+                          </>
+                        )}
                       </AlertDescription>
                     </Alert>
                   </div>

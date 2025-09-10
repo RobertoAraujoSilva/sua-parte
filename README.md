@@ -6,7 +6,23 @@ O **Sistema Ministerial** é uma plataforma completa para gerenciamento de mater
 
 ---
 
+## 📣 **Atualização Importante - Correções Implementadas!**
+
+Recentemente foram implementadas correções importantes para melhorar a experiência do usuário e resolver problemas técnicos. Veja [SOLUTION_SUMMARY.md](SOLUTION_SUMMARY.md) para detalhes completos.
+
+**Principais correções:**
+- ✅ Upload de PDF para Storage com políticas corretas
+- ✅ Modal de confirmação melhorado para programas duplicados
+- ✅ Redução de logs excessivos no console
+- ✅ Correção de erros 403 ao salvar designações
+
+---
+
 ## ✨ **Funcionalidades Implementadas**
+
+### 📘 Guia Definitivo (Passo a Passo)
+- Para um roteiro completo com páginas numeradas e botões em ordem cronológica (Admin → Instrutor → Estudante), consulte:
+- docs/GUIA_DEFINITIVO.md
 
 ### 🎯 **Admin Dashboard (100% Funcional)**
 - **Interface administrativa completa** com abas organizadas
@@ -62,6 +78,30 @@ Login: amazonwebber007@gmail.com / admin123
 
 ---
 
+## 🛠️ **Correções Recentes**
+
+### **📂 Upload de PDF para Storage**
+- **Problema:** Erros 400 ao fazer upload de PDFs para o storage
+- **Solução:** Implementado sistema de upload com verificação de bucket e políticas adequadas
+- **Documentação:** [FIXES_DOCUMENTATION.md](FIXES_DOCUMENTATION.md#1-storage-upload--bucket-policies-)
+
+### **🔄 Modal de Programas Duplicados**
+- **Problema:** Confirmação nativa (window.confirm) pouco intuitiva
+- **Solução:** Criado modal personalizado com opções "Atualizar" e "Atualizar e Gerar"
+- **Documentação:** [FIXES_DOCUMENTATION.md](FIXES_DOCUMENTATION.md#2-modal-atualizar-e-gerar-)
+
+### **🔇 Redução de Logs**
+- **Problema:** Excesso de logs no console gerando ruído
+- **Solução:** Implementado utilitário de logging com níveis configuráveis
+- **Documentação:** [FIXES_DOCUMENTATION.md](FIXES_DOCUMENTATION.md#3-logging-reduction-)
+
+### **🛡️ Correção de Erros 403**
+- **Problema:** Erros 403 ao salvar designações devido a políticas RLS
+- **Solução:** Aplicadas políticas RLS corretas para tabelas do banco de dados
+- **Documentação:** [FIXES_DOCUMENTATION.md](FIXES_DOCUMENTATION.md#1-bancorls-issues-)
+
+---
+
 ## 🏗️ **Arquitetura do Sistema**
 
 ```
@@ -92,6 +132,10 @@ sua-parte/
 - **`npm run dev:backend-only`** - Apenas o backend (porta 3000)
 - **`npm run dev:frontend-only`** - Apenas o frontend (porta 8080)
 - **Desenvolvimento simplificado** com um único comando
+
+### **🔧 Scripts de Correção**
+- **`npm run fix:policies-only`** - Exibe instruções para aplicar políticas
+- **`npm run verify:storage`** - Verifica configuração do storage
 
 ### **✅ Admin Dashboard**
 - **Visão Geral:** Estatísticas do sistema e ações rápidas
@@ -159,6 +203,14 @@ Login → Dashboard Estudante → Ver Materiais Publicados
 ```
 
 ---
+
+## 📎 Atalhos Úteis
+
+- Guia definitivo do fluxo (Admin → Instrutor → Estudante): docs/GUIA_DEFINITIVO.md
+- Programas (Instrutor): /programas
+- Designações (Instrutor): /designacoes
+- Estudantes (Instrutor): /estudantes
+- Admin Dashboard: /admin
 
 ## 🎨 **Características Visuais**
 
@@ -288,6 +340,10 @@ npm run dev:all              # Inicia backend + frontend simultaneamente
 npm run dev:backend-only     # Apenas o backend (porta 3000)
 npm run dev:frontend-only    # Apenas o frontend (porta 8080)
 
+# 🔧 Scripts de Correção
+npm run fix:policies-only    # Exibe instruções para aplicar políticas
+npm run verify:storage       # Verifica configuração do storage
+
 # 🔧 Comandos Originais
 npm run dev                  # Frontend apenas (como antes)
 npm run build                # Build de produção
@@ -306,6 +362,7 @@ SUPABASE_ANON_KEY=your_supabase_key
 # Frontend
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_key
+VITE_LOG_LEVEL=info          # Nível de log (error|warn|info|debug)
 ```
 
 ### **Dependências Principais**
@@ -342,6 +399,9 @@ VITE_SUPABASE_ANON_KEY=your_supabase_key
 | 🧪 Testes Cypress | ✅ **100%** | Validação automatizada |
 | 📱 Interface | ✅ **100%** | Responsiva e moderna |
 | 🗄️ Banco de Dados | ✅ **100%** | Supabase configurado |
+| 📤 Upload de PDF | ✅ **Corrigido** | Upload para storage funcionando |
+| 🔄 Programas Duplicados | ✅ **Corrigido** | Modal personalizado implementado |
+| 🔇 Redução de Logs | ✅ **Corrigido** | Logging com níveis configuráveis |
 
 ---
 
@@ -379,6 +439,11 @@ curl http://localhost:3000/api/status
 - Confirmar role do usuário no banco
 - Verificar console do navegador para logs
 
+### **Erros de Upload de PDF**
+- Verificar se o bucket "programas" existe no Supabase Storage
+- Confirmar que as políticas de storage foram aplicadas
+- Executar `npm run verify:storage` para diagnosticar problemas
+
 ---
 
 ## 📚 **Documentação Adicional**
@@ -387,6 +452,9 @@ curl http://localhost:3000/api/status
 - **[DEBUG_ADMIN_DASHBOARD.md](DEBUG_ADMIN_DASHBOARD.md)** - Debug e troubleshooting
 - **[README_ESTUDANTES.md](README_ESTUDANTES.md)** - Sistema de estudantes
 - **[docs/SISTEMA-UNIFICADO.md](docs/SISTEMA-UNIFICADO.md)** - Arquitetura unificada
+- **[FIXES_DOCUMENTATION.md](FIXES_DOCUMENTATION.md)** - Documentação das correções implementadas
+- **[SOLUTION_SUMMARY.md](SOLUTION_SUMMARY.md)** - Resumo das soluções
+- **[MANUAL_STORAGE_SETUP.md](MANUAL_STORAGE_SETUP.md)** - Configuração manual do storage
 
 ---
 
@@ -399,6 +467,9 @@ curl http://localhost:3000/api/status
 - [x] Testes automatizados
 - [x] Documentação completa
 - [x] **Scripts unificados** para desenvolvimento
+- [x] **Correções de upload de PDF**
+- [x] **Melhoria do modal de duplicatas**
+- [x] **Redução de logs excessivos**
 
 ### **🚀 Em Desenvolvimento**
 - [ ] Interface mais polida
@@ -419,6 +490,7 @@ curl http://localhost:3000/api/status
 - **✅ Documentação completa** criada
 - **✅ Código versionado** e sincronizado no GitHub
 - **✅ Scripts unificados** para desenvolvimento simplificado
+- **✅ Correções importantes** implementadas e documentadas
 
 **🚀 Sistema pronto para uso em produção com desenvolvimento otimizado!**
 
@@ -453,4 +525,3 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ---
 
 **🌟 Sistema Ministerial - Transformando a gestão de materiais e programas!**
-

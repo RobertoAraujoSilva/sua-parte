@@ -17,12 +17,14 @@ import { ProgramDetailModal } from "@/components/ProgramDetailModal";
 import { TemplateLibrary } from "@/components/TemplateLibrary";
 import { supabase } from "@/integrations/supabase/client";
 import { generateProgramPDF } from "@/utils/pdfGenerator";
+import logger from '@/utils/logger';
 import { supabaseWithRetry, checkAuthState } from "@/utils/supabase-auth-fix";
 import PageShell from "@/components/layout/PageShell";
 import ProgramasToolbar from "@/components/programs/ProgramasToolbar";
 import ProgramFlowGuide from "@/components/programs/ProgramFlowGuide";
 import { ResponsiveTableWrapper } from "@/components/layout/ResponsiveTableWrapper";
 import { AdaptiveGrid } from "@/components/layout/adaptive-grid";
+import { DuplicateProgramModal } from '@/components/DuplicateProgramModal';
 
 const ProgramasOptimized = () => {
   const navigate = useNavigate();
@@ -47,6 +49,13 @@ const ProgramasOptimized = () => {
   const [showProgramDetail, setShowProgramDetail] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [selectedTab, setSelectedTab] = useState<"upcoming" | "completed" | "all">("upcoming");
+  const [duplicateModalOpen, setDuplicateModalOpen] = useState(false);
+  const [duplicateContext, setDuplicateContext] = useState<{
+    existing: any;
+    upload: any;
+    mesApostila: string | null;
+    dataInicio: string;
+  } | null>(null);
 
   // Calculate real statistics from programs data
   const programStats = useMemo(() => {
@@ -170,7 +179,7 @@ const ProgramasOptimized = () => {
   }
 
   const handlePdfUploadComplete = async (uploadData: any) => {
-    console.log('PDF upload completed:', uploadData);
+    logger.debug('PDF upload completed:', uploadData);
 
     if (!user?.id) {
       toast({
@@ -185,7 +194,7 @@ const ProgramasOptimized = () => {
       // Verificar estado da autenticação antes de prosseguir
       const authState = await checkAuthState();
       if (!authState.authenticated) {
-        console.error('❌ Authentication check failed:', authState.error);
+        logger.error('Authentication check failed:', authState.error);
         toast({
           title: "Erro de Autenticação",
           description: "Sua sessão expirou. Por favor, faça login novamente.",
@@ -198,7 +207,7 @@ const ProgramasOptimized = () => {
       const mesApostila = uploadData.extractedData?.mes_ano || null;
 
       // Check for duplicate programs using the database function with retry
-      console.log('🔍 Checking for duplicate programs...');
+      logger.debug('Checking for duplicate programs...');
       
       const duplicateCheckResult = await supabaseWithRetry(async () => {
         return await supabase
@@ -210,7 +219,7 @@ const ProgramasOptimized = () => {
       });
 
       if (duplicateCheckResult.error) {
-        console.error('❌ Error checking for duplicates:', duplicateCheckResult.error);
+        logger.error('Error checking for duplicates:', duplicateCheckResult.error);
         toast({
           title: "Erro de Verificação",
           description: "Não foi possível verificar programas duplicados. Tente novamente.",
@@ -220,21 +229,7 @@ const ProgramasOptimized = () => {
       }
 
       if (duplicateCheckResult.data) {
-        console.log('⚠️ Duplicate program found');
-
-        // Offer to update existing program instead of blocking
-        const shouldUpdate = window.confirm(
-          `Já existe um programa para "${mesApostila || 'esta semana'}".\n\n` +
-          `Deseja atualizar o existente com este PDF (mantendo o histórico)?`
-        );
-
-        if (!shouldUpdate) {
-          toast({
-            title: "Importação cancelada",
-            description: "O programa existente não foi alterado.",
-          });
-          return;
-        }
+        logger.warn('Duplicate program found');
 
         // Find the existing program (prefer month match when available)
         let existingProgram: any | null = null;
@@ -247,9 +242,8 @@ const ProgramasOptimized = () => {
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
-
           if (byMonthError) {
-            console.error('❌ Error fetching existing program by month:', byMonthError);
+            logger.error('Error fetching existing program by month:', byMonthError);
           }
           existingProgram = byMonth || null;
         }
@@ -262,9 +256,8 @@ const ProgramasOptimized = () => {
             .order('created_at', { ascending: false })
             .limit(1)
             .maybeSingle();
-
           if (byWeekError) {
-            console.error('❌ Error fetching existing program by week:', byWeekError);
+            logger.error('Error fetching existing program by week:', byWeekError);
           }
           existingProgram = byWeek || null;
         }
@@ -278,48 +271,8 @@ const ProgramasOptimized = () => {
           return;
         }
 
-        // Prepare update payload
-        const updateData = {
-          partes: uploadData.extractedData?.partes || [
-            "Tesouros da Palavra de Deus",
-            "Faça Seu Melhor no Ministério",
-            "Nossa Vida Cristã"
-          ],
-          arquivo: uploadData.filename || existingProgram.arquivo,
-          semana: uploadData.extractedData?.semana || existingProgram.semana,
-          // Keep assignment_status as-is to preserve approval state
-        };
-
-        console.log('♻️ Updating existing program:', existingProgram.id, updateData);
-
-        const updateResult = await supabaseWithRetry(async () => {
-          return await supabase
-            .from('programas')
-            .update(updateData)
-            .eq('id', existingProgram.id)
-            .select()
-            .single();
-        });
-
-        if (updateResult.error) {
-          console.error('❌ Error updating existing program:', updateResult.error);
-          toast({
-            title: "Erro ao Atualizar",
-            description: `Não foi possível atualizar o programa existente: ${updateResult.error.message}`,
-            variant: "destructive"
-          });
-          return;
-        }
-
-        console.log('✅ Program updated successfully:', updateResult.data);
-
-        await loadPrograms();
-
-        toast({
-          title: "Programa Atualizado",
-          description: `O programa "${updateResult.data?.semana || mesApostila || 'existente'}" foi atualizado com sucesso.`,
-        });
-
+        setDuplicateContext({ existing: existingProgram, upload: uploadData, mesApostila, dataInicio });
+        setDuplicateModalOpen(true);
         return;
       }
 
@@ -339,7 +292,7 @@ const ProgramasOptimized = () => {
         semana: uploadData.extractedData?.semana || (mesApostila ? mesApostila : `Semana de ${dataInicio}`)
       };
 
-      console.log('💾 Saving program to database:', programData);
+      logger.debug('Saving program to database:', programData);
 
       const saveResult = await supabaseWithRetry(async () => {
         return await supabase
@@ -350,7 +303,7 @@ const ProgramasOptimized = () => {
       });
 
       if (saveResult.error) {
-        console.error('❌ Error saving program:', saveResult.error);
+        logger.error('Error saving program:', saveResult.error);
         toast({
           title: "Erro ao Salvar",
           description: `Erro ao salvar programa: ${saveResult.error.message}`,
@@ -359,7 +312,7 @@ const ProgramasOptimized = () => {
         return;
       }
 
-      console.log('✅ Program saved successfully:', saveResult.data);
+      logger.debug('Program saved successfully:', saveResult.data);
 
       // Refresh programs list
       await loadPrograms();
@@ -375,7 +328,7 @@ const ProgramasOptimized = () => {
       }
 
     } catch (error) {
-      console.error('❌ Exception saving program:', error);
+      logger.error('Exception saving program:', error);
       
       // Check if it's an authentication error
       if (error?.message?.includes('401') || error?.message?.includes('JWT') || error?.message?.includes('auth')) {
@@ -444,6 +397,87 @@ const ProgramasOptimized = () => {
         description: "Revise as designações e aprove quando estiver satisfeito.",
       });
     }
+  };
+
+  // Duplicate handling helpers
+  const handleDuplicateConfirm = async (action: 'update' | 'updateAndGenerate') => {
+    if (!duplicateContext) return;
+
+    const { existing, upload, mesApostila, dataInicio } = duplicateContext;
+
+    try {
+      // Update existing program
+      const programData = {
+        data_inicio_semana: dataInicio,
+        mes_apostila: mesApostila,
+        partes: upload.extractedData?.partes || [
+          "Tesouros da Palavra de Deus",
+          "Faça Seu Melhor no Ministério",
+          "Nossa Vida Cristã"
+        ],
+        status: "ativo" as "ativo",
+        arquivo: upload.filename || `programa-${dataInicio}.pdf`,
+        semana: upload.extractedData?.semana || (mesApostila ? mesApostila : `Semana de ${dataInicio}`)
+      };
+
+      // If action is "updateAndGenerate", reset assignment status
+      if (action === 'updateAndGenerate') {
+        programData.assignment_status = 'pending';
+      }
+
+      const { error: updateError } = await supabase
+        .from('programas')
+        .update(programData)
+        .eq('id', existing.id);
+
+      if (updateError) {
+        logger.error('Error updating program:', updateError);
+        toast({
+          title: "Erro ao Atualizar",
+          description: `Erro ao atualizar programa: ${updateError.message}`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      logger.debug('Program updated successfully');
+
+      // Close modal and refresh programs
+      setDuplicateModalOpen(false);
+      setDuplicateContext(null);
+      await loadPrograms();
+
+      toast({
+        title: "Programa Atualizado!",
+        description: `O programa "${programData.semana}" foi atualizado com sucesso.`,
+      });
+
+      // If action is "updateAndGenerate", generate assignments
+      if (action === 'updateAndGenerate') {
+        const { data: updatedProgram } = await supabase
+          .from('programas')
+          .select('*')
+          .eq('id', existing.id)
+          .single();
+
+        if (updatedProgram) {
+          await handleGenerateAssignments(updatedProgram);
+        }
+      }
+
+    } catch (error) {
+      logger.error('Exception updating program:', error);
+      toast({
+        title: "Erro Inesperado",
+        description: "Ocorreu um erro inesperado ao atualizar o programa.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleDuplicateCancel = () => {
+    setDuplicateModalOpen(false);
+    setDuplicateContext(null);
   };
 
   const handleConfirmAssignments = async () => {
@@ -557,6 +591,10 @@ const ProgramasOptimized = () => {
           }
         } catch (storageError) {
           console.log('File not found in storage, will generate PDF instead');
+          toast({
+            title: "Arquivo não encontrado",
+            description: "Gerando PDF local a partir dos dados do programa...",
+          });
         }
       }
 
@@ -791,6 +829,23 @@ const ProgramasOptimized = () => {
                     <p className="text-sm text-gray-400">
                       {searchValue ? 'Tente ajustar os filtros de busca.' : 'Importe um arquivo PDF para começar a criar programas.'}
                     </p>
+                    <div className="mt-4 flex items-center justify-center gap-3 flex-wrap">
+                      <a
+                        href="/docs/GUIA_DEFINITIVO.md"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3 py-1.5 border rounded text-sm underline text-blue-700"
+                      >
+                        Abrir Guia Definitivo
+                      </a>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => navigate('/admin')}
+                      >
+                        Ir ao Admin
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -957,6 +1012,15 @@ const ProgramasOptimized = () => {
           isConfirming={isConfirmingAssignments}
         />
       )}
+
+      {/* Duplicate Program Modal */}
+      <DuplicateProgramModal
+        open={duplicateModalOpen}
+        onOpenChange={setDuplicateModalOpen}
+        existingProgram={duplicateContext?.existing}
+        onConfirm={handleDuplicateConfirm}
+        onCancel={handleDuplicateCancel}
+      />
 
       {showProgramDetail && selectedProgram && (
         <ProgramDetailModal

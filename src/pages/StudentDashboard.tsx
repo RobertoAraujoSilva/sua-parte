@@ -203,6 +203,16 @@ const StudentDashboard: React.FC = () => {
               {estudante.cargo ? `${estudante.cargo}` : t('Estudante')}
               {estudante.batizado ? ` • ${t('Batizado')}` : ` • ${t('Não Batizado')}`}
             </p>
+            <div className="mt-3">
+              <a
+                href="/docs/GUIA_DEFINITIVO.md"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-block px-3 py-1 text-xs rounded border border-white/40 hover:bg-white/10"
+              >
+                Guia Definitivo
+              </a>
+            </div>
           </div>
         </div>
       </header>

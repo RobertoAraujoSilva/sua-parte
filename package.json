@@ -27,7 +27,7 @@
     "cypress:verify": "cypress verify",
     "test:e2e": "cypress run --spec \"cypress/e2e/**/*.cy.ts\"",
     "test:e2e:open": "cypress open",
-    "test:e2e:record": "cypress run --record",
+    "test:e2e:record": "cypress run --spec \"cypress/e2e/**/*.cy.ts\" --record",
     "test:franklin": "cypress run --spec \"cypress/e2e/franklin-login.cy.ts\"",
     "test:franklin:record": "cypress run --spec \"cypress/e2e/franklin-login.cy.ts\" --record",
     "test:sarah": "cypress run --spec \"cypress/e2e/sarah-student-registration.cy.ts\"",
@@ -82,7 +82,10 @@
     "optimize": "npm run build:prod && npm run analyze",
     "testsprite:run": "python testsprite_tests/run_testsprite_with_api.py",
     "testsprite:smoke": "python testsprite_tests/run_testsprite_with_api.py --scenario testsprite_tests/scenarios/min_smoke.json",
-    "testsprite:smoke:win": "powershell -ExecutionPolicy Bypass -File scripts\\run-testsprite-smoke.ps1"
+    "testsprite:smoke:win": "powershell -ExecutionPolicy Bypass -File scripts\\run-testsprite-smoke.ps1",
+    "fix:rls-storage": "node scripts/apply-rls-and-storage-fixes.js",
+    "fix:policies-only": "node scripts/apply-policy-fixes.js",
+    "verify:storage": "node scripts/verify-storage-setup.js"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",
@@ -124,7 +127,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^3.6.0",
-    "dotenv": "^17.2.1",
+    "dotenv": "^17.2.2",
     "embla-carousel-react": "^8.6.0",
     "fs-extra": "^11.3.1",
     "i18next": "^25.3.6",

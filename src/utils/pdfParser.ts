@@ -1,6 +1,8 @@
 // PDF Parser utility for Vida e Ministério Cristão workbooks
 // This utility handles parsing of official JW.org PDF files
 
+import logger from '@/utils/logger';
+
 export interface ParsedPdfData {
   semana: string;
   mes_ano: string;
@@ -302,7 +304,7 @@ export class JWPdfParser {
       if (filenameData.data_inicio) {
         const dateValidation = this.validateDate(filenameData.data_inicio);
         if (!dateValidation.isValid) {
-          console.warn(`⚠️ Date validation failed for ${file.name}:`, dateValidation.error);
+          logger.warn(`Date validation failed for ${file.name}:`, dateValidation.error);
           // Use current date as fallback
           filenameData.data_inicio = new Date().toISOString().split('T')[0];
           filenameData.detalhes_extras = {
@@ -324,7 +326,7 @@ export class JWPdfParser {
       return filenameData as ParsedPdfData;
 
     } catch (error) {
-      console.error('❌ Critical PDF parsing error:', error);
+      logger.error('Critical PDF parsing error:', error);
 
       // Return safe fallback with error information
       return {

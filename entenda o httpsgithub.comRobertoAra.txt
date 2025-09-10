@@ -1,0 +1,1416 @@
+entenda o https://github.com/RobertoAraujoSilva/sua-parte/blob/main RobertoAraujoSilva
+sua-parte
+
+Type / to search
+Code
+Issues
+Pull requests
+Actions
+Projects
+Security
+Insights
+Settings
+Files
+Go to file
+t
+.kilocode content loaded
+.github/workflows
+cypress.yml
+.kilocode
+mcp.json
+.kiro
+settings
+mcp.json
+specs
+auth-fix
+design.md
+requirements.md
+tasks.md
+desktop-layout-optimization
+design.md
+requirements.md
+tasks.md
+login-ux-improvement
+design.md
+requirements.md
+tasks.md
+mobile-portrait-refresh-fix
+design.md
+requirements.md
+tasks.md
+module-resolution-fix
+design.md
+requirements.md
+tasks.md
+responsive-layout-optimization
+design.md
+requirements.md
+tasks.md
+sistema-ministerial-verification
+design.md
+requirements.md
+tasks.md
+system-optimization
+database-migration.sql
+design.md
+enhanced-types.ts
+requirements.md
+tasks.md
+.playwright-mcp
+admin-dashboard-final-test.png
+audit
+STATUS_IMPL_PLAN.md
+backend
+config
+database.js
+mwbSources.json
+supabase.js
+routes
+admin.js
+designacoes.js
+materials.js
+programacoes.js
+programs.js
+services
+jwDownloader.js
+materialManager.js
+notificationService.js
+pdfParser.js
+programGenerator.js
+sql
+programacoes_schema.sql
+.env.example
+README.md
+README_PROGRAMACOES.md
+dev_servers.log
+package-lock.json
+package.json
+programacao-nov-3-9.json
+server.js
+test-programacoes.js
+cypress
+e2e
+admin-dashboard-complete.cy.ts
+admin-dashboard-focused.cy.ts
+admin-dashboard-integration.cy.ts
+admin-test.cy.ts
+assignment-generation.cy.ts
+auditoria_sistema_ministerial.cy.ts
+authentication-roles-fixed.cy.ts
+authentication-roles.cy.ts
+basic-login-test.cy.ts
+debug-dashboard.cy.ts
+enhanced-pdf-parsing.cy.ts
+franklin-login.cy.ts
+mobile-landing.cy.ts
+pdf-upload-functionality.cy.ts
+programs-page-functionality.cy.ts
+sarah-student-registration.cy.ts
+save-debug-info.cy.ts
+simple-debug.cy.ts
+sistema-completo-test.cy.ts
+sistema-ministerial-completo.cy.ts
+sistema-ministerial-e2e.cy.ts
+smoke-test.cy.ts
+student-portal-navigation.cy.ts
+url-configuration.cy.ts
+fixtures
+franklin-user.json
+sarah-user.json
+support
+commands.ts
+component.ts
+cypress.d.ts
+e2e.ts
+README.md
+basic-info.txt
+debug-dashboard-info.txt
+page-content.txt
+tsconfig.json
+docs
+Oficial
+S-38_E.rtf
+WhatsApp Image 2025-08-14 at 19.44.07 (1).jpeg
+WhatsApp Image 2025-08-14 at 19.44.07.jpeg
+estudantes_ficticios.xlsx
+estudantes_rows.sql
+mwb_E_202507.pdf
+mwb_E_202509.pdf
+mwb_E_202511.pdf
+mwb_T_202507.daisy.zip
+mwb_T_202509.daisy.zip
+mwb_T_202509.jwpub
+mwb_T_202511.jwpub
+~$estudantes_ficticios.xlsx
+20250908130000_consolidate_all_schema_fixes.sql
+ADMIN_DASHBOARD_INTEGRATION.md
+AGENTS.md
+ANALISE_COMPLETA_SISTEMA_MINISTERIAL.md
+ANALISE_DASHBOARDS_INTEGRACAO.md
+ANALISE_RESPOSTAS_QUESTIONARIO.md
+APPLICATION_READINESS_ASSESSMENT.md
+APPLY_DATABASE_MIGRATION_NOW.md
+ASSIGNMENT_GENERATION_SYSTEM.md
+ASSIGNMENT_SYSTEM_IMPLEMENTATION_COMPLETE.md
+ASSIGNMENT_SYSTEM_REPAIR_GUIDE.md
+ASSIGNMENT_WORKFLOW_GUIDE.md
+AUDITORIA_E_IMPLANTACAO.md
+AUTHENTICATION_STATUS_REPORT.md
+AUTH_TIMEOUT_FIXES_COMPREHENSIVE.md
+AUTH_TROUBLESHOOTING.md
+BIRTH_DATE_FEATURE.md
+BUILD_ERRORS_FIXED.md
+CACHE_ASIDE_PATTERN_GUIDE.md
+CHECKLIST_IMPLEMENTACAO.md
+CI_CD_COMPLETION_GUIDE.md
+CI_CD_INTEGRATION_SUMMARY.md
+COMPREHENSIVE_TUTORIAL_SYSTEM_COMPLETE.md
+COMPREHENSIVE_VALIDATION_ASSESSMENT_REPORT.md
+CONSOLE_LOG_FIXES.md
+CORRECAO_APLICADA_TELA_BRANCA.md
+CORRECAO_ERRO_DATA_DESIGNACOES.md
+CORRECAO_QRCODE_BUILD.md
+CORRECOES_TIPOS_MAPEAMENTOS.md
+CORRECTED_DEVELOPER_REGISTRATION_GUIDE.md
+CORREÇÕES_AUDITORIA_PWA.md
+CREDENCIAIS_TESTE_SISTEMA_COMPLETO.md
+CRITICAL_ASSIGNMENT_FIXES_SUMMARY.md
+CRITICAL_DATABASE_MIGRATION_APPLIED.md
+CRITICAL_OPTIMIZATIONS_COMPLETE.md
+CYPRESS_CICD_IMPLEMENTATION_SUMMARY.md
+CYPRESS_CLOUD_CICD_SETUP.md
+CYPRESS_CLOUD_SETUP.md
+CYPRESS_CLOUD_TROUBLESHOOTING.md
+CYPRESS_TESTING_SETUP.md
+CYPRESS_TROUBLESHOOTING.md
+DASHBOARD_LOGOUT_FIX.md
+DEBUG_ADMIN_DASHBOARD.md
+DEPLOYMENT_AUTHORIZATION_FIX.md
+DEVELOPER_PANEL_IMPLEMENTATION_COMPLETE.md
+DEVELOPER_REGISTRATION_VALIDATION_REPORT.md
+DOCUMENTACAO_COMPLETA.md
+DOCUMENTACAO_TECNICA_CONVITES_FAMILIARES.md
+EMAIL_CONFIRMATION_FIX.md
+ENHANCED_PDF_PARSING.md
+ENVIRONMENT_CONFIGURATION_COMPLETE.md
+ENVIRONMENT_SETUP_GUIDE.md
+EXCEL_IMPORT_GUIDE.md
+EXECUTION_TASKS_TRACKER.md
+FAMILY_INVITATIONS_BUG_FIX.md
+FAMILY_INVITATIONS_FEATURE.md
+FAMILY_INVITATIONS_IMPLEMENTATION.md
+FAMILY_MANAGEMENT_BUG_FIX.md
+FAMILY_MANAGEMENT_TESTING_GUIDE.md
+FAMILY_MEMBER_INSERT_BUG_FIX.md
+FAQ_DELIVERABLES_SUMMARY.md
+FAQ_SECTION_IMPLEMENTATION.md
+GITHUB_ACTIONS_SETUP.md
+GITHUB_REPOSITORY_SETUP.md
+GUIA_ADMINISTRADOR_SISTEMA_MINISTERIAL.md
+GUIA_TESTES_CYPRESS.md
+GUIA_TRADUCAO_COMPLETA.md
+GUIA_USUARIO.md
+HEADER_AUTHENTICATION_FIX.md
+IMPLEMENTACAO_COMPLETA_FINAL.md
+IMPLEMENTACAO_COMPLETA_SISTEMA_MINISTERIAL.md
+IMPLEMENTACAO_REGRA_S38_OFICIAL.md
+IMPLEMENTATION_PLAN.md
+INFINITE_LOADING_FIX.md
+INTEGRACAO_DASHBOARDS_UNIFICADA.md
+INTERNATIONAL_PHONE_SUPPORT.md
+MEETINGS_DATABASE_IMPLEMENTATION_COMPLETE.md
+MELHORIAS_IMPORTACAO_PLANILHA.md
+NODEMON_TROUBLESHOOTING.md
+ONBOARDING_GUIDE.md
+PACKAGE_MANAGER_LOCKFILE_RESOLUTION.md
+PAGE_REFRESH_FIX.md
+PAGE_REFRESH_LOADING_FIX.md
+PAINEL_INSTRUTOR_INTERATIVO.md
+PERFORMANCE_OPTIMIZATIONS_IMPLEMENTED.md
+PLANO.md
+PLANO_IMPLEMENTACAO_HISTORICO_FILA_JUSTA.md
+PRD.md
+PRD_PROGRAMACAO_PDF_ADMIN.md
+PROBLEMA_DASHBOARDS.md
+PROBLEMA_EXTRACAO_PDF.md
+PROBLEMA_PROGRAMDISPLAY.md
+PROBLEMA_TELA_EM_BRANCO_F5.md
+PRODUCTION_DEPLOYMENT_FIX.md
+PRODUCTION_URL_UPDATE.md
+PROFILE_FETCH_FIX.md
+PROFILE_FETCH_TIMEOUT_FIXES.md
+PROGRAMACOES_API.md
+PROGRAMAS_SETUP.md
+PROGRAMA_HARMONIZACAO_AMANHA.md
+PROGRAMDISPLAY_DOCUMENTACAO.md
+PROGRAM_PREVIEW_SYSTEM_COMPLETE.md
+PROXIMAS_TAREFAS.md
+PULL_REQUEST_DESCRIPTION.md
+QUESTIONARIO_PROJETO_SISTEMA_MINISTERIAL.md
+QUICK_DEPLOYMENT_FIX.md
+REACT_HOOKS_ISSUE_FIX.md
+REACT_USEEFFECT_FIX.md
+README.md
+README_ESTUDANTES.md
+RECORD_KEY_GENERATION_GUIDE.md
+REGIONAL_CONNECTIVITY_FIXES.md
+RESPOSTAS_QUESTIONARIO.md
+ROUTE_AUDIT_AND_UX_REVISION.md
+ROUTE_AUDIT_IMPLEMENTATION_COMPLETE.md
+ROUTING_FIX_SUMMARY.md
+SARAH_CYPRESS_TEST.md
+SCHEMA_FIX_APPLICATION_GUIDE.md
+SECURITY_FIX_REPORT.md
+SIGNUP_ERROR_FIX.md
+SISTEMA-UNIFICADO.md
+SISTEMA_BILINGUE.md
+SISTEMA_DESIGNACOES_S38T.md
+SISTEMA_TUTORIAIS_INTERATIVOS.md
+SOLUCAO_TELA_BRANCA_ADMIN.md
+SOLUCAO_WEBSOCKET.md
+STUDENT_LOGIN_DEBUG_GUIDE.md
+STUDENT_LOGOUT_IMPLEMENTATION.md
+STUDENT_PORTAL_IMPLEMENTATION.md
+SUPABASE_AUTHENTICATION_FIXES_SUMMARY.md
+SUPABASE_CLIENT_TIMEOUT_FIX.md
+SUPABASE_EMAIL_TEMPLATE_CONFIG.md
+SUPABASE_URL_CONFIGURATION.md
+SUPABASE_URL_CONFIG_COMPLETE.md
+SYSTEM_FLOW.md
+SYSTEM_FLOW_DIAGRAM.md
+SYSTEM_LOGIC_DOCUMENTATION.md
+TABLET_RESPONSIVENESS_FIXES.md
+TAILWIND_CONFIGURATION_UPDATE_SUMMARY.md
+TASK_14_COMPLETION_SUMMARY.md
+TESTE_SISTEMA_BILINGUE.md
+TODO_LIST.md
+TUTORIAL_IMPORT_ERROR_FIX_COMPLETE.md
+UNIFICACAO_SCRIPTS.md
+UNIFIED_DASHBOARD_INTEGRATION_SUMMARY.md
+VERIFICACAO_CYPRESS_BUILD.md
+VERIFICATION_SYSTEM_GUIDE.md
+VERIFICATION_SYSTEM_IMPLEMENTATION_COMPLETE.md
+ZOOM_RESPONSIVENESS_TESTING_GUIDE.md
+ZOOM_RESPONSIVENESS_TESTING_IMPLEMENTATION_SUMMARY.md
+guia-desenvolvedor-logout.md
+historico-problemas-logout.md
+problemas-logout-sistema-ministerial.md
+programacao-semana-exemplo.json
+integration-test-reports
+exports
+report-report-2025-08-17T14-24-49-220Z-nbsd7o-2025-08-17T14-24-49-221Z.html
+report-report-2025-08-17T14-24-49-220Z-nbsd7o-2025-08-17T14-24-49-221Z.json
+reports
+report-2025-08-17T14-24-49-220Z-nbsd7o.json
+report-2025-08-17T14-24-49-417Z-q25tab.json
+report-2025-08-17T14-24-49-422Z-vskorl.json
+index.json
+index.json.backup
+public
+templates
+README.md
+404.html
+_redirects
+apple-touch-icon.svg
+debug-browser-api-keys.html
+debug-env-vars.html
+favicon.ico
+favicon.svg
+manifest.json
+masked-icon.svg
+placeholder.svg
+pwa-192x192.svg
+pwa-512x512.svg
+pwa-icons-generator.html
+robots.txt
+static.json
+sw.js
+test-auth-programas.html
+test-authentication-fixes.html
+test-definitive-fix.html
+test-env-debug.html
+test-supabase-connectivity.html
+test-supabase-fix.html
+scripts
+README.md
+agents-log.js
+agents-log.mjs
+apply-admin-dashboard-migration.js
+apply-meeting-migration.js
+apply-migration.js
+apply-schema-fix-simple.js
+apply-schema-fix.js
+audit-implementation.mjs
+auditar-plano.mjs
+browser-console-test.js
+check-database-structure.js
+check-estudantes-data.js
+check-profiles-structure.js
+clean-git-history.ps1
+console-auth-fix.js
+create-rpc-functions.sql
+debug-dashboard-auth.html
+debug-logout-issue.html
+debug-student-redirect.html
+diagnose-cypress.bat
+diagnose-deployment-issue.js
+diagnose-supabase-auth.js
+extrai_mwb.js
+final-rpc-fix.sql
+fix-auth-tokens.js
+fix-cypress-powershell.bat
+fix-programas-schema.sql
+fix-rls-403.js
+fix-rls-immediate.js
+fix-rpc-function.sql
+generate-pwa-icons.cjs
+generate-pwa-icons.js
+immediate-auth-fix.js
+kill-ports.bat
+manual-migration.js
+repair-assignment-system.sql
+run-cypress-fixed.bat
+run-cypress-tests.bat
+run-cypress-tests.ps1
+run-testsprite-smoke.ps1
+run_migrations.cjs
+run_migrations.js
+setup-and-test-cypress.bat
+setup-github-secrets.md
+test-application-readiness.js
+test-auth-basic.js
+test-auth-fix.js
+test-auth-status.js
+test-birth-date-feature.html
+test-blank-screen-fix.html
+test-browser-authentication.js
+test-cargo-labels.js
+test-cargo-options.js
+test-complete-logout-system.js
+test-critical-logout-fix.js
+test-cypress-cloud.bat
+test-dashboard-logout.js
+test-database.js
+test-debug-panel-fix.js
+test-franklin-cypress.js
+test-instructor-cargo.js
+test-jworg-integration.js
+test-logout-comprehensive-fix.js
+test-logout-fallback-system.js
+test-logout-fix.js
+test-logout-functionality.js
+test-logout-system.js
+test-mauricio-profile.html
+test-mauricio-signup.html
+test-page-refresh-fix.html
+test-page-refresh.html
+test-phone-validation.js
+test-production-url-config.js
+test-profile-access.js
+test-routing-fix.js
+test-sarah-cypress.bat
+test-sarah-cypress.js
+test-sarah-cypress.ps1
+test-schema-fix.js
+test-security-fix.js
+test-signup-debug.js
+test-student-cargo-dropdown.js
+test-student-login-debug.js
+test-student-logout.js
+test-student-portal-auth.js
+test-supabase-error-diagnosis.js
+test-supabase-url-config.js
+test-url-configuration.js
+test-zoom-responsiveness.js
+validate-env.js
+validate-zoom-responsiveness.js
+verify-build.js
+verify-cypress-setup.ps1
+verify-dashboard-fix.js
+verify-header-fix.js
+verify-student-form-cargo.js
+src
+app
+estudantes
+page.tsx
+programas
+layout.tsx
+page.tsx
+assets
+hero-ministerial.jpg
+components
+admin
+CongregationsTab.tsx
+MonitoringTab.tsx
+OverviewTab.tsx
+SystemTab.tsx
+UsersTab.tsx
+assignments
+DesignacoesToolbar.tsx
+auth
+LoginFeedback.tsx
+SimpleLoginFeedback.tsx
+dashboards
+AdminDashboard.tsx
+InstructorDashboard.tsx
+RefactoredAdminDashboard.tsx
+RefactoredInstructorDashboard.tsx
+StudentDashboard.tsx
+examples
+IntelligentToolbarExample.tsx
+ResponsiveTableExample.tsx
+instructor
+InstructorDashboardStats.tsx
+PendingStudentsPanel.tsx
+ProgressBoard.tsx
+SpeechTypeCategories.tsx
+StudentQualificationCard.tsx
+index.ts
+layout
+IntelligentToolbar.tsx
+PageShell.tsx
+ResponsiveTableWrapper.tsx
+adaptive-grid.tsx
+mobile-tabs.tsx
+quick-actions.tsx
+responsive-container.tsx
+responsive-header.tsx
+responsive-integration.tsx
+migration
+FamilyMigrationPanel.tsx
+navigation
+MobileNavigation.tsx
+ProgramasNavButton.tsx
+programs
+ProgramDisplay.tsx
+ProgramFlowGuide.tsx
+ProgramasToolbar.tsx
+students
+EstudantesToolbar.tsx
+StudentSpreadsheetOptimized.tsx
+StudentsGrid.tsx
+StudentsGridAG.tsx
+StudentsPageWithModes.tsx
+StudentsViewToggle.tsx
+tests
+DensityToggleTest.tsx
+IntelligentToolbarTest.tsx
+ResponsiveIntegrationTest.tsx
+ResponsiveTableWrapperTest.tsx
+TailwindBreakpointTest.tsx
+ZoomResponsivenessTest.tsx
+tutorial
+TutorialButton.tsx
+TutorialOverlay.tsx
+TutorialTooltip.tsx
+index.ts
+ui
+accordion.tsx
+alert-dialog.tsx
+alert.tsx
+aspect-ratio.tsx
+avatar.tsx
+badge.tsx
+breadcrumb.tsx
+button.tsx
+calendar.tsx
+card.tsx
+carousel.tsx
+chart.tsx
+checkbox.tsx
+collapsible.tsx
+command.tsx
+context-menu.tsx
+density-toggle.tsx
+dialog.tsx
+drawer.tsx
+dropdown-menu.tsx
+empty-state.tsx
+enhanced-responsive-table.tsx
+fallback-state.tsx
+form.tsx
+hover-card.tsx
+input-otp.tsx
+input.tsx
+label.tsx
+menubar.tsx
+navigation-menu.tsx
+pagination.tsx
+popover.tsx
+progress.tsx
+radio-group.tsx
+resizable.tsx
+responsive-container.tsx
+responsive-table.tsx
+scroll-area.tsx
+scroll-tabs.tsx
+select.tsx
+separator.tsx
+sheet.tsx
+sidebar.tsx
+skeleton-list.tsx
+skeleton.tsx
+slider.tsx
+sonner.tsx
+switch.tsx
+table.tsx
+tabs.tsx
+textarea.tsx
+toast.tsx
+toaster.tsx
+toggle-group.tsx
+toggle.tsx
+tooltip.tsx
+use-toast.ts
+AssignmentEditModal.tsx
+AssignmentGenerationModal.tsx
+AssignmentPreviewModal.tsx
+AssignmentStatusCard.tsx
+AssignmentSystem.tsx
+AuthErrorHandler.tsx
+AuthRecoveryButton.tsx
+Benefits.tsx
+CacheAsideDemo.tsx
+CongregationManager.tsx
+ConnectionStatusBanner.tsx
+DebugFab.tsx
+DebugPanel.tsx
+DebugPanelTest.tsx
+DonationCard.tsx
+ErrorBoundary.tsx
+EstudanteCard.tsx
+EstudanteForm.tsx
+FAQSection.tsx
+FallbackScreen.tsx
+FamilyInvitationDebugPanel.tsx
+FamilyMemberForm.tsx
+FamilyMembersList.tsx
+Features.tsx
+Footer.tsx
+Header.tsx
+Hero.tsx
+ImportHelp.tsx
+JWContentParser.tsx
+JWTerminologyHelper.tsx
+JWorgTest.tsx
+LandingHero.tsx
+LanguageDebug.tsx
+LazyLoader.tsx
+MeetingManagement.tsx
+MockAdminDashboard.tsx
+MockDashboard.tsx
+ModalPreviaDesignacoes.tsx
+ModalSelecaoSemana.tsx
+OptimizedImage.tsx
+PDFProgrammingManager.tsx
+PDFTestButton.tsx
+PdfParsingDemo.tsx
+PdfUpload.tsx
+ProductionDebugPanel.tsx
+ProgramDetailModal.tsx
+ProgramManager.tsx
+ProgramPublisher.tsx
+ProtectedRoute.tsx
+QuickActions.tsx
+SpreadsheetUpload.tsx
+StudentAssignmentView.tsx
+StudentsSpreadsheet.tsx
+SyncButton.tsx
+TemplateDownload.tsx
+TemplateLibrary.tsx
+TodoExample.tsx
+TutorialIntegration.tsx
+TutorialManager.tsx
+UnifiedBreadcrumbs.tsx
+UnifiedDashboard.tsx
+UnifiedNavigation.tsx
+UnifiedNotifications.tsx
+UserFlowGuide.tsx
+WorkingDashboard.tsx
+config
+donations.ts
+performance.ts
+tutorials.ts
+contexts
+AuthContext.tsx
+AuthContextFallback.tsx
+DensityContext.tsx
+GlobalDataContext.tsx
+LanguageContext.tsx
+TutorialContext.tsx
+data
+mockMaterials.ts
+hooks
+admin
+useAdminCache.ts
+use-mobile.tsx
+use-responsive-table.ts
+use-responsive.ts
+use-timeout-fetch.ts
+use-toast.ts
+useAssignmentGeneration.ts
+useBackendAPI.ts
+useCacheAsideEstudantes.ts
+useCacheAsideEstudantesEnhanced.ts
+useConnectionStatus.ts
+useEnhancedEstudantes.ts
+useEnhancedFamilyMigration.ts
+useEstudantes.ts
+useFamilyMembers.ts
+useInstructorDashboard.ts
+useJWorgIntegration.ts
+useMaterials.ts
+useMeetings.ts
+useNotifications.ts
+usePDFProgramming.ts
+usePdfUpload.ts
+useProfileLoader.ts
+useResponsive.ts
+useSpreadsheetImport.ts
+useStudentsGrid.ts
+useSupabaseMaterials.ts
+useTranslation.ts
+useUnifiedData.ts
+useViewMode.ts
+integrations/supabase
+client.ts
+enhanced-client.ts
+types.ts
+layouts
+SafeAreaLayout.tsx
+lib
+mock-data.ts
+supabase.ts
+supabaseAdmin.ts
+utils.ts
+locales
+en.json
+pt.json
+pages
+convite
+aceitar.tsx
+estudante/[id]
+AdminDashboard.tsx
+AdminDashboardFixed.tsx
+AdminDashboardNew.tsx
+Auth.tsx
+BemVindo.tsx
+CacheAsideDemo.tsx
+ConfiguracaoInicial.tsx
+Congregacoes.tsx
+Dashboard.tsx
+Demo.tsx
+DensityToggleTest.tsx
+Designacoes.tsx
+DesignacoesOptimized.tsx
+DeveloperPanel.tsx
+Doar.tsx
+Equidade.tsx
+EstudanteDashboard.tsx
+EstudantePortal.tsx
+Estudantes.tsx
+EstudantesOptimized.tsx
+EstudantesResponsive.tsx
+Funcionalidades.tsx
+Index.tsx
+InstrutorDashboard.tsx
+IntelligentToolbarTest.tsx
+NotFound.tsx
+PdfParsingTest.tsx
+PortalFamiliar.tsx
+PrimeiroPrograma.tsx
+ProgramDisplayDemo.tsx
+ProgramaPreview.tsx
+Programas.tsx
+ProgramasOptimized.tsx
+ProgramasTest.tsx
+Relatorios.tsx
+ResponsiveIntegrationTestPage.tsx
+Reunioes.tsx
+Sobre.tsx
+StudentDashboard.tsx
+Suporte.tsx
+TailwindBreakpointTest.tsx
+ZoomResponsivenessTest.tsx
+schedule-instructor-sample.json
+styles
+page-shell.css
+responsive.css
+types
+designacoes.ts
+enhanced-estudantes.ts
+estudante.ts
+estudantes.ts
+family.ts
+global.d.ts
+meetings.ts
+spreadsheet.ts
+supabase-extensions.ts
+supabase-helpers.ts
+tutorial.ts
+unified-system.ts
+utils
+EventBus.ts
+addRedirectURL.ts
+analyzeDatabaseInconsistencies.ts
+applyEstudantesRLS.ts
+applyProgramsDesignacoesRLS.ts
+assignmentGenerator.ts
+auth-recovery.ts
+auth.ts
+authDebounce.ts
+authErrorHandler.ts
+authFlowTest.ts
+authLogger.ts
+authTimeoutDiagnostics.ts
+balanceamentoHistorico.ts
+cacheAsidePattern.ts
+cacheAsidePatternEnhanced.ts
+createCongregacoesTable.ts
+dataLoaders.ts
+dataMigrationHelper.ts
+databaseErrorHandler.ts
+dateValidationTest.ts
+debugLogger.ts
+decodeKey.ts
+emergencyLogout.ts
+enhancedFamilyValidation.ts
+excelTemplateGenerator.ts
+executeDirectSQL.ts
+executeMigration.ts
+familyInferenceEngine.ts
+familyInvitationDebug.ts
+familyMemberDebug.ts
+fixAllViaMCP.ts
+fixCongregacaoSystem.ts
+fixDatabaseSchema.ts
+forceLogout.ts
+jwOrgContentParser.ts
+logoutDiagnostics.ts
+mwbParser.ts
+offlineCache.ts
+offlineLocalDB.ts
+pageRefreshOptimization.ts
+pdfGenerator.ts
+pdfParser.ts
+performanceMonitor.ts
+phoneValidationTest.ts
+profileCache.ts
+quickSync.ts
+reactHooksFix.ts
+redirectConfig.ts
+refreshTokenHandler.ts
+regionalConnectivityTest.ts
+regrasS38T.ts
+reviewDatabase.ts
+rls-policy-fix.ts
+runGlobalMigration.ts
+runMigration.ts
+safeMCPFix.ts
+sanitize.ts
+spreadsheetProcessor.ts
+supabase-auth-fix.ts
+supabaseConnectionTest.ts
+supabaseHealthCheck.ts
+supabaseTimeoutConfig.ts
+syncDatabase.ts
+syncProfilestoEstudantes.ts
+syncStudentsToInstructors.ts
+tailwindBreakpointVerification.ts
+testDensityToggle.ts
+testFamilyInvitationSystem.ts
+testesSistemaDesignacoes.ts
+tratamentoErros.ts
+typeCompatibility.ts
+useMCPSupabase.ts
+validacaoFamiliar.ts
+validacaoSeguranca.ts
+zoomResponsivenessUtils.ts
+verification
+tests
+INTEGRATION_TESTS_README.md
+README.md
+TASK_12_2_COMPLETION_SUMMARY.md
+auth-verifier.test.ts
+backend-verifier.test.ts
+controller.test.ts
+database-verifier.test.ts
+frontend-verifier.test.ts
+infrastructure-verifier.test.ts
+integration-test-runner.ts
+integration-tests.ts
+run-all-tests.ts
+run-unit-tests.ts
+test-framework.ts
+test-runner.cjs
+test-suite-verifier.test.ts
+README.md
+REPORT_STORAGE_README.md
+TECHNICAL_DOCUMENTATION.md
+auth-config.ts
+auth-verifier.ts
+backend-verifier.ts
+base-verifier.ts
+cli.js
+cli.ts
+controller.ts
+database-verifier-README.md
+database-verifier.ts
+download-verifier.ts
+frontend-README.md
+frontend-verifier.ts
+index.ts
+infrastructure-verifier.ts
+integration-test-cli.js
+integration-test-cli.ts
+integration-test.ts
+integration-tester.ts
+interfaces.ts
+rbac-tester.ts
+react-hooks-verifier.ts
+report-cli.ts
+report-generator.ts
+report-storage.ts
+routing-tester.ts
+script-verifier.ts
+session-tester.ts
+simple-integration-test.ts
+simple-test.js
+system-optimizer.js
+test-coverage-analyzer.js
+test-cypress-setup.ts
+test-database-verifier.ts
+test-download-functionality-offline.cjs
+test-download-functionality.cjs
+test-download-verifier.cjs
+test-execution-verifier.js
+test-file-organization-corrected.cjs
+test-file-organization.cjs
+test-frontend-verifier.ts
+test-integration-simple.js
+test-integration-simple.ts
+test-report-storage.ts
+test-script-simple.js
+test-script-verifier.js
+test-simple-verifier.js
+test-suite-verifier.ts
+types.ts
+utils.ts
+validate-script-verifier.js
+App.css
+App.tsx
+i18n.ts
+index.css
+main.tsx
+main.tsx.bak
+sw-register.ts
+translations.ts
+vite-env.d.ts
+supabase
+.temp
+cli-latest
+gotrue-version
+pooler-url
+postgres-version
+project-ref
+rest-version
+storage-version
+functions/send-family-invitation
+index.ts
+migrations
+20250113000000_create_congregacoes_table.sql
+20250115_create_rls_policies.sql
+20250115_create_unified_system.sql
+20250806090345_570602b1-847e-40c1-81c2-cdf49bbeffe8.sql
+20250806090412_823d66e1-b85b-452f-bb7c-669d2c14e77a.sql
+20250806120000_add_user_roles.sql
+20250806140000_meeting_management_system.sql
+20250806150000_fix_family_members_rls.sql
+20250811000000_add_assignment_status_to_programs.sql
+20250811120000_add_developer_role_and_template_system.sql
+20250811120000_fix_assignment_constraints.sql
+20250811130000_fix_assignment_generation_critical.sql
+20250811150000_fix_programas_duplicates.sql
+20250812000000_fix_programas_schema_and_security.sql
+20250812121246-.sql
+20250813000000_enhanced_family_relationships.sql
+20250814000000_add_congregacao_system.sql
+20250814000001_global_congregation_system.sql
+20250815000000_add_admin_role.sql
+20250816000000_add_metadata_fields.sql
+20250822120000_fix_admin_dashboard_rls.sql
+20250908_create_congregacoes.sql
+20250908_programacoes_designacoes.sql
+20250908_programacoes_minimal_patch.sql
+20250910110000_add_date_to_programas.sql
+20250910120000_add_program_columns.sql
+20250910130000_fix_programas_rls.sql
+20250910133000_fix_assignment_history_rls.sql
+20250910133500_fix_designacoes_rls_and_storage.sql
+20250910193000_fix_assignment_history_insert_policies.sql
+config.toml
+test-autofix-reports
+reports
+report-2025-08-17T14-20-49-531Z-hzfo7e.json
+index.json
+index.json.backup
+test-verification-reports
+exports
+report-report-2025-08-17T14-20-49-376Z-5iqjvs-2025-08-17T14-20-49-378Z.html
+report-report-2025-08-17T14-20-49-376Z-5iqjvs-2025-08-17T14-20-49-378Z.html.backup
+report-report-2025-08-17T14-20-49-376Z-5iqjvs-2025-08-17T14-20-49-378Z.json
+reports
+report-2025-08-17T14-20-49-376Z-5iqjvs.json
+report-2025-08-17T14-20-49-488Z-n8ol9u.json
+report-2025-08-17T14-20-49-493Z-9me78i.json
+report-2025-08-17T14-20-49-497Z-pq3vrq.json
+index.json
+index.json.backup
+testsprite_tests
+scenarios
+min_smoke.json
+COMPLETE_TEST_STATUS_REPORT.md
+FINAL_TESTSPRITE_REPORT_WITH_API.md
+FINAL_TEST_REPORT.md
+TC001_Admin_Dashboard_Access_and_Load.py
+TC001_Admin_Dashboard_Access_and_Statistics_Display.py
+TC002_Automatic_Download_and_Processing_of_JW.org_Materials.py
+TC002_Automatic_JW.org_Materials_Download_via_Admin_Dashboard.py
+TC003_Authentication_Role_based_Access_Control.py
+TC003_Backend_API_Responses_and_Download_Processing.py
+TC004_Student_Import_via_Excel_and_Inline_Editing.py
+TC004_User_Authentication_with_Supabase_Auth.py
+TC005_Import_Students_via_Excel_File_and_Inline_Editing.py
+TC005_Import_and_Parsing_of_Ministerial_Programs_from_PDF_and_JW.org_Text.py
+TC006_Generation_of_Designations_Respecting_S_38_T_Eligibility_and_Balancing_Rules.py
+TC006_Import_Ministerial_Programs_via_PDF_and_Copied_Text.py
+TC007_Generate_Designations_Automatically_Respecting_S_38_T_Rules.py
+TC007_Student_Portal_Access_and_Designation_Display.py
+TC008_Student_Portal_Access_and_Designation_History.py
+TC008_System_Monitoring_Logs_and_Health_Checks_on_Admin_Dashboard.py
+TC009_End_to_End_Tests_Execution_and_npm_Script_Validation.py
+TC009_Family_Management_System_Invite_and_Link_Family_Members.py
+TC010_Family_Management_System_Functionality.py
+TC010_System_Monitoring_and_Health_Check_on_Admin_Dashboard.py
+TC011_API_REST_Endpoints_Functional_Tests.py
+TC011_NPM_Scripts_Execution_for_Development_Environment.py
+TC012_Cypress_E2E_Test_Suite_Execution.py
+TC013_Error_Handling_for_Invalid_Login_Attempts.py
+TC014_Edge_Case_Import_Empty_or_Large_Excel_File_for_Students.py
+TC015_Edge_Case_Generate_Designations_with_No_Eligible_Students.py
+backend-test-report.md
+manual-test-report-complete.md
+run_all_tests.py
+run_testsprite_with_api.py
+standard_prd.json
+test_results_with_api.json
+testsprite-mcp-test-report.html
+testsprite-mcp-test-report.md
+testsprite_frontend_test_plan.json
+.env
+.env.cypress
+.env.example
+.gitignore
+.npmrc
+.nvmrc
+ADMIN_DASHBOARD_INTEGRATION.md
+AGENTS.md
+APPLY_MIGRATIONS_NOW.sql
+APPLY_THIS_SQL.sql
+AUTH_TROUBLESHOOTING.md
+DEBUG_ADMIN_DASHBOARD.md
+DEPLOYMENT_AUTHORIZATION_FIX.md
+DOCUMENTACAO_COMPLETA.md
+GUIA_USUARIO.md
+PORTAS_CORRIGIDAS.md
+PROGRAMAS_SETUP.md
+QUICK_DEPLOYMENT_FIX.md
+REACT_HOOKS_ISSUE_FIX.md
+README.md
+README_ESTUDANTES.md
+README_EXTENDIDO.md
+REFRESH_SCHEMA_CACHE.sql
+SYSTEM_STREAMLINING_SUMMARY.md
+TASK_14_COMPLETION_SUMMARY.md
+TestSprite.pdf
+VERIFICATION_SYSTEM_GUIDE.md
+VERIFICATION_SYSTEM_IMPLEMENTATION_COMPLETE.md
+WARP.md
+admin-dashboard-test.png
+check_test_users.sql
+check_translations.js
+cleanup_estudantes.sql
+clear-cache-and-test.html
+components.json
+convert_excel_to_json.py
+cursor_update_readme_md_for_dashboard_r.md
+cypress.config.mjs
+cypress.env.json
+database_review.sql
+debug_congregation_query.sql
+dev_servers.log
+eslint.config.js
+fix-database-schema.sql
+index.html
+index_proposed-1755115111581.css
+install-uv.ps1
+migrate.js
+migrate.mjs
+package-lock.json
+package.json
+postcss.config.js
+process_estudantes.sql
+quick-start.bat
+requirements.txt
+simple-admin-test.mjs
+start-backend.bat
+start-system.bat
+tailwind.config.ts
+test-admin-functionality.mjs
+test-app-syntax.tsx
+test-assignment-generation.js
+test-credentials.js
+test-credentials.mjs
+test-frontend-auth.html
+test-jw-parser.js
+test-ports.bat
+test-profile-loading.js
+test-real-data.js
+tsconfig.app.json
+tsconfig.app.tsbuildinfo
+tsconfig.json
+tsconfig.node.json
+tsconfig.node.tsbuildinfo
+vite-env.d.ts
+vite.config.prod.ts
+vite.config.ts
+sua-parte
+/README.md
+Webber-Lubenham
+Webber-Lubenham
+Commit inicial sem arquivos grandes
+4d58e82
+ · 
+yesterday
+sua-parte
+/README.md
+
+Preview
+
+Code
+
+Blame
+456 lines (353 loc) · 15.5 KB
+📚 Sistema Ministerial
+🚀 Status: SISTEMA COMPLETO IMPLEMENTADO E FUNCIONANDO!
+O Sistema Ministerial é uma plataforma completa para gerenciamento de materiais, programas e congregações, com Admin Dashboard integrado e Backend Node.js funcionando em tempo real.
+
+✨ Funcionalidades Implementadas
+🎯 Admin Dashboard (100% Funcional)
+Interface administrativa completa com abas organizadas
+Download automático de materiais da JW.org (PDF, JWPub, RTF, DAISY)
+Gerenciamento de materiais e publicação para congregações
+Monitoramento do sistema em tempo real
+Sistema de debug para desenvolvimento
+🔧 Backend Node.js (Porta 3001)
+Servidor Express com APIs REST completas
+Serviço JWDownloader para scraping e download da JW.org
+Sistema de cron para downloads automáticos
+Integração com Supabase para banco de dados
+Health checks e monitoramento do sistema
+🌐 Frontend React (Porta 8081)
+Interface responsiva com TailwindCSS e Shadcn/ui
+Sistema de autenticação integrado com Supabase
+Controle de acesso por roles (admin, instrutor, estudante)
+Dashboard unificado para todos os usuários
+🧪 Testes Automatizados
+Testes Cypress para validação completa do sistema
+Cobertura de funcionalidades principais
+Testes de integração frontend-backend
+🚀 Como Usar o Sistema
+🎯 Opção 1 - Iniciar Tudo de Uma Vez (RECOMENDADO)
+npm run dev:all
+Resultado: Inicia ambos os servidores simultaneamente
+
+Backend: Porta 3000
+Frontend: Porta 8080
+🔧 Opção 2 - Iniciar Separadamente
+# Terminal 1 - Backend
+npm run dev:backend-only
+
+# Terminal 2 - Frontend  
+npm run dev:frontend-only
+📱 Acessar o Admin Dashboard
+URL: http://localhost:8080/admin
+Login: amazonwebber007@gmail.com / admin123
+🏗️ Arquitetura do Sistema
+sua-parte/
+├── 📁 src/                          # Frontend React
+│   ├── pages/AdminDashboard.tsx     # ✅ Dashboard Admin
+│   ├── pages/Auth.tsx               # ✅ Sistema de Login
+│   ├── pages/Programas.tsx          # ✅ Gerenciamento de Programas
+│   └── contexts/AuthContext.tsx     # ✅ Contexto de Autenticação
+├── 📁 backend/                      # ✅ Backend Node.js
+│   ├── server.js                    # ✅ Servidor Principal
+│   ├── services/jwDownloader.js     # ✅ Download JW.org
+│   ├── routes/admin.js              # ✅ APIs Admin
+│   └── config/mwbSources.json      # ✅ URLs JW.org
+├── 📁 cypress/                      # ✅ Testes Automatizados
+│   └── e2e/admin-dashboard-integration.cy.ts
+├── 📁 supabase/                     # ✅ Migrações e Banco
+│   └── migrations/
+└── 📁 docs/Oficial/                 # ✅ Materiais Baixados
+🔍 Funcionalidades Detalhadas
+🎯 Scripts Unificados (NOVO!)
+npm run dev:all - Inicia backend e frontend simultaneamente
+npm run dev:backend-only - Apenas o backend (porta 3000)
+npm run dev:frontend-only - Apenas o frontend (porta 8080)
+Desenvolvimento simplificado com um único comando
+✅ Admin Dashboard
+Visão Geral: Estatísticas do sistema e ações rápidas
+Downloads: Configuração e verificação de atualizações da JW.org
+Materiais: Lista de materiais baixados e seus status
+Publicação: Sistema de publicação para congregações
+🎯 Explicação Completa dos Dashboards
+🏠 1. Dashboard Principal (Dashboard Geral)
+📍 URL: /dashboard ou /
+👥 Usuários: Instrutores (não-admin)
+🎯 Finalidade: Visão geral da congregação, gerenciamento de estudantes, visualização de programas publicados, controle de designações e partes, estatísticas básicas de participação
+🔧 Funcionalidades: Lista de estudantes sob responsabilidade, programas ministeriais disponíveis, calendário de reuniões, designações pendentes e realizadas, relatórios de participação
+👑 2. Admin Dashboard (Dashboard Administrativo)
+📍 URL: /admin
+👥 Usuários: Administradores do sistema
+🎯 Finalidade: Controle total do sistema, gerenciamento de materiais da JW.org, administração de congregações, configuração de usuários e permissões, monitoramento do sistema
+🔧 Funcionalidades Detalhadas:
+📊 Visão Geral: Estatísticas do sistema, status dos serviços, ações rápidas
+📥 Downloads: Verificar Novas Versões (scraping automático da JW.org), download de materiais (PDF, EPUB, JWPub, RTF, DAISY), configuração de URLs e idiomas, logs de download
+📚 Materiais: Lista de materiais baixados, status de processamento, organização por idioma e período, metadados dos arquivos
+📢 Publicação: Publicar materiais para congregações, controle de acesso por região, agendamento de publicações, histórico de publicações
+🏥 Monitoramento: Status do backend, conexão com banco de dados, logs do sistema, health checks
+👨‍🎓 3. Dashboard do Estudante
+📍 URL: /estudante/{id}
+👥 Usuários: Estudantes individuais
+🎯 Finalidade: Acesso limitado aos materiais publicados, visualização de programas ministeriais, histórico pessoal de participação, materiais de estudo disponíveis
+🔧 Funcionalidades: Materiais publicados para sua congregação, programas ministeriais disponíveis, histórico de designações, perfil pessoal básico, acesso somente leitura
+👨‍👩‍👧‍👦 4. Portal Familiar
+📍 URL: /portal-familiar
+👥 Usuários: Membros de família
+🎯 Finalidade: Acesso familiar aos materiais, suporte para estudo em casa, materiais complementares de estudo
+🔧 Funcionalidades: Materiais de estudo em família, recursos complementares, acesso limitado e controlado
+🔐 5. Sistema de Autenticação
+📍 URL: /auth
+👥 Usuários: Todos os usuários
+🎯 Finalidade: Login e registro de usuários, controle de acesso baseado em roles, gerenciamento de sessões
+🔧 Funcionalidades: Login com email/senha, registro de novos usuários, recuperação de senha, controle de sessão
+🔄 Fluxo de Funcionamento
+1. Administrador:
+Login → Admin Dashboard → Downloads → Materiais → Publicação
+2. Instrutor:
+Login → Dashboard Principal → Gerenciar Estudantes → Ver Programas
+3. Estudante:
+Login → Dashboard Estudante → Ver Materiais Publicados
+🎨 Características Visuais
+Admin Dashboard:
+Interface administrativa com abas organizadas
+Cores azuis para transmitir confiança
+Loading states elegantes (implementados recentemente)
+Debug info para desenvolvimento
+Dashboard Principal:
+Interface limpa e focada em tarefas
+Cores neutras para uso prolongado
+Componentes reutilizáveis para consistência
+Dashboard Estudante:
+Interface simples e intuitiva
+Acesso limitado e controlado
+Foco em conteúdo e não em funcionalidades
+🚀 Integração com Backend
+Admin Dashboard:
+APIs completas para todas as funcionalidades
+Download automático da JW.org
+Gerenciamento de arquivos e metadados
+Sistema de cron para tarefas automáticas
+Dashboard Principal:
+APIs de consulta para dados da congregação
+Integração com Supabase para dados em tempo real
+Sistema de notificações para atualizações
+Dashboard Estudante:
+APIs de leitura para materiais publicados
+Controle de acesso baseado em RLS
+Cache inteligente para performance
+🎯 Arquitetura dos Dashboards
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Admin         │    │   Instrutor     │    │   Estudante     │
+│   Dashboard     │    │   Dashboard     │    │   Dashboard     │
+│                 │    │                 │    │                 │
+│ • Downloads     │    │ • Estudantes    │    │ • Materiais     │
+│ • Materiais     │    │ • Programas     │    │ • Programas     │
+│ • Publicação    │    │ • Designações   │    │ • Histórico     │
+│ • Monitoramento │    │ • Relatórios    │    │ • Perfil        │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                    Backend Node.js                              │
+│              • APIs REST                                        │
+│              • JWDownloader                                     │
+│              • Supabase Integration                             │
+│              • File Management                                  │
+└─────────────────────────────────────────────────────────────────┘
+🌟 Benefícios do Sistema
+Para Administradores:
+Controle total sobre materiais e usuários
+Automação de downloads da JW.org
+Monitoramento em tempo real
+Para Instrutores:
+Gerenciamento eficiente de estudantes
+Acesso rápido a materiais atualizados
+Controle de designações e programas
+Para Estudantes:
+Acesso organizado aos materiais
+Interface simples e intuitiva
+Materiais sempre atualizados
+Monitoramento: Status do sistema e logs
+✅ Sistema de Downloads
+URLs configuradas para JW.org (PT-BR e EN-US)
+Download automático de múltiplos formatos
+Organização por idioma e período
+Verificação de atualizações em tempo real
+✅ Controle de Acesso
+Admin: Acesso completo ao sistema
+Instrutor: Gerenciamento de programas e materiais
+Estudante: Visualização de materiais publicados
+🧪 Executar Testes
+Testes Cypress
+# Executar todos os testes
+npm run cypress:run
+
+# Teste específico do Admin Dashboard
+npm run cypress:run --spec "cypress/e2e/admin-dashboard-integration.cy.ts"
+Testes Disponíveis
+✅ Carregamento do Dashboard
+✅ Conexão com Backend
+✅ Verificação de Atualizações
+✅ Listagem de Materiais
+✅ Teste de Perfil + Backend
+✅ Monitoramento do Sistema
+✅ Debug Info
+✅ Funcionalidade Completa de Download
+🔧 Configuração e Desenvolvimento
+📋 Scripts Disponíveis
+# 🎯 Comandos Principais
+npm run dev:all              # Inicia backend + frontend simultaneamente
+npm run dev:backend-only     # Apenas o backend (porta 3000)
+npm run dev:frontend-only    # Apenas o frontend (porta 8080)
+
+# 🔧 Comandos Originais
+npm run dev                  # Frontend apenas (como antes)
+npm run build                # Build de produção
+npm run cypress:run          # Testes automatizados
+Variáveis de Ambiente
+# Backend (.env)
+PORT=3000
+NODE_ENV=development
+DOCS_PATH=../docs/Oficial
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_supabase_key
+
+# Frontend
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_key
+Dependências Principais
+// Backend
+{
+  "express": "^4.18.2",
+  "node-cron": "^3.0.3",
+  "node-fetch": "^3.3.2",
+  "cheerio": "^1.0.0-rc.12",
+  "fs-extra": "^11.1.1",
+  "@supabase/supabase-js": "^2.38.4"
+}
+
+// Frontend
+{
+  "react": "^18.2.0",
+  "typescript": "^5.0.2",
+  "tailwindcss": "^3.3.0",
+  "@supabase/supabase-js": "^2.38.4"
+}
+📊 Status das Funcionalidades
+Funcionalidade	Status	Descrição
+🎯 Admin Dashboard	✅ 100%	Interface completa e funcional
+🔧 Backend Node.js	✅ 100%	Servidor rodando e APIs ativas
+📥 Download JW.org	✅ 100%	Sistema automático funcionando
+🔐 Autenticação	✅ 100%	Login e controle de acesso
+🧪 Testes Cypress	✅ 100%	Validação automatizada
+📱 Interface	✅ 100%	Responsiva e moderna
+🗄️ Banco de Dados	✅ 100%	Supabase configurado
+🚨 Troubleshooting
+🎯 Problemas com o Sistema Unificado
+# Se o comando unificado não funcionar
+npm run dev:all
+
+# Alternativa: iniciar separadamente
+npm run dev:backend-only    # Terminal 1
+npm run dev:frontend-only   # Terminal 2
+Backend não inicia
+# Opção 1: Usar o script unificado
+npm run dev:backend-only
+
+# Opção 2: Comando tradicional
+cd backend
+npm install
+npm run dev
+Frontend não conecta ao backend
+# Verificar se backend está rodando
+curl http://localhost:3000/api/status
+Problemas de autenticação
+Verificar credenciais no Supabase
+Confirmar role do usuário no banco
+Verificar console do navegador para logs
+📚 Documentação Adicional
+ADMIN_DASHBOARD_INTEGRATION.md - Guia completo do Admin Dashboard
+DEBUG_ADMIN_DASHBOARD.md - Debug e troubleshooting
+README_ESTUDANTES.md - Sistema de estudantes
+docs/SISTEMA-UNIFICADO.md - Arquitetura unificada
+🎯 Próximos Passos
+✅ Concluído
+ Backend Node.js implementado
+ Admin Dashboard funcional
+ Sistema de downloads automático
+ Testes automatizados
+ Documentação completa
+ Scripts unificados para desenvolvimento
+🚀 Em Desenvolvimento
+ Interface mais polida
+ Relatórios avançados
+ Notificações em tempo real
+ Sistema de backup automático
+🏆 Resultado Final
+🎉 O Sistema Ministerial está 100% funcional!
+
+✅ Admin Dashboard integrado e funcionando
+✅ Backend rodando e processando downloads
+✅ Download automático da JW.org implementado
+✅ Testes automatizados funcionando
+✅ Documentação completa criada
+✅ Código versionado e sincronizado no GitHub
+✅ Scripts unificados para desenvolvimento simplificado
+🚀 Sistema pronto para uso em produção com desenvolvimento otimizado!
+
+👥 Contribuição
+Desenvolvedor Principal
+Roberto Araujo da Silva - Arquitetura e implementação completa
+Como Contribuir
+Fork o repositório
+Crie uma branch para sua feature
+Commit suas mudanças
+Push para a branch
+Abra um Pull Request
+📞 Suporte
+Issues: GitHub Issues
+Documentação: Arquivos markdown no repositório
+Debug: Painel amarelo no Admin Dashboard (modo desenvolvimento)
+📄 Licença
+Este projeto está sob a licença MIT. Veja o arquivo LICENSE para mais detalhes.
+
+🌟 Sistema Ministerial - Transformando a gestão de materiais e programas!

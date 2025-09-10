@@ -6,13 +6,14 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import logger from '@/utils/logger';
 
 /**
  * Verifica as políticas RLS para uma tabela específica
  */
 export const checkRLSPolicies = async (tableName: string) => {
   try {
-    console.log(`🔍 Checking RLS policies for table: ${tableName}`);
+    logger.debug(`Checking RLS policies for table: ${tableName}`);
     
     // Tentar uma operação de leitura simples para verificar permissões
     const { data, error } = await supabase
@@ -21,15 +22,15 @@ export const checkRLSPolicies = async (tableName: string) => {
       .limit(1);
     
     if (error) {
-      console.error(`❌ RLS check failed for ${tableName}:`, error);
+      logger.error(`RLS check failed for ${tableName}:`, error);
       return { hasAccess: false, error: error.message };
     }
     
-    console.log(`✅ RLS check passed for ${tableName}`);
+    logger.debug(`RLS check passed for ${tableName}`);
     return { hasAccess: true, data };
     
   } catch (error) {
-    console.error(`❌ Exception checking RLS for ${tableName}:`, error);
+    logger.error(`Exception checking RLS for ${tableName}:`, error);
     return { hasAccess: false, error: 'Exception during RLS check' };
   }
 };
@@ -39,7 +40,7 @@ export const checkRLSPolicies = async (tableName: string) => {
  */
 export const testInsertPermissions = async (tableName: string, testData: any) => {
   try {
-    console.log(`🔍 Testing INSERT permissions for table: ${tableName}`);
+    logger.debug(`Testing INSERT permissions for table: ${tableName}`);
     
     // Tentar inserir dados de teste
     const { data, error } = await supabase
@@ -48,7 +49,7 @@ export const testInsertPermissions = async (tableName: string, testData: any) =>
       .select();
     
     if (error) {
-      console.error(`❌ INSERT test failed for ${tableName}:`, error);
+      logger.error(`INSERT test failed for ${tableName}:`, error);
       return { canInsert: false, error: error.message, code: error.code };
     }
     
@@ -60,15 +61,15 @@ export const testInsertPermissions = async (tableName: string, testData: any) =>
         .eq('id', data[0].id);
       
       if (deleteResult.error) {
-        console.warn(`⚠️ Could not clean up test data from ${tableName}:`, deleteResult.error);
+        logger.warn(`Could not clean up test data from ${tableName}:`, deleteResult.error);
       }
     }
     
-    console.log(`✅ INSERT test passed for ${tableName}`);
+    logger.debug(`INSERT test passed for ${tableName}`);
     return { canInsert: true, data };
     
   } catch (error) {
-    console.error(`❌ Exception testing INSERT for ${tableName}:`, error);
+    logger.error(`Exception testing INSERT for ${tableName}:`, error);
     return { canInsert: false, error: 'Exception during INSERT test' };
   }
 };
@@ -77,7 +78,7 @@ export const testInsertPermissions = async (tableName: string, testData: any) =>
  * Diagnóstico completo de RLS para as tabelas principais
  */
 export const diagnoseRLSIssues = async (userId: string) => {
-  console.group('🔍 DIAGNÓSTICO DE RLS');
+  logger.info('Starting RLS diagnosis');
   
   const results = {
     userId,
@@ -94,7 +95,7 @@ export const diagnoseRLSIssues = async (userId: string) => {
   ];
   
   for (const table of tablesToCheck) {
-    console.log(`\n📋 Verificando tabela: ${table}`);
+    logger.info(`Verificando tabela: ${table}`);
     
     // Verificar permissões de leitura
     const readCheck = await checkRLSPolicies(table);
@@ -129,7 +130,7 @@ export const diagnoseRLSIssues = async (userId: string) => {
             confirmado: false
           };
         } else {
-          console.log('ℹ️ Skipping INSERT test for designacoes: missing sample ids');
+          logger.debug(`Skipping INSERT test for designacoes: missing sample ids`);
           testData = null;
         }
         break;
@@ -172,21 +173,20 @@ export const diagnoseRLSIssues = async (userId: string) => {
     };
     
     // Log resultados
-    console.log(`  📖 Leitura: ${readCheck.hasAccess ? '✅' : '❌'}`);
+    logger.info(`  📖 Leitura: ${readCheck.hasAccess ? '✅' : '❌'}`);
     if (!readCheck.hasAccess) {
-      console.log(`    Erro: ${readCheck.error}`);
+      logger.error(`    Erro: ${readCheck.error}`);
     }
     
     if (testData) {
-      console.log(`  ✏️ Inserção: ${insertCheck.canInsert ? '✅' : '❌'}`);
+      logger.info(`  ✏️ Inserção: ${insertCheck.canInsert ? '✅' : '❌'}`);
       if (!insertCheck.canInsert) {
-        console.log(`    Erro: ${insertCheck.error}`);
-        console.log(`    Código: ${insertCheck.code}`);
+        logger.error(`    Erro: ${insertCheck.error}`);
+        logger.error(`    Código: ${insertCheck.code}`);
       }
     }
   }
   
-  console.groupEnd();
   return results;
 };
 
@@ -195,17 +195,17 @@ export const diagnoseRLSIssues = async (userId: string) => {
  */
 export const checkUserPermissions = async () => {
   try {
-    console.log('🔍 Checking current user permissions...');
+    logger.debug('Checking current user permissions...');
     
     // Verificar usuário atual
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     if (userError || !user) {
-      console.error('❌ No authenticated user found:', userError);
+      logger.error('No authenticated user found:', userError);
       return { hasPermissions: false, error: 'No authenticated user' };
     }
     
-    console.log('👤 Current user:', user.email, user.id);
+    logger.debug('Current user:', user.email, user.id);
     
     // Verificar perfil do usuário
     const { data: profile, error: profileError } = await supabase
@@ -215,11 +215,11 @@ export const checkUserPermissions = async () => {
       .single();
     
     if (profileError) {
-      console.error('❌ Error loading user profile:', profileError);
+      logger.error('Error loading user profile:', profileError);
       return { hasPermissions: false, error: 'Profile not found' };
     }
     
-    console.log('📋 User profile:', profile);
+    logger.debug('User profile:', profile);
     
     // Executar diagnóstico completo
     const diagnosis = await diagnoseRLSIssues(user.id);
@@ -232,7 +232,7 @@ export const checkUserPermissions = async () => {
     };
     
   } catch (error) {
-    console.error('❌ Exception checking user permissions:', error);
+    logger.error('Exception checking user permissions:', error);
     return { hasPermissions: false, error: 'Exception during permission check' };
   }
 };
@@ -242,7 +242,7 @@ export const checkUserPermissions = async () => {
  */
 export const attemptRLSFix = async () => {
   try {
-    console.log('🔧 Attempting to fix RLS issues...');
+    logger.info('Attempting to fix RLS issues...');
     
     // Verificar permissões atuais
     const permissionCheck = await checkUserPermissions();
@@ -256,11 +256,11 @@ export const attemptRLSFix = async () => {
     }
     
     // Tentar refresh da sessão para renovar tokens
-    console.log('🔄 Refreshing session...');
+    logger.debug('Refreshing session...');
     const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
     
     if (refreshError) {
-      console.error('❌ Session refresh failed:', refreshError);
+      logger.error('Session refresh failed:', refreshError);
       return {
         success: false,
         error: 'Session refresh failed',
@@ -268,7 +268,7 @@ export const attemptRLSFix = async () => {
       };
     }
     
-    console.log('✅ Session refreshed successfully');
+    logger.debug('Session refreshed successfully');
     
     // Verificar novamente após refresh
     const postRefreshCheck = await checkUserPermissions();
@@ -281,7 +281,7 @@ export const attemptRLSFix = async () => {
     };
     
   } catch (error) {
-    console.error('❌ Exception during RLS fix attempt:', error);
+    logger.error('Exception during RLS fix attempt:', error);
     return {
       success: false,
       error: 'Exception during RLS fix',
@@ -294,35 +294,47 @@ export const attemptRLSFix = async () => {
  * Função para executar diagnóstico completo via console
  */
 export const runRLSDiagnostic = async () => {
-  console.log('🏥 INICIANDO DIAGNÓSTICO COMPLETO DE RLS...');
-  console.log('');
+  logger.info('INICIANDO DIAGNÓSTICO COMPLETO DE RLS...');
+  logger.info('');
   
   const result = await attemptRLSFix();
   
-  console.log('');
-  console.log('📋 RESULTADO DO DIAGNÓSTICO:');
-  console.log(`Status: ${result.success ? '✅ Sucesso' : '❌ Falha'}`);
+  logger.info('');
+  logger.info('RESULTADO DO DIAGNÓSTICO:');
+  logger.info(`Status: ${result.success ? '✅ Sucesso' : '❌ Falha'}`);
   
   if (result.error) {
-    console.log(`Erro: ${result.error}`);
+    logger.error(`Erro: ${result.error}`);
   }
   
   if (result.message) {
-    console.log(`Mensagem: ${result.message}`);
+    logger.info(`Mensagem: ${result.message}`);
   }
   
-  console.log('');
-  console.log('💡 RECOMENDAÇÕES:');
+  logger.info('');
+  logger.info('💡 RECOMENDAÇÕES:');
   
   if (!result.success) {
-    console.log('1. Verifique se você está logado corretamente');
-    console.log('2. Tente fazer logout e login novamente');
-    console.log('3. Verifique se seu perfil tem as permissões necessárias');
-    console.log('4. Entre em contato com o administrador se o problema persistir');
+    logger.info('1. Verifique se você está logado corretamente');
+    logger.info('2. Tente fazer logout e login novamente');
+    logger.info('3. Verifique se seu perfil tem as permissões necessárias');
+    logger.info('4. Entre em contato com o administrador se o problema persistir');
   } else {
-    console.log('1. Tente executar a operação novamente');
-    console.log('2. Se o problema persistir, pode ser necessário ajustar as políticas RLS no banco');
+    logger.info('1. Tente executar a operação novamente');
+    logger.info('2. Se o problema persistir, pode ser necessário ajustar as políticas RLS no banco');
   }
   
   return result;
 };
+
+// Expose quick helpers in development for easier troubleshooting
+try {
+  if (typeof window !== 'undefined' && (import.meta as any)?.env?.DEV) {
+    (window as any).rlsDiagnostic = {
+      run: runRLSDiagnostic,
+      attemptFix: attemptRLSFix,
+      check: checkUserPermissions
+    };
+    logger.debug('RLS tools available: window.rlsDiagnostic.run(), .attemptFix(), .check()');
+  }
+} catch {}

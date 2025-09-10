@@ -1,8 +1,7 @@
-import { useState, useCallback } from 'react';
-import { toast } from '@/hooks/use-toast';
+import { useCallback, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { criarGeradorDesignacoes, salvarDesignacoes } from '@/utils/assignmentGenerator';
-import type { DesignacaoGerada } from '@/types/designacoes';
+import { toast } from '@/hooks/use-toast';
+import logger from '@/utils/logger';
 
 export interface AssignmentGenerationState {
   isGenerating: boolean;
@@ -183,7 +182,7 @@ export const useAssignmentGeneration = () => {
 const parsePartesPrograma = async (partes: string[]) => {
   const partesPrograma = [];
 
-  console.log('📋 Parsing program parts:', partes);
+  logger.debug('📋 Parsing program parts:', partes);
 
   // Complete JW meeting structure following Watchtower format
   const parteTemplates = [
@@ -282,7 +281,7 @@ const parsePartesPrograma = async (partes: string[]) => {
     });
   }
 
-  console.log('✅ Generated program structure:', partesPrograma.map(p => ({
+  logger.debug('✅ Generated program structure:', partesPrograma.map(p => ({
     numero: p.numero_parte,
     titulo: p.titulo_parte,
     tipo: p.tipo_parte,
@@ -320,6 +319,7 @@ const ensureProgramExists = async (programData: ProgramData, userId: string): Pr
     .single();
 
   if (error) {
+    logger.error('Error creating program:', error);
     throw new Error(`Erro ao criar programa: ${error.message}`);
   }
 
@@ -350,7 +350,7 @@ const updateProgramAssignmentStatus = async (
     .eq('id', programId);
 
   if (error) {
-    console.error('Error updating program assignment status:', error);
+    logger.error('Error updating program assignment status:', error);
     throw new Error(`Erro ao atualizar status de designações do programa: ${error.message}`);
   }
 };

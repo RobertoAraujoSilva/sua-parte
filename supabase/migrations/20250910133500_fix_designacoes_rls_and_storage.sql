@@ -52,12 +52,8 @@ END$$;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.designacoes TO authenticated;
 GRANT USAGE ON SCHEMA public TO authenticated;
 
--- Create and open storage bucket 'programas' for PDFs
--- If the bucket already exists, this call will error; run conditionally in UI if needed.
--- Uncomment next line to create bucket via SQL runner once.
--- SELECT storage.create_bucket('programas', public := true);
-
 -- Storage RLS policies for 'programas' bucket
+-- These policies assume the bucket already exists
 CREATE POLICY IF NOT EXISTS "programas_read_public"
 ON storage.objects
 FOR SELECT
@@ -82,4 +78,3 @@ ON storage.objects
 FOR DELETE
 TO authenticated
 USING (bucket_id = 'programas' AND owner = auth.uid());
-

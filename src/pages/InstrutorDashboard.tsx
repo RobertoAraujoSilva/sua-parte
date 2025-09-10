@@ -1,10 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Users, BookOpen, Calendar, ClipboardList, BarChart3, Settings } from "lucide-react";
 
 const InstrutorDashboard = () => {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -115,22 +117,61 @@ const InstrutorDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start" variant="outline" onClick={() => navigate('/estudantes')}>
                 <Users className="w-4 h-4 mr-2" />
                 Gerenciar Estudantes
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start" variant="outline" onClick={() => navigate('/programas')}>
                 <BookOpen className="w-4 h-4 mr-2" />
                 Ver Programas
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start" variant="outline" onClick={() => navigate('/programas')}>
                 <ClipboardList className="w-4 h-4 mr-2" />
                 Gerar Designações
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start" variant="outline" onClick={() => navigate('/designacoes')}>
                 <BarChart3 className="w-4 h-4 mr-2" />
                 Relatórios
               </Button>
+            </CardContent>
+          </Card>
+
+          {/* Guia Rápido (Instrutor) */}
+          <Card>
+            <CardHeader>
+              <CardTitle>📋 Guia Rápido (Instrutor)</CardTitle>
+              <CardDescription>
+                Sequência recomendada (clique para navegar)
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <ol className="list-decimal ml-5 space-y-2">
+                <li>
+                  <button className="underline text-blue-700" onClick={() => navigate('/programas')}>
+                    B1: Ir para Programas (upload PDF)
+                  </button>
+                </li>
+                <li>
+                  <button className="underline text-blue-700" onClick={() => navigate('/programas')}>
+                    B2: Gerar 12 Designações
+                  </button>
+                </li>
+                <li>
+                  <button className="underline text-blue-700" onClick={() => navigate('/designacoes')}>
+                    B3: Revisar / Ajustar Designações
+                  </button>
+                </li>
+                <li>
+                  <button className="underline text-blue-700" onClick={() => navigate('/estudantes')}>
+                    B4: Conferir Estudantes / Qualificações
+                  </button>
+                </li>
+                <li>
+                  <a href="/docs/GUIA_DEFINITIVO.md" target="_blank" rel="noreferrer" className="underline text-blue-700">
+                    Abrir Guia Definitivo
+                  </a>
+                </li>
+              </ol>
             </CardContent>
           </Card>
         </div>

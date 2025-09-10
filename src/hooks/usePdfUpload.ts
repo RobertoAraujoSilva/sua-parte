@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { JWPdfParser, type ParsedPdfData } from '@/utils/pdfParser';
+import { supabase } from '@/integrations/supabase/client';
+import logger from '@/utils/logger';
 
 export interface PdfUploadResult {
   success: boolean;
@@ -49,6 +51,43 @@ export const usePdfUpload = () => {
     return null;
   }, []);
 
+  const uploadToStorage = useCallback(async (file: File): Promise<{ success: boolean; url?: string; error?: string }> => {
+    try {
+      // Upload file to Supabase Storage
+      const fileName = `${Date.now()}-${file.name}`;
+      const { data, error } = await supabase.storage
+        .from('programas')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        logger.error('❌ Error uploading to storage:', error);
+        
+        // Provide more specific error messages
+        if (error.message.includes('Bucket not found')) {
+          return { 
+            success: false, 
+            error: 'Bucket de armazenamento não encontrado. Entre em contato com o administrador do sistema.' 
+          };
+        }
+        
+        return { success: false, error: `Erro ao fazer upload: ${error.message}` };
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('programas')
+        .getPublicUrl(fileName);
+
+      return { success: true, url: publicUrl };
+    } catch (error) {
+      logger.error('❌ Exception uploading to storage:', error);
+      return { success: false, error: 'Erro inesperado ao fazer upload' };
+    }
+  }, []);
+
   const simulatePdfParsing = useCallback(async (file: File): Promise<ParsedPdfData> => {
     // Simulate PDF parsing delay
     await new Promise(resolve => setTimeout(resolve, 2000));
@@ -59,7 +98,7 @@ export const usePdfUpload = () => {
       // for JW.org workbooks (mwb_T_YYYYMM.pdf) and other common formats
       const extractedData = await JWPdfParser.parsePdf(file);
 
-      console.log('📄 PDF Parsing Results (Filename-based):', {
+      logger.debug('📄 PDF Parsing Results (Filename-based):', {
         filename: file.name,
         extractedData,
         fileSize: file.size,
@@ -77,7 +116,7 @@ export const usePdfUpload = () => {
 
       return extractedData;
     } catch (error) {
-      console.error('❌ Error parsing PDF:', error);
+      logger.error('❌ Error parsing PDF:', error);
 
       // Enhanced fallback with better error information
       const fallbackData = {
@@ -99,7 +138,7 @@ export const usePdfUpload = () => {
         }
       };
 
-      console.warn('⚠️ Using fallback parsing for:', file.name);
+      logger.warn('⚠️ Using fallback parsing for:', file.name);
       return fallbackData;
     }
   }, []);
@@ -124,14 +163,22 @@ export const usePdfUpload = () => {
     }));
 
     try {
+      // Upload to storage first
+      setState(prev => ({ ...prev, progress: 25 }));
+      const storageResult = await uploadToStorage(file);
+      
+      if (!storageResult.success) {
+        throw new Error(storageResult.error);
+      }
+
       // Simulate upload progress
-      for (let i = 0; i <= 100; i += 10) {
+      for (let i = 30; i <= 50; i += 5) {
         setState(prev => ({ ...prev, progress: i }));
         await new Promise(resolve => setTimeout(resolve, 100));
       }
 
       // Simulate PDF parsing
-      setState(prev => ({ ...prev, progress: 50 }));
+      setState(prev => ({ ...prev, progress: 75 }));
       const extractedData = await simulatePdfParsing(file);
       
       setState(prev => ({ ...prev, progress: 100 }));
@@ -194,7 +241,7 @@ export const usePdfUpload = () => {
 
       return result;
     }
-  }, [validatePdfFile, simulatePdfParsing]);
+  }, [validatePdfFile, uploadToStorage, simulatePdfParsing]);
 
   const resetUpload = useCallback(() => {
     setState({
