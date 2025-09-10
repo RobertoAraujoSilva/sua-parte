@@ -275,10 +275,10 @@ const parsePartesPrograma = async (partes: string[]) => {
     partesPrograma.push({
       numero_parte: template.numero,
       titulo_parte: titulo,
-      tipo_parte: template.tipo,
+      tipo_parte: template.tipo === 'parte_ministerio' ? 'demonstracao' : 'discurso',
       tempo_minutos: tempo,
       requer_ajudante: template.tipo === 'parte_ministerio',
-      restricao_genero: template.genero_restricao
+      cena: template.tipo === 'parte_ministerio' ? 'Sala Principal' : undefined
     });
   }
 

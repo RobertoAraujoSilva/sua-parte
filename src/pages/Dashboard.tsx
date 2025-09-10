@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Calendar, FileText, Settings, Plus, CalendarDays, Upload } from 'lucide-react';
+import { Users, Calendar, FileText, Settings, Plus, CalendarDays, Upload, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useEstudantes } from '@/hooks/useEstudantes';
 import { useTranslation } from '@/hooks/useTranslation';
@@ -10,6 +10,7 @@ import TemplateDownload from '@/components/TemplateDownload';
 import Header from '@/components/Header';
 import { DebugPanel } from '@/components/DebugPanel';
 import { TutorialButton } from '@/components/tutorial';
+import { UserFlowGuide } from '@/components/UserFlowGuide';
 import { supabase } from '@/integrations/supabase/client';
 
 const Dashboard = () => {
@@ -140,6 +141,11 @@ const Dashboard = () => {
               </div>
               <TutorialButton page="dashboard" />
             </div>
+          </div>
+
+          {/* User Flow Guide */}
+          <div className="mb-8">
+            <UserFlowGuide onNavigate={(route) => navigate(route)} />
           </div>
 
           {/* Quick Actions */}

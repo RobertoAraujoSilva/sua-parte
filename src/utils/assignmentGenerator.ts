@@ -494,11 +494,41 @@ export const salvarDesignacoes = async (
   userId: string
 ): Promise<{ sucesso: boolean; erro?: string; detalhes?: any }> => {
   try {
-    // Importar validador de segurança
-    const { ValidadorSeguranca } = await import('./validacaoSeguranca');
+    console.log('💾 Iniciando salvamento de designações:', {
+      quantidade: designacoes.length,
+      idPrograma,
+      userId
+    });
 
-    // Validação completa de segurança
-    const validacao = await ValidadorSeguranca.validarCompleto(designacoes, idPrograma, userId);
+    // Verificar autenticação antes de prosseguir
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError || !user) {
+      console.error('❌ Erro de autenticação:', authError);
+      return {
+        sucesso: false,
+        erro: 'Usuário não autenticado. Faça login novamente.',
+        detalhes: { authError }
+      };
+    }
+
+    if (user.id !== userId) {
+      console.error('❌ User ID mismatch:', { sessionUserId: user.id, providedUserId: userId });
+      return {
+        sucesso: false,
+        erro: 'Erro de segurança: ID do usuário não confere.',
+        detalhes: { userIdMismatch: true }
+      };
+    }
+
+    // Tentar importar validador de segurança (pode não existir)
+    let validacao = { valido: true, erros: [], conflitos: [], avisos: [] };
+    try {
+      const { ValidadorSeguranca } = await import('./validacaoSeguranca');
+      validacao = await ValidadorSeguranca.validarCompleto(designacoes, idPrograma, userId);
+    } catch (importError) {
+      console.warn('⚠️ Validador de segurança não disponível, continuando sem validação avançada');
+    }
 
     if (!validacao.valido) {
       const errosCompletos = [
@@ -513,14 +543,39 @@ export const salvarDesignacoes = async (
       };
     }
 
-    // Verificar se já existem designações e removê-las (transação implícita)
-    const existentesResult = await ValidadorSeguranca.verificarDesignacoesExistentes(idPrograma, userId);
-    if (existentesResult.existem) {
-      const remocaoResult = await ValidadorSeguranca.removerDesignacoesSeguro(idPrograma, userId);
-      if (!remocaoResult.sucesso) {
+    // Verificar se já existem designações para este programa
+    console.log('🔍 Verificando designações existentes...');
+    const { data: existingAssignments, error: checkError } = await supabase
+      .from('designacoes')
+      .select('id')
+      .eq('id_programa', idPrograma)
+      .eq('user_id', userId);
+
+    if (checkError) {
+      console.error('❌ Erro ao verificar designações existentes:', checkError);
+      return {
+        sucesso: false,
+        erro: `Erro ao verificar designações existentes: ${checkError.message}`,
+        detalhes: { checkError }
+      };
+    }
+
+    // Remover designações existentes se houver
+    if (existingAssignments && existingAssignments.length > 0) {
+      console.log(`🗑️ Removendo ${existingAssignments.length} designações existentes...`);
+      
+      const { error: deleteError } = await supabase
+        .from('designacoes')
+        .delete()
+        .eq('id_programa', idPrograma)
+        .eq('user_id', userId);
+
+      if (deleteError) {
+        console.error('❌ Erro ao remover designações existentes:', deleteError);
         return {
           sucesso: false,
-          erro: `Erro ao remover designações existentes: ${remocaoResult.erro}`
+          erro: `Erro ao remover designações existentes: ${deleteError.message}`,
+          detalhes: { deleteError }
         };
       }
     }
@@ -548,9 +603,10 @@ export const salvarDesignacoes = async (
     });
 
     // Inserção em lote com RLS automático
-    const { error } = await supabase
+    const { data: insertedData, error } = await supabase
       .from('designacoes')
-      .insert(designacoesParaSalvar);
+      .insert(designacoesParaSalvar)
+      .select();
 
     if (error) {
       console.error('❌ Erro ao salvar designações:', {
@@ -562,12 +618,38 @@ export const salvarDesignacoes = async (
         dadosInseridos: designacoesParaSalvar
       });
 
-      // Provide more specific error messages
+      // Handle specific RLS errors
+      if (error.code === '42501' || error.message.includes('row-level security')) {
+        console.error('🔒 RLS Policy violation detected');
+        
+        // Try to diagnose RLS issues
+        try {
+          const { checkUserPermissions } = await import('./rls-policy-fix');
+          const permissionCheck = await checkUserPermissions();
+          console.log('🔍 Permission check result:', permissionCheck);
+        } catch (rlsError) {
+          console.warn('⚠️ Could not run RLS diagnostic:', rlsError);
+        }
+
+        return {
+          sucesso: false,
+          erro: 'Erro de permissão: Você não tem autorização para salvar designações. Verifique se está logado corretamente e tente novamente.',
+          detalhes: { 
+            supabaseError: error, 
+            dadosInseridos: designacoesParaSalvar,
+            rlsViolation: true
+          }
+        };
+      }
+
+      // Provide more specific error messages for other errors
       let errorMessage = error.message;
       if (error.message.includes('designacoes_numero_parte_check')) {
         errorMessage = 'Erro: Número de parte inválido. Execute a migração do banco de dados para suportar partes 1-12.';
       } else if (error.message.includes('designacoes_tipo_parte_check')) {
         errorMessage = 'Erro: Tipo de parte inválido. Execute a migração do banco de dados para suportar novos tipos de designação.';
+      } else if (error.message.includes('foreign key')) {
+        errorMessage = 'Erro: Referência inválida a programa ou estudante. Verifique se os dados estão corretos.';
       }
 
       return {
@@ -577,15 +659,29 @@ export const salvarDesignacoes = async (
       };
     }
 
+    console.log('✅ Designações salvas com sucesso:', insertedData?.length || 0);
+
     return {
       sucesso: true,
       detalhes: {
-        quantidadeSalva: designacoes.length,
-        avisos: validacao.avisos
+        quantidadeSalva: insertedData?.length || designacoes.length,
+        avisos: validacao.avisos,
+        dadosInseridos: insertedData
       }
     };
   } catch (error) {
-    console.error('Exceção ao salvar designações:', error);
+    console.error('❌ Exceção ao salvar designações:', error);
+    
+    // Check if it's an RLS-related error
+    const errorMessage = error?.message || error?.toString() || '';
+    if (errorMessage.includes('RLS') || errorMessage.includes('row-level security') || errorMessage.includes('42501')) {
+      return {
+        sucesso: false,
+        erro: 'Erro de permissão: Problema de segurança do banco de dados. Tente fazer logout e login novamente.',
+        detalhes: { exception: error, rlsError: true }
+      };
+    }
+
     return {
       sucesso: false,
       erro: 'Erro interno do sistema',

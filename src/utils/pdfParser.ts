@@ -33,8 +33,9 @@ export class JWPdfParser {
   static parseFilename(filename: string): Partial<ParsedPdfData> {
     const lowerFilename = filename.toLowerCase();
     
-    // Parse JW.org monthly workbook pattern: mwb_T_YYYYMM.pdf
-    const jwWorkbookMatch = lowerFilename.match(/mwb_t_(\d{4})(\d{2})\.pdf/);
+    // Parse JW.org monthly workbook pattern: mwb_<lang>_YYYYMM.pdf
+    // Accepts any 1-3 letter language code (e.g., mwb_e_202511.pdf, mwb_t_202511.pdf)
+    const jwWorkbookMatch = lowerFilename.match(/mwb_[a-z]{1,3}_(\d{4})(\d{2})\.pdf/);
     if (jwWorkbookMatch) {
       return this.parseMonthlyWorkbook(jwWorkbookMatch[1], jwWorkbookMatch[2]);
     }

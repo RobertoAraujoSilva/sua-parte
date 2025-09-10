@@ -20,6 +20,7 @@ import { generateProgramPDF } from "@/utils/pdfGenerator";
 import { supabaseWithRetry, checkAuthState } from "@/utils/supabase-auth-fix";
 import PageShell from "@/components/layout/PageShell";
 import ProgramasToolbar from "@/components/programs/ProgramasToolbar";
+import ProgramFlowGuide from "@/components/programs/ProgramFlowGuide";
 import { ResponsiveTableWrapper } from "@/components/layout/ResponsiveTableWrapper";
 import { AdaptiveGrid } from "@/components/layout/adaptive-grid";
 
@@ -220,11 +221,105 @@ const ProgramasOptimized = () => {
 
       if (duplicateCheckResult.data) {
         console.log('⚠️ Duplicate program found');
-        toast({
-          title: "Programa Já Existe",
-          description: `Um programa para "${mesApostila || 'esta semana'}" já foi importado.`,
-          variant: "destructive"
+
+        // Offer to update existing program instead of blocking
+        const shouldUpdate = window.confirm(
+          `Já existe um programa para "${mesApostila || 'esta semana'}".\n\n` +
+          `Deseja atualizar o existente com este PDF (mantendo o histórico)?`
+        );
+
+        if (!shouldUpdate) {
+          toast({
+            title: "Importação cancelada",
+            description: "O programa existente não foi alterado.",
+          });
+          return;
+        }
+
+        // Find the existing program (prefer month match when available)
+        let existingProgram: any | null = null;
+
+        if (mesApostila) {
+          const { data: byMonth, error: byMonthError } = await supabase
+            .from('programas')
+            .select('id, semana, arquivo, assignment_status, data_inicio_semana, mes_apostila, partes')
+            .eq('mes_apostila', mesApostila)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (byMonthError) {
+            console.error('❌ Error fetching existing program by month:', byMonthError);
+          }
+          existingProgram = byMonth || null;
+        }
+
+        if (!existingProgram) {
+          const { data: byWeek, error: byWeekError } = await supabase
+            .from('programas')
+            .select('id, semana, arquivo, assignment_status, data_inicio_semana, mes_apostila, partes')
+            .eq('data_inicio_semana', dataInicio)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (byWeekError) {
+            console.error('❌ Error fetching existing program by week:', byWeekError);
+          }
+          existingProgram = byWeek || null;
+        }
+
+        if (!existingProgram?.id) {
+          toast({
+            title: "Erro ao localizar programa",
+            description: "Não foi possível localizar o programa existente para atualizar.",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        // Prepare update payload
+        const updateData = {
+          partes: uploadData.extractedData?.partes || [
+            "Tesouros da Palavra de Deus",
+            "Faça Seu Melhor no Ministério",
+            "Nossa Vida Cristã"
+          ],
+          arquivo: uploadData.filename || existingProgram.arquivo,
+          semana: uploadData.extractedData?.semana || existingProgram.semana,
+          // Keep assignment_status as-is to preserve approval state
+        };
+
+        console.log('♻️ Updating existing program:', existingProgram.id, updateData);
+
+        const updateResult = await supabaseWithRetry(async () => {
+          return await supabase
+            .from('programas')
+            .update(updateData)
+            .eq('id', existingProgram.id)
+            .select()
+            .single();
         });
+
+        if (updateResult.error) {
+          console.error('❌ Error updating existing program:', updateResult.error);
+          toast({
+            title: "Erro ao Atualizar",
+            description: `Não foi possível atualizar o programa existente: ${updateResult.error.message}`,
+            variant: "destructive"
+          });
+          return;
+        }
+
+        console.log('✅ Program updated successfully:', updateResult.data);
+
+        await loadPrograms();
+
+        toast({
+          title: "Programa Atualizado",
+          description: `O programa "${updateResult.data?.semana || mesApostila || 'existente'}" foi atualizado com sucesso.`,
+        });
+
         return;
       }
 
@@ -240,7 +335,7 @@ const ProgramasOptimized = () => {
         ],
         status: "ativo" as "ativo",
         assignment_status: 'pending',
-        arquivo: uploadData.file?.name || `programa-${dataInicio}.pdf`,
+        arquivo: uploadData.filename || `programa-${dataInicio}.pdf`,
         semana: uploadData.extractedData?.semana || (mesApostila ? mesApostila : `Semana de ${dataInicio}`)
       };
 
@@ -595,6 +690,11 @@ const ProgramasOptimized = () => {
           className="w-full xs:w-auto text-sm sm:text-base" 
         />
       </div>
+
+      {/* Flow Guide */}
+      <section className="px-4 mb-4">
+        <ProgramFlowGuide />
+      </section>
 
       {/* Upload Section */}
       <section className="py-6 md:py-8 bg-white border-b mb-6">
