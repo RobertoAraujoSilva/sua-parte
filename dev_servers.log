@@ -1,0 +1,33 @@
+
+> vite_react_shadcn_ts@0.0.0 dev:all
+> concurrently "npm run dev:backend" "npm run dev:frontend"
+
+[0] npm warn config optional Use `--omit=optional` to exclude optional dependencies, or
+[0] npm warn config `--include=optional` to include them.
+[0] npm warn config
+[0] npm warn config       Default value does install optional deps unless otherwise omitted.
+[1] npm warn config optional Use `--omit=optional` to exclude optional dependencies, or
+[1] npm warn config `--include=optional` to include them.
+[1] npm warn config
+[1] npm warn config       Default value does install optional deps unless otherwise omitted.
+[0]
+[0] > vite_react_shadcn_ts@0.0.0 dev:backend
+[0] > cd backend && npm run dev
+[0]
+[1]
+[1] > vite_react_shadcn_ts@0.0.0 dev:frontend
+[1] > vite --host 127.0.0.1
+[1]
+[0]
+[0] > sistema-ministerial-backend@1.0.0 dev
+[0] > nodemon server.js
+[0]
+[0] [33m[nodemon] 3.1.10[39m
+[0] [33m[nodemon] to restart at any time, enter `rs`[39m
+[0] [33m[nodemon] watching path(s): *.*[39m
+[0] [33m[nodemon] watching extensions: js,mjs,cjs,json[39m
+[0] [32m[nodemon] starting `node server.js`[39m
+[1]
+[1]   VITE v5.4.19  ready in 487 ms
+[1]
+[1]   ➜  Local:   http://127.0.0.1:8080/
