@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../integrations/supabase/client';
-import { useJWorgIntegration } from '../hooks/useJWorgIntegration';
+import { useMaterials } from '../hooks/useMaterials';
 import { JWorgTest } from '../components/JWorgTest';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import LazyLoader from '../components/LazyLoader';
 import AuthErrorHandler from '../components/AuthErrorHandler';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import ProgramManager from '../components/ProgramManager';
+import CongregationManager from '../components/CongregationManager';
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { Separator } from '../components/ui/separator';
@@ -41,7 +43,7 @@ interface SystemStats {
 
 export default function AdminDashboard() {
   const { user, profile, isAdmin } = useAuth();
-  const jworg = useJWorgIntegration();
+  const { syncAllMaterials, isLoading: materialsLoading } = useMaterials();
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
   const [systemStats, setSystemStats] = useState<SystemStats | null>(null);
@@ -371,28 +373,10 @@ export default function AdminDashboard() {
   }, []);
 
   // JW.org & S-38
-  const handleMWBAvailable = useCallback(async () => {
-    console.log('📚 Disponibilizando MWB atual...');
-    try {
-      await jworg.fetchCurrentWeek();
-      console.log('✅ MWB atualizada');
-      alert('✅ Apostila MWB atual disponibilizada para todas as congregações!');
-    } catch (error) {
-      console.error('❌ Erro ao disponibilizar MWB:', error);
-      alert('Erro ao disponibilizar MWB: ' + error.message);
-    }
-  }, [jworg]);
-
-  const handleConfigureJWorgURLs = useCallback(() => {
-    console.log('⚙️ Configurando URLs JW.org...');
-    const ptUrl = prompt('URL JW.org PT:', 'https://www.jw.org/pt/biblioteca/jw-apostila-do-mes/');
-    const enUrl = prompt('URL JW.org EN:', 'https://www.jw.org/en/library/jw-meeting-workbook/');
-    
-    if (ptUrl && enUrl) {
-      console.log('✅ URLs configuradas:', { ptUrl, enUrl });
-      alert('✅ URLs JW.org configuradas com sucesso!');
-    }
-  }, []);
+  const handleSyncMaterials = useCallback(async () => {
+    console.log('🔄 Sincronizando materiais com o backend...');
+    await syncAllMaterials();
+  }, [syncAllMaterials]);
 
   const handleSyncCongregations = useCallback(async () => {
     console.log('🔄 Sincronizando com congregações...');
@@ -417,93 +401,6 @@ export default function AdminDashboard() {
           `Esta visualização mostrará todas as apostilas MWB dos próximos 3 meses.`);
   }, []);
 
-  const handleUpdateProgramPT = useCallback(async () => {
-    console.log('🇧🇷 Atualizando programação PT...');
-    try {
-      jworg.setLanguage('pt');
-      await jworg.fetchNextWeeks();
-      console.log('✅ Programação PT atualizada');
-      alert('✅ Programação em Português atualizada com sucesso!');
-    } catch (error) {
-      console.error('❌ Erro ao atualizar programação PT:', error);
-      alert('Erro ao atualizar programação PT: ' + error.message);
-    }
-  }, [jworg]);
-
-  const handleUpdateProgramEN = useCallback(async () => {
-    console.log('🇺🇸 Atualizando programação EN...');
-    try {
-      jworg.setLanguage('en');
-      await jworg.fetchNextWeeks();
-      console.log('✅ Programação EN atualizada');
-      alert('✅ Programação em Inglês atualizada com sucesso!');
-    } catch (error) {
-      console.error('❌ Erro ao atualizar programação EN:', error);
-      alert('Erro ao atualizar programação EN: ' + error.message);
-    }
-  }, [jworg]);
-
-  const handleCheckNewWeeks = useCallback(async () => {
-    console.log('🔍 Verificando novas semanas...');
-    try {
-      await jworg.fetchNextWeeks();
-      const newWeeks = jworg.nextWeeks.length;
-      console.log(`✅ Verificação concluída: ${newWeeks} semanas`);
-      alert(`🔍 Verificação concluída!\n\nEncontradas ${newWeeks} semanas de programação.\n\nTodas estão sincronizadas com JW.org.`);
-    } catch (error) {
-      console.error('❌ Erro ao verificar semanas:', error);
-      alert('Erro ao verificar novas semanas: ' + error.message);
-    }
-  }, [jworg]);
-
-  const handleUpdateS38Structure = useCallback(() => {
-    console.log('🏗️ Atualizando estrutura S-38 global...');
-    alert(`🏗️ Estrutura S-38 Global\n\n` +
-          `✅ Partes da reunião atualizadas:\n` +
-          `• Chairman\n• Treasures\n• Gems\n• Reading\n` +
-          `• Starting\n• Following\n• Making\n• Explaining\n` +
-          `• Talk\n\n` +
-          `Esta estrutura será aplicada mundialmente.`);
-  }, []);
-
-  // JW.org Integration
-  const handleReloadCurrentWeek = useCallback(async () => {
-    console.log('🔄 Recarregando semana atual...');
-    try {
-      await jworg.fetchCurrentWeek();
-      console.log('✅ Semana atual recarregada');
-      alert('✅ Semana atual recarregada com sucesso!');
-    } catch (error) {
-      console.error('❌ Erro ao recarregar semana:', error);
-      alert('Erro ao recarregar semana: ' + error.message);
-    }
-  }, [jworg]);
-
-  const handleReloadNextWeeks = useCallback(async () => {
-    console.log('📅 Recarregando próximas semanas...');
-    try {
-      await jworg.fetchNextWeeks();
-      console.log('✅ Próximas semanas recarregadas');
-      alert('✅ Próximas semanas recarregadas com sucesso!');
-    } catch (error) {
-      console.error('❌ Erro ao recarregar próximas semanas:', error);
-      alert('Erro ao recarregar próximas semanas: ' + error.message);
-    }
-  }, [jworg]);
-
-  const handleTestDownloadPT = useCallback(async () => {
-    console.log('🧪 Testando download PT...');
-    try {
-      jworg.setLanguage('pt');
-      await jworg.downloadWorkbook('pt', '07', '2025');
-      console.log('✅ Download PT testado');
-      alert('✅ Download PT testado com sucesso!');
-    } catch (error) {
-      console.error('❌ Erro no teste de download PT:', error);
-      alert('Erro no teste de download PT: ' + error.message);
-    }
-  }, [jworg]);
-
   // Monitoramento
   const handleViewAllLogs = useCallback(async () => {
     console.log('📋 Visualizando todos os logs...');
@@ -524,45 +421,6 @@ export default function AdminDashboard() {
     }
   }, []);
 
-  const handleTestJWorgIntegration = useCallback(async () => {
-    console.log('🧪 Testando integração JW.org...');
-    try {
-      await jworg.fetchCurrentWeek();
-      console.log('✅ Integração JW.org testada com sucesso');
-      alert('✅ Integração JW.org funcionando perfeitamente!');
-    } catch (error) {
-      console.error('❌ Erro na integração JW.org:', error);
-      alert('❌ Erro na integração JW.org: ' + error.message);
-    }
-  }, [jworg]);
-
-  const handleChangeLanguage = useCallback((newLang: 'pt' | 'en') => {
-    jworg.setLanguage(newLang);
-    console.log(`🌐 Idioma alterado para: ${newLang}`);
-    alert(`🌐 Idioma alterado para: ${newLang === 'pt' ? 'Português' : 'English'}`);
-  }, [jworg]);
-
-  // Alterna o idioma atual entre PT/EN
-  const toggleLanguage = useCallback(() => {
-    const current = (jworg as any)?.currentLanguage ?? 'pt';
-    const next = current === 'pt' ? 'en' : 'pt';
-    jworg.setLanguage(next);
-    console.log(`🌐 Idioma alternado: ${current} -> ${next}`);
-    alert(`🌐 Idioma alternado para: ${next === 'pt' ? 'Português' : 'English'}`);
-  }, [jworg]);
-
-  // Atualiza materiais JW.org (semana atual + próximas semanas)
-  const updateMaterials = useCallback(async () => {
-    try {
-      await jworg.fetchCurrentWeek();
-      await jworg.fetchNextWeeks();
-      console.log('✅ Materiais JW.org atualizados');
-      alert('✅ Materiais JW.org atualizados com sucesso!');
-    } catch (error: any) {
-      console.error('❌ Erro ao atualizar materiais:', error);
-      alert('❌ Erro ao atualizar materiais: ' + (error?.message || error));
-    }
-  }, [jworg]);
 
   // Sincronizar materiais da pasta docs/Oficial -> tabela public.programas
   const syncMaterialsToPrograms = useCallback(async () => {
@@ -743,8 +601,9 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
+            <TabsTrigger value="programacao">Programação</TabsTrigger>
             <TabsTrigger value="users">Usuários</TabsTrigger>
             <TabsTrigger value="congregations">Congregações</TabsTrigger>
             <TabsTrigger value="system">Sistema</TabsTrigger>
@@ -935,13 +794,9 @@ export default function AdminDashboard() {
                     <span className="text-sm text-green-700">Hoje, 10:30</span>
                   </div>
                   <div className="flex space-x-2">
-                    <Button size="sm" variant="outline" className="border-green-300 text-green-700" onClick={handleMWBAvailable}>
+                    <Button size="sm" variant="outline" className="border-green-300 text-green-700" onClick={handleSyncMaterials}>
                       <RefreshCw className="h-3 w-3 mr-1" />
-                      Disponibilizar MWB Atual
-                    </Button>
-                    <Button size="sm" variant="outline" className="border-green-300 text-green-700" onClick={handleConfigureJWorgURLs}>
-                      <Settings className="h-3 w-3 mr-1" />
-                      Configurar URLs JW.org
+                      Sincronizar Materiais com JW.org
                     </Button>
                     <Button size="sm" variant="outline" className="border-green-300 text-green-700" onClick={syncMaterialsToPrograms} disabled={loading}>
                       <RefreshCw className={`h-3 w-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
@@ -979,6 +834,24 @@ export default function AdminDashboard() {
                 </CardContent>
               </Card>
 
+              {/* Importar Estudantes */}
+              <Card className="bg-blue-50 border-blue-200">
+                <CardHeader>
+                  <CardTitle className="text-blue-800">📥 Importar Estudantes</CardTitle>
+                  <CardDescription className="text-blue-700">
+                    Importe estudantes em massa usando uma planilha Excel.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <a href="/estudantes?tab=import">
+                    <Button className="w-full" variant="outline">
+                      <Upload className="h-4 w-4 mr-2" />
+                      Importar Planilha
+                    </Button>
+                  </a>
+                </CardContent>
+              </Card>
+
               {/* Debug / Integração */}
               <Card className="bg-slate-50 border-slate-200">
                 <CardHeader>
@@ -988,21 +861,9 @@ export default function AdminDashboard() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Idioma Atual:</span>
-                    <Badge variant="outline" className="text-slate-700">
-                      {(jworg as any)?.currentLanguage === 'en' ? '🇺🇸 English' : '🇧🇷 Português'}
-                    </Badge>
-                  </div>
                   <div className="flex flex-wrap gap-2">
-                    <Button size="sm" variant="outline" onClick={toggleLanguage}>
-                      Alternar Idioma
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={updateMaterials}>
-                      Atualizar Materiais
-                    </Button>
-                    <Button size="sm" variant="outline" onClick={handleTestJWorgIntegration}>
-                      Testar Integração JW.org
+                    <Button size="sm" variant="outline" onClick={handleSyncMaterials}>
+                      Sincronizar Materiais
                     </Button>
                     <Button size="sm" variant="outline" onClick={checkForUpdates} disabled={loading}>
                       Atualizar Contagens
@@ -1110,90 +971,14 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Congregações */}
-          <TabsContent value="congregations" className="space-y-6">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-center text-muted-foreground">
-                🏢 Gestão de Congregações para Acesso às Apostilas MWB
-              </h3>
-              <p className="text-center text-sm text-muted-foreground mt-2">
-                🎯 Função Principal: Admin gerencia congregações → Instrutores acessam apostilas
-              </p>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Estatísticas de Congregações */}
-            <Card>
-              <CardHeader>
-                  <CardTitle>Estatísticas</CardTitle>
-                  <CardDescription>Resumo das congregações</CardDescription>
-              </CardHeader>
-              <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Total de Congregações:</span>
-                      <Badge variant="outline">{staticStats.total_congregations}</Badge>
-                  </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Congregações Ativas:</span>
-                      <Badge variant="outline" className="bg-green-50 text-green-700">
-                        {staticStats.active_congregations}
-                      </Badge>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm">Total de Estudantes:</span>
-                      <Badge variant="outline">{staticStats.total_estudantes}</Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+          {/* Programação */}
+          <TabsContent value="programacao">
+            <ProgramManager />
+          </TabsContent>
 
-              {/* Lista de Congregações */}
-              <Card className="lg:col-span-2">
-                <CardHeader>
-                  <CardTitle>Congregações Registradas</CardTitle>
-                  <CardDescription>Lista das congregações no sistema</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                          <Package className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium">Sistema Ministerial Global</p>
-                          <p className="text-sm text-muted-foreground">Congregação Principal</p>
-                          </div>
-                        </div>
-                      <Badge variant="outline" className="bg-green-50 text-green-700">
-                        Ativa
-                        </Badge>
-                      </div>
-                  </div>
-                  
-                  <div className="mt-4">
-                    <Button variant="outline" className="w-full" onClick={() => handleManageCongregation('Sistema Ministerial Global')}>
-                      <Users className="h-4 w-4 mr-2" />
-                      Gerenciar
-                    </Button>
-                  </div>
-                  
-                  <div className="mt-4">
-                    <Button variant="outline" className="w-full" onClick={handleAddCongregation}>
-                      <Users className="h-4 w-4 mr-2" />
-                      Adicionar Nova Congregação
-                    </Button>
-                  </div>
-                  
-                  <div className="mt-4">
-                    <Button variant="outline" className="w-full">
-                      <Users className="h-4 w-4 mr-2" />
-                      Expandir
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+          {/* Congregações */}
+          <TabsContent value="congregations">
+            <CongregationManager />
           </TabsContent>
 
           {/* Sistema */}

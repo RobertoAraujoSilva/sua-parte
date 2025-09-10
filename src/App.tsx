@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
-import AdminDashboard from './components/dashboards/AdminDashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import InstructorDashboard from './components/dashboards/InstructorDashboard';
 import StudentDashboard from './components/dashboards/StudentDashboard';
 import Auth from './pages/Auth';

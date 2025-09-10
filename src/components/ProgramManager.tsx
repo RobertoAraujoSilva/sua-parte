@@ -3,27 +3,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/lib/supabase';
-import { useSupabaseMaterials } from '@/hooks/useSupabaseMaterials';
+import { useMaterials } from '@/hooks/useMaterials';
 import { parseMWBContent, MWBProgram } from '@/utils/mwbParser';
 import { Calendar, FileText, Eye, Upload } from 'lucide-react';
 
 const ProgramManager: React.FC = () => {
-  const { materials, loadMaterials } = useSupabaseMaterials();
+  const { materials, listMaterials, isLoading } = useMaterials();
   const [programs, setPrograms] = useState<MWBProgram[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    loadMaterials();
-  }, [loadMaterials]);
+    listMaterials();
+  }, [listMaterials]);
 
   useEffect(() => {
     if (materials.length > 0) {
       const allPrograms: MWBProgram[] = [];
       
       materials
-        .filter(m => m.name.includes('mwb_'))
+        .filter(m => m.filename.includes('mwb_'))
         .forEach(material => {
-          const parsed = parseMWBContent(material.name);
+          const parsed = parseMWBContent(material.filename);
           allPrograms.push(...parsed);
         });
       
@@ -56,7 +56,7 @@ const ProgramManager: React.FC = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Gerenciar Programação</h2>
-        <Button onClick={loadMaterials} variant="outline">
+        <Button onClick={listMaterials} variant="outline" disabled={isLoading}>
           <Upload className="mr-2 h-4 w-4" />
           Atualizar Materiais
         </Button>

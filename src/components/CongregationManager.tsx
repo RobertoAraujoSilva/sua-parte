@@ -8,7 +8,7 @@ import { Plus, Users, Settings } from 'lucide-react';
 
 interface Congregation {
   id: string;
-  name: string;
+  nome: string; // Changed from name to nome to match table
   instructors: number;
   students: number;
   status: 'active' | 'inactive';
@@ -24,20 +24,26 @@ const CongregationManager: React.FC = () => {
   }, []);
 
   const loadCongregations = async () => {
+    setLoading(true);
     try {
-      // For now, show a default congregation
-      const mockCongregations: Congregation[] = [
-        {
-          id: '1',
-          name: 'Congregação Principal',
-          instructors: 3,
-          students: 25,
-          status: 'active'
-        }
-      ];
-      setCongregations(mockCongregations);
+      const { data, error } = await supabase
+        .from('congregacoes')
+        .select('id, nome');
+
+      if (error) throw error;
+
+      const loadedCongregations = data.map(c => ({
+        ...c,
+        instructors: 0, // Placeholder
+        students: 0, // Placeholder
+        status: 'active' as const
+      }));
+
+      setCongregations(loadedCongregations);
     } catch (error) {
-      console.error('Error loading congregations');
+      console.error('Error loading congregations:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -46,19 +52,28 @@ const CongregationManager: React.FC = () => {
     
     setLoading(true);
     try {
-      // Mock creation for now
-      const newCongregation: Congregation = {
-        id: Date.now().toString(),
-        name: newCongregationName,
-        instructors: 0,
-        students: 0,
-        status: 'active'
-      };
+      const { data, error } = await supabase
+        .from('congregacoes')
+        .insert({ nome: newCongregationName })
+        .select();
+
+      if (error) throw error;
       
-      setCongregations([...congregations, newCongregation]);
-      setNewCongregationName('');
+      if (data) {
+        // Add the new congregation to the state
+        const newCongregation: Congregation = {
+            ...(data[0] as any),
+            instructors: 0,
+            students: 0,
+            status: 'active'
+        };
+        setCongregations([...congregations, newCongregation]);
+        setNewCongregationName('');
+      }
+
     } catch (error) {
-      console.error('Error creating congregation');
+      console.error('Error creating congregation:', error);
+      alert('Erro ao criar congregação. Verifique se o nome já existe.');
     } finally {
       setLoading(false);
     }
@@ -88,7 +103,7 @@ const CongregationManager: React.FC = () => {
           <Card key={congregation.id}>
             <CardContent className="pt-4">
               <div className="flex justify-between items-start mb-3">
-                <h3 className="font-semibold">{congregation.name}</h3>
+                <h3 className="font-semibold">{congregation.nome}</h3>
                 <Badge variant={congregation.status === 'active' ? 'default' : 'secondary'}>
                   {congregation.status === 'active' ? 'Ativa' : 'Inativa'}
                 </Badge>
