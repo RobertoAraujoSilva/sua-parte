@@ -68,28 +68,37 @@ try {
       },
       // Configuração de fetch personalizada para garantir que os headers sejam enviados
       fetch: (url, options = {}) => {
+        const urlStr = typeof url === 'string' ? url : String(url);
+        // Não injeta headers customizados nos endpoints de Auth para evitar conflitos
+        if (urlStr.includes('/auth/v1/')) {
+          if (import.meta.env.DEV) {
+            console.log('🔄 Fetch (auth) para URL:', urlStr);
+          }
+          return fetch(url, options);
+        }
+
         const headers = new Headers(options.headers || {});
         
         // Garantir que os headers essenciais estejam presentes
         if (!headers.has('apikey')) {
           headers.set('apikey', supabaseAnonKey);
-          console.log('🔑 Adicionando header apikey manualmente');
+          if (import.meta.env.DEV) console.log('🔑 Adicionando header apikey manualmente');
         }
         
         if (!headers.has('Authorization')) {
           headers.set('Authorization', `Bearer ${supabaseAnonKey}`);
-          console.log('🔑 Adicionando header Authorization manualmente');
+          if (import.meta.env.DEV) console.log('🔑 Adicionando header Authorization manualmente');
         }
         
         // Adicionar Content-Type se não estiver presente
         if (!headers.has('Content-Type') && !['GET', 'HEAD'].includes((options.method || 'GET').toUpperCase())) {
           headers.set('Content-Type', 'application/json');
-          console.log('📄 Adicionando header Content-Type: application/json');
+          if (import.meta.env.DEV) console.log('📄 Adicionando header Content-Type: application/json');
         }
         
         // Log em desenvolvimento para depuração
         if (import.meta.env.DEV) {
-          console.log('🔄 Fetch para URL:', url);
+          console.log('🔄 Fetch para URL:', urlStr);
           console.log('🔑 Headers:', Object.fromEntries(headers.entries()));
         }
         

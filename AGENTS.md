@@ -1,95 +1,123 @@
-# AGENTS.md — Orquestrador de Personas
+# AGENTS.md (v2) — Orquestrador de Personas
 
-Este arquivo define o orquestrador e as personas especializadas para guiar o fluxo de trabalho no projeto. Use-o como referência para alternar modos e coordenar tarefas.
+> Resumo rápido
+>
+> - Ciclo: Orchestrator → F Architect → Code → Debug → Orchestrator
+> - “Def. of Done” por modo
+> - Handoffs prontos para colar
+> - `agents:log` grava em `agents.log.json` e atualiza a seção do AGENTS.md entre os marcadores
+> - Scripts de CI/qualidade acoplados
+> - Segurança: sem vazar tokens (Supabase MCP)
 
-## Modos Disponíveis
+## Modos
 
 - F Architect (Planejar)
-  - Foco: planejar arquitetura, fluxos, modelos de dados e regras (S‑38), antes de codar.
-  - Saídas: diagramas, especificações, critérios de aceite, riscos.
+  - Foco: arquitetura, fluxos, esquema de dados, regras S-38, RLS.
+  - DoD: diagrama + esquema + riscos + critérios de aceite (teste verificável).
 
 - Code (Implementar)
-  - Foco: escrever, modificar e refatorar código seguindo SOLID/DRY e UI consistente (Tailwind + shadcn/ui).
-  - Saídas: commits pequenos, testes adicionados/ajustados, docs breves.
+  - Foco: implementar com SOLID/DRY e UI consistente (Tailwind + shadcn/ui).
+  - DoD: testes (unit/E2E), lint ok, build ok, docs curtas atualizadas.
 
 - ? Ask (Descobrir)
-  - Foco: esclarecer dúvidas e justificar decisões, explicar trade-offs.
-  - Saídas: respostas objetivas, comparativos, referências internas.
+  - Foco: esclarecer decisões e trade-offs.
+  - DoD: respostas objetivas (máx. 5 bullets), decisão tomada/registrada.
 
 - Debug (Diagnosticar)
-  - Foco: reproduzir, isolar e corrigir defeitos; adicionar testes de regressão.
-  - Saídas: RCA, fix verificado, métricas (antes/depois) quando aplicável.
+  - Foco: reproduzir, isolar, corrigir; adicionar teste de regressão.
+  - DoD: RCA curto, teste de regressão, métrica antes/depois (se aplicável).
 
 - Orchestrator (Orquestrar)
-  - Foco: coordenar tarefas entre modos, dividir trabalho em etapas, garantir handoffs limpos.
-  - Saídas: plano de execução, checklist, ordem de operações e critérios de conclusão.
+  - Foco: dividir trabalho, ordenar etapas, garantir handoffs e critérios.
+  - DoD: plano de execução, checklist, owners, prazos, conclusão registrada.
 
 ## Atalhos de Modo
 
-- Ctrl + .  → próximo modo
-- Ctrl + Shift + .  → modo anterior
+- Ctrl + . → próximo modo
+- Ctrl + Shift + . → modo anterior
 
-## Diretrizes do Orquestrador
+## Diretrizes do Orquestrador (execução)
 
-1) Começar no modo F Architect para planejar:
-   - Definir objetivo, requisitos, riscos, critérios de aceite.
-   - Mapear entidades/tabelas, políticas RLS e regras S‑38 relevantes.
+1. Iniciar no F Architect  
+   Definir objetivo, requisitos, riscos, aceite; mapear entidades, RLS e S-38.
 
-2) Delegar para Code com escopo claro:
-   - Descrever arquivos a alterar/criar e pontos de integração.
-   - Exigir testes (Cypress/E2E, unitários quando couber) e verificação de lint.
+2. Delegar para Code (escopo claro)  
+   Arquivos a criar/alterar, pontos de integração, testes obrigatórios.
 
-3) Usar ? Ask quando houver ambiguidades:
-   - Formular perguntas fechadas e decisões com prós/cons.
+3. ? Ask quando houver ambiguidade  
+   Formular 2–4 perguntas fechadas com prós/cons curtos.
 
-4) Invocar Debug após implementação:
-   - Reproduzir, criar testes de regressão, verificar métricas/perf.
+4. Debug após implementação  
+   Reproduzir → corrigir → teste de regressão → registrar métrica/antes-depois.
 
-5) Encerrar ciclo com documentação mínima:
-   - Atualizar README/README_EXTENDIDO, CHANGELOG e anotações de decisões.
+5. Encerrar  
+   Atualizar README/CHANGELOG/decisões; `agents:log`.
 
-## Padrões de Qualidade (todos os modos)
+## Padrões (todos os modos)
 
-- Segurança: não expor segredos, RLS ativo, mínimo privilégio.
-- Código: funções curtas, nomes claros, early return/guard clauses.
-- UI/UX: responsivo, consistente, sem inline styles desnecessários.
-- Performance: evitar refetches, usar memoização e paginação.
-- Documentação: sucinta, com exemplos e instruções de uso.
+- Segurança: nada de segredos no repo; RLS ativo; princípio do menor privilégio.
+- Código: funções curtas, nomes claros, early return; tipagem estrita.
+- UI/UX: responsivo, consistente, sem inline style desnecessário.
+- Performance: memoização, paginação, evitar refetch; lazy/dynamic import.
+- Docs: sucintas com exemplos de execução.
 
-## Fluxo de Trabalho Sugerido
+## Handoffs (modelos)
 
-1. Orchestrator: alinhamento e criação de checklist.
-2. F Architect: modelo de dados/fluxo (inclui S‑38 quando pertinente).
-3. Code: implementação incremental (commits pequenos) + testes.
-4. Debug: validações e correções.
-5. Orchestrator: revisão final, merge e atualização de docs.
+**Orchestrator → F Architect**
 
-## Exemplo de Handoff
+    Objetivo: <o que> para <quem> até <quando>.
+    Requisitos: [ ] funcional 1 · [ ] segurança/RLS · [ ] S-38 · [ ] i18n
+    Saídas: diagrama, esquema SQL, políticas RLS, critérios de aceite testáveis.
+    Riscos: <lista breve>  Mitigação: <como>
 
-- Orchestrator → F Architect: "Definir esquema de `designacoes` com regras S‑38 e conflito de versão".
-- F Architect → Code: "Criar migração, políticas RLS e validações de elegibilidade no frontend".
-- Code → Debug: "Adicionar testes E2E para conflitos e exportação PDF".
-- Debug → Orchestrator: "RCA e fix confirmados; pronto para merge".
+**F Architect → Code**
 
-## Registro de Atividades (automático)
+    Arquivos: /supabase/migrations/xxx.sql · /src/modules/...  
+    RLS: políticas SELECT/INSERT/UPDATE/DELETE; owner(s).  
+    Validações S-38 no FE: regras de elegibilidade e conflitos.  
+    Testes: unit <lista> · E2E (Cypress): <fluxos chave>.  
+    Critérios de aceite: <checável>.
 
-Este arquivo mantém um registro automático das atividades dos agentes.
+**Code → Debug**
 
-Use o comando:
+    Build ok ✔ · Lint ok ✔ · Testes unit ✔.  
+    Cenário bug/risco: <como reproduzir> → esperado vs atual.  
+    Adicionar teste de regressão: <arquivo>.  
 
-```bash
-npm run agents:log -- --agent="Code" --action="Implement feature X" --status="completed" --details="arquivos Y/Z atualizados"
-```
+**Debug → Orchestrator**
 
-As entradas serão salvas em `agents.log.json` e refletidas abaixo.
+    RCA: causa raiz (1–2 linhas).  
+    Fix: <commit/PR>.  
+    Regressão: <teste>.  
+    Métrica (opcional): <antes> → <depois>.
+    Pronto para merge.
+
+## S-38 (regras mínimas embutidas)
+
+- Elegibilidade por tipo de parte (ex.: `requires_male`, `elders_only`, etc.).
+- Sem nomes no modelo oficial (admin publica template).
+- RLS: cada congregação vê/aplica as próprias designações.
+- Conflitos: impedir dupla designação no mesmo horário/semana; preferir fair queue.
+
+---
+
+# Registro de Atividades
+
+Execute:
+
+    npm run agents:log -- --agent="Code" --action="Implement feature X" --status="completed" --details="arquivos Y/Z atualizados"
+
+Os logs entram em `agents.log.json` e atualizam a seção abaixo automaticamente.
 
 <!-- AGENTS_LOG_START -->
 <!-- Entradas serão inseridas automaticamente aqui. Não editar manualmente abaixo desta linha. -->
 <!-- AGENTS_LOG_END -->
 
-## Índice de Materiais e Documentos
+---
 
-### Materiais Oficiais (servidos pelo backend)
+# Índice de Materiais e Documentos
+
+## Materiais Oficiais (servidos pelo backend)
 - mwb_E_202507.pdf — `http://localhost:3001/materials/mwb_E_202507.pdf`
 - mwb_E_202509.pdf — `http://localhost:3001/materials/mwb_E_202509.pdf`
 - mwb_E_202511.pdf — `http://localhost:3001/materials/mwb_E_202511.pdf`
@@ -103,7 +131,7 @@ As entradas serão salvas em `agents.log.json` e refletidas abaixo.
 - estudantes_ficticios.xlsx — `http://localhost:3001/materials/estudantes_ficticios.xlsx`
 - estudantes_rows.sql — `http://localhost:3001/materials/estudantes_rows.sql`
 
-### Documentação (links no repositório)
+## Documentação (links no repositório)
 - docs/CONSOLE_LOG_FIXES.md
 - docs/CORRECAO_ERRO_DATA_DESIGNACOES.md
 - docs/CORRECAO_QRCODE_BUILD.md
@@ -245,40 +273,113 @@ As entradas serão salvas em `agents.log.json` e refletidas abaixo.
 - docs/COMPREHENSIVE_VALIDATION_ASSESSMENT_REPORT.md
 
 
-{
-  "mcpServers": {
-    "Context 7": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@upstash/context7-mcp@latest"
-      ]
-    },
-    "Playwright": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@playwright/mcp@latest"
-      ]
-    },
-    "Sequential thinking": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
-      ]
-    },
-    "supabase": {
-      "command": "npx",
-      "args": [
-        "@supabase/mcp-server-supabase",
-        "--read-only",
-        "--project-ref=nwpuurgwnnuejqinkvrh"
-      ],
-      "cwd": "C:\\Users\\frank.MONITORE-MAFRA\\Documents\\GitHub\\sua-parte",
-      "env": {
-        "SUPABASE_ACCESS_TOKEN": "sbp_0437204347bbd8c2697ee3c5ebc850f1f1bfa75d"
-      }
-    }
+## Configuração MCP (segurança)
+
+No trecho de configuração MCP (exemplo):
+
+```
+"supabase": {
+  "command": "npx",
+  "args": ["@supabase/mcp-server-supabase","--read-only","--project-ref=nwpuurgwnnuejqinkvrh"],
+  "cwd": "C:\\...\\sua-parte",
+  "env": {
+    "SUPABASE_ACCESS_TOKEN": "sbp_0437..."
   }
 }
+```
+
+- Não versionar o token. Mover para `.env`:
+
+```
+SUPABASE_ACCESS_TOKEN=sbp_****  # coloque aqui
+```
+
+- Injetar via script de inicialização (ou `cross-env`) sem fixar no arquivo MCP.
+- Manter `--read-only` para auditorias.
+
+---
+
+# ⚙️ Scripts & arquivos necessários (orientação)
+
+1) package.json (scripts sugeridos)
+
+```
+{
+  "scripts": {
+    "agents:log": "node scripts/agents-log.mjs",
+    "agents:mode": "node -e \"console.log('modo atual:', process.env.AGENT_MODE||'Orchestrator')\"",
+    "lint": "eslint . --ext .ts,.tsx",
+    "test": "vitest run",
+    "e2e": "cypress run",
+    "precommit": "npm run lint && npm run test && echo '✅ qualidade ok'"
+  }
+}
+```
+
+2) scripts/agents-log.mjs
+
+```
+import fs from 'fs';
+import path from 'path';
+
+const ROOT = process.cwd();
+const LOG_PATH = path.join(ROOT, 'agents.log.json');
+const AGENTS_MD = path.join(ROOT, 'AGENTS.md');
+
+function readArg(flag, def='') {
+  const i = process.argv.indexOf(`--${flag}`);
+  return i > -1 ? process.argv[i+1] : def;
+}
+
+const entry = {
+  timestamp: new Date().toISOString(),
+  agent: readArg('agent','Unknown'),
+  action: readArg('action',''),
+  status: readArg('status','pending'),
+  details: readArg('details','')
+};
+
+// 1) append em agents.log.json
+let log = [];
+if (fs.existsSync(LOG_PATH)) {
+  try { log = JSON.parse(fs.readFileSync(LOG_PATH,'utf8')); } catch {}
+}
+log.push(entry);
+fs.writeFileSync(LOG_PATH, JSON.stringify(log, null, 2));
+
+// 2) atualizar bloco no AGENTS.md entre marcadores
+const md = fs.readFileSync(AGENTS_MD, 'utf8');
+const start = '<!-- AGENTS_LOG_START -->';
+const end   = '<!-- AGENTS_LOG_END -->';
+const i1 = md.indexOf(start);
+const i2 = md.indexOf(end);
+if (i1 !== -1 && i2 !== -1 && i2 > i1) {
+  const visible = log.slice(-10).reverse()
+    .map(e => `- ${e.timestamp} — **${e.agent}**: ${e.action} _(status: ${e.status})_  \n  ${e.details ? '↳ ' + e.details : ''}`)
+    .join('\n');
+  const next = md.slice(0, i1 + start.length) + '\n' + visible + '\n' + md.slice(i2);
+  fs.writeFileSync(AGENTS_MD, next);
+  console.log('✅ agents.log.json atualizado e AGENTS.md refletido.');
+} else {
+  console.log('ℹ️ Marcadores não encontrados no AGENTS.md; gravado apenas em agents.log.json.');
+}
+```
+
+3) .gitignore (garantir)
+
+```
+# segredos & artefatos
+.env
+*.local
+*.log
+agents.log.json
+```
+
+---
+
+# ✅ Checklist de qualidade (curto)
+
+- F Architect entregou esquema/fluxo + critérios de aceite testáveis.
+- Code com testes (unit/E2E), lint e build.
+- Debug registrou RCA + teste de regressão.
+- Orchestrator rodou `npm run agents:log` com status final e atualizou docs.

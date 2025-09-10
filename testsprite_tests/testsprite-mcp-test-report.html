@@ -1,0 +1,410 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <title>Markdown Preview</title>
+      <style>
+        body {
+          font-family: sans-serif;
+          padding: 40px;
+          line-height: 1.6;
+          background: #fdfdfd;
+          color: #333;
+        }
+        pre {
+          background: #f4f4f4;
+          padding: 10px;
+          border-radius: 5px;
+          overflow-x: auto;
+        }
+        code {
+          font-family: monospace;
+          background: #eee;
+          padding: 2px 4px;
+        }
+        table {
+          border-collapse: collapse;
+          width: 100%;
+          margin-top: 20px;
+        }
+        th, td {
+          border: 1px solid #ccc;
+          padding: 8px 12px;
+          text-align: left;
+        }
+        th {
+          background-color: #f2f2f2;
+          font-weight: bold;
+        }
+      </style>
+    </head>
+    <body>
+      <h1>TestSprite AI Testing Report(MCP)</h1>
+<hr>
+<h2>1️⃣ Document Metadata</h2>
+<ul>
+<li><strong>Project Name:</strong> sua-parte</li>
+<li><strong>Version:</strong> 0.0.0</li>
+<li><strong>Date:</strong> 2025-09-10</li>
+<li><strong>Prepared by:</strong> TestSprite AI Team</li>
+</ul>
+<hr>
+<h2>2️⃣ Requirement Validation Summary</h2>
+<h3>Requirement: Admin Dashboard Access and Management</h3>
+<ul>
+<li><strong>Description:</strong> Supports administrator access to dashboard with statistics display and system monitoring capabilities.</li>
+</ul>
+<h4>Test 1</h4>
+<ul>
+<li><strong>Test ID:</strong> TC001</li>
+<li><strong>Test Name:</strong> Admin Dashboard Access and Statistics Display</li>
+<li><strong>Test Code:</strong> <a href="./TC001_Admin_Dashboard_Access_and_Statistics_Display.py">code_file</a></li>
+<li><strong>Test Error:</strong> Failed to go to the start URL. Err: Error executing action go_to_url: Page.goto: Timeout 60000ms exceeded.</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/b4eae8d5-e303-4358-83b7-e644cf238ee3/fdbe7257-cd49-4605-914f-fc9444fe93aa</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> The test failed because the frontend did not load the Admin Dashboard page within the allowed timeout, indicating a possible server downtime, misconfiguration, or network issue preventing the browser from reaching http://localhost:8080/admin.</li>
+</ul>
+<hr>
+<h4>Test 2</h4>
+<ul>
+<li><strong>Test ID:</strong> TC002</li>
+<li><strong>Test Name:</strong> Automatic JW.org Materials Download via Admin Dashboard</li>
+<li><strong>Test Code:</strong> <a href="./TC002_Automatic_JW.org_Materials_Download_via_Admin_Dashboard.py">code_file</a></li>
+<li><strong>Test Error:</strong> Failed to go to the start URL. Err: Error executing action go_to_url: Page.goto: Timeout 60000ms exceeded.</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/b4eae8d5-e303-4358-83b7-e644cf238ee3/a0ab2a5f-e223-4325-8c68-ca4d09db71fd</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> The test failed due to inability to load the Admin Dashboard page where the automatic JW.org materials download feature is accessed, likely caused by the frontend application not being reachable.</li>
+</ul>
+<hr>
+<h4>Test 3</h4>
+<ul>
+<li><strong>Test ID:</strong> TC010</li>
+<li><strong>Test Name:</strong> System Monitoring and Health Check on Admin Dashboard</li>
+<li><strong>Test Code:</strong> <a href="./TC010_System_Monitoring_and_Health_Check_on_Admin_Dashboard.py">code_file</a></li>
+<li><strong>Test Error:</strong> Failed to go to the start URL. Err: Error executing action go_to_url: Page.goto: Timeout 60000ms exceeded.</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/b4eae8d5-e303-4358-83b7-e644cf238ee3/2d0e8473-9dc8-425c-b18d-332b9f1de04c</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> System monitoring and health check components on Admin Dashboard failed to load, preventing visibility of real-time logs and health statuses.</li>
+</ul>
+<hr>
+<h3>Requirement: Backend API Integration</h3>
+<ul>
+<li><strong>Description:</strong> Ensures backend Node.js server correctly processes API requests for JW.org materials download and parsing.</li>
+</ul>
+<h4>Test 1</h4>
+<ul>
+<li><strong>Test ID:</strong> TC003</li>
+<li><strong>Test Name:</strong> Backend API Responses and Download Processing</li>
+<li><strong>Test Code:</strong> <a href="./TC003_Backend_API_Responses_and_Download_Processing.py">code_file</a></li>
+<li><strong>Test Error:</strong> Failed to go to the start URL. Err: Error executing action go_to_url: Page.goto: Timeout 60000ms exceeded.</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/b4eae8d5-e303-4358-83b7-e644cf238ee3/c90bf1d4-2461-4b88-926e-f4d1c04fb9bb</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> Despite being a backend API test, the test failed trying to access the frontend start URL and never reached backend API endpoints, indicating that the frontend environment was not available to initiate or proxy requests to backend service on port 3001.</li>
+</ul>
+<hr>
+<h3>Requirement: User Authentication System</h3>
+<ul>
+<li><strong>Description:</strong> Supports secure user authentication via Supabase Auth system with role-based access control.</li>
+</ul>
+<h4>Test 1</h4>
+<ul>
+<li><strong>Test ID:</strong> TC004</li>
+<li><strong>Test Name:</strong> User Authentication with Supabase Auth</li>
+<li><strong>Test Code:</strong> <a href="./TC004_User_Authentication_with_Supabase_Auth.py">code_file</a></li>
+<li><strong>Test Error:</strong> Failed to go to the start URL. Err: Error executing action go_to_url: Page.goto: Timeout 60000ms exceeded.</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/b4eae8d5-e303-4358-83b7-e644cf238ee3/3de8be10-d425-428a-b68d-2d2856e781ad</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> The authentication workflow test failed because the frontend login page did not load within the allotted timeout, preventing the Supabase authentication flows from executing.</li>
+</ul>
+<hr>
+<h4>Test 2</h4>
+<ul>
+<li><strong>Test ID:</strong> TC013</li>
+<li><strong>Test Name:</strong> Error Handling for Invalid Login Attempts</li>
+<li><strong>Test Code:</strong> <a href="./TC013_Error_Handling_for_Invalid_Login_Attempts.py">code_file</a></li>
+<li><strong>Test Error:</strong> Failed to go to the start URL. Err: Error executing action go_to_url: Page.goto: Timeout 60000ms exceeded.</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/b4eae8d5-e303-4358-83b7-e644cf238ee3/437c4901-1224-4254-b750-57d6ccf09c82</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> Invalid login attempt error handling test failed because the login page could not be loaded, blocking verification of error messages and proper UI behavior on authentication failures.</li>
+</ul>
+<hr>
+<h3>Requirement: Student Management System</h3>
+<ul>
+<li><strong>Description:</strong> Supports importing students via Excel files with data validation and inline editing capabilities.</li>
+</ul>
+<h4>Test 1</h4>
+<ul>
+<li><strong>Test ID:</strong> TC005</li>
+<li><strong>Test Name:</strong> Import Students via Excel File and Inline Editing</li>
+<li><strong>Test Code:</strong> <a href="./TC005_Import_Students_via_Excel_File_and_Inline_Editing.py">code_file</a></li>
+<li><strong>Test Error:</strong> Failed to go to the start URL. Err: Error executing action go_to_url: Page.goto: Timeout 60000ms exceeded.</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/b4eae8d5-e303-4358-83b7-e644cf238ee3/1c2183f8-64c1-4edc-90f9-f7c92c78765d</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> The Import Students functionality could not be tested because the frontend page did not load in time, which prevented validation of Excel file import and inline editing features.</li>
+</ul>
+<hr>
+<h4>Test 2</h4>
+<ul>
+<li><strong>Test ID:</strong> TC014</li>
+<li><strong>Test Name:</strong> Edge Case: Import Empty or Large Excel File for Students</li>
+<li><strong>Test Code:</strong> <a href="./TC014_Edge_Case_Import_Empty_or_Large_Excel_File_for_Students.py">code_file</a></li>
+<li><strong>Test Error:</strong> Failed to go to the start URL. Err: Error executing action go_to_url: Page.goto: Timeout 60000ms exceeded.</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/b4eae8d5-e303-4358-83b7-e644cf238ee3/78eeadbf-ff87-413f-a8ab-bb015fa82e73</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> Edge case testing for importing empty or large Excel files failed due to frontend page load timeout, preventing evaluation of import file handling and performance under edge conditions.</li>
+</ul>
+<hr>
+<h3>Requirement: Program Management System</h3>
+<ul>
+<li><strong>Description:</strong> Supports importing ministerial programs via PDF upload or copied text with data parsing and editing capabilities.</li>
+</ul>
+<h4>Test 1</h4>
+<ul>
+<li><strong>Test ID:</strong> TC006</li>
+<li><strong>Test Name:</strong> Import Ministerial Programs via PDF and Copied Text</li>
+<li><strong>Test Code:</strong> <a href="./TC006_Import_Ministerial_Programs_via_PDF_and_Copied_Text.py">code_file</a></li>
+<li><strong>Test Error:</strong> Failed to go to the start URL. Err: Error executing action go_to_url: Page.goto: Timeout 60000ms exceeded.</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/b4eae8d5-e303-4358-83b7-e644cf238ee3/8f0346ae-6e0e-4182-ac42-34079450cced</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> The test for importing ministerial programs via PDF or copied text failed due to the frontend page not loading within timeout, preventing any interaction with the import features or data parsing UI.</li>
+</ul>
+<hr>
+<h3>Requirement: Assignment Generation System</h3>
+<ul>
+<li><strong>Description:</strong> Supports automatic generation of ministerial designations following S-38-T rules with eligibility and balancing constraints.</li>
+</ul>
+<h4>Test 1</h4>
+<ul>
+<li><strong>Test ID:</strong> TC007</li>
+<li><strong>Test Name:</strong> Generate Designations Automatically Respecting S-38-T Rules</li>
+<li><strong>Test Code:</strong> <a href="./TC007_Generate_Designations_Automatically_Respecting_S_38_T_Rules.py">code_file</a></li>
+<li><strong>Test Error:</strong> Failed to go to the start URL. Err: Error executing action go_to_url: Page.goto: Timeout 60000ms exceeded.</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/b4eae8d5-e303-4358-83b7-e644cf238ee3/404e0dda-9f23-4c0e-9ae7-8695d6bc1575</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> The designation generation feature could not be tested because the frontend UI to trigger and display results did not load, causing the test to timeout.</li>
+</ul>
+<hr>
+<h4>Test 2</h4>
+<ul>
+<li><strong>Test ID:</strong> TC015</li>
+<li><strong>Test Name:</strong> Edge Case: Generate Designations with No Eligible Students</li>
+<li><strong>Test Code:</strong> <a href="./TC015_Edge_Case_Generate_Designations_with_No_Eligible_Students.py">code_file</a></li>
+<li><strong>Test Error:</strong> [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE (at http://localhost:8080/src/components/ui/table.tsx:0:0)</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/b4eae8d5-e303-4358-83b7-e644cf238ee3/7e3af2e5-2b69-48ed-9a87-0c51b2ccba34</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> Designation generation edge case test failed due to frontend resource load error (net::ERR_EMPTY_RESPONSE), indicating frontend server was unresponsive, blocking testing of system behavior when no students are eligible.</li>
+</ul>
+<hr>
+<h3>Requirement: Student Portal System</h3>
+<ul>
+<li><strong>Description:</strong> Supports secure student portal access with assignment viewing and historical participation tracking.</li>
+</ul>
+<h4>Test 1</h4>
+<ul>
+<li><strong>Test ID:</strong> TC008</li>
+<li><strong>Test Name:</strong> Student Portal Access and Designation History</li>
+<li><strong>Test Code:</strong> <a href="./TC008_Student_Portal_Access_and_Designation_History.py">code_file</a></li>
+<li><strong>Test Error:</strong> Failed to go to the start URL. Err: Error executing action go_to_url: Page.goto: Timeout 60000ms exceeded.</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/b4eae8d5-e303-4358-83b7-e644cf238ee3/e27cba73-0ce2-4925-9336-819d8b59f76d</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> Student portal access and designation history view failed to load due to the frontend not being reachable, preventing verification of secure login and assignment display.</li>
+</ul>
+<hr>
+<h3>Requirement: Family Management System</h3>
+<ul>
+<li><strong>Description:</strong> Supports family invitation system and relationship linking within the ministerial system.</li>
+</ul>
+<h4>Test 1</h4>
+<ul>
+<li><strong>Test ID:</strong> TC009</li>
+<li><strong>Test Name:</strong> Family Management System: Invite and Link Family Members</li>
+<li><strong>Test Code:</strong> <a href="./TC009_Family_Management_System_Invite_and_Link_Family_Members.py">code_file</a></li>
+<li><strong>Test Error:</strong> Failed to go to the start URL. Err: Error executing action go_to_url: Page.goto: Timeout 60000ms exceeded.</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/b4eae8d5-e303-4358-83b7-e644cf238ee3/2ce530f6-c5aa-4244-942a-171698b8cbd1</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> Family invitation and linking features were inaccessible due to the frontend page load timeout, blocking functional verification of family relationship management UI.</li>
+</ul>
+<hr>
+<h3>Requirement: Development Environment Setup</h3>
+<ul>
+<li><strong>Description:</strong> Ensures npm scripts and development environment startup work correctly.</li>
+</ul>
+<h4>Test 1</h4>
+<ul>
+<li><strong>Test ID:</strong> TC011</li>
+<li><strong>Test Name:</strong> NPM Scripts Execution for Development Environment</li>
+<li><strong>Test Code:</strong> <a href="./TC011_NPM_Scripts_Execution_for_Development_Environment.py">code_file</a></li>
+<li><strong>Test Error:</strong> Failed to go to the start URL. Err: Error executing action go_to_url: Page.goto: Timeout 60000ms exceeded.</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/b4eae8d5-e303-4358-83b7-e644cf238ee3/1c2c3150-f3ee-4fd4-be87-c0b3ed8ecfac</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> The development environment startup test failed because the frontend application could not be accessed, indicating the npm scripts might not be launching the frontend server correctly or its dependencies are not met.</li>
+</ul>
+<hr>
+<h3>Requirement: End-to-End Testing Infrastructure</h3>
+<ul>
+<li><strong>Description:</strong> Ensures Cypress E2E test suite runs successfully and validates key functionalities.</li>
+</ul>
+<h4>Test 1</h4>
+<ul>
+<li><strong>Test ID:</strong> TC012</li>
+<li><strong>Test Name:</strong> Cypress E2E Test Suite Execution</li>
+<li><strong>Test Code:</strong> <a href="./TC012_Cypress_E2E_Test_Suite_Execution.py">code_file</a></li>
+<li><strong>Test Error:</strong> [ERROR] Failed to load resource: net::ERR_EMPTY_RESPONSE (at http://localhost:8080/src/types/spreadsheet.ts:0:0)</li>
+<li><strong>Test Visualization and Result:</strong> https://www.testsprite.com/dashboard/mcp/tests/b4eae8d5-e303-4358-83b7-e644cf238ee3/3c12e0b6-058c-4f14-b989-5bbf68d1b173</li>
+<li><strong>Status:</strong> ❌ Failed</li>
+<li><strong>Severity:</strong> High</li>
+<li><strong>Analysis / Findings:</strong> Cypress E2E suite failed due to frontend resource loading errors (net::ERR_EMPTY_RESPONSE), indicating the frontend app is not properly serving files or the server is unresponsive.</li>
+</ul>
+<hr>
+<h2>3️⃣ Coverage &amp; Matching Metrics</h2>
+<ul>
+<li><strong>0% of product requirements tested</strong></li>
+<li><strong>0% of tests passed</strong></li>
+<li><strong>Key gaps / risks:</strong></li>
+</ul>
+<blockquote>
+<p>0% of product requirements had at least one test generated.<br>
+0% of tests passed fully.<br>
+<strong>Critical Risk</strong>: Frontend server is not running or accessible at http://localhost:8080, causing all tests to fail with timeout errors. This indicates a fundamental infrastructure issue that must be resolved before any functional testing can proceed.</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Total Tests</th>
+<th>✅ Passed</th>
+<th>⚠️ Partial</th>
+<th>❌ Failed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Admin Dashboard</td>
+<td>3</td>
+<td>0</td>
+<td>0</td>
+<td>3</td>
+</tr>
+<tr>
+<td>Backend API</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>User Authentication</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Student Management</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Program Management</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Assignment Generation</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Student Portal</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Family Management</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Development Environment</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>E2E Testing</td>
+<td>1</td>
+<td>0</td>
+<td>0</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2>🚨 Critical Issues Identified</h2>
+<h3>1. <strong>Frontend Server Not Running (CRITICAL)</strong></h3>
+<ul>
+<li><strong>Issue</strong>: All tests failed due to inability to access http://localhost:8080</li>
+<li><strong>Impact</strong>: Complete system unavailability</li>
+<li><strong>Recommendation</strong>: Start the frontend development server using <code>npm run dev</code> or <code>npm run dev:frontend</code></li>
+</ul>
+<h3>2. <strong>Resource Loading Errors</strong></h3>
+<ul>
+<li><strong>Issue</strong>: net::ERR_EMPTY_RESPONSE errors for static assets</li>
+<li><strong>Impact</strong>: Frontend application cannot load properly</li>
+<li><strong>Recommendation</strong>: Check server configuration and ensure all dependencies are installed</li>
+</ul>
+<h3>3. <strong>Development Environment Setup</strong></h3>
+<ul>
+<li><strong>Issue</strong>: NPM scripts may not be launching servers correctly</li>
+<li><strong>Impact</strong>: Development workflow is broken</li>
+<li><strong>Recommendation</strong>: Verify package.json scripts and run <code>npm install</code> to ensure all dependencies are available</li>
+</ul>
+<hr>
+<h2>📋 Next Steps</h2>
+<ol>
+<li><strong>Immediate Action Required</strong>: Start the frontend development server</li>
+<li><strong>Verify Backend</strong>: Ensure backend server is running on port 3001</li>
+<li><strong>Check Dependencies</strong>: Run <code>npm install</code> in both root and backend directories</li>
+<li><strong>Re-run Tests</strong>: Once servers are running, re-execute TestSprite tests</li>
+<li><strong>Address Individual Issues</strong>: Focus on authentication, student management, and program import functionality</li>
+</ol>
+<hr>
+<h2>📊 Test Execution Summary</h2>
+<ul>
+<li><strong>Total Tests Executed</strong>: 15</li>
+<li><strong>Tests Passed</strong>: 0 (0%)</li>
+<li><strong>Tests Failed</strong>: 15 (100%)</li>
+<li><strong>Execution Time</strong>: 2 minutes 6 seconds</li>
+<li><strong>Primary Failure Cause</strong>: Frontend server unavailability</li>
+</ul>
+
+    </body>
+    </html>
+  
