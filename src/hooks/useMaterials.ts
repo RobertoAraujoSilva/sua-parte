@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
 
+const BACKEND_URL = 'http://localhost:3001';
+
 export interface Material {
   filename: string;
   size: number;
@@ -34,7 +36,7 @@ export const useMaterials = (): UseMaterials => {
       const token = await getAuthToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch('/api/materials', {
+      const response = await fetch(`${BACKEND_URL}/api/materials`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -61,7 +63,7 @@ export const useMaterials = (): UseMaterials => {
       const token = await getAuthToken();
       if (!token) throw new Error('Not authenticated');
 
-      const response = await fetch('/api/materials/sync-all', {
+      const response = await fetch(`${BACKEND_URL}/api/materials/sync-all`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

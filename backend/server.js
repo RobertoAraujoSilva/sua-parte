@@ -26,7 +26,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Servir arquivos estáticos da pasta docs/Oficial
-app.use('/materials', express.static(path.join(__dirname, '../docs/Oficial')));
+app.use('/materials', express.static(path.join(__dirname, '..', 'docs', 'Oficial')));
 
 // Rotas
 app.use('/api/admin', adminRoutes);

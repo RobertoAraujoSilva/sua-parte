@@ -72,6 +72,48 @@ USING (
   is_admin_user()         -- Admin users can view all programas
 );
 
+DROP POLICY IF EXISTS "Admin users can insert programas" ON public.programas;
+CREATE POLICY "Admin users can insert programas"
+ON public.programas
+FOR INSERT
+WITH CHECK (
+  is_admin_user()
+);
+
+DROP POLICY IF EXISTS "Admin users can update programas" ON public.programas;
+CREATE POLICY "Admin users can update programas"
+ON public.programas
+FOR UPDATE
+USING (
+  auth.uid() = user_id OR
+  is_admin_user()
+)
+WITH CHECK (
+  auth.uid() = user_id OR
+  is_admin_user()
+);
+
+DROP POLICY IF EXISTS "Admin users can delete programas" ON public.programas;
+CREATE POLICY "Admin users can delete programas"
+ON public.programas
+FOR DELETE
+USING (
+  auth.uid() = user_id OR
+  is_admin_user()
+);
+
+-- Add policy for 'date' column
+DROP POLICY IF EXISTS "Admin users can manage date column in programas" ON public.programas;
+CREATE POLICY "Admin users can manage date column in programas"
+ON public.programas
+FOR ALL
+USING (
+  is_admin_user()
+)
+WITH CHECK (
+  is_admin_user()
+);
+
 -- 6. Ensure RLS is enabled on all tables
 ALTER TABLE IF EXISTS public.audit_overrides ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS public.profiles ENABLE ROW LEVEL SECURITY;

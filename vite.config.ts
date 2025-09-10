@@ -10,14 +10,21 @@ export default defineConfig(({ mode }) => ({
     mode === 'development' && componentTagger(),
   ].filter(Boolean),
   server: {
-    host: "::",
-    port: 8080,
+    host: "127.0.0.1",
+    port: 5173,
     hmr: {
-      port: 8080,
-      host: 'localhost',
-      clientPort: 8080,
+      port: 5173,
+      host: '127.0.0.1',
+      clientPort: 5173,
       protocol: 'ws',
       timeout: 30000
+    },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        secure: false
+      }
     }
   },
   resolve: {
@@ -39,7 +46,4 @@ export default defineConfig(({ mode }) => ({
     }
   },
 }))
-
-
-
 
