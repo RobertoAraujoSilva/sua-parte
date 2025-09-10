@@ -7,14 +7,19 @@ import requests
 import json
 import time
 import os
+import argparse
 
-# API Key do TestSprite
-API_KEY = "sk-user-6Yb096I2rncrg87-i9k27eU5do4sUG0tfkWplCqd32BP0ti03sOJd8MrRN-8OeHUrlnfiZd0LXQXj5ElBqK15IYmpQum1jIVDUQsoceABGguAk-fNSLInapYXz0Nnvb17nA"
+# API Key do TestSprite (lida do ambiente)
+API_KEY = os.getenv("TESTSPRITE_API_KEY", "")
 
-# Configurações do projeto
-PROJECT_PATH = r"C:\Users\mauro\Documents\GitHub\sua-parte"
-FRONTEND_URL = "http://localhost:8080"
-BACKEND_URL = "http://localhost:3000"
+# Configurações do projeto (com override por env)
+PROJECT_PATH = os.getenv("PROJECT_PATH", os.getcwd())
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:8080")
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:3001")
+SCENARIO_PATH = os.getenv(
+    "TESTSPRITE_SCENARIO",
+    os.path.join("testsprite_tests", "scenarios", "min_smoke.json")
+)
 
 def test_connectivity():
     """Testa conectividade com frontend e backend"""
@@ -176,6 +181,87 @@ def run_manual_tests():
     
     return test_results
 
+def resolve_url(template: str) -> str:
+    return (
+        template
+        .replace("${frontend_url}", FRONTEND_URL)
+        .replace("${backend_url}", BACKEND_URL)
+    )
+
+def run_scenario_from_file(path: str):
+    """Executa um cenário JSON simples (smoke)."""
+    print(f"\n📝 Carregando cenário: {path}")
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            scenario = json.load(f)
+    except Exception as e:
+        print(f"❌ Não foi possível carregar o cenário: {e}")
+        return []
+
+    tests = scenario.get('tests', [])
+    results = []
+
+    for t in tests:
+        tid = t.get('id') or t.get('name') or 'test'
+        req = t.get('request', {})
+        method = (req.get('method') or 'GET').upper()
+        url = resolve_url(req.get('url', ''))
+        asserts = t.get('assert', {})
+
+        print(f"\n🔄 Cenário: {tid}")
+        print(f"   {method} {url}")
+
+        try:
+            resp = requests.request(method, url, timeout=20)
+            status_ok = ('status' not in asserts) or (resp.status_code == asserts.get('status'))
+
+            body_text = resp.text or ''
+            json_ok = True
+            keys_expected = asserts.get('json.keys')
+            if keys_expected is not None:
+                try:
+                    data = resp.json()
+                    for k in keys_expected:
+                        if k not in data:
+                            json_ok = False
+                            break
+                except Exception:
+                    json_ok = False
+
+            contains_ok = True
+            contains_any = asserts.get('contains.any')
+            if contains_any is not None:
+                contains_ok = any(s in body_text for s in contains_any)
+
+            ok = status_ok and json_ok and contains_ok
+            results.append({
+                'test': tid,
+                'status': 'PASSED' if ok else 'FAILED',
+                'status_code': resp.status_code,
+                'response_time': resp.elapsed.total_seconds(),
+                'url': url
+            })
+            icon = '✅' if ok else '❌'
+            print(f"   {icon} Status {resp.status_code} | tempo {resp.elapsed.total_seconds():.2f}s")
+            if not ok:
+                if not status_ok:
+                    print(f"   ⚠️ Esperado status {asserts.get('status')}")
+                if keys_expected is not None and not json_ok:
+                    print(f"   ⚠️ JSON não contém chaves: {keys_expected}")
+                if contains_any is not None and not contains_ok:
+                    print(f"   ⚠️ Conteúdo não contém nenhum de: {contains_any}")
+
+        except Exception as e:
+            print(f"   ❌ Erro de requisição: {e}")
+            results.append({
+                'test': tid,
+                'status': 'FAILED',
+                'error': str(e),
+                'url': url
+            })
+
+    return results
+
 def generate_report(test_results):
     """Gera relatório final dos testes"""
     print("\n" + "="*60)
@@ -224,8 +310,24 @@ def generate_report(test_results):
 
 def main():
     """Função principal"""
+    # CLI args override
+    parser = argparse.ArgumentParser(description="Run TestSprite smoke tests")
+    parser.add_argument("--scenario", default=SCENARIO_PATH, help="Path to scenario JSON file")
+    parser.add_argument("--frontend", default=FRONTEND_URL, help="Frontend base URL")
+    parser.add_argument("--backend", default=BACKEND_URL, help="Backend base URL")
+    args = parser.parse_args()
+
+    # Apply overrides
+    global FRONTEND_URL, BACKEND_URL, SCENARIO_PATH
+    FRONTEND_URL = args.frontend
+    BACKEND_URL = args.backend
+    SCENARIO_PATH = args.scenario
+
     print("🚀 TestSprite - Sistema Ministerial")
     print("="*60)
+    if not API_KEY:
+        print("❌ TESTSPRITE_API_KEY não configurada. Defina a variável de ambiente TESTSPRITE_API_KEY e tente novamente.")
+        return
     print(f"🔑 API Key: {API_KEY[:20]}...")
     print(f"🌐 Frontend: {FRONTEND_URL}")
     print(f"🔧 Backend: {BACKEND_URL}")
@@ -239,12 +341,13 @@ def main():
     
     print("\n✅ Conectividade OK! Iniciando testes...")
     
-    # Cria plano de teste
-    test_plan = create_test_plan()
-    print(f"\n📋 Plano de teste criado com {len(test_plan['tests'])} testes")
+    # Executa cenário JSON (smoke)
+    scenario_results = run_scenario_from_file(SCENARIO_PATH)
     
     # Executa testes manuais
-    test_results = run_manual_tests()
+    manual_results = run_manual_tests()
+    
+    test_results = scenario_results + manual_results
     
     # Gera relatório
     generate_report(test_results)
@@ -254,7 +357,12 @@ def main():
         json.dump({
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
             "api_key": API_KEY[:20] + "...",
-            "project": test_plan["project"],
+            "project": {
+                "path": PROJECT_PATH,
+                "frontend_url": FRONTEND_URL,
+                "backend_url": BACKEND_URL,
+                "scenario": SCENARIO_PATH
+            },
             "results": test_results
         }, f, indent=2, ensure_ascii=False)
     

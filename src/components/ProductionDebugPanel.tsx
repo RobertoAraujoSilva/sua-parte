@@ -178,6 +178,23 @@ export const ProductionDebugPanel: React.FC = () => {
                     >
                       Clear Storage
                     </button>
+                    <button
+                      onClick={() => {
+                        try {
+                          const fn = (window as any).resetSupabaseAuth;
+                          if (typeof fn === 'function') {
+                            fn();
+                          } else {
+                            console.warn('resetSupabaseAuth() não está disponível. Certifique-se de estar em modo DEV.');
+                          }
+                        } catch (e) {
+                          console.error('Falha ao resetar sessão Supabase:', e);
+                        }
+                      }}
+                      className="bg-orange-500 text-white px-3 py-1 rounded text-xs hover:bg-orange-600"
+                    >
+                      Reset Supabase Auth
+                    </button>
                   </div>
                 </div>
               </div>

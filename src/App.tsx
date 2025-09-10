@@ -44,6 +44,7 @@ import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DebugFab from "./components/DebugFab";
+import AuthRecoveryButton from "./components/AuthRecoveryButton";
 
 const queryClient = new QueryClient();
 
@@ -297,6 +298,11 @@ const App = () => (
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
+
+          {/* Auth Recovery Button - Shows when there are auth errors */}
+          <div className="fixed top-4 right-4 z-50">
+            <AuthRecoveryButton />
+          </div>
 
           {/* Debug Panel - Only shows in development */}
           <ConditionalDebugPanel />

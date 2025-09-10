@@ -17,6 +17,7 @@ import { ProgramDetailModal } from "@/components/ProgramDetailModal";
 import { TemplateLibrary } from "@/components/TemplateLibrary";
 import { supabase } from "@/integrations/supabase/client";
 import { generateProgramPDF } from "@/utils/pdfGenerator";
+import { supabaseWithRetry, checkAuthState } from "@/utils/supabase-auth-fix";
 import PageShell from "@/components/layout/PageShell";
 import ProgramasToolbar from "@/components/programs/ProgramasToolbar";
 import { ResponsiveTableWrapper } from "@/components/layout/ResponsiveTableWrapper";
@@ -180,21 +181,35 @@ const ProgramasOptimized = () => {
     }
 
     try {
+      // Verificar estado da autenticação antes de prosseguir
+      const authState = await checkAuthState();
+      if (!authState.authenticated) {
+        console.error('❌ Authentication check failed:', authState.error);
+        toast({
+          title: "Erro de Autenticação",
+          description: "Sua sessão expirou. Por favor, faça login novamente.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       const dataInicio = uploadData.extractedData?.data_inicio || new Date().toISOString().split('T')[0];
       const mesApostila = uploadData.extractedData?.mes_ano || null;
 
-      // Check for duplicate programs using the database function
+      // Check for duplicate programs using the database function with retry
       console.log('🔍 Checking for duplicate programs...');
       
-      const { data: isDuplicate, error: checkError } = await supabase
-        .rpc('check_programa_duplicate', {
-          p_user_id: user.id,
-          p_mes_apostila: mesApostila || '',
-          p_data_inicio_semana: dataInicio
-        });
+      const duplicateCheckResult = await supabaseWithRetry(async () => {
+        return await supabase
+          .rpc('check_programa_duplicate', {
+            p_user_id: user.id,
+            p_mes_apostila: mesApostila || '',
+            p_data_inicio_semana: dataInicio
+          });
+      });
 
-      if (checkError) {
-        console.error('❌ Error checking for duplicates:', checkError);
+      if (duplicateCheckResult.error) {
+        console.error('❌ Error checking for duplicates:', duplicateCheckResult.error);
         toast({
           title: "Erro de Verificação",
           description: "Não foi possível verificar programas duplicados. Tente novamente.",
@@ -203,7 +218,7 @@ const ProgramasOptimized = () => {
         return;
       }
 
-      if (isDuplicate) {
+      if (duplicateCheckResult.data) {
         console.log('⚠️ Duplicate program found');
         toast({
           title: "Programa Já Existe",
@@ -213,7 +228,7 @@ const ProgramasOptimized = () => {
         return;
       }
 
-      // Save program to database
+      // Save program to database with retry mechanism
       const programData = {
         user_id: user.id,
         data_inicio_semana: dataInicio,
@@ -231,23 +246,25 @@ const ProgramasOptimized = () => {
 
       console.log('💾 Saving program to database:', programData);
 
-      const { data, error } = await supabase
-        .from('programas')
-        .insert(programData)
-        .select()
-        .single();
+      const saveResult = await supabaseWithRetry(async () => {
+        return await supabase
+          .from('programas')
+          .insert(programData)
+          .select()
+          .single();
+      });
 
-      if (error) {
-        console.error('❌ Error saving program:', error);
+      if (saveResult.error) {
+        console.error('❌ Error saving program:', saveResult.error);
         toast({
           title: "Erro ao Salvar",
-          description: `Erro ao salvar programa: ${error.message}`,
+          description: `Erro ao salvar programa: ${saveResult.error.message}`,
           variant: "destructive"
         });
         return;
       }
 
-      console.log('✅ Program saved successfully:', data);
+      console.log('✅ Program saved successfully:', saveResult.data);
 
       // Refresh programs list
       await loadPrograms();
@@ -258,17 +275,27 @@ const ProgramasOptimized = () => {
       });
 
       // Automate assignment generation for the new program
-      if (data) {
-        await handleGenerateAssignments(data);
+      if (saveResult.data) {
+        await handleGenerateAssignments(saveResult.data);
       }
 
     } catch (error) {
       console.error('❌ Exception saving program:', error);
-      toast({
-        title: "Erro Inesperado",
-        description: "Ocorreu um erro inesperado ao salvar o programa.",
-        variant: "destructive"
-      });
+      
+      // Check if it's an authentication error
+      if (error?.message?.includes('401') || error?.message?.includes('JWT') || error?.message?.includes('auth')) {
+        toast({
+          title: "Erro de Autenticação",
+          description: "Sua sessão expirou. Por favor, recarregue a página e faça login novamente.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Erro Inesperado",
+          description: "Ocorreu um erro inesperado ao salvar o programa.",
+          variant: "destructive"
+        });
+      }
     }
   };
 

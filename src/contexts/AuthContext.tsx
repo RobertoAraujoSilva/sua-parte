@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { User, Session, AuthError } from '@supabase/supabase-js';
+import { checkAndClearInvalidTokens, recoverFromAuthError, clearAuthStorage } from '@/utils/auth-recovery';
 
 interface Profile {
   id: string;
@@ -49,11 +50,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('🔄 Attempting to refresh authentication...');
       
+      // Primeiro, verificar e limpar tokens inválidos
+      const tokenCheck = await checkAndClearInvalidTokens();
+      if (tokenCheck.cleared) {
+        console.log('🧹 Invalid tokens were cleared, auth state reset');
+        setUser(null);
+        setProfile(null);
+        setAuthError('Sessão expirada. Por favor, faça login novamente.');
+        setLoading(false);
+        return;
+      }
+      
       // Tentar obter sessão atual
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
         console.error('❌ Session error:', sessionError);
+        
+        // Tentar recuperar do erro
+        const recovery = await recoverFromAuthError(sessionError);
+        if (recovery.recovered) {
+          console.log('✅ Recovered from session error:', recovery.action);
+          if (recovery.action === 'force_signout') {
+            setUser(null);
+            setProfile(null);
+            setAuthError('Sessão expirada. Por favor, faça login novamente.');
+            setLoading(false);
+            return;
+          }
+        }
+        
         setAuthError(`Erro de sessão: ${sessionError.message}`);
         return;
       }
@@ -69,11 +95,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error) {
       console.error('❌ Error refreshing auth:', error);
-      setAuthError('Erro ao atualizar autenticação');
       
-      // Limpar estado em caso de erro crítico
-      setUser(null);
-      setProfile(null);
+      // Tentar recuperar do erro
+      const recovery = await recoverFromAuthError(error);
+      if (recovery.recovered) {
+        console.log('✅ Recovered from refresh error:', recovery.action);
+        if (recovery.action === 'force_signout') {
+          setUser(null);
+          setProfile(null);
+          setAuthError('Sessão expirada. Por favor, faça login novamente.');
+        }
+      } else {
+        setAuthError('Erro ao atualizar autenticação');
+        // Limpar estado em caso de erro crítico
+        setUser(null);
+        setProfile(null);
+      }
     } finally {
       setLoading(false);
     }
@@ -108,7 +145,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // Verificar se o perfil foi encontrado
       if (!profileData) {
-        console.warn('⚠️ No profile found for user:', userId);
+        console.warn('⚠️ No profile found in profiles table, creating from user metadata');
+        
+        // Se não encontrou na tabela profiles, criar a partir dos metadados do usuário
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData.user) {
+          const metadata = userData.user.user_metadata;
+          
+          // Criar perfil a partir dos metadados
+          const profileFromMetadata = {
+            id: userId,
+            nome_completo: metadata.nome_completo || userData.user.email?.split('@')[0] || 'Usuário',
+            congregacao: metadata.congregacao || 'Não informado',
+            cargo: metadata.cargo || 'instrutor',
+            role: metadata.role || 'instrutor',
+            email: userData.user.email || '',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
+          console.log('✅ Profile created from metadata:', profileFromMetadata);
+          setProfile(profileFromMetadata);
+          return;
+        }
+        
         setAuthError('Perfil não encontrado. Entre em contato com o administrador.');
         return;
       }
@@ -122,8 +182,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Verificar erro 406 Not Acceptable
       if (profileError && (profileError as any).code === 'PGRST116') {
-        console.log('ℹ️ Erro PGRST116 (0 rows): Perfil não encontrado, mas não é um erro fatal');
+        console.log('ℹ️ Erro PGRST116 (0 rows): Perfil não encontrado, criando a partir dos metadados');
         console.log('ℹ️ Detalhes do erro:', profileError);
+        
+        // Criar perfil a partir dos metadados do usuário
+        const { data: userData } = await supabase.auth.getUser();
+        if (userData.user) {
+          const metadata = userData.user.user_metadata;
+          
+          const profileFromMetadata = {
+            id: userId,
+            nome_completo: metadata.nome_completo || userData.user.email?.split('@')[0] || 'Usuário',
+            congregacao: metadata.congregacao || 'Não informado',
+            cargo: metadata.cargo || 'instrutor',
+            role: metadata.role || 'instrutor',
+            email: userData.user.email || '',
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+          
+          console.log('✅ Profile created from metadata (PGRST116):', profileFromMetadata);
+          setProfile(profileFromMetadata);
+          setAuthError(null);
+          return;
+        }
+        
         setProfile(null);
         return;
       }
@@ -142,7 +225,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (profileData) {
         console.log('✅ Profile loaded successfully:', profileData);
-        setProfile(profileData);
+        
+        // Garantir que o perfil tenha o campo role
+        const profileWithRole = {
+          ...profileData,
+          role: profileData.role || 'instrutor', // Fallback se role não existir
+          email: profileData.email || user?.email || ''
+        };
+        
+        setProfile(profileWithRole);
+        setAuthError(null);
       } else {
         console.log('⚠️ No profile found for user');
         setProfile(null);
@@ -359,18 +451,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('🧹 Force clearing invalid tokens...');
       
+      // Usar utilitário de recuperação
+      clearAuthStorage();
+      
       // Limpar estado local
       setUser(null);
       setProfile(null);
       setAuthError(null);
-      
-      // Limpar tokens do localStorage
-      try {
-        localStorage.removeItem('sb-nwpuurgwnnuejqinkvrh-auth-token');
-        sessionStorage.clear();
-      } catch (e) {
-        console.log('🧹 Error clearing storage:', e);
-      }
       
       // Forçar logout no Supabase
       await supabase.auth.signOut();

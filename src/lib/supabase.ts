@@ -62,8 +62,9 @@ try {
       global: {
         headers: {
           'X-Client-Info': 'supabase-js-web',
+          // For PostgREST, supabase-js will automatically attach the user's access token
+          // We keep only the public anon apikey here.
           'apikey': supabaseAnonKey,
-          'Authorization': `Bearer ${supabaseAnonKey}`,
         }
       },
       // Configuração de fetch personalizada para garantir que os headers sejam enviados
@@ -84,11 +85,9 @@ try {
           headers.set('apikey', supabaseAnonKey);
           if (import.meta.env.DEV) console.log('🔑 Adicionando header apikey manualmente');
         }
-        
-        if (!headers.has('Authorization')) {
-          headers.set('Authorization', `Bearer ${supabaseAnonKey}`);
-          if (import.meta.env.DEV) console.log('🔑 Adicionando header Authorization manualmente');
-        }
+        // Important: do NOT override Authorization here; supabase-js will set the
+        // correct user access token for PostgREST calls. Overriding with anon key
+        // would drop user context and cause 401/denied RLS.
         
         // Adicionar Content-Type se não estiver presente
         if (!headers.has('Content-Type') && !['GET', 'HEAD'].includes((options.method || 'GET').toUpperCase())) {
@@ -118,6 +117,91 @@ try {
 } catch (error) {
   console.error('❌ Erro ao configurar Supabase:', error);
   throw error;
+}
+
+// Listener de mudanças de autenticação (apenas em desenvolvimento)
+if (typeof window !== 'undefined' && (import.meta as any).env?.DEV) {
+  try {
+    supabase.auth.onAuthStateChange((event, session) => {
+      const info = {
+        event,
+        user: session?.user?.id,
+        expires_at: session?.expires_at,
+        has_refresh_token: Boolean((session as any)?.refresh_token),
+      };
+      // Logs enxutos para diagnóstico em dev
+      if (event === 'TOKEN_REFRESHED') console.log('🔐 [Supabase] Token refreshed', info);
+      else if (event === 'TOKEN_REFRESH_TIMEOUT') console.warn('⏱️ [Supabase] Token refresh timeout', info);
+      else if (event === 'SIGNED_IN') console.log('✅ [Supabase] Signed in', info);
+      else if (event === 'SIGNED_OUT') console.log('👋 [Supabase] Signed out');
+      else if (event === 'USER_UPDATED') console.log('👤 [Supabase] User updated', info);
+      else if (event === 'PASSWORD_RECOVERY') console.log('🔑 [Supabase] Password recovery');
+      else console.log('ℹ️ [Supabase] Auth state change', info);
+    });
+  } catch (e) {
+    console.warn('⚠️ Não foi possível registrar listener de auth do Supabase:', e);
+  }
+}
+
+// Ação Dev: resetar autenticação completamente (logout + limpar storage/cache)
+export const resetAuthDev = async () => {
+  try {
+    console.log('🧹 Resetando sessão Supabase (signOut + limpar caches storages)...');
+    // 1) Sign out via SDK
+    try { await supabase.auth.signOut(); } catch {}
+
+    // 2) Limpar LocalStorage chaves sb-* e supabase*
+    if (typeof window !== 'undefined') {
+      try {
+        const keys: string[] = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const k = localStorage.key(i);
+          if (!k) continue;
+          if (k.startsWith('sb-') || k.startsWith('supabase')) keys.push(k);
+        }
+        keys.forEach(k => localStorage.removeItem(k));
+        console.log(`🧼 LocalStorage limpo (${keys.length} chaves)`);
+      } catch {}
+    }
+
+    // 3) Limpar IndexedDB do supabase (nomes comuns)
+    try {
+      const dbs = ['supabase-auth', 'supabase-js-auth', 'localforage'];
+      dbs.forEach(name => {
+        try { (indexedDB as any)?.deleteDatabase?.(name); } catch {}
+      });
+      console.log('🗄️ IndexedDB: requisitado delete das bases supabase');
+    } catch {}
+
+    // 4) Opcional: Unregister service workers (pode cachear páginas de auth)
+    try {
+      if ('serviceWorker' in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map(r => r.unregister()));
+        console.log(`🧻 ServiceWorkers desregistrados (${regs.length})`);
+      }
+    } catch {}
+
+    // 5) Limpar Cache Storage (PWA)
+    try {
+      if ('caches' in window) {
+        const names = await caches.keys();
+        await Promise.all(names.map(n => caches.delete(n)));
+        console.log(`🗑️ Caches removidos (${names.length})`);
+      }
+    } catch {}
+
+    console.log('✅ Reset concluído. Recarregando página...');
+    try { window.location.reload(); } catch {}
+  } catch (e) {
+    console.error('❌ Falha ao resetar autenticação:', e);
+  }
+};
+
+// Expor utilitário no window em DEV para fácil acesso via console
+if (typeof window !== 'undefined' && (import.meta as any).env?.DEV) {
+  (window as any).resetSupabaseAuth = resetAuthDev;
+  console.log('🧰 Dica Dev: chame resetSupabaseAuth() no console para limpar sessão/cache do Supabase.');
 }
 
 // Função utilitária para testar credenciais

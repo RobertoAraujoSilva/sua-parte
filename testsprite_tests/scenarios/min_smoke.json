@@ -1,0 +1,22 @@
+{
+  "project": {
+    "name": "Sistema Ministerial - Smoke",
+    "frontend_url": "http://localhost:8080",
+    "backend_url": "http://localhost:3001"
+  },
+  "tests": [
+    {
+      "id": "SMK-API-STATUS",
+      "name": "Backend API Status responds 200",
+      "request": { "method": "GET", "url": "${backend_url}/api/status" },
+      "assert": { "status": 200, "json.keys": ["status", "services"] }
+    },
+    {
+      "id": "SMK-ADMIN",
+      "name": "Admin dashboard loads",
+      "request": { "method": "GET", "url": "${frontend_url}/admin" },
+      "assert": { "status": 200, "contains.any": ["<!DOCTYPE html", "<html"] }
+    }
+  ]
+}
+

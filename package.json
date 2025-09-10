@@ -7,6 +7,7 @@
     "dev": "vite --port 8080 --strictPort",
     "dev:all": "npm run kill-ports && concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "kill-ports": "scripts\\kill-ports.bat",
+    "agents:log": "node scripts/agents-log.mjs",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "vite --port 8080 --strictPort",
     "dev:backend-only": "cd backend && npm run dev",
@@ -73,11 +74,15 @@
     "verify:reports:init": "node src/verification/cli.js reports init",
     "test:report-storage": "node src/verification/test-report-storage.js",
     "test:frontend-verifier": "node src/verification/test-frontend-verifier.js",
-    "test": "cypress run",
+    "test": "vitest run",
+    "e2e": "cypress run",
     "test:open": "cypress open",
     "test:component": "cypress run --component",
     "test:performance": "lighthouse http://localhost:8080/admin --output html --output-path ./lighthouse-report.html",
-    "optimize": "npm run build:prod && npm run analyze"
+    "optimize": "npm run build:prod && npm run analyze",
+    "testsprite:run": "python testsprite_tests/run_testsprite_with_api.py",
+    "testsprite:smoke": "python testsprite_tests/run_testsprite_with_api.py --scenario testsprite_tests/scenarios/min_smoke.json",
+    "testsprite:smoke:win": "powershell -ExecutionPolicy Bypass -File scripts\\run-testsprite-smoke.ps1"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^18.0.1",

@@ -8,11 +8,13 @@ export const getApiBaseUrl = () => {
     return '';
   }
   
-  const raw = import.meta.env.VITE_API_BASE_URL as string | undefined;
+  // Prefer VITE_API_BASE (new). Keep a fallback for VITE_API_BASE_URL (legacy)
+  const raw = (import.meta.env.VITE_API_BASE as string | undefined)
+    || (import.meta.env.VITE_API_BASE_URL as string | undefined);
   const envUrl = raw ? raw.replace(/\/$/, '') : '';
 
   if (!envUrl) {
-    console.log('⚠️ VITE_API_BASE_URL não definida, retornando URL vazia');
+    console.log('⚠️ VITE_API_BASE não definida (nem VITE_API_BASE_URL legado), retornando URL vazia');
     return '';
   }
 
@@ -101,7 +103,7 @@ export function usePDFProgramming() {
       // Em dev, use caminho relativo e deixe o Vite proxy encaminhar
       const baseUrl = getApiBaseUrl();
       if (!import.meta.env.DEV && !baseUrl) {
-        throw new Error('URL da API não configurada. Verifique a variável de ambiente VITE_API_BASE_URL.');
+        throw new Error('URL da API não configurada. Defina VITE_API_BASE.');
       }
       const apiUrl = import.meta.env.DEV
         ? `/api/admin/scan-pdfs`
@@ -125,7 +127,7 @@ export function usePDFProgramming() {
       if (!contentType.includes('application/json')) {
         const text = await response.text();
         const hint = text.includes('/@vite/client') || text.includes('<!DOCTYPE html')
-          ? 'Parece que o frontend devolveu o index.html. Verifique se o backend está rodando e se VITE_API_BASE_URL aponta para ele (ou remova para usar mocks em dev).'
+          ? 'Parece que o frontend devolveu o index.html. Verifique se o backend está rodando e se VITE_API_BASE aponta para ele (ou remova para usar mocks em dev).'
           : 'O servidor não retornou JSON.';
         throw new Error(`Resposta não-JSON do servidor: ${text.slice(0, 120)}... Dica: ${hint}`);
       }
@@ -158,7 +160,7 @@ export function usePDFProgramming() {
       
       const parseBase = getApiBaseUrl();
       if (!import.meta.env.DEV && !parseBase) {
-        throw new Error('URL da API não configurada. Verifique a variável de ambiente VITE_API_BASE_URL.');
+        throw new Error('URL da API não configurada. Defina VITE_API_BASE.');
       }
       const apiUrl = import.meta.env.DEV
         ? `/api/admin/parse-pdf`
@@ -182,7 +184,7 @@ export function usePDFProgramming() {
       if (!contentTypeCheck.includes('application/json')) {
         const text = await response.text();
         const hint = text.includes('/@vite/client') || text.includes('<!DOCTYPE html')
-          ? 'Parece que o frontend devolveu o index.html. Verifique se o backend está rodando e se VITE_API_BASE_URL aponta para ele (ou remova para usar mocks em dev).'
+          ? 'Parece que o frontend devolveu o index.html. Verifique se o backend está rodando e se VITE_API_BASE aponta para ele (ou remova para usar mocks em dev).'
           : 'O servidor não retornou JSON.';
         throw new Error(`Resposta não-JSON do servidor: ${text.slice(0, 120)}... Dica: ${hint}`);
       }
@@ -211,7 +213,7 @@ export function usePDFProgramming() {
       
       const validateBase = getApiBaseUrl();
       if (!import.meta.env.DEV && !validateBase) {
-        throw new Error('URL da API não configurada. Verifique a variável de ambiente VITE_API_BASE_URL.');
+        throw new Error('URL da API não configurada. Defina VITE_API_BASE.');
       }
       const validateUrl = import.meta.env.DEV
         ? `/api/admin/validate-pdf`
@@ -233,7 +235,7 @@ export function usePDFProgramming() {
       if (!contentTypeCheck.includes('application/json')) {
         const text = await response.text();
         const hint = text.includes('/@vite/client') || text.includes('<!DOCTYPE html')
-          ? 'Parece que o frontend devolveu o index.html. Verifique se o backend está rodando e se VITE_API_BASE_URL aponta para ele (ou remova para usar mocks em dev).'
+          ? 'Parece que o frontend devolveu o index.html. Verifique se o backend está rodando e se VITE_API_BASE aponta para ele (ou remova para usar mocks em dev).'
           : 'O servidor não retornou JSON.';
         throw new Error(`Resposta não-JSON do servidor: ${text.slice(0, 120)}... Dica: ${hint}`);
       }
@@ -264,7 +266,7 @@ export function usePDFProgramming() {
       
       const saveBase = getApiBaseUrl();
       if (!import.meta.env.DEV && !saveBase) {
-        throw new Error('URL da API não configurada. Verifique a variável de ambiente VITE_API_BASE_URL.');
+        throw new Error('URL da API não configurada. Defina VITE_API_BASE.');
       }
       const saveUrl = import.meta.env.DEV
         ? `/api/admin/save-programming`
