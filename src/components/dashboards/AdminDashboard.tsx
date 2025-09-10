@@ -202,24 +202,15 @@ const AdminDashboard: React.FC = () => {
       setBackendConnected(true);
       setUsingRealData(true);
       
-      const transformedMaterials: Material[] = supabaseMaterials.materials.map((material) => {
-        let displayName = material.name
-          .replace(/[<>"'&]/g, '')
-          .replace(/\.(pdf|jwpub|rtf|zip)$/i, '')
-          .replace(/_/g, ' ')
-          .replace(/mwb /gi, 'MWB ')
-          .replace(/\b\w/g, (l: string) => l.toUpperCase());
-
-        return {
-          id: material.name,
-          name: `📄 ${displayName}`,
-          type: material.type,
-          language: material.language,
-          size: `${(material.size / 1024 / 1024).toFixed(1)} MB`,
-          downloadDate: material.downloadDate ? new Date(material.downloadDate).toISOString().split('T')[0] : '',
-          status: 'available' as const
-        };
-      });
+      const transformedMaterials: Material[] = supabaseMaterials.materials.map((material) => ({
+        id: material.name,
+        name: `📄 ${material.name.replace(/[<>"'&]/g, '').replace(/\.(pdf|jwpub|rtf|zip)$/i, '').replace(/_/g, ' ')}`,
+        type: material.type,
+        language: material.language,
+        size: `${(material.size / 1024 / 1024).toFixed(1)} MB`,
+        downloadDate: material.downloadDate ? new Date(material.downloadDate).toISOString().split('T')[0] : '',
+        status: 'available' as const
+      }));
       
       setMaterials(transformedMaterials);
       return;
@@ -234,29 +225,12 @@ const AdminDashboard: React.FC = () => {
       
       const { mockMaterials } = await import('@/data/mockMaterials');
       const transformedMaterials: Material[] = mockMaterials.map((material) => {
-        const extension = material.filename.split('.').pop()?.toLowerCase();
-        let type: 'PDF' | 'JWPub' | 'RTF' = 'PDF';
-        
-        if (extension === 'jwpub') type = 'JWPub';
-        else if (extension === 'rtf') type = 'RTF';
-        
-        let language = 'pt-BR';
-        if (material.filename.includes('_E_') || material.filename.includes('_E.')) {
-          language = 'en';
-        }
-
-        let displayName = material.filename
-          .replace(/[<>"'&]/g, '')
-          .replace(/\.(pdf|jwpub|rtf|zip)$/i, '')
-          .replace(/_/g, ' ')
-          .replace(/mwb /gi, 'MWB ')
-          .replace(/\b\w/g, (l: string) => l.toUpperCase());
-
+        const ext = material.filename.split('.').pop()?.toLowerCase();
         return {
           id: material.filename,
-          name: `📄 ${displayName}`,
-          type,
-          language,
+          name: `📄 ${material.filename.replace(/[<>"'&]/g, '').replace(/\.(pdf|jwpub|rtf|zip)$/i, '').replace(/_/g, ' ')}`,
+          type: ext === 'jwpub' ? 'JWPub' : ext === 'rtf' ? 'RTF' : 'PDF',
+          language: material.filename.includes('_E_') ? 'en' : 'pt-BR',
           size: material.sizeFormatted,
           downloadDate: new Date(material.modifiedAt).toISOString().split('T')[0],
           status: 'available' as const
