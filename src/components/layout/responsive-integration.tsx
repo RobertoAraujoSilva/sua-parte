@@ -1,262 +1,306 @@
+/**
+ * Responsive Integration Components
+ * 
+ * Components and utilities for handling responsive design integration,
+ * device detection, and adaptive layout management.
+ */
+
 import React from 'react';
-import { useResponsive } from '@/hooks/use-responsive';
 import { useDensity } from '@/contexts/DensityContext';
-import { ResponsiveContainer } from './responsive-container';
-import PageShell from './PageShell';
 
-/**
- * Integration layer between PageShell and existing responsive components
- * Ensures backward compatibility while leveraging new layout system
- */
+// Device type detection utilities
+export const getDeviceType = (): 'mobile' | 'tablet' | 'desktop' => {
+  if (typeof window === 'undefined') return 'desktop';
+  
+  const width = window.innerWidth;
+  
+  if (width < 768) return 'mobile';
+  if (width < 1024) return 'tablet';
+  return 'desktop';
+};
 
-interface ResponsivePageShellProps {
-  title?: string;
-  hero?: boolean;
-  toolbar?: React.ReactNode;
-  actions?: React.ReactNode; // Legacy support
-  children: React.ReactNode;
-  className?: string;
-  // Responsive container options
-  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full';
-  padding?: 'none' | 'sm' | 'md' | 'lg';
-}
+// Breakpoint utilities
+export const breakpoints = {
+  mobile: '(max-width: 767px)',
+  tablet: '(min-width: 768px) and (max-width: 1023px)',
+  desktop: '(min-width: 1024px)',
+  touch: '(pointer: coarse)',
+  hover: '(hover: hover)',
+} as const;
 
-/**
- * Enhanced PageShell that integrates with existing responsive system
- * Automatically wraps content in ResponsiveContainer when needed
- */
-export function ResponsivePageShell({
-  title,
-  hero = false,
-  toolbar,
-  actions,
-  children,
-  className,
-  maxWidth = '2xl',
-  padding = 'md'
-}: ResponsivePageShellProps) {
-  const { currentBreakpoint } = useResponsive();
-  const { density } = useDensity();
+// Media query hook
+export const useMediaQuery = (query: string): boolean => {
+  const [matches, setMatches] = React.useState(false);
 
-  // Apply density data attribute to PageShell
   React.useEffect(() => {
-    document.documentElement.setAttribute('data-density', density);
-  }, [density]);
+    const mediaQuery = window.matchMedia(query);
+    setMatches(mediaQuery.matches);
 
-  return (
-    <PageShell
-      title={title}
-      hero={hero}
-      toolbar={toolbar}
-      actions={actions}
-      className={className}
-    >
-      <ResponsiveContainer 
-        maxWidth={maxWidth} 
-        padding={padding}
-        className="h-full"
-      >
-        {children}
-      </ResponsiveContainer>
-    </PageShell>
-  );
-}
+    const handler = (event: MediaQueryListEvent) => {
+      setMatches(event.matches);
+    };
 
-/**
- * Enhanced responsive table wrapper that integrates with PageShell
- * Uses CSS variables from page-shell.css for height calculations
- */
-interface ResponsiveTableShellProps {
+    mediaQuery.addEventListener('change', handler);
+    return () => mediaQuery.removeEventListener('change', handler);
+  }, [query]);
+
+  return matches;
+};
+
+// Device detection hooks
+export const useIsMobile = () => useMediaQuery(breakpoints.mobile);
+export const useIsTablet = () => useMediaQuery(breakpoints.tablet);
+export const useIsDesktop = () => useMediaQuery(breakpoints.desktop);
+export const useTouchDevice = () => useMediaQuery(breakpoints.touch);
+export const useHoverCapable = () => useMediaQuery(breakpoints.hover);
+
+// Container query component
+interface ResponsiveContainerProps {
   children: React.ReactNode;
   className?: string;
-  density?: 'compact' | 'comfortable';
+  breakpoint?: keyof typeof breakpoints;
 }
 
-export function ResponsiveTableShell({
+export const ResponsiveContainer: React.FC<ResponsiveContainerProps> = ({
   children,
   className = '',
-  density
-}: ResponsiveTableShellProps) {
-  const { density: contextDensity } = useDensity();
-  const finalDensity = density || contextDensity;
-
+  breakpoint = 'mobile'
+}) => {
+  const matches = useMediaQuery(breakpoints[breakpoint]);
+  
   return (
     <div 
-      className={`responsive-table-container ${className}`}
-      data-density={finalDensity}
+      className={`responsive-container ${className}`}
+      data-breakpoint={breakpoint}
+      data-matches={matches}
     >
       {children}
     </div>
   );
+};
+
+// Adaptive component wrapper
+interface AdaptiveWrapperProps {
+  mobile?: React.ReactNode;
+  tablet?: React.ReactNode;
+  desktop?: React.ReactNode;
+  fallback?: React.ReactNode;
 }
 
-/**
- * Adaptive grid that works with PageShell layout system
- * Integrates with CSS variables for consistent spacing
- */
-interface AdaptiveGridShellProps {
-  children: React.ReactNode;
-  minItemWidth?: number;
-  maxColumns?: number;
-  className?: string;
-}
+export const AdaptiveWrapper: React.FC<AdaptiveWrapperProps> = ({
+  mobile,
+  tablet,
+  desktop,
+  fallback
+}) => {
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
+  const isDesktop = useIsDesktop();
 
-export function AdaptiveGridShell({
-  children,
-  minItemWidth = 300,
-  maxColumns,
-  className = ''
-}: AdaptiveGridShellProps) {
-  const { currentBreakpoint } = useResponsive();
-  const { density } = useDensity();
+  if (isMobile && mobile) return <>{mobile}</>;
+  if (isTablet && tablet) return <>{tablet}</>;
+  if (isDesktop && desktop) return <>{desktop}</>;
+  
+  return <>{fallback}</>;
+};
 
-  // Calculate columns based on breakpoint and density
-  const getColumns = () => {
-    const baseColumns = {
-      mobile: 1,
-      tablet: 2,
-      desktop: 3,
-      large: 4
-    }[currentBreakpoint];
+// Layout shift detection
+export const useLayoutShift = () => {
+  const [shifts, setShifts] = React.useState<number>(0);
+  const [totalShift, setTotalShift] = React.useState<number>(0);
 
-    // Adjust for density
-    const densityMultiplier = density === 'compact' ? 1.2 : density === 'comfortable' ? 1 : 0.8;
-    const adjustedColumns = Math.floor(baseColumns * densityMultiplier);
+  React.useEffect(() => {
+    if (!('PerformanceObserver' in window)) return;
+
+    const observer = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        if (entry.entryType === 'layout-shift' && !(entry as any).hadRecentInput) {
+          setShifts(prev => prev + 1);
+          setTotalShift(prev => prev + (entry as any).value);
+        }
+      }
+    });
+
+    observer.observe({ entryTypes: ['layout-shift'] });
     
-    return maxColumns ? Math.min(adjustedColumns, maxColumns) : adjustedColumns;
+    return () => observer.disconnect();
+  }, []);
+
+  return { shifts, totalShift };
+};
+
+// Intersection observer hook
+export const useIntersection = (
+  ref: React.RefObject<HTMLElement>,
+  options?: IntersectionObserverInit
+) => {
+  const [isIntersecting, setIntersecting] = React.useState(false);
+
+  React.useEffect(() => {
+    if (!ref.current) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIntersecting(entry.isIntersecting),
+      options
+    );
+
+    observer.observe(ref.current);
+    
+    return () => observer.disconnect();
+  }, [ref, options]);
+
+  return isIntersecting;
+};
+
+// Responsive image component
+interface ResponsiveImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
+  mobileSrc?: string;
+  tabletSrc?: string;
+  desktopSrc?: string;
+  fallbackSrc: string;
+}
+
+export const ResponsiveImage: React.FC<ResponsiveImageProps> = ({
+  mobileSrc,
+  tabletSrc, 
+  desktopSrc,
+  fallbackSrc,
+  ...props
+}) => {
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
+  
+  const getSrc = () => {
+    if (isMobile && mobileSrc) return mobileSrc;
+    if (isTablet && tabletSrc) return tabletSrc;
+    if (desktopSrc) return desktopSrc;
+    return fallbackSrc;
   };
 
-  const columns = getColumns();
+  return <img {...props} src={getSrc()} />;
+};
 
-  return (
-    <div 
-      className={`adaptive-grid ${className}`}
-      style={{
-        '--min-item-width': `${minItemWidth}px`,
-        gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-        gap: 'var(--content-gap)'
-      } as React.CSSProperties}
-    >
-      {children}
-    </div>
-  );
-}
+// Viewport size hook
+export const useViewportSize = () => {
+  const [size, setSize] = React.useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 0,
+    height: typeof window !== 'undefined' ? window.innerHeight : 0,
+  });
 
-/**
- * Responsive header that integrates with PageShell
- * Uses CSS variables for consistent heights and spacing
- */
-interface ResponsiveHeaderShellProps {
-  title?: string;
-  subtitle?: string;
-  actions?: React.ReactNode;
-  breadcrumbs?: React.ReactNode;
-  className?: string;
-}
+  React.useEffect(() => {
+    const updateSize = () => {
+      setSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
 
-export function ResponsiveHeaderShell({
-  title,
-  subtitle,
-  actions,
-  breadcrumbs,
-  className = ''
-}: ResponsiveHeaderShellProps) {
-  const { isMobile } = useResponsive();
-  const { density } = useDensity();
+    window.addEventListener('resize', updateSize);
+    updateSize();
+    
+    return () => window.removeEventListener('resize', updateSize);
+  }, []);
 
-  return (
-    <div 
-      className={`
-        bg-gradient-to-br from-jw-navy via-jw-blue to-jw-blue-dark
-        text-white
-        ${className}
-      `.trim()}
-      style={{
-        height: 'var(--hero-h)',
-        padding: '0 var(--shell-gutter)'
-      }}
-    >
-      <div className="h-full flex flex-col justify-center gap-2">
-        {breadcrumbs && !isMobile && (
-          <div className="text-white/80 text-sm">
-            {breadcrumbs}
-          </div>
-        )}
-        
-        {title && (
-          <h1 className={`
-            font-bold text-white
-            ${isMobile ? 'text-xl' : 'text-2xl lg:text-3xl'}
-          `}>
-            {title}
-          </h1>
-        )}
-        
-        {subtitle && (
-          <p className="text-white/90 text-sm lg:text-base max-w-3xl">
-            {subtitle}
-          </p>
-        )}
+  return size;
+};
 
-        {actions && (
-          <div className="flex flex-wrap gap-2 mt-2">
-            {actions}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
+// Safe area detection (for mobile notches, etc.)
+export const useSafeArea = () => {
+  const [safeArea, setSafeArea] = React.useState({
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+  });
 
-/**
- * Hook for getting integrated responsive classes
- * Combines PageShell CSS variables with responsive breakpoints
- */
-export function useResponsiveShell() {
-  const { currentBreakpoint, isMobile, isTablet, isDesktop, isLarge } = useResponsive();
-  const { density } = useDensity();
+  React.useEffect(() => {
+    const updateSafeArea = () => {
+      const root = document.documentElement;
+      setSafeArea({
+        top: parseInt(getComputedStyle(root).getPropertyValue('--safe-area-inset-top') || '0'),
+        right: parseInt(getComputedStyle(root).getPropertyValue('--safe-area-inset-right') || '0'),
+        bottom: parseInt(getComputedStyle(root).getPropertyValue('--safe-area-inset-bottom') || '0'),
+        left: parseInt(getComputedStyle(root).getPropertyValue('--safe-area-inset-left') || '0'),
+      });
+    };
 
-  const getContainerClasses = (maxWidth: string = '2xl') => {
-    if (maxWidth === 'full') {
-      return 'w-full';
+    updateSafeArea();
+    window.addEventListener('resize', updateSafeArea);
+    
+    return () => window.removeEventListener('resize', updateSafeArea);
+  }, []);
+
+  return safeArea;
+};
+
+// Orientation detection
+export const useOrientation = () => {
+  const [orientation, setOrientation] = React.useState<'portrait' | 'landscape'>('portrait');
+
+  React.useEffect(() => {
+    const updateOrientation = () => {
+      setOrientation(window.innerHeight > window.innerWidth ? 'portrait' : 'landscape');
+    };
+
+    updateOrientation();
+    window.addEventListener('resize', updateOrientation);
+    
+    return () => window.removeEventListener('resize', updateOrientation);
+  }, []);
+
+  return orientation;
+};
+
+// Network status detection
+export const useNetworkStatus = () => {
+  const [isOnline, setIsOnline] = React.useState(navigator.onLine);
+  const [connection, setConnection] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    const updateOnlineStatus = () => setIsOnline(navigator.onLine);
+    
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    // Network Information API (experimental)
+    if ('connection' in navigator) {
+      const conn = (navigator as any).connection;
+      setConnection({
+        effectiveType: conn.effectiveType,
+        downlink: conn.downlink,
+        rtt: conn.rtt,
+        saveData: conn.saveData,
+      });
+
+      const updateConnection = () => {
+        setConnection({
+          effectiveType: conn.effectiveType,
+          downlink: conn.downlink,
+          rtt: conn.rtt,
+          saveData: conn.saveData,
+        });
+      };
+
+      conn.addEventListener('change', updateConnection);
+      
+      return () => {
+        window.removeEventListener('online', updateOnlineStatus);
+        window.removeEventListener('offline', updateOnlineStatus);
+        conn.removeEventListener('change', updateConnection);
+      };
     }
-    
-    return `fluid-width max-w-${maxWidth}`;
-  };
 
-  const getTableClasses = () => {
-    return `responsive-table-container density-table`;
-  };
+    return () => {
+      window.removeEventListener('online', updateOnlineStatus);
+      window.removeEventListener('offline', updateOnlineStatus);
+    };
+  }, []);
 
-  const getToolbarClasses = () => {
-    return `intelligent-toolbar__grid`;
-  };
+  return { isOnline, connection };
+};
 
-  const getGridClasses = (columns?: number) => {
-    const baseClass = 'adaptive-grid';
-    const columnClass = columns ? `grid-cols-${columns}` : 'grid-responsive-auto';
-    return `${baseClass} ${columnClass}`;
-  };
-
-  return {
-    currentBreakpoint,
-    isMobile,
-    isTablet,
-    isDesktop,
-    isLarge,
-    density,
-    getContainerClasses,
-    getTableClasses,
-    getToolbarClasses,
-    getGridClasses
-  };
-}
-
-/**
- * Compatibility wrapper for existing responsive components
- * Ensures they work with PageShell without breaking changes
- */
-export function withResponsiveShell<T extends object>(
+// Density-aware component wrapper
+export function withDensity<T extends object>(
   Component: React.ComponentType<T>
 ) {
   return React.forwardRef<any, T>((props, ref) => {
@@ -269,6 +313,6 @@ export function withResponsiveShell<T extends object>(
       }
     }, [density, ref]);
 
-    return <Component {...props} ref={ref} />;
+    return React.createElement(Component, { ...(props as any), ref });
   });
 }

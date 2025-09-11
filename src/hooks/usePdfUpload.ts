@@ -107,22 +107,24 @@ export const usePdfUpload = () => {
       });
 
       // Add parsing method info to extracted data
-      extractedData.detalhes_extras = {
-        ...extractedData.detalhes_extras,
-        parsing_method: 'filename_analysis',
-        content_extracted: false,
-        filename_recognized: true
-      };
+      if (extractedData.detalhes_extras) {
+        (extractedData as any).detalhes_extras = {
+          ...extractedData.detalhes_extras,
+          parsing_method: 'filename_analysis',
+          content_extracted: false,
+          filename_recognized: true
+        };
+      }
 
       return extractedData;
     } catch (error) {
       logger.error('❌ Error parsing PDF:', error);
 
       // Enhanced fallback with better error information
-      const fallbackData = {
+      const fallbackData: any = {
         semana: `Programa Importado - ${file.name}`,
         mes_ano: '',
-        tipo_documento: 'programa_semanal',
+        tipo_documento: 'programa_semanal' as const,
         partes: [
           'Tesouros da Palavra de Deus',
           'Faça Seu Melhor no Ministério',
@@ -199,13 +201,13 @@ export const usePdfUpload = () => {
       }));
 
       // Show appropriate toast based on parsing method
-      if (extractedData.detalhes_extras?.parsing_method === 'fallback') {
+      if ((extractedData as any).detalhes_extras?.parsing_method === 'fallback') {
         toast({
           title: 'PDF importado com limitações',
           description: `Programa "${extractedData.semana}" foi importado, mas requer revisão manual das informações extraídas.`,
           variant: 'destructive'
         });
-      } else if (extractedData.detalhes_extras?.parsing_method === 'filename_analysis') {
+      } else if ((extractedData as any).detalhes_extras?.parsing_method === 'filename_analysis') {
         toast({
           title: 'PDF importado com sucesso!',
           description: `Programa "${extractedData.semana}" foi processado baseado no nome do arquivo. Verifique se as informações estão corretas.`,

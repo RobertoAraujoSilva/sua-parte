@@ -12,8 +12,6 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import { LanguageDebug } from "@/components/LanguageDebug";
 import Demo from "./pages/Demo";
-import Estudantes from "./pages/Estudantes";
-import EstudantesResponsive from "./pages/EstudantesResponsive";
 import ProgramasOptimized from "./pages/ProgramasOptimized";
 import ProgramaPreview from "./pages/ProgramaPreview";
 import ProgramasTest from "./pages/ProgramasTest";
@@ -35,8 +33,6 @@ import DeveloperPanel from "./pages/DeveloperPanel";
 import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
-import Equidade from "./pages/Equidade";
-import UnifiedDashboard from "./components/UnifiedDashboard";
 import AdminDashboardNew from "./pages/AdminDashboardNew";
 import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
@@ -138,14 +134,7 @@ const App = () => (
                 {/* Debug Routes - Only in development */}
                 {import.meta.env.DEV && (
                   <>
-                    <Route 
-                      path="/estudantes-responsive" 
-                      element={
-                        <ProtectedRoute allowedRoles={['instrutor']}>
-                          <EstudantesResponsive />
-                        </ProtectedRoute>
-                      } 
-                    />
+                    {/* Removed legacy route */}
                     <Route 
                       path="/density-toggle-test" 
                       element={<DensityToggleTestPage />} 
@@ -166,14 +155,7 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="/estudantes"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Estudantes />
-                    </ProtectedRoute>
-                  }
-                />
+                {/* Removed legacy route */}
                 <Route
                   path="/programas"
                   element={
@@ -235,14 +217,7 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="/equidade"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Equidade />
-                    </ProtectedRoute>
-                  }
-                />
+                {/* Removed legacy route */}
                 <Route
                   path="/admin"
                   element={
