@@ -20,9 +20,9 @@ const programacoesRoutes = require('./routes/programacoes');
 const designacoesRoutes = require('./routes/designacoes');
 
 const app = express();
-// Porta do servidor: usa variável de ambiente quando definida (>0); caso contrário, 3001 para produção
+// Porta do servidor: usa variável de ambiente quando definida (>0); caso contrário, 3000
 const envPort = parseInt(process.env.PORT || '', 10);
-const PORT = Number.isFinite(envPort) && envPort > 0 ? envPort : 3001;
+const PORT = Number.isFinite(envPort) && envPort > 0 ? envPort : 3000;
 
 // Middleware
 app.use(helmet());
