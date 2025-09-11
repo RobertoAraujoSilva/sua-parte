@@ -12,7 +12,6 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import { LanguageDebug } from "@/components/LanguageDebug";
 import Demo from "./pages/Demo";
-import Dashboard from "./pages/Dashboard";
 import Estudantes from "./pages/Estudantes";
 import EstudantesResponsive from "./pages/EstudantesResponsive";
 import ProgramasOptimized from "./pages/ProgramasOptimized";
@@ -39,7 +38,6 @@ import PortalFamiliar from "./pages/PortalFamiliar";
 import Equidade from "./pages/Equidade";
 import UnifiedDashboard from "./components/UnifiedDashboard";
 import AdminDashboardNew from "./pages/AdminDashboardNew";
-import CacheAsideDemo from "./pages/CacheAsideDemo";
 import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -95,7 +93,6 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/demo" element={<Demo />} />
-                <Route path="/cache-demo" element={<CacheAsideDemo />} />
                 <Route path="/funcionalidades" element={<Funcionalidades />} />
                 <Route path="/congregacoes" element={<Congregacoes />} />
                 <Route path="/suporte" element={<Suporte />} />
@@ -141,7 +138,6 @@ const App = () => (
                 {/* Debug Routes - Only in development */}
                 {import.meta.env.DEV && (
                   <>
-                    <Route path="/debug-dashboard" element={<Dashboard />} />
                     <Route 
                       path="/estudantes-responsive" 
                       element={
