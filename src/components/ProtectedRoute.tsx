@@ -153,9 +153,11 @@ const ProtectedRoute = ({
               navigate('/portal-familiar', { replace: true });
             }
           } else {
-            if (!didRedirect && location.pathname !== '/auth') {
+            // Default fallback: admins -> /admin, others -> /auth
+            const fallback = userRole === 'admin' ? '/admin' : '/auth';
+            if (!didRedirect && location.pathname !== fallback) {
               setDidRedirect(true);
-              navigate('/auth', { replace: true });
+              navigate(fallback, { replace: true });
             }
           }
           return;
