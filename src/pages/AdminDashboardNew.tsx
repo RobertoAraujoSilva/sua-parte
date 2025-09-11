@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,8 @@ import {
   Calendar
 } from 'lucide-react';
 import { PDFProgrammingManager } from '@/components/PDFProgrammingManager';
+import { useAuth } from '@/contexts/AuthContext';
+import supabase from '@/integrations/supabase/client';
 
 /**
  * Novo Admin Dashboard com funcionalidade de PDF
@@ -24,6 +26,52 @@ import { PDFProgrammingManager } from '@/components/PDFProgrammingManager';
 export default function AdminDashboardNew() {
   const [activeTab, setActiveTab] = useState('overview');
   const [loading, setLoading] = useState(false);
+  const [systemStatus, setSystemStatus] = useState<null | {
+    system: string;
+    timestamp: string;
+    services: Record<string, string>;
+    storage?: any;
+    lastSync?: any;
+  }>(null);
+  const [materials, setMaterials] = useState<Array<any>>([]);
+  const [materialsLoading, setMaterialsLoading] = useState(false);
+
+  const { user } = useAuth();
+
+  const apiBase = useMemo(() => '/api/admin', []);
+
+  const getAuthHeader = useCallback(async () => {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }, []);
+
+  const fetchStatus = useCallback(async () => {
+    try {
+      const headers = await getAuthHeader();
+      const res = await fetch(`${apiBase}/status`, { headers });
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      const json = await res.json();
+      setSystemStatus(json);
+    } catch (err) {
+      console.error('Erro ao carregar status do sistema', err);
+    }
+  }, [apiBase, getAuthHeader]);
+
+  const fetchMaterials = useCallback(async () => {
+    setMaterialsLoading(true);
+    try {
+      const headers = await getAuthHeader();
+      const res = await fetch(`${apiBase}/materials`, { headers });
+      if (!res.ok) throw new Error(`Status ${res.status}`);
+      const json = await res.json();
+      setMaterials(Array.isArray(json.materials) ? json.materials : []);
+    } catch (err) {
+      console.error('Erro ao carregar materiais', err);
+    } finally {
+      setMaterialsLoading(false);
+    }
+  }, [apiBase, getAuthHeader]);
 
   // Estatísticas estáticas (em produção viriam do backend)
   const staticStats = {
@@ -36,15 +84,34 @@ export default function AdminDashboardNew() {
   const checkForUpdates = async () => {
     setLoading(true);
     try {
-      // Simular verificação de atualizações
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const headers = await getAuthHeader();
+      const res = await fetch(`${apiBase}/check-updates`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...headers },
+      });
+      if (!res.ok) throw new Error(`Status ${res.status}`);
       console.log('✅ Atualizações verificadas');
+      // refresh materials and status after check
+      fetchMaterials();
+      fetchStatus();
     } catch (error) {
       console.error('❌ Erro ao verificar atualizações:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!user) return;
+    fetchStatus();
+  }, [user, fetchStatus]);
+
+  useEffect(() => {
+    if (!user) return;
+    if (activeTab === 'materials') {
+      fetchMaterials();
+    }
+  }, [user, activeTab, fetchMaterials]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -71,9 +138,10 @@ export default function AdminDashboardNew() {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Visão Geral</TabsTrigger>
             <TabsTrigger value="pdfs">PDFs</TabsTrigger>
+            <TabsTrigger value="materials">Materiais</TabsTrigger>
             <TabsTrigger value="users">Usuários</TabsTrigger>
             <TabsTrigger value="congregations">Congregações</TabsTrigger>
             <TabsTrigger value="system">Sistema</TabsTrigger>
@@ -137,9 +205,11 @@ export default function AdminDashboardNew() {
                   <RefreshCw className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">✅</div>
+                  <div className="text-2xl font-bold">{systemStatus?.lastSync ? '✅' : '—'}</div>
                   <p className="text-xs text-muted-foreground">
-                    Hoje, {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                    {systemStatus?.lastSync?.timestamp
+                      ? new Date(systemStatus.lastSync.timestamp).toLocaleString('pt-BR')
+                      : 'Sem registro'}
                   </p>
                 </CardContent>
               </Card>
@@ -159,14 +229,16 @@ export default function AdminDashboardNew() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Última Verificação:</span>
                     <span className="text-sm text-muted-foreground">
-                      {new Date().toLocaleString('pt-BR')}
+                      {systemStatus?.timestamp
+                        ? new Date(systemStatus.timestamp).toLocaleString('pt-BR')
+                        : '—'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Status:</span>
-                    <Badge variant="outline" className="text-green-600">
+                    <Badge variant="outline" className={systemStatus?.system === 'online' ? 'text-green-600' : 'text-amber-600'}>
                       <CheckCircle className="h-3 w-3 mr-1" />
-                      Operacional
+                      {systemStatus?.system || '—'}
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between">
@@ -221,6 +293,47 @@ export default function AdminDashboardNew() {
             </div>
             
             <PDFProgrammingManager />
+          </TabsContent>
+
+          {/* Materiais */}
+          <TabsContent value="materials" className="space-y-6">
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-center text-muted-foreground">
+                📁 Materiais baixados (JW.org)
+              </h3>
+              <p className="text-center text-sm text-muted-foreground mt-2">
+                Listagem de arquivos disponíveis em <code>/materials</code>
+              </p>
+            </div>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Arquivos</CardTitle>
+                <CardDescription>
+                  {materialsLoading ? 'Carregando…' : `${materials.length} itens`}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {materials.length === 0 && !materialsLoading && (
+                    <div className="text-sm text-muted-foreground">Nenhum material encontrado.</div>
+                  )}
+                  {materials.map((m) => (
+                    <div key={m.filename} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-sm">{m.filename}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {m.language || '—'} • {m.size ? `${(m.size/1024/1024).toFixed(2)} MB` : '—'} • {m.createdAt ? new Date(m.createdAt).toLocaleString('pt-BR') : '—'}
+                        </span>
+                      </div>
+                      <a className="text-sm text-blue-600 hover:underline" href={`/materials/${encodeURIComponent(m.filename)}`} target="_blank" rel="noreferrer">
+                        Abrir
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Usuários */}
