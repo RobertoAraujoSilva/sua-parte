@@ -30,7 +30,7 @@ interface DebugInfo {
 export const ProductionDebugPanel: React.FC = () => {
   const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const { user, session, profile, loading } = useAuth();
+  const { user, profile, signOut } = useAuth();
 
   useEffect(() => {
     const loadDebugInfo = async () => {

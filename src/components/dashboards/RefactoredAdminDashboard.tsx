@@ -117,7 +117,7 @@ const RefactoredAdminDashboard: React.FC = () => {
               </AlertDescription>
             </Alert>
 
-            {isDataStale() && (
+            {isDataStale && (
               <Alert className="border-orange-200 bg-orange-50">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>

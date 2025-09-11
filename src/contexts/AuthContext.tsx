@@ -18,6 +18,8 @@ interface AuthContextType {
   user: User | null;
   profile: Profile | null;
   isAdmin: boolean;
+  isInstrutor: boolean;
+  isEstudante: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signUp: (email: string, password: string, profileData: Partial<Profile>) => Promise<{ error: AuthError | null }>;
@@ -230,7 +232,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const profileWithRole = {
           ...profileData,
           role: profileData.role || 'instrutor', // Fallback se role não existir
-          email: profileData.email || user?.email || ''
         };
         
         setProfile(profileWithRole);
@@ -504,11 +505,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // 🔄 Computar se o usuário é admin
   const isAdmin = profile?.role === 'admin';
+  const isInstrutor = profile?.role === 'instrutor';
+  const isEstudante = profile?.role === 'estudante';
 
   const value: AuthContextType = {
     user,
     profile,
     isAdmin,
+    isInstrutor,
+    isEstudante,
     loading,
     signIn,
     signUp,

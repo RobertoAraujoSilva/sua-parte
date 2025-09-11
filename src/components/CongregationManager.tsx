@@ -33,7 +33,8 @@ const CongregationManager: React.FC = () => {
       if (error) throw error;
 
       const loadedCongregations = data.map(c => ({
-        ...c,
+        id: c.id as string,
+        nome: c.nome as string,
         instructors: 0, // Placeholder
         students: 0, // Placeholder
         status: 'active' as const
