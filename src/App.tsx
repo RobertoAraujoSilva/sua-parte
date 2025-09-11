@@ -15,8 +15,6 @@ import Demo from "./pages/Demo";
 import ProgramasTest from "./pages/ProgramasTest";
 import Relatorios from "./pages/Relatorios";
 import Reunioes from "./pages/Reunioes";
-import Dashboard from "./pages/Dashboard";
-import Designacoes from "./pages/Designacoes";
 import EstudantesResponsive from "./pages/EstudantesResponsive";
 import FamiliaPage from "./pages/estudante/[id]/familia";
 import Funcionalidades from "./pages/Funcionalidades";
@@ -182,14 +180,6 @@ const App = () => (
                 />
                 {/* Instrutor routes re-enabled */}
                 <Route
-                  path="/dashboard"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
                   path="/estudantes"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
@@ -202,14 +192,6 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
                       <ProgramasTest />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/designacoes"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Designacoes />
                     </ProtectedRoute>
                   }
                 />
