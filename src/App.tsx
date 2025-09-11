@@ -13,7 +13,6 @@ import Auth from "./pages/Auth";
 import { LanguageDebug } from "@/components/LanguageDebug";
 import Demo from "./pages/Demo";
 import ProgramasTest from "./pages/ProgramasTest";
-import PdfParsingTest from "./pages/PdfParsingTest";
 import Relatorios from "./pages/Relatorios";
 import Reunioes from "./pages/Reunioes";
 import FamiliaPage from "./pages/estudante/[id]/familia";
@@ -25,7 +24,6 @@ import Doar from "./pages/Doar";
 import BemVindo from "./pages/BemVindo";
 import ConfiguracaoInicial from "./pages/ConfiguracaoInicial";
 import PrimeiroPrograma from "./pages/PrimeiroPrograma";
-import DeveloperPanel from "./pages/DeveloperPanel";
 import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
@@ -50,9 +48,6 @@ if (import.meta.env.DEV) {
     import("@/utils/logoutDiagnostics"),
     import("@/utils/emergencyLogout"),
     import("@/utils/familyMemberDebug"),
-    import("@/utils/reviewDatabase"),
-    import("@/utils/executeMigration"),
-    import("@/utils/syncStudentsToInstructors"),
     import("@/utils/quickSync")
   ]).then(() => {
     console.log('✅ Debug tools loaded successfully');
@@ -118,21 +113,11 @@ const App = () => (
                   }
                 />
 
-                {/* Developer Panel Route */}
-                <Route
-                  path="/admin/developer"
-                  element={
-                    <ProtectedRoute allowedRoles={['developer']}>
-                      <DeveloperPanel />
-                    </ProtectedRoute>
-                  }
-                />
-
                 {/* Debug Routes - Only in development */}
                 {import.meta.env.DEV && (
                   <>
                     {/* Removed legacy route */}
-                    <Route 
+                    <Route
                       path="/density-toggle-test" 
                       element={<DensityToggleTestPage />} 
                     />
@@ -170,14 +155,6 @@ const App = () => (
                       element={
                         <ProtectedRoute allowedRoles={['instrutor']}>
                           <ProgramasTest />
-                        </ProtectedRoute>
-                      }
-                    />
-                    <Route
-                      path="/pdf-parsing-test"
-                      element={
-                        <ProtectedRoute allowedRoles={['instrutor']}>
-                          <PdfParsingTest />
                         </ProtectedRoute>
                       }
                     />

@@ -55,8 +55,14 @@ export const useAdminCache = () => {
     misses: 15,
     hitRate: 85.0,
     metrics: {
-      cacheHitRatio: 85.0,
+      hits: 85,
+      misses: 15,
+      hitRate: 85.0,
+      averageLatency: 125,
+      size: 150,
+      errors: 2,
       totalRequests: 100,
+      cacheHitRatio: 85.0,
       avgResponseTime: 125
     }
   });
@@ -66,6 +72,8 @@ export const useAdminCache = () => {
     uptime: '99.9%',
     lastCheck: new Date().toISOString(),
     metrics: {
+      isHealthy: true,
+      errorRate: 0.1,
       dbConnections: 5,
       activeUsers: 18,
       systemLoad: 45
