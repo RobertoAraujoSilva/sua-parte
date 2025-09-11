@@ -95,7 +95,7 @@ const ProtectedRoute = ({
 
       // Get role from profile if available, otherwise from user metadata
       if (profile) {
-        userRole = profile.role;
+        userRole = profile.role as UserRole;
         console.log('✅ ProtectedRoute: Using profile role:', userRole);
       } else if (user.user_metadata?.role) {
         userRole = user.user_metadata?.role as UserRole;
@@ -189,7 +189,7 @@ const ProtectedRoute = ({
 
     // Get role from profile if available, otherwise from user metadata
     if (profile) {
-      userRole = profile.role;
+      userRole = profile.role as UserRole;
       console.log('✅ ProtectedRoute: Using profile role:', userRole);
     } else if (user.user_metadata?.role) {
       userRole = user.user_metadata?.role as UserRole;

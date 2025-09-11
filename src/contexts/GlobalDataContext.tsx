@@ -228,7 +228,7 @@ export function GlobalDataProvider({ children }: { children: ReactNode }) {
         .order('nome', { ascending: true });
 
       if (error) throw error;
-      dispatch({ type: 'SET_STUDENTS', payload: data || [] });
+      dispatch({ type: 'SET_STUDENTS', payload: (data as unknown as Student[]) || [] });
     } catch (error) {
       console.error('Error loading students:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Erro ao carregar estudantes' });
@@ -247,7 +247,7 @@ export function GlobalDataProvider({ children }: { children: ReactNode }) {
         .limit(10);
 
       if (error) throw error;
-      dispatch({ type: 'SET_PROGRAMS', payload: data || [] });
+      dispatch({ type: 'SET_PROGRAMS', payload: (data as unknown as Program[]) || [] });
     } catch (error) {
       console.error('Error loading programs:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Erro ao carregar programas' });
@@ -266,7 +266,7 @@ export function GlobalDataProvider({ children }: { children: ReactNode }) {
         .limit(50);
 
       if (error) throw error;
-      dispatch({ type: 'SET_ASSIGNMENTS', payload: data || [] });
+      dispatch({ type: 'SET_ASSIGNMENTS', payload: (data as unknown as Assignment[]) || [] });
     } catch (error) {
       console.error('Error loading assignments:', error);
       dispatch({ type: 'SET_ERROR', payload: 'Erro ao carregar designações' });

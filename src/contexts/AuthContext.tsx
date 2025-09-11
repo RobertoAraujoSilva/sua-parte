@@ -232,6 +232,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const profileWithRole = {
           ...profileData,
           role: profileData.role || 'instrutor', // Fallback se role não existir
+          email: user?.email || '', // Adicionar email do user
         };
         
         setProfile(profileWithRole);
@@ -310,7 +311,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .update({
           ...updates,
           updated_at: new Date().toISOString(),
-        })
+        } as any)
         .eq('id', user.id)
         .select('*')
         .single();
