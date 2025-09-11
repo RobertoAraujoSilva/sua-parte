@@ -95,7 +95,7 @@ export function useAdminCache(): UseAdminCacheReturn {
         defaultStats // Fallback data
       );
 
-      setStats(data);
+      setStats(data as AdminStats);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar estatísticas';
       setError(errorMessage);
@@ -129,7 +129,7 @@ export function useAdminCache(): UseAdminCacheReturn {
         [] // Fallback: array vazio
       );
 
-      setProfiles(data);
+      setProfiles(data as any[]);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar perfis';
       setError(errorMessage);

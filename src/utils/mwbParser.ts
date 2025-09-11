@@ -3,9 +3,9 @@ export interface MWBProgram {
   date: string;
   theme: string;
   parts: {
-    treasures: { title: string; time: string; reading?: string }[];
-    ministry: { title: string; time: string; type: string }[];
-    christianLife: { title: string; time: string; speaker?: string }[];
+    treasures: { title: string; time: string; reading?: string; type?: string }[];
+    ministry: { title: string; time: string; type?: string }[];
+    christianLife: { title: string; time: string; speaker?: string; type?: string }[];
   };
 }
 

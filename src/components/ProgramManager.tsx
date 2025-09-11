@@ -130,9 +130,9 @@ const ProgramManager: React.FC = () => {
                     date: new Date().toISOString().split('T')[0],
                     theme: 'Programa de Exemplo - Semana 1',
                     parts: {
-                      treasures: [{ title: 'Tesouros da Palavra de Deus', time: '10 min' }],
-                      ministry: [{ title: 'Faça Seu Melhor no Ministério', time: '15 min' }],
-                      christianLife: [{ title: 'Nossa Vida Cristã', time: '15 min' }]
+                      treasures: [{ title: 'Tesouros da Palavra de Deus', time: '10 min', type: 'treasures' }],
+                      ministry: [{ title: 'Faça Seu Melhor no Ministério', time: '15 min', type: 'ministry' }],
+                      christianLife: [{ title: 'Nossa Vida Cristã', time: '15 min', type: 'christianLife' }]
                     }
                   },
                   {
@@ -140,9 +140,9 @@ const ProgramManager: React.FC = () => {
                     date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                     theme: 'Programa de Exemplo - Semana 2',
                     parts: {
-                      treasures: [{ title: 'Tesouros da Palavra de Deus', time: '10 min' }],
-                      ministry: [{ title: 'Faça Seu Melhor no Ministério', time: '15 min' }],
-                      christianLife: [{ title: 'Nossa Vida Cristã', time: '15 min' }]
+                      treasures: [{ title: 'Tesouros da Palavra de Deus', time: '10 min', type: 'treasures' }],
+                      ministry: [{ title: 'Faça Seu Melhor no Ministério', time: '15 min', type: 'ministry' }],
+                      christianLife: [{ title: 'Nossa Vida Cristã', time: '15 min', type: 'christianLife' }]
                     }
                   }
                 ]);

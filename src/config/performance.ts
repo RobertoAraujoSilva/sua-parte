@@ -151,7 +151,7 @@ export const monitorWebVitals = () => {
 // 🔧 Bundle Analyzer Helper
 export const analyzeBundle = () => {
   if (typeof window !== 'undefined') {
-    const resources = performance.getEntriesByType('resource');
+    const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[];
     const totalSize = resources.reduce((acc, resource) => {
       if (resource.transferSize) {
         return acc + resource.transferSize;
@@ -165,7 +165,7 @@ export const analyzeBundle = () => {
     
     // Top 5 largest resources
     const largestResources = resources
-      .filter(r => r.transferSize)
+      .filter((r): r is PerformanceResourceTiming => Boolean(r.transferSize))
       .sort((a, b) => (b.transferSize || 0) - (a.transferSize || 0))
       .slice(0, 5);
 
