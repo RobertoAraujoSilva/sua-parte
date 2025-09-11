@@ -15,7 +15,7 @@ import Demo from "./pages/Demo";
 import ProgramasTest from "./pages/ProgramasTest";
 import Relatorios from "./pages/Relatorios";
 import Reunioes from "./pages/Reunioes";
-import EstudantesResponsive from "./pages/EstudantesResponsive";
+import Designacoes from "./pages/Designacoes";
 import FamiliaPage from "./pages/estudante/[id]/familia";
 import Funcionalidades from "./pages/Funcionalidades";
 import Congregacoes from "./pages/Congregacoes";
@@ -183,7 +183,8 @@ const App = () => (
                   path="/estudantes"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
-                      <EstudantesResponsive />
+                      {/* Fallback to unified dashboard or a simple placeholder linking to students grid */}
+                      <UnifiedDashboard />
                     </ProtectedRoute>
                   }
                 />
@@ -192,6 +193,14 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
                       <ProgramasTest />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/designacoes"
+                  element={
+                    <ProtectedRoute allowedRoles={['instrutor']}>
+                      <Designacoes />
                     </ProtectedRoute>
                   }
                 />
