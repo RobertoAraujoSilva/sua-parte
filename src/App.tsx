@@ -12,14 +12,10 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import { LanguageDebug } from "@/components/LanguageDebug";
 import Demo from "./pages/Demo";
-import ProgramasOptimized from "./pages/ProgramasOptimized";
-import ProgramaPreview from "./pages/ProgramaPreview";
 import ProgramasTest from "./pages/ProgramasTest";
 import PdfParsingTest from "./pages/PdfParsingTest";
-import DesignacoesOptimized from "./pages/DesignacoesOptimized";
 import Relatorios from "./pages/Relatorios";
 import Reunioes from "./pages/Reunioes";
-import EstudantePortal from "./pages/EstudantePortal";
 import FamiliaPage from "./pages/estudante/[id]/familia";
 import Funcionalidades from "./pages/Funcionalidades";
 import Congregacoes from "./pages/Congregacoes";
@@ -33,6 +29,7 @@ import DeveloperPanel from "./pages/DeveloperPanel";
 import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
+import UnifiedDashboard from "./components/UnifiedDashboard";
 import AdminDashboardNew from "./pages/AdminDashboardNew";
 import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
@@ -157,21 +154,14 @@ const App = () => (
                 />
                 {/* Removed legacy route */}
                 <Route
-                  path="/programas"
+                  path="/programas-test"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
-                      <ProgramasOptimized />
+                      <ProgramasTest />
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="/programa/:id"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <ProgramaPreview />
-                    </ProtectedRoute>
-                  }
-                />
+                {/* Removed legacy route */}
                 {/* Test Routes - Only in development */}
                 {import.meta.env.DEV && (
                   <>
@@ -193,14 +183,7 @@ const App = () => (
                     />
                   </>
                 )}
-                <Route
-                  path="/designacoes"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <DesignacoesOptimized />
-                    </ProtectedRoute>
-                  }
-                />
+                {/* Removed legacy route */}
                 <Route
                   path="/relatorios"
                   element={
