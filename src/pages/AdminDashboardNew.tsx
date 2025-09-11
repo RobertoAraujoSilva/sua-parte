@@ -323,7 +323,7 @@ export default function AdminDashboardNew() {
                       <div className="flex flex-col">
                         <span className="font-medium text-sm">{m.filename}</span>
                         <span className="text-xs text-muted-foreground">
-                          {m.language || '—'} • {m.size ? `${(m.size/1024/1024).toFixed(2)} MB` : '—'} • {m.createdAt ? new Date(m.createdAt).toLocaleString('pt-BR') : '—'}
+                          {(m.language ?? '—')} • {(m.sizeFormatted ?? (m.size ? `${(m.size/1024/1024).toFixed(2)} MB` : '—'))} • {m.modifiedAt ? new Date(m.modifiedAt).toLocaleString('pt-BR') : '—'}
                         </span>
                       </div>
                       <a className="text-sm text-blue-600 hover:underline" href={`/materials/${encodeURIComponent(m.filename)}`} target="_blank" rel="noreferrer">

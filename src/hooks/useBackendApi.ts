@@ -87,7 +87,31 @@ export function useBackendApi() {
       const response = await fetch(`${API_BASE_URL}/admin/materials`, { headers });
       if (!response.ok) throw new Error(`Status ${response.status}`);
       const json = await response.json();
-      return json.materials || [];
+      const raws = (json.materials || []) as any[];
+
+      // Mapear para o formato esperado pelo AdminDashboardConnected
+      const mapType = (filename: string): string => {
+        const lower = filename.toLowerCase();
+        if (lower.endsWith('.pdf')) return 'pdf';
+        if (lower.endsWith('.jwpub')) return 'jwpub';
+        if (lower.endsWith('.daisy.zip')) return 'daisy.zip';
+        if (lower.endsWith('.rtf')) return 'rtf';
+        return 'file';
+      };
+
+      const mapLanguage = (filename: string): string => {
+        if (/mwb_[eE]_/.test(filename)) return 'en-US';
+        if (/mwb_[tT]_/.test(filename)) return 'pt-BR';
+        return '—';
+      };
+
+      return raws.map((m) => ({
+        name: m.filename ?? m.name ?? '—',
+        size: typeof m.size === 'number' ? m.size : 0,
+        lastModified: m.modifiedAt ? new Date(m.modifiedAt).toISOString() : (m.downloadedAt || new Date().toISOString()),
+        type: mapType(m.filename ?? ''),
+        language: m.language ?? mapLanguage(m.filename ?? ''),
+      }));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao buscar materiais');
       return [];
