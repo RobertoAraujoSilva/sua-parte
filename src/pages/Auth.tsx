@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, LogIn, UserPlus, Calendar, Home, Church, UserCheck } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -18,6 +18,7 @@ import { supabase } from "@/lib/supabase";
 
 const AuthPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { t } = useTranslation();
   const { signIn, signUp, user } = useAuth();
   
@@ -37,10 +38,12 @@ const AuthPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState("login");
 
   useEffect(() => {
-    if (user) {
-      navigate('/dashboard');
+    if (!user) return;
+    // Evita loop de navegação: só redireciona se ainda estiver em /auth
+    if (location.pathname === '/auth') {
+      navigate('/dashboard', { replace: true });
     }
-  }, [user, navigate]);
+  }, [user?.id, location.pathname, navigate]);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
