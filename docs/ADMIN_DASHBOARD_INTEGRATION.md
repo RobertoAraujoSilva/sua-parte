@@ -24,7 +24,7 @@ O **Dashboard Administrativo** agora está **100% funcional** com integração c
 
 ### **Backend (Node.js)**
 - **URL:** `http://localhost:3001/api`
-- **Porta:** 3001
+- **Porta:** 3001 (padrão unificado)
 - **Status:** ✅ Funcionando
 
 ---
@@ -161,26 +161,29 @@ Admin seleciona → Publica → Instrutores acessam → Sistema funcionando!
 
 ## **🚨 Troubleshooting**
 
-### **Problema: Backend não inicia**
+### **Problema: Backend não inicia na porta 3001**
 ```bash
 # Verificar dependências
 cd backend
 npm install
 
-# Verificar porta
+# Verificar se a porta está ocupada
 netstat -an | findstr :3001
 
-# Verificar logs
+# Forçar porta específica
+set PORT=3001
 npm run dev
+
+# Verificar logs de inicialização
 ```
 
 ### **Problema: Frontend não conecta ao backend**
 ```bash
-# Verificar se backend está rodando
+# Verificar se backend está rodando (porta 3001 padrão)
 curl http://localhost:3001/api/status
 
-# Verificar CORS
-# Backend já tem CORS configurado
+# Verificar CORS (já configurado)
+# Testar no navegador em http://localhost:8080/admin
 ```
 
 ### **Problema: Downloads não funcionam**

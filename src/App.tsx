@@ -28,7 +28,7 @@ import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
 import UnifiedDashboard from "./components/UnifiedDashboard";
-import AdminDashboardNew from "./pages/AdminDashboardNew";
+import AdminDashboardConnected from "./components/admin/AdminDashboardConnected";
 import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -179,18 +179,10 @@ const App = () => (
                 />
                 {/* Removed legacy route */}
                 <Route
-                  path="/admin"
-                  element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <AdminDashboardNew />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
                   path="/admin/*"
                   element={
                     <ProtectedRoute allowedRoles={['admin']}>
-                      <AdminDashboardNew />
+                      <AdminDashboardConnected />
                     </ProtectedRoute>
                   }
                 />

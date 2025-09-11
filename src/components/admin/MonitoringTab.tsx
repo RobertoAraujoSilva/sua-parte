@@ -22,7 +22,11 @@ import { useAdminCache } from '@/hooks/admin/useAdminCache';
  * ✅ Regra 9: Performance monitoring
  */
 
-export default function MonitoringTab() {
+interface MonitoringTabProps {
+  systemStatus?: any;
+}
+
+export default function MonitoringTab({ systemStatus }: MonitoringTabProps) {
   const { getCacheMetrics, getHealthStatus } = useAdminCache();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -126,9 +130,9 @@ export default function MonitoringTab() {
             <div className="text-2xl font-bold text-green-600">
               {healthStatus.metrics?.isHealthy ? '✅' : '⚠️'}
             </div>
-            <p className="text-xs text-muted-foreground">
-              {healthStatus.metrics?.isHealthy ? 'Saudável' : 'Atenção'}
-            </p>
+              <p className="text-sm text-muted-foreground">
+                {systemStatus?.services ? `${Object.values(systemStatus.services).filter(s => s === 'active').length}/4 serviços ativos` : 'Status - System Health'}
+              </p>
             <div className="mt-2 text-xs text-muted-foreground">
               Error Rate: {healthStatus.metrics?.errorRate?.toFixed(1) || 0}%
             </div>
