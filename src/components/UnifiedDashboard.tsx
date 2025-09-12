@@ -43,6 +43,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useJWorgIntegration } from '@/hooks/useJWorgIntegration';
 import { supabase } from '@/lib/supabase';
 import UnifiedNavigation from './UnifiedNavigation';
+import ProgramFlowGuide from '@/components/programs/ProgramFlowGuide';
 import UnifiedBreadcrumbs from './UnifiedBreadcrumbs';
 
 // 🎯 LAZY LOADING DOS COMPONENTES PESADOS
@@ -369,6 +370,11 @@ export default function UnifiedDashboard() {
                   {profile.congregacao || 'Sua Congregação'} - Gestão Local
                 </p>
               </div>
+            </div>
+
+            {/* Fluxo orientado para novo usuário */}
+            <div className="mb-4">
+              <ProgramFlowGuide />
             </div>
 
             {/* 📊 ESTATÍSTICAS LOCAIS */}

@@ -6,7 +6,7 @@ O **Dashboard Administrativo** agora está **100% funcional** com integração c
 
 ### **🔧 O que foi implementado:**
 
-1. **✅ Backend Node.js** rodando na porta 3001
+1. **✅ Backend Node.js** rodando na porta 3000
 2. **✅ Serviço JWDownloader** para baixar materiais da JW.org
 3. **✅ API REST** com rotas para admin, materiais e programas
 4. **✅ Integração frontend-backend** completa
@@ -23,8 +23,8 @@ O **Dashboard Administrativo** agora está **100% funcional** com integração c
 - **Status:** ✅ Funcionando
 
 ### **Backend (Node.js)**
-- **URL:** `http://localhost:3001/api`
-- **Porta:** 3001
+- **URL:** `http://localhost:3000/api`
+- **Porta:** 3000
 - **Status:** ✅ Funcionando
 
 ---
@@ -40,9 +40,9 @@ npm run dev
 
 **Resultado esperado:**
 ```
-🎯 Sistema Ministerial Backend rodando na porta 3001
+🎯 Sistema Ministerial Backend rodando na porta 3000
 📁 Materiais disponíveis em: C:\Users\sharo\Documents\GitHub\sua-parte\docs\Oficial
-🌐 API disponível em: http://localhost:3001/api
+🌐 API disponível em: http://localhost:3000/api
 ```
 
 ### **2. Iniciar o Frontend**
@@ -122,7 +122,7 @@ npm run cypress:run --spec "cypress/e2e/admin-dashboard-integration.cy.ts"
 - Verifica usuário, perfil e role
 
 ### **🗄️ Test Backend**
-- Testa conexão com backend na porta 3001
+- Testa conexão com backend na porta 3000
 - Valida API `/api/status`
 
 ### **👤 Force Profile + Backend**
@@ -168,7 +168,7 @@ cd backend
 npm install
 
 # Verificar porta
-netstat -an | findstr :3001
+netstat -an | findstr :3000
 
 # Verificar logs
 npm run dev
@@ -177,7 +177,7 @@ npm run dev
 ### **Problema: Frontend não conecta ao backend**
 ```bash
 # Verificar se backend está rodando
-curl http://localhost:3001/api/status
+curl http://localhost:3000/api/status
 
 # Verificar CORS
 # Backend já tem CORS configurado

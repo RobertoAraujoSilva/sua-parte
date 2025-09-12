@@ -1,0 +1,59 @@
+{
+  "timestamp": "2025-09-10 16:45:29",
+  "api_key": "sk-user-6Yb096I2rncr...",
+  "project": {
+    "name": "Sistema Ministerial",
+    "path": "C:\\Users\\mauro\\Documents\\GitHub\\sua-parte",
+    "frontend_url": "http://localhost:8080",
+    "backend_url": "http://localhost:3000"
+  },
+  "results": [
+    {
+      "test": "Admin Dashboard Access",
+      "status": "PASSED",
+      "response_time": 0.01,
+      "html_length": 3044
+    },
+    {
+      "test": "Authentication Page", 
+      "status": "PASSED",
+      "response_time": 0.03,
+      "html_length": 3044
+    },
+    {
+      "test": "Student Management",
+      "status": "PASSED", 
+      "response_time": 0.00,
+      "html_length": 3044
+    },
+    {
+      "test": "Program Management",
+      "status": "PASSED",
+      "response_time": 0.00,
+      "html_length": 3044
+    },
+    {
+      "test": "Backend API Status",
+      "status": "PASSED",
+      "response_time": 0.00,
+      "data": {
+        "status": "online",
+        "timestamp": "2025-09-10T16:45:29.216Z",
+        "version": "1.0.0",
+        "services": {
+          "jwDownloader": "active",
+          "programGenerator": "active", 
+          "materialManager": "active",
+          "notificationService": "active"
+        }
+      }
+    }
+  ],
+  "summary": {
+    "total_tests": 5,
+    "passed": 5,
+    "warnings": 0,
+    "failed": 0,
+    "success_rate": 100.0
+  }
+}

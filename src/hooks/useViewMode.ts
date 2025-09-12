@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'react-router-dom';
 
 export type ViewMode = 'list' | 'grid' | 'stats';
 
@@ -16,7 +16,7 @@ interface UseViewModeOptions {
 
 export function useViewMode(options: UseViewModeOptions = {}) {
   const { defaultView = 'list', storageKey = 'estudantesView' } = options;
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   
   // Get initial view from URL params or localStorage
   const getInitialView = (): ViewMode => {

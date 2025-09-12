@@ -1,18 +1,25 @@
 import { useState, useCallback } from 'react';
 
-// URL base da API - detecta automaticamente se está em desenvolvimento ou produção
-const getApiBaseUrl = () => {
-  if (import.meta.env.DEV) {
-    // Em desenvolvimento, tentar detectar a porta do backend
-    // O backend usa porta dinâmica, então vamos tentar algumas portas comuns
-    const possiblePorts = [59033, 57808, 3000, 5000, 8000];
-    
-    // Por enquanto, usar a porta atual conhecida
-    // TODO: Implementar detecção automática de porta
-    return 'http://localhost:59033';
+// URL base da API: usa variável de ambiente quando válida
+export const getApiBaseUrl = () => {
+  const forceMock = (import.meta.env.VITE_FORCE_MOCK as string | undefined) === '1' || (import.meta.env.VITE_FORCE_MOCK as string | undefined) === 'true';
+  if (forceMock) {
+    console.log('⚠️ Modo mock forçado ativado, retornando URL vazia');
+    return '';
   }
-  // Em produção, usar URL relativa
-  return '';
+  
+  // Prefer VITE_API_BASE (new). Keep a fallback for VITE_API_BASE_URL (legacy)
+  const raw = (import.meta.env.VITE_API_BASE as string | undefined)
+    || (import.meta.env.VITE_API_BASE_URL as string | undefined);
+  const envUrl = raw ? raw.replace(/\/$/, '') : '';
+
+  if (!envUrl) {
+    console.log('⚠️ VITE_API_BASE não definida (nem VITE_API_BASE_URL legado), retornando URL vazia');
+    return '';
+  }
+
+  console.log('✅ Usando API base URL:', envUrl);
+  return envUrl;
 };
 
 // Tipos para PDF e programação
@@ -91,11 +98,23 @@ export function usePDFProgramming() {
     
     try {
       console.log('🔍 Escaneando PDFs na pasta oficial...');
+      console.log('🔗 URL da API:', getApiBaseUrl());
       
-      const response = await fetch(`${getApiBaseUrl()}/api/admin/scan-pdfs`, {
+      // Em dev, use caminho relativo e deixe o Vite proxy encaminhar
+      const baseUrl = getApiBaseUrl();
+      if (!import.meta.env.DEV && !baseUrl) {
+        throw new Error('URL da API não configurada. Defina VITE_API_BASE.');
+      }
+      const apiUrl = import.meta.env.DEV
+        ? `/api/admin/scan-pdfs`
+        : `${baseUrl}/api/admin/scan-pdfs`;
+      console.log('🔗 Endpoint completo:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json',
           'Authorization': 'Bearer test' // TODO: Implementar autenticação real
         }
       });
@@ -104,6 +123,14 @@ export function usePDFProgramming() {
         throw new Error(`Erro HTTP: ${response.status}`);
       }
 
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        const text = await response.text();
+        const hint = text.includes('/@vite/client') || text.includes('<!DOCTYPE html')
+          ? 'Parece que o frontend devolveu o index.html. Verifique se o backend está rodando e se VITE_API_BASE aponta para ele (ou remova para usar mocks em dev).'
+          : 'O servidor não retornou JSON.';
+        throw new Error(`Resposta não-JSON do servidor: ${text.slice(0, 120)}... Dica: ${hint}`);
+      }
       const data = await response.json();
       
       if (data.success) {
@@ -129,8 +156,18 @@ export function usePDFProgramming() {
     
     try {
       console.log('📖 Extraindo programação do PDF:', pdf.fileName);
+      console.log('🔗 URL da API:', getApiBaseUrl());
       
-      const response = await fetch(`${getApiBaseUrl()}/api/admin/parse-pdf`, {
+      const parseBase = getApiBaseUrl();
+      if (!import.meta.env.DEV && !parseBase) {
+        throw new Error('URL da API não configurada. Defina VITE_API_BASE.');
+      }
+      const apiUrl = import.meta.env.DEV
+        ? `/api/admin/parse-pdf`
+        : `${parseBase}/api/admin/parse-pdf`;
+      console.log('🔗 Endpoint completo:', apiUrl);
+      
+      const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -143,6 +180,14 @@ export function usePDFProgramming() {
         throw new Error(`Erro HTTP: ${response.status}`);
       }
 
+      const contentTypeCheck = response.headers.get('content-type') || '';
+      if (!contentTypeCheck.includes('application/json')) {
+        const text = await response.text();
+        const hint = text.includes('/@vite/client') || text.includes('<!DOCTYPE html')
+          ? 'Parece que o frontend devolveu o index.html. Verifique se o backend está rodando e se VITE_API_BASE aponta para ele (ou remova para usar mocks em dev).'
+          : 'O servidor não retornou JSON.';
+        throw new Error(`Resposta não-JSON do servidor: ${text.slice(0, 120)}... Dica: ${hint}`);
+      }
       const data = await response.json();
       
       if (data.success) {
@@ -166,7 +211,14 @@ export function usePDFProgramming() {
     try {
       console.log('✅ Validando PDF:', pdf.fileName);
       
-      const response = await fetch(`${getApiBaseUrl()}/api/admin/validate-pdf`, {
+      const validateBase = getApiBaseUrl();
+      if (!import.meta.env.DEV && !validateBase) {
+        throw new Error('URL da API não configurada. Defina VITE_API_BASE.');
+      }
+      const validateUrl = import.meta.env.DEV
+        ? `/api/admin/validate-pdf`
+        : `${validateBase}/api/admin/validate-pdf`;
+      const response = await fetch(validateUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -179,6 +231,14 @@ export function usePDFProgramming() {
         throw new Error(`Erro HTTP: ${response.status}`);
       }
 
+      const contentTypeCheck = response.headers.get('content-type') || '';
+      if (!contentTypeCheck.includes('application/json')) {
+        const text = await response.text();
+        const hint = text.includes('/@vite/client') || text.includes('<!DOCTYPE html')
+          ? 'Parece que o frontend devolveu o index.html. Verifique se o backend está rodando e se VITE_API_BASE aponta para ele (ou remova para usar mocks em dev).'
+          : 'O servidor não retornou JSON.';
+        throw new Error(`Resposta não-JSON do servidor: ${text.slice(0, 120)}... Dica: ${hint}`);
+      }
       const data = await response.json();
       
       if (data.success) {
@@ -204,7 +264,14 @@ export function usePDFProgramming() {
     try {
       console.log('💾 Salvando programação extraída...');
       
-      const response = await fetch(`${getApiBaseUrl()}/api/admin/save-programming`, {
+      const saveBase = getApiBaseUrl();
+      if (!import.meta.env.DEV && !saveBase) {
+        throw new Error('URL da API não configurada. Defina VITE_API_BASE.');
+      }
+      const saveUrl = import.meta.env.DEV
+        ? `/api/admin/save-programming`
+        : `${saveBase}/api/admin/save-programming`;
+      const response = await fetch(saveUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -217,6 +284,11 @@ export function usePDFProgramming() {
         throw new Error(`Erro HTTP: ${response.status}`);
       }
 
+      const contentTypeCheck = response.headers.get('content-type') || '';
+      if (!contentTypeCheck.includes('application/json')) {
+        const text = await response.text();
+        throw new Error(`Resposta não-JSON do servidor: ${text.slice(0, 120)}...`);
+      }
       const data = await response.json();
       
       if (data.success) {
@@ -241,7 +313,10 @@ export function usePDFProgramming() {
     try {
       console.log('📋 Listando programações salvas...');
       
-      const url = status ? `${getApiBaseUrl()}/api/admin/programmings?status=${status}` : `${getApiBaseUrl()}/api/admin/programmings`;
+      const listBase = getApiBaseUrl();
+      const url = import.meta.env.DEV
+        ? (status ? `/api/admin/programmings?status=${status}` : `/api/admin/programmings`)
+        : (status ? `${listBase}/api/admin/programmings?status=${status}` : `${listBase}/api/admin/programmings`);
       
       const response = await fetch(url, {
         method: 'GET',
@@ -255,6 +330,14 @@ export function usePDFProgramming() {
         throw new Error(`Erro HTTP: ${response.status}`);
       }
 
+      const contentTypeCheck = response.headers.get('content-type') || '';
+      if (!contentTypeCheck.includes('application/json')) {
+        const text = await response.text();
+        const hint = text.includes('/@vite/client') || text.includes('<!DOCTYPE html')
+          ? 'Parece que o frontend devolveu o index.html. Verifique se o backend está rodando e se VITE_API_BASE_URL aponta para ele (ou remova para usar mocks em dev).'
+          : 'O servidor não retornou JSON.';
+        throw new Error(`Resposta não-JSON do servidor: ${text.slice(0, 120)}... Dica: ${hint}`);
+      }
       const data = await response.json();
       
       if (data.success) {

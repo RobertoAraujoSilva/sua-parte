@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { OnboardingProvider } from "@/contexts/OnboardingContext"; 
 import { TutorialProvider } from "@/contexts/TutorialContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TutorialOverlay } from "@/components/tutorial";
@@ -12,17 +13,10 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import { LanguageDebug } from "@/components/LanguageDebug";
 import Demo from "./pages/Demo";
-import Dashboard from "./pages/Dashboard";
-import Estudantes from "./pages/Estudantes";
-import EstudantesResponsive from "./pages/EstudantesResponsive";
-import ProgramasOptimized from "./pages/ProgramasOptimized";
-import ProgramaPreview from "./pages/ProgramaPreview";
 import ProgramasTest from "./pages/ProgramasTest";
-import PdfParsingTest from "./pages/PdfParsingTest";
-import DesignacoesOptimized from "./pages/DesignacoesOptimized";
 import Relatorios from "./pages/Relatorios";
 import Reunioes from "./pages/Reunioes";
-import EstudantePortal from "./pages/EstudantePortal";
+import Designacoes from "./pages/Designacoes";
 import FamiliaPage from "./pages/estudante/[id]/familia";
 import Funcionalidades from "./pages/Funcionalidades";
 import Congregacoes from "./pages/Congregacoes";
@@ -32,18 +26,17 @@ import Doar from "./pages/Doar";
 import BemVindo from "./pages/BemVindo";
 import ConfiguracaoInicial from "./pages/ConfiguracaoInicial";
 import PrimeiroPrograma from "./pages/PrimeiroPrograma";
-import DeveloperPanel from "./pages/DeveloperPanel";
 import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
-import Equidade from "./pages/Equidade";
 import UnifiedDashboard from "./components/UnifiedDashboard";
-import AdminDashboardNew from "./pages/AdminDashboardNew";
-import CacheAsideDemo from "./pages/CacheAsideDemo";
+import Dashboard from "./pages/Dashboard";
+import { AdminLayout } from "./components/admin/AdminLayout";
 import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DebugFab from "./components/DebugFab";
+import AuthRecoveryButton from "./components/AuthRecoveryButton";
 
 const queryClient = new QueryClient();
 
@@ -58,9 +51,6 @@ if (import.meta.env.DEV) {
     import("@/utils/logoutDiagnostics"),
     import("@/utils/emergencyLogout"),
     import("@/utils/familyMemberDebug"),
-    import("@/utils/reviewDatabase"),
-    import("@/utils/executeMigration"),
-    import("@/utils/syncStudentsToInstructors"),
     import("@/utils/quickSync")
   ]).then(() => {
     console.log('✅ Debug tools loaded successfully');
@@ -79,7 +69,8 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <AuthProvider>
-        <TutorialProvider>
+        <OnboardingProvider>
+          <TutorialProvider>
           <TooltipProvider>
             <Sonner />
             <TutorialOverlay />
@@ -94,7 +85,6 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/demo" element={<Demo />} />
-                <Route path="/cache-demo" element={<CacheAsideDemo />} />
                 <Route path="/funcionalidades" element={<Funcionalidades />} />
                 <Route path="/congregacoes" element={<Congregacoes />} />
                 <Route path="/suporte" element={<Suporte />} />
@@ -127,29 +117,11 @@ const App = () => (
                   }
                 />
 
-                {/* Developer Panel Route */}
-                <Route
-                  path="/admin/developer"
-                  element={
-                    <ProtectedRoute allowedRoles={['developer']}>
-                      <DeveloperPanel />
-                    </ProtectedRoute>
-                  }
-                />
-
                 {/* Debug Routes - Only in development */}
                 {import.meta.env.DEV && (
                   <>
-                    <Route path="/debug-dashboard" element={<Dashboard />} />
-                    <Route 
-                      path="/estudantes-responsive" 
-                      element={
-                        <ProtectedRoute allowedRoles={['instrutor']}>
-                          <EstudantesResponsive />
-                        </ProtectedRoute>
-                      } 
-                    />
-                    <Route 
+                    {/* Removed legacy route */}
+                    <Route
                       path="/density-toggle-test" 
                       element={<DensityToggleTestPage />} 
                     />
@@ -160,39 +132,25 @@ const App = () => (
                   </>
                 )}
 
-                {/* Instrutor Only Routes */}
-                <Route
-                  path="/dashboard"
+                {/* Dashboard Principal */}
+                <Route 
+                  path="/dashboard" 
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
-                      <UnifiedDashboard />
+                      <Dashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                {/* Removed legacy route */}
+                <Route
+                  path="/programas-test"
+                  element={
+                    <ProtectedRoute allowedRoles={['instrutor']}>
+                      <ProgramasTest />
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="/estudantes"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Estudantes />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/programas"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <ProgramasOptimized />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/programa/:id"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <ProgramaPreview />
-                    </ProtectedRoute>
-                  }
-                />
+                {/* Removed legacy route */}
                 {/* Test Routes - Only in development */}
                 {import.meta.env.DEV && (
                   <>
@@ -204,24 +162,9 @@ const App = () => (
                         </ProtectedRoute>
                       }
                     />
-                    <Route
-                      path="/pdf-parsing-test"
-                      element={
-                        <ProtectedRoute allowedRoles={['instrutor']}>
-                          <PdfParsingTest />
-                        </ProtectedRoute>
-                      }
-                    />
                   </>
                 )}
-                <Route
-                  path="/designacoes"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <DesignacoesOptimized />
-                    </ProtectedRoute>
-                  }
-                />
+                {/* Removed legacy route */}
                 <Route
                   path="/relatorios"
                   element={
@@ -238,29 +181,40 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                {/* Instrutor routes re-enabled */}
                 <Route
-                  path="/equidade"
+                  path="/estudantes"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Equidade />
+                      {/* Fallback to unified dashboard or a simple placeholder linking to students grid */}
+                      <UnifiedDashboard />
                     </ProtectedRoute>
                   }
                 />
                 <Route
-                  path="/admin"
+                  path="/programas"
                   element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <AdminDashboardNew />
+                    <ProtectedRoute allowedRoles={['instrutor']}>
+                      <ProgramasTest />
                     </ProtectedRoute>
                   }
                 />
                 <Route
-                  path="/admin/*"
+                  path="/designacoes"
                   element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <AdminDashboardNew />
+                    <ProtectedRoute allowedRoles={['instrutor']}>
+                      <Designacoes />
                     </ProtectedRoute>
                   }
+                />
+                {/* Rotas Administrativas */}
+                <Route 
+                  path="/admin/*" 
+                  element={
+                    <ProtectedRoute allowedRoles={['admin']}>
+                      <AdminLayout />
+                    </ProtectedRoute>
+                  } 
                 />
 
                 {/* Estudante Only Routes */}
@@ -298,11 +252,17 @@ const App = () => (
             </BrowserRouter>
           </TooltipProvider>
 
+          {/* Auth Recovery Button - Shows when there are auth errors */}
+          <div className="fixed top-4 right-4 z-50">
+            <AuthRecoveryButton />
+          </div>
+
           {/* Debug Panel - Only shows in development */}
           <ConditionalDebugPanel />
           {import.meta.env.DEV && <DebugFab />}
           {import.meta.env.DEV && <LanguageDebug />}
-        </TutorialProvider>
+          </TutorialProvider>
+        </OnboardingProvider>
       </AuthProvider>
     </LanguageProvider>
   </QueryClientProvider>

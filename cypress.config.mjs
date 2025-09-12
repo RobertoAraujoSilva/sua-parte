@@ -3,7 +3,8 @@ import { defineConfig } from 'cypress'
 export default defineConfig({
   projectId: 'o6ctse',
   e2e: {
-    baseUrl: process.env.CI ? 'http://localhost:4173' : 'http://localhost:8080',
+    // Usa 8080 no dev por padrão; 4173 em CI (vite preview)
+    baseUrl: process.env.CYPRESS_BASE_URL || (process.env.CI ? 'http://localhost:4173' : 'http://localhost:8080'),
     viewportWidth: 1280,
     viewportHeight: 720,
     video: true,

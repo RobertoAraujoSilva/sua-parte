@@ -15,9 +15,9 @@
         "ghcr.io/github/github-mcp-server"
       ],
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "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",
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${{ secrets.GITHUB_PERSONAL_ACCESS_TOKEN }}",
         "GITHUB_TOOLSETS": "",
-        "GITHUB_READ_ONLY": ""
+        "GITHUB_READ_ONLY": "true"
       }
     },
     "context7": {

@@ -7,6 +7,7 @@ node_modules/
 cypress/screenshots/
 cypress/videos/
 cypress/downloads/
+cypress/videos/*.mp4
 
 # Production
 build/
@@ -38,6 +39,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+agents.log.json
+*.local
 
 # Runtime data
 pids
@@ -98,6 +101,11 @@ public
 # Temporary folders
 tmp/
 temp/
+
+# Large files
+docs/Oficial/*.daisy.zip
+docs/Oficial/*.jwpub
+docs/Oficial/*.pdf
 
 # Editor directories and files
 .vscode/

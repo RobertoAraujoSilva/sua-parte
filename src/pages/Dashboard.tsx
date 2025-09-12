@@ -1,292 +1,241 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Calendar, FileText, Settings, Plus, CalendarDays, Upload } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useEstudantes } from '@/hooks/useEstudantes';
-import { useTranslation } from '@/hooks/useTranslation';
-import TemplateDownload from '@/components/TemplateDownload';
-import Header from '@/components/Header';
-import { DebugPanel } from '@/components/DebugPanel';
-import { TutorialButton } from '@/components/tutorial';
-import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useOnboarding } from "@/contexts/OnboardingContext";
+import { UserFlowGuide } from "@/components/UserFlowGuide";
+import QuickActions from "@/components/QuickActions";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { 
+  Users, 
+  Calendar, 
+  FileText, 
+  TrendingUp,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  Settings
+} from "lucide-react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import { LoadingCard, InfoState } from "@/components/shared/LoadingStates";
 
 const Dashboard = () => {
-  const { t } = useTranslation();
-  const { user } = useAuth();
   const navigate = useNavigate();
-  const { getStatistics } = useEstudantes();
+  const { profile } = useAuth();
+  const { currentStep, steps, isComplete, systemData, loading } = useOnboarding();
 
-  // Get real-time statistics from students
-  const statistics = getStatistics();
-
-  // State for dashboard statistics
-  const [dashboardStats, setDashboardStats] = useState({
-    programsCount: 0,
-    assignmentsCount: 0,
-    loadingStats: true
-  });
-
-  // Load real dashboard statistics from database
-  const loadDashboardStats = async () => {
-    if (!user?.id) {
-      setDashboardStats(prev => ({ ...prev, loadingStats: false }));
-      return;
-    }
-
-    try {
-      console.log('📊 Loading dashboard statistics for user:', user.id);
-
-      // Load programs and assignments counts in parallel
-      const [programsResult, assignmentsResult] = await Promise.all([
-        supabase
-          .from('programas')
-          .select('id', { count: 'exact' })
-          .eq('user_id', user.id)
-          .eq('status', 'ativo'),
-
-        supabase
-          .from('designacoes')
-          .select('id', { count: 'exact' })
-          .eq('user_id', user.id)
-          .gte('created_at', new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()) // This month
-      ]);
-
-      const programsCount = programsResult.count || 0;
-      const assignmentsCount = assignmentsResult.count || 0;
-
-      console.log('✅ Dashboard stats loaded:', { programsCount, assignmentsCount });
-
-      setDashboardStats({
-        programsCount,
-        assignmentsCount,
-        loadingStats: false
-      });
-
-    } catch (error) {
-      console.error('❌ Error loading dashboard statistics:', error);
-      setDashboardStats(prev => ({ ...prev, loadingStats: false }));
-    }
+  const handleNavigate = (route: string) => {
+    navigate(route);
   };
 
-  useEffect(() => {
-    if (!user) {
-      navigate('/auth');
-    }
-  }, [user, navigate]);
-
-  // Load dashboard statistics when user is available
-  useEffect(() => {
-    if (user?.id) {
-      loadDashboardStats();
-    }
-  }, [user?.id]);
-
-  if (!user) {
-    return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-jw-blue/5 to-jw-gold/5">
+        <Header />
+        <div className="container mx-auto px-4 py-8 pt-24">
+          <LoadingCard 
+            title="Carregando Dashboard"
+            description="Verificando sistema e configurações..."
+          />
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
-  const dashboardCards = [
+  // Se onboarding não está completo, mostrar guia
+  if (!isComplete) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-jw-blue/5 to-jw-gold/5">
+        <Header />
+        
+        <div className="container mx-auto px-4 py-8 pt-24">
+          <div className="max-w-6xl mx-auto">
+            {/* Header with progress */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h1 className="text-3xl font-bold text-jw-navy">
+                    Bem-vindo, {profile?.nome_completo || 'Instrutor'}
+                  </h1>
+                  <p className="text-gray-600">
+                    Configure seu sistema para começar a gerenciar designações
+                  </p>
+                </div>
+                
+                <Button
+                  variant="outline"
+                  onClick={() => navigate('/configuracao-inicial')}
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Configurações
+                </Button>
+              </div>
+              
+              <div className="bg-white p-4 rounded-lg border">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium">Progresso da Configuração</span>
+                  <span className="text-sm text-gray-600">
+                    {steps.filter(s => s.completed).length} de {steps.length} passos
+                  </span>
+                </div>
+                <Progress 
+                  value={(steps.filter(s => s.completed).length / steps.length) * 100} 
+                  className="w-full"
+                />
+              </div>
+            </div>
+
+            <UserFlowGuide onNavigate={handleNavigate} />
+          </div>
+        </div>
+        
+        <Footer />
+      </div>
+    );
+  }
+
+  // Dashboard completo
+  const stats = [
     {
-      title: t('navigation.students'),
-      description: t('dashboard.manageStudentsDesc'),
+      title: "Estudantes Ativos",
+      value: systemData.studentsCount || 0,
       icon: Users,
-      href: "/estudantes",
-      action: t('dashboard.manageStudents')
+      route: "/estudantes",
+      color: "text-blue-600"
     },
     {
-      title: t('navigation.programs'),
-      description: t('dashboard.manageProgramsDesc'),
+      title: "Programas Importados", 
+      value: systemData.programsCount || 0,
       icon: Calendar,
-      href: "/programas",
-      action: t('dashboard.viewPrograms')
+      route: "/programas",
+      color: "text-green-600"
     },
     {
-      title: t('navigation.assignments'),
-      description: t('dashboard.manageAssignmentsDesc'),
+      title: "Designações Geradas",
+      value: systemData.assignmentsCount || 0,
       icon: FileText,
-      href: "/designacoes",
-      action: t('dashboard.viewAssignments')
-    },
-    {
-      title: t('dashboard.meetings'),
-      description: t('dashboard.manageMeetingsDesc'),
-      icon: CalendarDays,
-      href: "/reunioes",
-      action: t('dashboard.manageMeetings')
-    },
-    {
-      title: t('navigation.reports'),
-      description: t('dashboard.reportsDesc'),
-      icon: Settings,
-      href: "/relatorios",
-      action: t('dashboard.viewReports')
+      route: "/designacoes",
+      color: "text-purple-600"
     }
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-jw-blue/5 to-jw-gold/5">
       <Header />
-
-      {/* Main Content */}
-      <main className="pt-16">
-        <div className="container mx-auto px-2 md:px-6 py-6 md:py-8">
+      
+      <div className="container mx-auto px-4 py-8 pt-24">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
           <div className="mb-8">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-2xl md:text-3xl font-bold text-jw-navy mb-2">{t('dashboard.title')}</h2>
-                <p className="text-muted-foreground text-base md:text-lg">{t('dashboard.subtitle')}</p>
+                <h1 className="text-3xl font-bold text-jw-navy mb-2">
+                  Dashboard Principal
+                </h1>
+                <p className="text-gray-600">
+                  {profile?.congregacao} • {profile?.cargo}
+                </p>
               </div>
-              <TutorialButton page="dashboard" />
+              
+              <Badge variant="secondary" className="bg-green-100 text-green-800">
+                <CheckCircle className="w-4 h-4 mr-1" />
+                Sistema Configurado
+              </Badge>
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="mb-8" data-tutorial="quick-actions">
-            <h3 className="text-base md:text-lg font-semibold text-jw-navy mb-4">{t('dashboard.quickActions')}</h3>
-            <div className="flex flex-wrap gap-2 md:gap-4">
-              <Button
-                variant="hero"
-                size="sm"
-                className="flex items-center gap-2 min-w-[150px] md:min-w-[180px]"
-                onClick={() => navigate('/estudantes')}
-              >
-                <Plus className="w-4 h-4" />
-                {t('dashboard.newStudent')}
-              </Button>
-              <Button
-                variant="ministerial"
-                size="sm"
-                className="flex items-center gap-2 min-w-[150px] md:min-w-[180px]"
-                onClick={() => navigate('/programas')}
-              >
-                <Calendar className="w-4 h-4" />
-                {t('dashboard.importProgram')}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 min-w-[150px] md:min-w-[180px]"
-                onClick={() => navigate('/designacoes')}
-              >
-                <FileText className="w-4 h-4" />
-                {t('dashboard.generateAssignments')}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 min-w-[150px] md:min-w-[180px]"
-                onClick={() => navigate('/estudantes?tab=import')}
-              >
-                <Upload className="w-4 h-4" />
-                {t('dashboard.importSpreadsheet')}
-              </Button>
-              <TemplateDownload
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2 min-w-[150px] md:min-w-[180px]"
-              />
-            </div>
-          </div>
-
-          {/* Dashboard Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6" data-tutorial="dashboard-cards">
-            {dashboardCards.map((card) => {
-              const Icon = card.icon;
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {stats.map((stat, index) => {
+              const Icon = stat.icon;
               return (
-                <Card key={card.title} className="hover:shadow-lg transition-shadow cursor-pointer">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-jw-blue/10 rounded-lg">
-                        <Icon className="w-6 h-6 text-jw-blue" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-base md:text-lg text-jw-navy">
-                          {card.title}
-                        </CardTitle>
-                      </div>
-                    </div>
+                <Card 
+                  key={index} 
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => navigate(stat.route)}
+                >
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">
+                      {stat.title}
+                    </CardTitle>
+                    <Icon className={`h-4 w-4 ${stat.color}`} />
                   </CardHeader>
                   <CardContent>
-                    <CardDescription className="mb-4 text-xs md:text-sm">
-                      {card.description}
-                    </CardDescription>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="w-full"
-                      onClick={() => navigate(card.href)}
-                    >
-                      {card.action}
-                    </Button>
+                    <div className="text-2xl font-bold">{stat.value}</div>
+                    <p className="text-xs text-muted-foreground">
+                      Total cadastrados
+                    </p>
                   </CardContent>
                 </Card>
               );
             })}
           </div>
 
-          {/* Stats Overview */}
-          <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6" data-tutorial="stats-overview">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
-                  {t('dashboard.totalStudents')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-xl md:text-2xl font-bold text-jw-navy">{statistics.total}</div>
-                <p className="text-xs text-muted-foreground">
-                  {t('dashboard.registeredInSystem')}
-                </p>
-              </CardContent>
-            </Card>
+          {/* Quick Actions */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Ações Rápidas</CardTitle>
+              <CardDescription>
+                Acesse as funcionalidades mais utilizadas
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <QuickActions />
+            </CardContent>
+          </Card>
 
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
-                  {t('dashboard.activePrograms')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-xl md:text-2xl font-bold text-jw-navy">
-                  {dashboardStats.loadingStats ? (
-                    <div className="animate-pulse bg-gray-200 h-8 w-12 rounded"></div>
-                  ) : (
-                    dashboardStats.programsCount
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {t('dashboard.scheduledWeeks')}
-                </p>
-              </CardContent>
-            </Card>
+          {/* Status Alerts */}
+          {systemData.hasPendingPrograms && (
+            <InfoState
+              title="Programas Pendentes"
+              message="Há programas importados aguardando geração de designações."
+              onAction={() => navigate('/programas')}
+              actionLabel="Gerar Designações"
+              className="mb-6"
+            />
+          )}
 
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">
-                  {t('dashboard.generatedAssignments')}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-xl md:text-2xl font-bold text-jw-navy">
-                  {dashboardStats.loadingStats ? (
-                    <div className="animate-pulse bg-gray-200 h-8 w-12 rounded"></div>
-                  ) : (
-                    dashboardStats.assignmentsCount
-                  )}
+          {/* Recent Activity */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Clock className="w-5 h-5" />
+                Atividade Recente
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                  <CheckCircle className="w-5 h-5 text-green-600" />
+                  <div>
+                    <p className="font-medium">Sistema configurado com sucesso</p>
+                    <p className="text-sm text-gray-600">Todos os passos foram concluídos</p>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {t('dashboard.thisMonth')}
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+                
+                {systemData.studentsCount > 0 && (
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <Users className="w-5 h-5 text-blue-600" />
+                    <div>
+                      <p className="font-medium">
+                        {systemData.studentsCount} estudantes cadastrados
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        Prontos para receber designações
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </main>
-
-      {/* Debug Panel - Fixed position */}
-      <DebugPanel position="fixed" />
+      </div>
+      
+      <Footer />
     </div>
   );
 };

@@ -20,7 +20,12 @@ import { useAdminCache } from '@/hooks/admin/useAdminCache';
  * ✅ Regra 9: Performance metrics
  */
 
-export default function SystemTab() {
+interface SystemTabProps {
+  systemStatus?: any;
+  isConnected?: boolean;
+}
+
+export default function SystemTab({ systemStatus, isConnected }: SystemTabProps) {
   const { stats, getCacheMetrics, getHealthStatus } = useAdminCache();
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
@@ -64,12 +69,14 @@ export default function SystemTab() {
               <span className="text-sm font-medium">Apostila MWB Atual:</span>
               <Badge variant="outline" className="text-green-600">
                 <CheckCircle className="h-3 w-3 mr-1" />
-                Disponível
+                {systemStatus?.services?.materialManager === 'active' ? 'Disponível' : 'Indisponível'}
               </Badge>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Última verificação:</span>
-              <span className="text-sm text-green-700">Hoje, 10:30</span>
+              <span className="text-sm font-medium">Backend Status:</span>
+              <Badge variant={isConnected ? "default" : "secondary"}>
+                {isConnected ? 'Conectado' : 'Desconectado'}
+              </Badge>
             </div>
             <div className="flex space-x-2">
               <Button 

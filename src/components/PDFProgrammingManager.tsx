@@ -182,7 +182,7 @@ function PDFFileCard({
             <span>•</span>
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              {formatDate(pdf.lastModified)}
+              {formatDate(typeof pdf.lastModified === 'string' ? new Date(pdf.lastModified) : pdf.lastModified)}
             </span>
           </div>
         </div>

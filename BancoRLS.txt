@@ -1,0 +1,41 @@
+Banco/RLS
+
+403 ao salvar designações: violação RLS em "assignment_history" quando trigger/auditoria tenta inserir (assignmentGenerator.ts:612).
+Testes RLS ruidosos: UUIDs falsos (“test-student-id”) gerando 22P02 e 23502 (“partes” NOT NULL) em inserts de diagnóstico (src/utils/rls-policy-fix.ts).
+Duplicidade “mês/semana”: risco de colisão se mes_apostila não for extraído e só a semana for usada (RPC check_programa_duplicate).
+ensureProgramExists busca só por data_inicio_semana e pode divergir da regra “único por mês” (src/hooks/useAssignmentGeneration.ts:560).
+Necessidade de aplicar migrações de RLS/constraints; sem elas, checagens tipo_parte/numero_parte e triggers podem falhar.
+Parsing/Upload
+
+Reconhecimento de arquivo JW: mwb_E_YYYYMM.pdf não era detectado corretamente (agora ajustado em src/utils/pdfParser.ts:36).
+Parser baseado apenas no nome do arquivo: sem extração real do conteúdo do PDF; partes genéricas e menos precisão.
+Fluxo/UX
+
+Confirmação nativa (window.confirm) para duplicados pouco intuitiva (substituída por modal com “Atualizar / Atualizar e Gerar”).
+Geração automática logo após salvar programa pode surpreender o usuário (ProgramasOptimized.tsx).
+Excesso de logs no console (ProtectedRoute, init, health, debug tools) gerando ruído e percepção de desordem.
+Ausência de guia visual de fluxo ao chegar na página (adicionado ProgramFlowGuide; faltava antes).
+Armazenamento
+
+400 ao baixar do Storage: objeto programas/<arquivo> ausente ou bucket/políticas não configurados (ProgramasOptimized.tsx:538).
+Upload do PDF para o Storage não implementado: posterior download inevitavelmente falha.
+Geração/Designações
+
+“Partes undefined” em alguns cenários: mapeamento/extração insuficiente e possíveis incompatibilidades com constraints (src/hooks/useAssignmentGeneration.ts:183).
+Constraints de designacoes: se migrações que ampliam numero_parte (1–12) e tipo_parte não estiverem aplicadas, inserts falham.
+Migrações/Config
+
+Falta de política INSERT em assignment_history (causa 403) — requer aplicar supabase/migrations/20250910193000_fix_assignment_history_insert_policies.sql.
+Possível descompasso de migrações: fix_assignment_constraints e fix_programas_schema_and_security precisam estar aplicadas para evitar erros de validação/duplicidade.
+Storage: bucket programas e políticas públicas/de leitura não configuradas.
+Consistência de Clients
+
+Uso misto de clientes Supabase (@/integrations/supabase/client vs @/lib/supabase) pode confundir e gerar inconsistências em permissões/config.
+Logs/Diagnóstico
+
+Ferramentas de diagnóstico RLS geravam inserts inválidos (ruído 22P02/23502) e ofuscavam a causa real (RLS em assignment_history).
+Se quiser, eu aplico agora:
+
+Upload para Storage + políticas do bucket.
+Modal “Atualizar e Gerar” habilitando reset do assignment_status para ‘pending’.
+Redução de logs com níveis (info/warn/error) e gate por import.meta.env.DEV.

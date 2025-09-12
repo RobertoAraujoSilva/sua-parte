@@ -1,10 +1,51 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv, Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import { componentTagger } from "lovable-tagger"
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react()],
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+  const backendUrl = (env.VITE_API_BASE_URL || '').replace(/\/$/, '')
+  const forceMock = env.VITE_FORCE_MOCK === '1' || env.VITE_FORCE_MOCK === 'true'
+  const isSelfProxy = /localhost:8080|127\.0\.0\.1:8080/.test(backendUrl)
+  const hasProxy = Boolean(backendUrl) && !isSelfProxy && !forceMock
+  
+  if (isSelfProxy) {
+    console.warn('[dev] VITE_API_BASE_URL aponta para localhost:8080; proxy desabilitado e mocks de API ativados.');
+  }
+  const devMockPlugin: Plugin | null = hasProxy ? null : {
+    name: 'dev-mock-api',
+    apply: 'serve',
+    configureServer(server) {
+      // Mock leve para desenvolvimento quando não há backend configurado
+      server.middlewares.use((req, res, next) => {
+        const url = req.url || '';
+        if (!url.startsWith('/api')) return next();
+
+        res.setHeader('Content-Type', 'application/json');
+
+        if (url.startsWith('/api/admin/scan-pdfs')) {
+          return res.end(JSON.stringify({ success: true, pdfs: [], total: 0 }));
+        }
+        if (url.startsWith('/api/admin/programmings')) {
+          return res.end(JSON.stringify({ success: true, total: 0, programmings: [] }));
+        }
+        if (url.startsWith('/api/admin/parse-pdf') || url.startsWith('/api/admin/validate-pdf') || url.startsWith('/api/admin/save-programming')) {
+          return res.end(JSON.stringify({ success: false, error: 'Backend não configurado (VITE_API_BASE_URL ausente)' }));
+        }
+        // Catch-all para outras rotas /api durante dev sem backend
+        return res.end(JSON.stringify({ success: false, error: 'Rota /api não mockada e backend ausente. Defina VITE_API_BASE_URL.' }));
+      });
+    },
+  };
+
+  return {
+  plugins: [
+    react(),
+    mode === 'development' && componentTagger(),
+    ...(devMockPlugin ? [devMockPlugin] : [])
+  ].filter(Boolean),
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -14,7 +55,7 @@ export default defineConfig({
   },
   server: {
     // Configuração padrão do servidor
-    host: 'localhost',
+    host: "::",
     port: 8080,
     strictPort: true,
     
@@ -37,6 +78,15 @@ export default defineConfig({
     
     // Configurações de CORS
     cors: true,
+    // Proxy para backend durante desenvolvimento, quando VITE_API_BASE_URL estiver definido
+    proxy: hasProxy ? {
+      '/api': {
+        target: backendUrl,
+        changeOrigin: true,
+        secure: false,
+        // Não reescreve o caminho; mantém /api/*
+      },
+    } : undefined,
   },
   build: {
     // Otimizações de performance
@@ -99,4 +149,5 @@ export default defineConfig({
   css: {
     postcss: './postcss.config.js',
   },
+}
 })

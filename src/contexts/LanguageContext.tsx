@@ -27,10 +27,22 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     i18n.changeLanguage(lang);
   };
 
-  // Debug current language
+  // Debug current language e verificar recursos
   React.useEffect(() => {
     console.log('🌐 LanguageContext: Current language is', language);
-    console.log('🌐 LanguageContext: Available resources:', Object.keys(i18n.options.resources || {}));
+    try {
+      // Verificar se resources existe antes de tentar acessá-lo
+      const availableResources = i18n.options.resources ? Object.keys(i18n.options.resources) : [];
+      console.log('🌐 LanguageContext: Available resources:', availableResources);
+      
+      // Verificar se o idioma atual tem recursos disponíveis
+      if (i18n.options.resources && !i18n.options.resources[language]) {
+        console.warn(`🌐 LanguageContext: No resources found for language ${language}, falling back to 'pt'`);
+        i18n.changeLanguage('pt');
+      }
+    } catch (error) {
+      console.error('🌐 LanguageContext: Error accessing resources:', error);
+    }
   }, [language, i18n]);
 
   return (

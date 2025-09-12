@@ -1,0 +1,390 @@
+[
+  {
+    "id": "TC001",
+    "title": "Admin Dashboard accessibility and data display",
+    "description": "Verify that the Admin Dashboard is accessible at http://localhost:8080/admin, loads successfully with backend integration, and displays real-time system statistics and monitoring data.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Open a web browser and navigate to http://localhost:8080/admin"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that the Admin Dashboard loads without errors"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that real-time system status, statistics, and monitoring widgets are displayed"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that data is consistent with backend responses"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Automatic JW.org materials download and processing",
+    "description": "Ensure the backend Node.js service downloads materials from JW.org automatically using configured schedules and processes/parses the contents correctly.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Trigger or wait for the scheduled download process via the Admin Dashboard or backend service"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that materials are downloaded without network errors"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that downloaded materials are parsed and stored correctly in the system"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that download logs and status updates are reflected in the Admin Dashboard monitoring tab"
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "User authentication and role-based access control",
+    "description": "Validate Supabase Auth-based login functionality for admin, instructor, and student roles including different access levels and error handling.",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to the login page at /auth or root endpoint"
+      },
+      {
+        "type": "action",
+        "description": "Attempt login with valid admin credentials"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify successful login and redirect to Admin Dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Logout and login as instructor user with valid credentials"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm instructor interface access and restrictions"
+      },
+      {
+        "type": "action",
+        "description": "Logout and login as student user with valid credentials"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify access to student portal and designations only"
+      },
+      {
+        "type": "action",
+        "description": "Attempt login with invalid credentials"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that login is denied with appropriate error messages"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "Bulk student import and inline editing functionality",
+    "description": "Test that student data can be imported via Excel file with validation, saved correctly, and edited inline through a spreadsheet interface without errors.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Log in as an instructor and navigate to the student management page"
+      },
+      {
+        "type": "action",
+        "description": "Import a valid Excel file containing student data"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that imported student data appears correctly in the management view"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to import an Excel file with missing required fields or invalid data"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that appropriate validation errors are shown and import is prevented"
+      },
+      {
+        "type": "action",
+        "description": "Edit student information inline in the spreadsheet interface and save changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that edits persist and reflect in the database"
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "Program import, parsing and editing from PDFs and copied content",
+    "description": "Verify that programs can be imported by uploading PDFs or copying content from JW.org, that parsing extracts data accurately, and imported programs are editable.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as instructor and navigate to program management page"
+      },
+      {
+        "type": "action",
+        "description": "Upload a PDF containing a ministerial program"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that the PDF is parsed and program data is extracted correctly"
+      },
+      {
+        "type": "action",
+        "description": "Copy raw program content from JW.org and paste into the import interface"
+      },
+      {
+        "type": "assertion",
+        "description": "Validate that pasted content is processed and parsed into program items"
+      },
+      {
+        "type": "action",
+        "description": "Make edits to imported program data and save changes"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that changes persist and update reflected in interface"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "Automatic generation of ministerial assignments respecting S-38-T rules",
+    "description": "Test the automatic assignment generation based on imported programs ensuring compliance with S-38-T eligibility and balance rules, avoiding conflicts.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as instructor and import a valid ministerial program"
+      },
+      {
+        "type": "action",
+        "description": "Execute the assignment generation process for students"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that generated assignments comply with eligibility rules (e.g., qualifications, role limits)"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that assignments do not create conflicts or over-assign any student"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that assignments are saved and viewable in student's portals"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "Student portal access to personal assignments and participation history",
+    "description": "Verify that students can log in securely, view their current assignments and past participation records accurately, with proper UI and data integrity.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as a student user"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm that the portal home page loads successfully"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that current ministerial assignments are listed with correct details"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that historical participation data is accessible and correctly displayed"
+      },
+      {
+        "type": "action",
+        "description": "Attempt unauthorized actions such as accessing admin or instructor pages"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure access is denied with proper error or redirect"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "System monitoring, health checks, and logging in Admin Dashboard",
+    "description": "Test that health checks, logs, and system status updates are properly available in the Admin Dashboard and reflect the backend state in real-time.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as admin and open the Admin Dashboard monitoring tab"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that system health status and logs are displayed and updated periodically"
+      },
+      {
+        "type": "action",
+        "description": "Simulate backend service failure or API error"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that the dashboard shows error statuses and appropriate alerts"
+      },
+      {
+        "type": "action",
+        "description": "Restore backend services and verify dashboard status returns to healthy"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure logs capture the sequence of events with proper timestamps"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "End-to-end (E2E) tests execution with Cypress",
+    "description": "Verify the E2E test suite runs fully using Cypress to validate all major workflows without failures.",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Run the Cypress test suite via npm scripts"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify all tests execute and pass successfully without errors"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that major user flows (login, imports, dashboard access, assignment generation) are covered and validated"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "NPM scripts for system development and execution",
+    "description": "Test the main npm scripts (dev:all, dev:backend-only, dev:frontend-only) for building and running the system independently and combined without errors.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Execute 'npm run dev:backend-only' and verify backend server starts successfully"
+      },
+      {
+        "type": "assertion",
+        "description": "Check backend APIs respond correctly on designated ports"
+      },
+      {
+        "type": "action",
+        "description": "Execute 'npm run dev:frontend-only' and verify frontend React app launches without errors"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm frontend is accessible on port 8080 and displays content"
+      },
+      {
+        "type": "action",
+        "description": "Execute 'npm run dev:all' to start both frontend and backend concurrently"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify both frontend and backend run concurrently without port conflicts or errors"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Error handling for invalid API requests and inputs",
+    "description": "Verify that invalid inputs and malformed API requests to backend routes return appropriate HTTP error codes and messages without crashing the server.",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Send API requests with invalid parameters to endpoints such as /admin, /materials, /programs"
+      },
+      {
+        "type": "assertion",
+        "description": "Check the server returns HTTP 400 or 422 with descriptive error messages"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to submit malformed JSON or missing required fields in POST requests"
+      },
+      {
+        "type": "assertion",
+        "description": "Ensure server responds gracefully with proper validation errors and does not crash"
+      },
+      {
+        "type": "action",
+        "description": "Try unauthorized API access without tokens or with invalid roles"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that 401 Unauthorized or 403 Forbidden responses are returned"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Family management: invitation sending and relationship management",
+    "description": "Test the family management system for inviting family members, accepting invitations, and managing family relationship data correctly.",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Login as a user with family management permissions"
+      },
+      {
+        "type": "action",
+        "description": "Send family invitations by entering valid email addresses"
+      },
+      {
+        "type": "assertion",
+        "description": "Confirm invitation emails are sent and invitation records are created in the system"
+      },
+      {
+        "type": "action",
+        "description": "Accept a family invitation using the email link"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify that family relationship is established and visible in both users' profiles"
+      },
+      {
+        "type": "action",
+        "description": "Attempt to send invalid or duplicate invitations"
+      },
+      {
+        "type": "assertion",
+        "description": "Check that proper validation messages appear and duplicates are prevented"
+      }
+    ]
+  }
+]

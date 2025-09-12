@@ -1,0 +1,56 @@
+sk-user-6Yb096I2rncrg87-i9k27eU5do4sUG0tfkWplCqd32BP0ti03sOJd8MrRN-8OeHUrlnfiZd0LXQXj5ElBqK15IYmpQum1jIVDUQsoceABGguAk-fNSLInapYXz0Nnvb17nA
+
+
+
+
+{
+  "mcpServers": {
+    "TestSprite": {
+      "command": "npx",
+      "args": [
+        "@testsprite/testsprite-mcp@latest"
+      ],
+      "env": {
+        "API_KEY": "sk-user-6Yb096I2rncrg87-i9k27eU5do4sUG0tfkWplCqd32BP0ti03sOJd8MrRN-8OeHUrlnfiZd0LXQXj5ElBqK15IYmpQum1jIVDUQsoceABGguAk-fNSLInapYXz0Nnvb17nA"
+      }
+    }
+  }
+}
+
+
+https://hub.continue.dev/mauro-de-lima/sistema-ministerial
+
+
+# Cypress Cloud configuration
+# Get your record key from: https://cloud.cypress.io/projects/o6ctse/settings
+# Record key for automated CI/CD integration
+CYPRESS_RECORD_KEY=a0b30189-faea-475f-9aa8-89eface58524
+
+# Cypress test credentials for automated E2E testing
+# Instructor Account (Full Admin Access - instrutor role)
+CYPRESS_INSTRUCTOR_EMAIL=frankwebber33@hotmail.com
+CYPRESS_INSTRUCTOR_PASSWORD=senha123
+
+# Student Account (Limited Portal Access - estudante role)
+CYPRESS_STUDENT_EMAIL=franklinmarceloferreiradelima@gmail.com
+CYPRESS_STUDENT_PASSWORD=senha123
+
+# Legacy Franklin credentials (for existing cy.loginAsFranklin() command)
+FRANKLIN_EMAIL=franklinmarceloferreiradelima@gmail.com
+FRANKLIN_PASSWORD=senha123
+
+#PARA OS TESTES COM CYPRESS NO http://localhost:8080/admin
+GENERAL_ADMIN=amazonwebber007@gmail.com
+ADMIN_PASSW0RD=admin123
+
+# Frontend -> Backend API base URL for dev/proxy
+# IMPORTANT: Ensure backend runs on the same port below
+VITE_API_BASE_URL=http://localhost:3000
+
+"C:\Users\mauro\Documents\GitHub\sua-parte\.env"
+
+
+
+
+
+use npm run dev:all

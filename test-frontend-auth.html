@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Autenticação - Sistema Ministerial</title>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 15px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Teste de Autenticação - Sistema Ministerial</h1>
+    
+    <div class="test-section info">
+        <h3>📋 Status do Teste</h3>
+        <div id="status">Aguardando...</div>
+    </div>
+
+    <div class="test-section">
+        <h3>🔐 Teste de Autenticação</h3>
+        <button onclick="testAuth()">Testar Login</button>
+        <div id="auth-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>👤 Teste de Carregamento de Perfil</h3>
+        <button onclick="testProfile()">Carregar Perfil</button>
+        <div id="profile-result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>📊 Teste de Dados do Dashboard</h3>
+        <button onclick="testDashboardData()">Carregar Dados do Dashboard</button>
+        <div id="dashboard-result"></div>
+    </div>
+
+    <script>
+        // Configuração do Supabase
+        const supabaseUrl = 'https://nwpuurgwnnuejqinkvrh.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im53cHV1cmd3bm51ZWpxaW5rdnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ0NjIwNjUsImV4cCI6MjA3MDAzODA2NX0.UHjSvXYY_c-_ydAIfELRUs4CMEBLKiztpBGQBNPHfak';
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+        
+        let currentUser = null;
+        let currentProfile = null;
+
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = `<strong>${message}</strong>`;
+            statusDiv.parentElement.className = `test-section ${type}`;
+        }
+
+        function showResult(elementId, data, type = 'info') {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+            resultDiv.parentElement.className = `test-section ${type}`;
+        }
+
+        async function testAuth() {
+            updateStatus('Testando autenticação...', 'info');
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: 'frankwebber33@hotmail.com',
+                    password: 'senha123'
+                });
+
+                if (error) {
+                    showResult('auth-result', { error: error.message }, 'error');
+                    updateStatus('❌ Erro na autenticação', 'error');
+                    return;
+                }
+
+                currentUser = data.user;
+                showResult('auth-result', {
+                    success: true,
+                    userId: data.user.id,
+                    email: data.user.email,
+                    role: data.user.user_metadata?.role,
+                    metadata: data.user.user_metadata
+                }, 'success');
+                
+                updateStatus('✅ Autenticação bem-sucedida', 'success');
+            } catch (error) {
+                showResult('auth-result', { error: error.message }, 'error');
+                updateStatus('❌ Erro na autenticação', 'error');
+            }
+        }
+
+        async function testProfile() {
+            if (!currentUser) {
+                showResult('profile-result', { error: 'Usuário não autenticado' }, 'error');
+                return;
+            }
+
+            updateStatus('Carregando perfil...', 'info');
+
+            try {
+                // Tentar carregar da tabela profiles
+                const { data: profileData, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .maybeSingle();
+
+                if (profileError) {
+                    if (profileError.code === 'PGRST116') {
+                        // Perfil não encontrado, criar a partir dos metadados
+                        const metadata = currentUser.user_metadata;
+                        const profileFromMetadata = {
+                            id: currentUser.id,
+                            nome_completo: metadata.nome_completo || currentUser.email?.split('@')[0] || 'Usuário',
+                            congregacao: metadata.congregacao || 'Não informado',
+                            cargo: metadata.cargo || 'instrutor',
+                            role: metadata.role || 'instrutor',
+                            email: currentUser.email || '',
+                            created_at: new Date().toISOString(),
+                            updated_at: new Date().toISOString()
+                        };
+                        
+                        currentProfile = profileFromMetadata;
+                        showResult('profile-result', {
+                            source: 'metadata',
+                            profile: profileFromMetadata
+                        }, 'success');
+                        updateStatus('✅ Perfil carregado a partir dos metadados', 'success');
+                    } else {
+                        showResult('profile-result', { error: profileError.message }, 'error');
+                        updateStatus('❌ Erro ao carregar perfil', 'error');
+                    }
+                } else if (profileData) {
+                    // Garantir que tenha o campo role
+                    const profileWithRole = {
+                        ...profileData,
+                        role: profileData.role || 'instrutor',
+                        email: profileData.email || currentUser.email || ''
+                    };
+                    
+                    currentProfile = profileWithRole;
+                    showResult('profile-result', {
+                        source: 'database',
+                        profile: profileWithRole
+                    }, 'success');
+                    updateStatus('✅ Perfil carregado do banco de dados', 'success');
+                } else {
+                    showResult('profile-result', { error: 'Nenhum perfil encontrado' }, 'error');
+                    updateStatus('❌ Perfil não encontrado', 'error');
+                }
+            } catch (error) {
+                showResult('profile-result', { error: error.message }, 'error');
+                updateStatus('❌ Erro ao carregar perfil', 'error');
+            }
+        }
+
+        async function testDashboardData() {
+            if (!currentUser || !currentProfile) {
+                showResult('dashboard-result', { error: 'Usuário ou perfil não carregado' }, 'error');
+                return;
+            }
+
+            updateStatus('Carregando dados do dashboard...', 'info');
+
+            try {
+                const results = {};
+
+                // Testar carregamento de estudantes
+                const { data: estudantes, error: estudantesError } = await supabase
+                    .from('estudantes')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .limit(5);
+
+                results.estudantes = {
+                    count: estudantes?.length || 0,
+                    data: estudantes || [],
+                    error: estudantesError?.message || null
+                };
+
+                // Testar carregamento de programas
+                const { data: programas, error: programasError } = await supabase
+                    .from('programas')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .limit(5);
+
+                results.programas = {
+                    count: programas?.length || 0,
+                    data: programas || [],
+                    error: programasError?.message || null
+                };
+
+                // Testar carregamento de designações
+                const { data: designacoes, error: designacoesError } = await supabase
+                    .from('designacoes')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .limit(5);
+
+                results.designacoes = {
+                    count: designacoes?.length || 0,
+                    data: designacoes || [],
+                    error: designacoesError?.message || null
+                };
+
+                showResult('dashboard-result', results, 'success');
+                updateStatus('✅ Dados do dashboard carregados', 'success');
+
+            } catch (error) {
+                showResult('dashboard-result', { error: error.message }, 'error');
+                updateStatus('❌ Erro ao carregar dados do dashboard', 'error');
+            }
+        }
+
+        // Inicializar
+        updateStatus('Pronto para testar', 'info');
+    </script>
+</body>
+</html>
+
