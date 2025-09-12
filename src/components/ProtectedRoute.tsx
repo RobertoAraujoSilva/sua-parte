@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOnboarding } from '@/contexts/OnboardingContext';
 import { Database } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -46,6 +47,7 @@ const ProtectedRoute = ({
   redirectTo
 }: ProtectedRouteProps) => {
   const { user, profile, loading } = useAuth();
+  const { isComplete: onboardingComplete, loading: onboardingLoading } = useOnboarding();
   const navigate = useNavigate();
   const location = useLocation();
   const [profileTimeout, setProfileTimeout] = useState(false);
@@ -167,13 +169,12 @@ const ProtectedRoute = ({
 
           // Additional check for instructors accessing main app without onboarding
           if (userRole === 'instrutor' && allowedRoles.includes('instrutor')) {
-            const onboardingCompleted = localStorage.getItem('onboarding_completed');
             const currentPath = location.pathname;
             const isOnboardingRoute = ['/bem-vindo', '/configuracao-inicial', '/primeiro-programa'].includes(currentPath);
             const isMainAppRoute = ['/dashboard', '/estudantes', '/programas', '/designacoes'].includes(currentPath);
 
-            if (!onboardingCompleted && isMainAppRoute) {
-              console.log('🔄 Redirecting to onboarding for first-time user');
+            if (!onboardingComplete && isMainAppRoute) {
+              console.log('🔄 Redirecting to onboarding for incomplete setup');
               if (!didRedirect && currentPath !== '/bem-vindo') {
                 setDidRedirect(true);
                 navigate('/bem-vindo', { replace: true });
@@ -197,10 +198,10 @@ const ProtectedRoute = ({
         }
       }
     }
-  }, [user?.id, profile?.role, loading, allowedRoles, requireAuth, redirectTo, navigate, profileTimeout, location.pathname, didRedirect]);
+  }, [user?.id, profile?.role, loading, onboardingComplete, allowedRoles, requireAuth, redirectTo, navigate, profileTimeout, location.pathname, didRedirect]);
 
-  // Show loading state while auth is loading
-  if (loading) {
+  // Show loading state while auth or onboarding is loading
+  if (loading || onboardingLoading) {
     console.log('🔄 ProtectedRoute: Showing loading state');
     return (
       <LoadingScreen 

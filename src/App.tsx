@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { OnboardingProvider } from "@/contexts/OnboardingContext"; 
 import { TutorialProvider } from "@/contexts/TutorialContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TutorialOverlay } from "@/components/tutorial";
@@ -29,7 +30,8 @@ import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
 import UnifiedDashboard from "./components/UnifiedDashboard";
-import AdminDashboardConnected from "./components/admin/AdminDashboardConnected";
+import Dashboard from "./pages/Dashboard";
+import { AdminLayout } from "./components/admin/AdminLayout";
 import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -67,7 +69,8 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <AuthProvider>
-        <TutorialProvider>
+        <OnboardingProvider>
+          <TutorialProvider>
           <TooltipProvider>
             <Sonner />
             <TutorialOverlay />
@@ -129,14 +132,14 @@ const App = () => (
                   </>
                 )}
 
-                {/* Instrutor Only Routes */}
-                <Route
-                  path="/dashboard"
+                {/* Dashboard Principal */}
+                <Route 
+                  path="/dashboard" 
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
-                      <UnifiedDashboard />
+                      <Dashboard />
                     </ProtectedRoute>
-                  }
+                  } 
                 />
                 {/* Removed legacy route */}
                 <Route
@@ -204,13 +207,14 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="/admin/*"
+                {/* Rotas Administrativas */}
+                <Route 
+                  path="/admin/*" 
                   element={
                     <ProtectedRoute allowedRoles={['admin']}>
-                      <AdminDashboardConnected />
+                      <AdminLayout />
                     </ProtectedRoute>
-                  }
+                  } 
                 />
 
                 {/* Estudante Only Routes */}
@@ -257,7 +261,8 @@ const App = () => (
           <ConditionalDebugPanel />
           {import.meta.env.DEV && <DebugFab />}
           {import.meta.env.DEV && <LanguageDebug />}
-        </TutorialProvider>
+          </TutorialProvider>
+        </OnboardingProvider>
       </AuthProvider>
     </LanguageProvider>
   </QueryClientProvider>
