@@ -1,53 +1,47 @@
-# 📚 Sistema Ministerial
+# 📚 Sistema Ministerial Simplificado
 
-## 🚀 **Status: SISTEMA COMPLETO IMPLEMENTADO E FUNCIONANDO!**
+## 🚀 **Status: SISTEMA REFORMULADO E SIMPLIFICADO!**
 
-O **Sistema Ministerial** é uma plataforma completa para gerenciamento de materiais, programas e congregações, com **Admin Dashboard integrado** e **Backend Node.js** funcionando em tempo real.
-
----
-
-## 📣 **Atualização Importante - Correções Implementadas!**
-
-Recentemente foram implementadas correções importantes para melhorar a experiência do usuário e resolver problemas técnicos. Veja [SOLUTION_SUMMARY.md](SOLUTION_SUMMARY.md) para detalhes completos.
-
-**Principais correções:**
-- ✅ Upload de PDF para Storage com políticas corretas
-- ✅ Modal de confirmação melhorado para programas duplicados
-- ✅ Redução de logs excessivos no console
-- ✅ Correção de erros 403 ao salvar designações
+O **Sistema Ministerial** foi reformulado para ser mais simples e direto. Agora temos apenas **dois dashboards principais**: **Instrutor** (painel central) e **Estudante** (portal pessoal).
 
 ---
 
-## ✨ **Funcionalidades Implementadas**
+## 🎯 **Nova Arquitetura Simplificada**
 
-### 📘 Guia Definitivo (Passo a Passo)
-- Para um roteiro completo com páginas numeradas e botões em ordem cronológica (Admin → Instrutor → Estudante), consulte:
-- docs/GUIA_DEFINITIVO.md
+### ✅ **O que mudou:**
+- ❌ **Admin Dashboard removido** - Complexidade desnecessária eliminada
+- ✅ **Dashboard do Instrutor** - Agora é o painel principal do sistema
+- ✅ **Portal do Estudante** - Visualização simples das designações pessoais
+- ✅ **Programação mockada** - Baseada nos PDFs oficiais (sem scraping)
+- ✅ **Foco na designação** - Sistema centrado na atribuição de estudantes
 
-### 🎯 **Admin Dashboard (100% Funcional)**
-- **Interface administrativa completa** com abas organizadas
-- **Download automático** de materiais da JW.org (PDF, JWPub, RTF, DAISY)
-- **Gerenciamento de materiais** e publicação para congregações
-- **Monitoramento do sistema** em tempo real
-- **Sistema de debug** para desenvolvimento
+### 🎯 **Fluxo Simplificado:**
+1. **👨‍🏫 Instrutor** → Login → Vê programação oficial → Designa estudantes
+2. **👨‍🎓 Estudante** → Login → Vê suas designações pessoais
 
-### 🔧 **Backend Node.js (Porta 3001)**
-- **Servidor Express** com APIs REST completas
-- **Serviço JWDownloader** para scraping e download da JW.org
-- **Sistema de cron** para downloads automáticos
-- **Integração com Supabase** para banco de dados
-- **Health checks** e monitoramento do sistema
+---
 
-### 🌐 **Frontend React (Porta 8081)**
-- **Interface responsiva** com TailwindCSS e Shadcn/ui
-- **Sistema de autenticação** integrado com Supabase
-- **Controle de acesso** por roles (admin, instrutor, estudante)
-- **Dashboard unificado** para todos os usuários
+## ✨ **Funcionalidades Atuais**
 
-### 🧪 **Testes Automatizados**
-- **Testes Cypress** para validação completa do sistema
-- **Cobertura de funcionalidades** principais
-- **Testes de integração** frontend-backend
+### 👨‍🏫 **Dashboard do Instrutor (Principal)**
+- **Programação oficial** das semanas (mockada dos PDFs)
+- **Lista de estudantes** locais com privilégios
+- **Interface de designação** drag-and-drop
+- **Salvamento no Supabase** das atribuições
+- **Seletor de semanas** (setembro 2025 disponível)
+
+### 👨‍🎓 **Portal do Estudante**
+- **Visualização das designações** pessoais
+- **Detalhes das partes** (referências, duração, tipo)
+- **Status das designações** (pendente, confirmada, concluída)
+- **Dicas de preparação** para cada tipo de atividade
+
+### 📊 **Dados Mockados Disponíveis**
+- **3 semanas de setembro 2025:**
+  - 8-14 setembro: Provérbios 30
+  - 15-21 setembro: Provérbios 31  
+  - 22-28 setembro: Eclesiastes 1-2
+- **Estrutura JSON completa** com todas as partes e referências
 
 ---
 

@@ -46,12 +46,7 @@ import UnifiedNavigation from './UnifiedNavigation';
 import ProgramFlowGuide from '@/components/programs/ProgramFlowGuide';
 import UnifiedBreadcrumbs from './UnifiedBreadcrumbs';
 
-// 🎯 LAZY LOADING DOS COMPONENTES PESADOS
-const OverviewTab = lazy(() => import('@/components/admin/OverviewTab'));
-const UsersTab = lazy(() => import('@/components/admin/UsersTab'));
-const CongregationsTab = lazy(() => import('@/components/admin/CongregationsTab'));
-const SystemTab = lazy(() => import('@/components/admin/SystemTab'));
-const MonitoringTab = lazy(() => import('@/components/admin/MonitoringTab'));
+// 🎯 COMPONENTES ADMIN REMOVIDOS - SISTEMA SIMPLIFICADO
 
 // 🚀 DASHBOARD UNIFICADO QUE ADAPTA AO ROLE DO USUÁRIO
 export default function UnifiedDashboard() {
@@ -128,17 +123,7 @@ export default function UnifiedDashboard() {
     try {
       setLoading(true);
 
-      if (profile.role === 'admin') {
-        // 🏠 DADOS ADMIN: Materiais JW.org e estatísticas globais
-        const { data: jworg } = await supabase
-          .from('programas')
-          .select('*')
-          .eq('status', 'ativo')
-          .order('created_at', { ascending: false })
-          .limit(5);
-
-        setJworgData(jworg);
-      } else if (profile.role === 'instrutor') {
+      if (profile.role === 'instrutor') {
         // 👨‍🏫 DADOS INSTRUTOR: Designações recentes da congregação
         const { data: assignments } = await supabase
           .from('designacoes')
@@ -190,169 +175,7 @@ export default function UnifiedDashboard() {
     );
   }
 
-  // 🏠 DASHBOARD ADMIN - CONTROLE GLOBAL E MATERIAIS JW.ORG
-  if (profile.role === 'admin') {
-    return (
-      <>
-        <UnifiedNavigation />
-        <div className="container mx-auto p-6 max-w-7xl">
-          <UnifiedBreadcrumbs />
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-4">
-              <Shield className="h-8 w-8 text-primary" />
-              <div>
-                <h1 className="text-3xl font-bold">Dashboard Administrativo</h1>
-                <p className="text-muted-foreground mt-1">
-                  Sistema Ministerial Global - Gestão e Monitoramento
-                </p>
-              </div>
-            </div>
-
-            {/* 📊 ESTATÍSTICAS GLOBAIS */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total de Estudantes</CardTitle>
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{dashboardStats.totalEstudantes}</div>
-                  <p className="text-xs text-muted-foreground">Em todo o sistema</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Programas Ativos</CardTitle>
-                  <BookOpen className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{dashboardStats.totalProgramas}</div>
-                  <p className="text-xs text-muted-foreground">Versões MWB disponíveis</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Designações</CardTitle>
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{dashboardStats.totalDesignacoes}</div>
-                  <p className="text-xs text-muted-foreground">Atribuições ativas</p>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Congregações</CardTitle>
-                  <Globe className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">1</div>
-                  <p className="text-xs text-muted-foreground">Ativas no sistema</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* 🚀 AÇÕES RÁPIDAS ADMIN */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Download className="h-5 w-5" />
-                    Materiais JW.org
-                  </CardTitle>
-                  <CardDescription>
-                    Baixe e atualize materiais oficiais para as congregações
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                    <ExternalLink className="h-4 w-4 text-blue-600" />
-                    <span className="text-sm">Apostila MWB Setembro-Outubro 2025</span>
-                    <Badge variant="secondary">Disponível</Badge>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                    <ExternalLink className="h-4 w-4 text-green-600" />
-                    <span className="text-sm">Meeting Workbook (Inglês)</span>
-                    <Badge variant="secondary">Disponível</Badge>
-                  </div>
-                  <Button className="w-full">
-                    <Download className="mr-2 h-4 w-4" />
-                    Atualizar Materiais
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Settings className="h-5 w-5" />
-                    Configuração S-38
-                  </CardTitle>
-                  <CardDescription>
-                    Gerencie as regras e configurações do sistema ministerial
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-sm">Regras S-38 ativas e configuradas</span>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <span className="text-sm">Sistema de designações funcionando</span>
-                  </div>
-                  <Button className="w-full">
-                    <Settings className="mr-2 h-4 w-4" />
-                    Configurar Sistema
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="overview">Visão Geral</TabsTrigger>
-              <TabsTrigger value="users">Usuários</TabsTrigger>
-              <TabsTrigger value="congregations">Congregações</TabsTrigger>
-              <TabsTrigger value="system">Sistema</TabsTrigger>
-              <TabsTrigger value="monitoring">Monitoramento</TabsTrigger>
-            </TabsList>
-
-            <Suspense fallback={
-              <div className="flex items-center justify-center p-12">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                <span className="ml-2">Carregando...</span>
-              </div>
-            }>
-              <TabsContent value="overview">
-                <OverviewTab />
-              </TabsContent>
-
-              <TabsContent value="users">
-                <UsersTab />
-              </TabsContent>
-
-              <TabsContent value="congregations">
-                <CongregationsTab />
-              </TabsContent>
-
-              <TabsContent value="system">
-                <SystemTab />
-              </TabsContent>
-
-              <TabsContent value="monitoring">
-                <MonitoringTab />
-              </TabsContent>
-            </Suspense>
-          </Tabs>
-        </div>
-      </>
-    );
-  }
+  // 🏠 DASHBOARD ADMIN REMOVIDO - SISTEMA SIMPLIFICADO
 
   // 👨‍🏫 DASHBOARD INSTRUTOR - GESTÃO LOCAL
   if (profile.role === 'instrutor') {

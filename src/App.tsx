@@ -31,7 +31,10 @@ import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
 import UnifiedDashboard from "./components/UnifiedDashboard";
 import Dashboard from "./pages/Dashboard";
-import { AdminLayout } from "./components/admin/AdminLayout";
+import InstrutorDashboard from "./pages/InstrutorDashboard";
+import EstudantesSimplified from "./pages/EstudantesSimplified";
+import DesignacoesSimplified from "./pages/DesignacoesSimplified";
+
 import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -137,7 +140,7 @@ const App = () => (
                   path="/dashboard" 
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Dashboard />
+                      <InstrutorDashboard />
                     </ProtectedRoute>
                   } 
                 />
@@ -186,8 +189,7 @@ const App = () => (
                   path="/estudantes"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
-                      {/* Fallback to unified dashboard or a simple placeholder linking to students grid */}
-                      <UnifiedDashboard />
+                      <EstudantesSimplified />
                     </ProtectedRoute>
                   }
                 />
@@ -203,19 +205,11 @@ const App = () => (
                   path="/designacoes"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Designacoes />
+                      <DesignacoesSimplified />
                     </ProtectedRoute>
                   }
                 />
-                {/* Rotas Administrativas */}
-                <Route 
-                  path="/admin/*" 
-                  element={
-                    <ProtectedRoute allowedRoles={['admin']}>
-                      <AdminLayout />
-                    </ProtectedRoute>
-                  } 
-                />
+                {/* Admin routes removed - system simplified */}
 
                 {/* Estudante Only Routes */}
                 <Route

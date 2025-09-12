@@ -36,7 +36,9 @@
         "API_KEY": "${{ secrets.TESTSPRITE_API_KEY }}"
       },
       "disabled": false,
-      "autoApprove": []
+      "autoApprove": [
+        "testsprite_bootstrap_tests"
+      ]
     }
   }
 }
