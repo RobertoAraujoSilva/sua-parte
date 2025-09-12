@@ -63,28 +63,6 @@ const OverviewTab = () => {
       color: "text-orange-600"
     }
   ];
-      icon: Home,
-      color: "text-blue-600"
-    },
-    {
-      title: "Usuários Registrados",
-      value: status?.users || 0,
-      icon: Users,
-      color: "text-green-600"
-    },
-    {
-      title: "Programas Processados",
-      value: status?.programs || 0,
-      icon: FileText,
-      color: "text-purple-600"
-    },
-    {
-      title: "PDFs Disponíveis",
-      value: status?.materials || 0,
-      icon: Database,
-      color: "text-orange-600"
-    }
-  ];
 
   return (
     <div className="space-y-6">
@@ -132,12 +110,6 @@ const OverviewTab = () => {
             <div className="text-center p-4 bg-purple-50 rounded-lg">
               <div className="text-2xl font-bold text-purple-600">
                 {status?.services?.version || "1.0.0"}
-              </div>
-              <p className="text-sm text-blue-700">Tempo ativo</p>
-            </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">
-                {status?.version || "1.0.0"}
               </div>
               <p className="text-sm text-purple-700">Versão atual</p>
             </div>
