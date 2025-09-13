@@ -67,7 +67,7 @@ export function InstructorDashboardSimplified() {
       
       toast({
         title: "Designações salvas!",
-        description: `${Object.keys(designacoes).length} designações foram salvas com sucesso.`,
+        description: `${Object.values(designacoes).filter(id => id !== 'nao-designado').length} designações foram salvas com sucesso.`,
       });
     } catch (error) {
       toast({
@@ -81,6 +81,7 @@ export function InstructorDashboardSimplified() {
   };
 
   const getEstudanteNome = (estudanteId: string) => {
+    if (estudanteId === 'nao-designado') return 'Não designado';
     const estudante = estudantes.find(e => e.id === estudanteId);
     return estudante?.nome || 'Não designado';
   };
@@ -235,14 +236,14 @@ export function InstructorDashboardSimplified() {
                           </div>
                           <div className="flex items-center gap-2">
                             <Select 
-                              value={designacoes[parte.id] || ''} 
+                              value={designacoes[parte.id] || 'nao-designado'} 
                               onValueChange={(value) => handleDesignacao(parte.id, value)}
                             >
                               <SelectTrigger className="w-48">
                                 <SelectValue placeholder="Designar estudante" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="">Não designado</SelectItem>
+                                <SelectItem value="nao-designado">Não designado</SelectItem>
                                 {estudantes.map((estudante) => (
                                   <SelectItem key={estudante.id} value={estudante.id}>
                                     {estudante.nome} ({estudante.genero})
@@ -307,20 +308,20 @@ export function InstructorDashboardSimplified() {
                   <div className="flex justify-between">
                     <span>Designadas:</span>
                     <span className="font-medium text-green-600">
-                      {Object.keys(designacoes).length}
+                      {Object.values(designacoes).filter(id => id !== 'nao-designado').length}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Pendentes:</span>
                     <span className="font-medium text-orange-600">
-                      {semanaEscolhida.programacao.reduce((acc, secao) => acc + secao.partes.length, 0) - Object.keys(designacoes).length}
+                      {semanaEscolhida.programacao.reduce((acc, secao) => acc + secao.partes.length, 0) - Object.values(designacoes).filter(id => id !== 'nao-designado').length}
                     </span>
                   </div>
                 </div>
                 <Button 
                   className="w-full mt-4" 
                   onClick={handleSalvarDesignacoes}
-                  disabled={salvando || Object.keys(designacoes).length === 0}
+                  disabled={salvando || Object.values(designacoes).filter(id => id !== 'nao-designado').length === 0}
                 >
                   <Save className="h-4 w-4 mr-2" />
                   {salvando ? 'Salvando...' : 'Salvar Designações'}
