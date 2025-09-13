@@ -1,32 +1,79 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, Home, ArrowLeft, Plus, Edit, Trash2 } from 'lucide-react';
+import { Users, Home, ArrowLeft, Plus, Edit, Trash2, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Estudante {
   id: string;
   nome: string;
-  genero: 'M' | 'F';
-  privilegios: string[];
+  genero: 'masculino' | 'feminino';
+  cargo: string;
   ativo: boolean;
+  idade: number;
+  email: string;
+  telefone: string;
+  data_batismo: string;
+  observacoes: string;
 }
 
 export default function EstudantesSimplified() {
   const navigate = useNavigate();
+  const [estudantes, setEstudantes] = useState<Estudante[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
-  // Mock de estudantes
-  const estudantes: Estudante[] = [
-    { id: '1', nome: 'João Silva', genero: 'M', privilegios: ['leitura', 'consideracao'], ativo: true },
-    { id: '2', nome: 'Maria Santos', genero: 'F', privilegios: ['leitura', 'participacao'], ativo: true },
-    { id: '3', nome: 'Pedro Costa', genero: 'M', privilegios: ['leitura', 'discurso'], ativo: true },
-    { id: '4', nome: 'Ana Oliveira', genero: 'F', privilegios: ['leitura', 'testemunho_informal'], ativo: true },
-    { id: '5', nome: 'Carlos Mendes', genero: 'M', privilegios: ['leitura', 'consideracao', 'discurso'], ativo: false },
-  ];
+  useEffect(() => {
+    fetchEstudantes();
+  }, []);
+
+  const fetchEstudantes = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('estudantes')
+        .select('*')
+        .order('nome');
+
+      if (error) {
+        throw error;
+      }
+
+      setEstudantes(data || []);
+    } catch (err) {
+      console.error('Erro ao buscar estudantes:', err);
+      setError('Erro ao carregar estudantes');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const estudantesAtivos = estudantes.filter(e => e.ativo);
   const estudantesInativos = estudantes.filter(e => !e.ativo);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Carregando estudantes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <Button onClick={fetchEstudantes}>Tentar novamente</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -132,26 +179,30 @@ export default function EstudantesSimplified() {
             <div className="space-y-3">
               {estudantesAtivos.map((estudante) => (
                 <div key={estudante.id} className="flex items-center justify-between p-4 border rounded-lg hover:shadow-md transition-shadow">
-                  <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="font-semibold text-blue-600">
-                        {estudante.nome.split(' ').map(n => n[0]).join('')}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{estudante.nome}</h3>
-                      <div className="flex gap-2 mt-1">
-                        <Badge variant={estudante.genero === 'M' ? 'default' : 'secondary'}>
-                          {estudante.genero === 'M' ? 'Masculino' : 'Feminino'}
-                        </Badge>
-                        {estudante.privilegios.map((privilegio) => (
-                          <Badge key={privilegio} variant="outline" className="text-xs">
-                            {privilegio}
-                          </Badge>
-                        ))}
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                          <span className="font-semibold text-blue-600">
+                            {estudante.nome.split(' ').map(n => n[0]).join('')}
+                          </span>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold">{estudante.nome}</h3>
+                          <div className="flex gap-2 mt-1">
+                            <Badge variant={estudante.genero === 'masculino' ? 'default' : 'secondary'}>
+                              {estudante.genero === 'masculino' ? 'Masculino' : 'Feminino'}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {estudante.cargo.replace('_', ' ')}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {estudante.idade} anos
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-gray-500 mt-1">
+                            {estudante.email} • {estudante.telefone}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm">
                       <Edit className="h-4 w-4" />
@@ -179,22 +230,28 @@ export default function EstudantesSimplified() {
               <div className="space-y-3">
                 {estudantesInativos.map((estudante) => (
                   <div key={estudante.id} className="flex items-center justify-between p-4 border rounded-lg bg-gray-50">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                        <span className="font-semibold text-gray-500">
-                          {estudante.nome.split(' ').map(n => n[0]).join('')}
-                        </span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-gray-600">{estudante.nome}</h3>
-                        <div className="flex gap-2 mt-1">
-                          <Badge variant="secondary">Inativo</Badge>
-                          <Badge variant={estudante.genero === 'M' ? 'default' : 'secondary'}>
-                            {estudante.genero === 'M' ? 'Masculino' : 'Feminino'}
-                          </Badge>
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                          <span className="font-semibold text-gray-500">
+                            {estudante.nome.split(' ').map(n => n[0]).join('')}
+                          </span>
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-gray-600">{estudante.nome}</h3>
+                          <div className="flex gap-2 mt-1">
+                            <Badge variant="secondary">Inativo</Badge>
+                            <Badge variant={estudante.genero === 'masculino' ? 'default' : 'secondary'}>
+                              {estudante.genero === 'masculino' ? 'Masculino' : 'Feminino'}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {estudante.cargo.replace('_', ' ')}
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-gray-500 mt-1">
+                            {estudante.email} • {estudante.telefone}
+                          </div>
                         </div>
                       </div>
-                    </div>
                     <div className="flex gap-2">
                       <Button variant="outline" size="sm">
                         Reativar

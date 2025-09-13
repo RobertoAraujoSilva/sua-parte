@@ -32,7 +32,7 @@ def convert_excel_to_json(excel_file_path, output_file_path):
                 record = {
                     # Campos obrigatórios
                     "id": str(row.get('id', gen_uuid())),
-                    "nome": str(row.get('Nome', '')).strip(),
+                    "nome": str(row.get('nome', '')).strip(),
                     
                     # Campos opcionais com valores padrão
                     "sobrenome": str(row.get('Sobrenome', '')).strip() if pd.notna(row.get('Sobrenome')) else None,
@@ -191,8 +191,8 @@ def main():
     print("=" * 60)
     
     # Caminhos dos arquivos
-    excel_file = "docs/Oficial/estudantes_ficticios.xlsx"
-    output_file = "estudantes_converted.json"
+    excel_file = "docs/Oficial/estudantes_ficticios_refinado.xlsx"
+    output_file = "estudantes_refinados_converted.json"
     
     # Verificar se o arquivo Excel existe
     if not os.path.exists(excel_file):
