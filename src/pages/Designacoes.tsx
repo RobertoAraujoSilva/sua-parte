@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,7 +22,9 @@ import {
   Mail,
   MessageSquare,
   QrCode,
-  Heart
+  Heart,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -266,175 +268,167 @@ const ImportacaoPDF: React.FC<{ onImportComplete: (programa: ProgramaSemanal) =>
   );
 };
 
-// Componente para geração automática de designações
+// Componente para geração automática de designações (integrado ao backend)
 const GeradorDesignacoes: React.FC<{ 
   programa: ProgramaSemanal | null;
   estudantes: any[];
   onDesignacoesGeradas: (designacoes: DesignacaoMinisterial[]) => void;
-}> = ({ programa, estudantes, onDesignacoesGeradas }) => {
+  onBindGenerate?: (fn: () => void) => void;
+}> = ({ programa, estudantes, onDesignacoesGeradas, onBindGenerate }) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [designacoesGeradas, setDesignacoesGeradas] = useState<DesignacaoMinisterial[]>([]);
+  const [congregacaoId, setCongregacaoId] = useState<string>("");
+  const [programacaoId, setProgramacaoId] = useState<string>("");
+  const [programacaoItens, setProgramacaoItens] = useState<any[]>([]);
+
+  // Preencher automaticamente a congregação com base no primeiro estudante ativo
+  useEffect(() => {
+    if (!congregacaoId && Array.isArray(estudantes) && estudantes.length > 0) {
+      const anyWithCong = (estudantes as any[]).find((e: any) => e?.congregacao_id);
+      if (anyWithCong?.congregacao_id) setCongregacaoId(anyWithCong.congregacao_id);
+    }
+  }, [estudantes]);
+
+  function toISO(d: Date) {
+    return d.toISOString().slice(0, 10);
+  }
+  function addDays(dateStr: string, days: number) {
+    const d = new Date(dateStr + 'T00:00:00');
+    d.setDate(d.getDate() + days);
+    return toISO(d);
+  }
+  function mapParteToItem(parte: ParteMeeting, idx: number) {
+    const section = (parte.secao || '').toUpperCase();
+    let type = '';
+    if (parte.tipo === 'leitura_biblica' || parte.titulo.toLowerCase().includes('leitura')) {
+      type = 'bible_reading';
+    } else if (parte.titulo.toLowerCase().includes('iniciando')) {
+      type = 'starting';
+    } else if (parte.titulo.toLowerCase().includes('cultivando')) {
+      type = 'following';
+    } else if (parte.titulo.toLowerCase().includes('discípulo') || parte.titulo.toLowerCase().includes('disc1pulos')) {
+      type = 'making_disciples';
+    } else if (parte.tipo === 'discurso') {
+      type = 'talk';
+    } else {
+      // fallback
+      type = 'talk';
+    }
+    return {
+      order: idx + 1,
+      section: section === 'TESOUROS' ? 'TREASURES' : section === 'MINISTERIO' ? 'APPLY' : section || 'LIVING',
+      type,
+      minutes: parte.tempo,
+      rules: null,
+      lang: {
+        en: { title: parte.titulo },
+        pt: { title: parte.titulo }
+      }
+    };
+  }
+
+  async function persistProgram(programaLocal: ProgramaSemanal) {
+    const week_start = programaLocal.data_inicio;
+    const week_end = addDays(week_start, 6);
+    const items = (programaLocal.partes || []).map(mapParteToItem);
+
+    const payload = {
+      week_start,
+      week_end,
+      status: 'publicada',
+      congregation_scope: 'global',
+      items
+    };
+
+    const resp = await fetch('/api/programacoes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error || 'Falha ao salvar programação');
+    }
+    const data = await resp.json();
+    setProgramacaoId(data.programacao.id);
+    setProgramacaoItens(data.itens || []);
+    return data.programacao.id as string;
+  }
 
   const gerarDesignacoes = async () => {
-    if (!programa || !estudantes.length) return;
+    if (!programa) return;
+    if (!congregacaoId) {
+      toast({ title: 'Congregação requerida', description: 'Informe o UUID da congregação para gerar designações.', variant: 'destructive' });
+      return;
+    }
 
     setIsGenerating(true);
     try {
-      // Simular lógica de geração automática seguindo regras S-38
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // 1) Persistir programa no backend
+      const progId = programacaoId || (await persistProgram(programa));
 
-      const designacoes: DesignacaoMinisterial[] = [];
-      
-      // Filtrar estudantes por critérios
-      const homens = estudantes.filter(e => e.genero === 'masculino' && e.ativo);
-      const mulheres = estudantes.filter(e => e.genero === 'feminino' && e.ativo);
-      const qualificados = homens.filter(e => 
-        ['anciao', 'servo_ministerial', 'publicador_batizado'].includes(e.cargo)
-      );
+      // 2) Chamar o gerador no backend
+      const genResp = await fetch('/api/designacoes/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ programacao_id: progId, congregacao_id: congregacaoId })
+      });
+      if (!genResp.ok) {
+        const err = await genResp.json().catch(() => ({}));
+        throw new Error(err.error || 'Falha ao gerar designações');
+      }
+      const genData = await genResp.json();
 
-      programa.partes.forEach((parte, index) => {
-        let estudantePrincipal = null;
-        let estudanteAjudante = null;
+      // 3) Buscar as designações geradas (com os itens)
+      const listResp = await fetch(`/api/designacoes?programacao_id=${encodeURIComponent(progId)}&congregacao_id=${encodeURIComponent(congregacaoId)}`);
+      if (!listResp.ok) {
+        const err = await listResp.json().catch(() => ({}));
+        throw new Error(err.error || 'Falha ao listar designações');
+      }
+      const listData = await listResp.json();
 
-        // Aplicar regras oficiais do S-38-E conforme tipo da parte
-        switch (parte.numero) {
-          case 3: // Talk (Tesouros da Palavra de Deus)
-            // Apenas anciãos ou servos ministeriais qualificados
-            if (qualificados.length > 0) {
-              estudantePrincipal = qualificados[Math.floor(Math.random() * qualificados.length)];
-            }
-            break;
+      const itens: any[] = listData.itens || [];
+      const itensByProgItem: Record<string, any> = {};
+      (programacaoItens || []).forEach((it: any) => { itensByProgItem[String(it.id)] = it; });
 
-          case 4: // Spiritual Gems (Joias Espirituais)
-            // Apenas anciãos ou servos ministeriais qualificados
-            if (qualificados.length > 0) {
-              estudantePrincipal = qualificados[Math.floor(Math.random() * qualificados.length)];
-            }
-            break;
-
-          case 5: // Bible Reading (Leitura da Bíblia)
-            // Apenas estudantes masculinos
-            if (homens.length > 0) {
-              estudantePrincipal = homens[Math.floor(Math.random() * homens.length)];
-            }
-            break;
-
-          case 7: // Starting a Conversation
-            // Homem ou mulher, assistente do mesmo sexo ou parente
-            const estudantesConversacao = [...homens, ...mulheres];
-            if (estudantesConversacao.length > 0) {
-              estudantePrincipal = estudantesConversacao[Math.floor(Math.random() * estudantesConversacao.length)];
-
-              if (estudantePrincipal) {
-                const mesmoSexo = estudantePrincipal.genero === 'masculino' ? homens : mulheres;
-                const ajudantesPossiveis = mesmoSexo.filter(e => e.id !== estudantePrincipal.id);
-                if (ajudantesPossiveis.length > 0) {
-                  estudanteAjudante = ajudantesPossiveis[Math.floor(Math.random() * ajudantesPossiveis.length)];
-                }
-              }
-            }
-            break;
-
-          case 8: // Following Up
-            // Homem ou mulher, assistente do mesmo sexo
-            const estudantesRevisita = [...homens, ...mulheres];
-            if (estudantesRevisita.length > 0) {
-              estudantePrincipal = estudantesRevisita[Math.floor(Math.random() * estudantesRevisita.length)];
-
-              if (estudantePrincipal) {
-                const mesmoSexo = estudantePrincipal.genero === 'masculino' ? homens : mulheres;
-                const ajudantesPossiveis = mesmoSexo.filter(e => e.id !== estudantePrincipal.id);
-                if (ajudantesPossiveis.length > 0) {
-                  estudanteAjudante = ajudantesPossiveis[Math.floor(Math.random() * ajudantesPossiveis.length)];
-                }
-              }
-            }
-            break;
-
-          case 9: // Making Disciples
-            // Homem ou mulher, assistente do mesmo sexo
-            const estudantesDiscipulos = [...homens, ...mulheres];
-            if (estudantesDiscipulos.length > 0) {
-              estudantePrincipal = estudantesDiscipulos[Math.floor(Math.random() * estudantesDiscipulos.length)];
-
-              if (estudantePrincipal) {
-                const mesmoSexo = estudantePrincipal.genero === 'masculino' ? homens : mulheres;
-                const ajudantesPossiveis = mesmoSexo.filter(e => e.id !== estudantePrincipal.id);
-                if (ajudantesPossiveis.length > 0) {
-                  estudanteAjudante = ajudantesPossiveis[Math.floor(Math.random() * ajudantesPossiveis.length)];
-                }
-              }
-            }
-            break;
-
-          case 10: // Explaining Your Beliefs (Demonstration)
-            // Homem ou mulher, assistente do mesmo sexo ou parente
-            const estudantesExplicarDemo = [...homens, ...mulheres];
-            if (estudantesExplicarDemo.length > 0) {
-              estudantePrincipal = estudantesExplicarDemo[Math.floor(Math.random() * estudantesExplicarDemo.length)];
-
-              if (estudantePrincipal) {
-                const mesmoSexo = estudantePrincipal.genero === 'masculino' ? homens : mulheres;
-                const ajudantesPossiveis = mesmoSexo.filter(e => e.id !== estudantePrincipal.id);
-                if (ajudantesPossiveis.length > 0) {
-                  estudanteAjudante = ajudantesPossiveis[Math.floor(Math.random() * ajudantesPossiveis.length)];
-                }
-              }
-            }
-            break;
-
-          case 11: // Explaining Your Beliefs (Talk)
-            // Apenas estudantes masculinos
-            if (homens.length > 0) {
-              estudantePrincipal = homens[Math.floor(Math.random() * homens.length)];
-            }
-            break;
-
-          case 16: // Congregation Bible Study
-            // Apenas anciãos ou servos ministeriais qualificados
-            if (qualificados.length > 0) {
-              estudantePrincipal = qualificados[Math.floor(Math.random() * qualificados.length)];
-            }
-            break;
-        }
-
-        if (estudantePrincipal) {
-          designacoes.push({
-            id: `${programa.id}-${parte.numero}`,
-            semana: programa.semana,
-            data_inicio: programa.data_inicio,
-            parte_numero: parte.numero,
-            parte_titulo: parte.titulo,
-            parte_tempo: parte.tempo,
-            parte_tipo: parte.tipo as any,
-            estudante_principal_id: estudantePrincipal.id,
-            estudante_ajudante_id: estudanteAjudante?.id,
-            cena: parte.cena,
-            referencia_biblica: parte.referencia,
-            instrucoes: parte.instrucoes,
-            status: 'pendente'
-          });
-        }
+      // Mapear para o tipo local de exibição
+      const designacoes: DesignacaoMinisterial[] = itens.map((di: any) => {
+        const progItem = itensByProgItem[String(di.programacao_item_id)] || {};
+        const title = progItem?.lang?.pt?.title || progItem?.lang?.en?.title || 'Parte';
+        const minutes = progItem?.minutes || 0;
+        return {
+          id: `${progId}-${di.programacao_item_id}`,
+          semana: programa.semana,
+          data_inicio: programa.data_inicio,
+          parte_numero: progItem.order || 0,
+          parte_titulo: title,
+          parte_tempo: minutes,
+          parte_tipo: (progItem.type || 'talk') as any,
+          estudante_principal_id: di.principal_estudante_id || '',
+          estudante_ajudante_id: di.assistente_estudante_id || undefined,
+          cena: undefined,
+          referencia_biblica: undefined,
+          instrucoes: undefined,
+          status: 'pendente'
+        };
       });
 
       setDesignacoesGeradas(designacoes);
       onDesignacoesGeradas(designacoes);
 
-      toast({
-        title: "Designações geradas!",
-        description: `${designacoes.length} designações foram criadas automaticamente.`
-      });
-
-    } catch (error) {
-      toast({
-        title: "Erro ao gerar designações",
-        description: "Não foi possível gerar as designações automaticamente.",
-        variant: "destructive"
-      });
+      toast({ title: 'Designações geradas!', description: `${designacoes.length} designações foram criadas automaticamente.` });
+    } catch (error: any) {
+      toast({ title: 'Erro ao gerar designações', description: error?.message || 'Falha na geração', variant: 'destructive' });
     } finally {
       setIsGenerating(false);
     }
   };
+
+  // Expor a função de geração para o cabeçalho (pai)
+  useEffect(() => {
+    if (onBindGenerate) onBindGenerate(gerarDesignacoes);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onBindGenerate, programa, programacaoId, congregacaoId, programacaoItens, estudantes]);
 
   if (!programa) {
     return (
@@ -459,24 +453,28 @@ const GeradorDesignacoes: React.FC<{
           Geração Automática de Designações
         </CardTitle>
         <CardDescription>
-          Gere designações automaticamente seguindo as regras do documento S-38
+          Gere designações automaticamente seguindo as regras do documento S-38 (via backend)
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <p className="text-sm font-medium">Programa:</p>
             <p className="text-sm text-gray-600">{programa.semana}</p>
           </div>
           <div>
-            <p className="text-sm font-medium">Estudantes disponíveis:</p>
+            <p className="text-sm font-medium">Estudantes ativos:</p>
             <p className="text-sm text-gray-600">{estudantes.length} estudantes</p>
+          </div>
+          <div>
+            <label className="text-sm font-medium">Congregação (UUID):</label>
+            <Input value={congregacaoId} onChange={(e) => setCongregacaoId(e.target.value)} placeholder="00000000-0000-0000-0000-000000000000" />
           </div>
         </div>
 
         <Button 
           onClick={gerarDesignacoes} 
-          disabled={isGenerating || estudantes.length === 0}
+          disabled={isGenerating || !congregacaoId.trim()}
           className="w-full"
         >
           {isGenerating ? (
@@ -501,9 +499,9 @@ const GeradorDesignacoes: React.FC<{
                   <div>
                     <p className="font-medium">{designacao.parte_titulo}</p>
                     <p className="text-sm text-gray-600">
-                      Estudante: {estudantes.find(e => e.id === designacao.estudante_principal_id)?.nome}
+                      Estudante: {estudantes.find(e => e.id === designacao.estudante_principal_id)?.nome || designacao.estudante_principal_id}
                       {designacao.estudante_ajudante_id && (
-                        <> + {estudantes.find(e => e.id === designacao.estudante_ajudante_id)?.nome}</>
+                        <> + {estudantes.find(e => e.id === designacao.estudante_ajudante_id)?.nome || designacao.estudante_ajudante_id}</>
                       )}
                     </p>
                   </div>
@@ -737,6 +735,127 @@ export default function Designacoes() {
   const [programaAtual, setProgramaAtual] = useState<ProgramaSemanal | null>(null);
   const [designacoes, setDesignacoes] = useState<DesignacaoMinisterial[]>([]);
   const [activeTab, setActiveTab] = useState("importar");
+  const childGenerateRef = useRef<(() => void) | null>(null);
+
+  // Helpers para navegação e apresentação da semana
+  function isoToDate(iso?: string) {
+    if (!iso) return null;
+    const d = new Date(iso + 'T00:00:00');
+    return isNaN(d.getTime()) ? null : d;
+  }
+  function addDaysISO(iso: string, days: number) {
+    const d = isoToDate(iso);
+    if (!d) return iso;
+    d.setDate(d.getDate() + days);
+    return d.toISOString().slice(0, 10);
+  }
+  function formatWeekRange(programa?: ProgramaSemanal | null) {
+    if (!programa?.data_inicio) return '—';
+    const start = isoToDate(programa.data_inicio);
+    if (!start) return '—';
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    const dfDayMonth = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'long' });
+    const dfYear = new Intl.DateTimeFormat('pt-BR', { year: 'numeric' });
+    const left = dfDayMonth.format(start);
+    const right = dfDayMonth.format(end);
+    const year = dfYear.format(start);
+    return `${left} – ${right} ${year}`;
+  }
+  async function fetchProgramaByRange(weekStartISO: string) {
+    const weekEndISO = addDaysISO(weekStartISO, 6);
+    try {
+      const resp = await fetch(`/api/programacoes?week_start=${encodeURIComponent(weekStartISO)}&week_end=${encodeURIComponent(weekEndISO)}`);
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({} as any));
+        throw new Error(err.error || 'Semana não encontrada');
+      }
+      const data = await resp.json();
+      // Mapear para ProgramaSemanal mínimo
+      const p: ProgramaSemanal = {
+        id: String(data.programacao.id),
+        semana: `${formatWeekRange({ data_inicio: data.programacao.week_start } as any)}`,
+        data_inicio: data.programacao.week_start,
+        mes_ano: '',
+        partes: (data.items || []).map((it: any, idx: number) => ({
+          numero: it.order ?? idx + 1,
+          titulo: it.lang?.pt?.title || it.lang?.en?.title || 'Parte',
+          tempo: it.minutes || 0,
+          tipo: it.type || 'talk',
+          secao: it.section || 'LIVING',
+        })),
+        criado_em: data.programacao.created_at || new Date().toISOString(),
+        atualizado_em: data.programacao.updated_at || new Date().toISOString()
+      };
+      setProgramaAtual(p);
+      toast({ title: 'Semana carregada', description: formatWeekRange(p) });
+    } catch (e: any) {
+      toast({ title: 'Falha ao carregar semana', description: e?.message || 'Erro', variant: 'destructive' });
+    }
+  }
+
+  // Calcular início da semana atual (segunda-feira)
+  function getCurrentWeekStartISO() {
+    const now = new Date();
+    const d = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+    // getUTCDay: 0 domingo, 1 segunda ...
+    let wd = d.getUTCDay();
+    if (wd === 0) wd = 7;
+    d.setUTCDate(d.getUTCDate() - (wd - 1));
+    return d.toISOString().slice(0, 10);
+  }
+
+  // Carregar semana atual a partir do mock (se não houver no banco)
+  async function loadMockCurrentWeek() {
+    const weekStart = getCurrentWeekStartISO();
+    try {
+      const resp = await fetch(`/api/programacoes/mock?semana=${encodeURIComponent(weekStart)}`);
+      if (!resp.ok) throw new Error('Mock da semana não encontrado');
+      const wk = await resp.json();
+      const partes = Array.isArray(wk.items) ? wk.items.map((it: any, idx: number) => ({
+        numero: it.order ?? idx + 1,
+        titulo: it.lang?.pt?.title || it.lang?.en?.title || 'Parte',
+        tempo: it.minutes || 0,
+        tipo: it.type || 'talk',
+        secao: it.section || 'LIVING',
+      })) : [];
+      const prog: ProgramaSemanal = {
+        id: String(wk.id || Date.now()),
+        semana: formatWeekRange({ data_inicio: weekStart } as any),
+        data_inicio: weekStart,
+        mes_ao: '',
+        partes,
+        criado_em: new Date().toISOString(),
+        atualizado_em: new Date().toISOString()
+      } as any;
+      setProgramaAtual(prog);
+      toast({ title: 'Semana (mock) carregada', description: formatWeekRange(prog) });
+    } catch (e: any) {
+      toast({ title: 'Falha ao carregar mock', description: e?.message || 'Erro', variant: 'destructive' });
+    }
+  }
+
+  function stepWeek(deltaDays: number) {
+    if (!programaAtual?.data_inicio) {
+      toast({ title: 'Selecione/importe uma semana antes', description: 'Use a aba Importar', variant: 'destructive' });
+      return;
+    }
+    const nextStart = addDaysISO(programaAtual.data_inicio, deltaDays);
+    fetchProgramaByRange(nextStart);
+  }
+
+  // Handlers dos botões de ação no header
+  const handleRegenerar = async () => {
+    setActiveTab("gerar");
+    // chamar geração do filho
+    setTimeout(() => childGenerateRef.current && childGenerateRef.current(), 0);
+  };
+  const handleSalvar = async () => {
+    toast({ title: 'Salvo', description: 'Designações mantidas como rascunho no Supabase.' });
+  };
+  const handleExportar = async () => {
+    toast({ title: 'Exportação S-89', description: 'Geração de PDFs S-89 será adicionada em seguida.' });
+  };
 
   const handleProgramaImportado = (programa: ProgramaSemanal) => {
     setProgramaAtual(programa);
@@ -761,8 +880,50 @@ export default function Designacoes() {
           subtitle="Automatize a atribuição de designações da Reunião Vida e Ministério Cristão"
         />
 
-        {/* Card de instruções oficiais S-38-E */}
         <div className="container mx-auto p-6">
+          {/* Header com seletor de semana e ações principais */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3 mb-6">
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => stepWeek(-7)}>
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <div className="px-3 py-2 bg-white border rounded text-sm">
+                Semana: {formatWeekRange(programaAtual)}
+              </div>
+              <Button variant="outline" size="sm" onClick={() => stepWeek(7)}>
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button onClick={() => {
+                if (!programaAtual) {
+                  toast({ title: 'Selecione/importe uma semana', description: 'Use a aba Importar ou navegue pelas setas', variant: 'destructive' });
+                  return;
+                }
+                setActiveTab('gerar');
+                setTimeout(() => childGenerateRef.current && childGenerateRef.current(), 0);
+              }}>
+                Gerar Designações Automáticas
+              </Button>
+              <Button variant="outline" onClick={handleRegenerar}>Regerar</Button>
+              <Button variant="outline" onClick={handleSalvar}>Salvar</Button>
+              <Button variant="outline" onClick={handleExportar}>Exportar S-89</Button>
+            </div>
+          </div>
+
+          {/* Aviso e ação para carregar semana quando não houver uma pronta */}
+          {!programaAtual && (
+            <Card className="mb-4 border-yellow-300 bg-yellow-50">
+              <CardContent className="py-4 flex items-center justify-between">
+                <div className="text-sm">
+                  Nenhuma semana carregada. Carregue a semana atual (mock) ou importe um PDF na aba Importar.
+                </div>
+                <Button variant="outline" onClick={loadMockCurrentWeek}>Carregar Semana Atual (mock)</Button>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Card de instruções oficiais S-38-E */}
           <Card className="mb-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -821,6 +982,7 @@ export default function Designacoes() {
                 programa={programaAtual}
                 estudantes={estudantes || []}
                 onDesignacoesGeradas={handleDesignacoesGeradas}
+                onBindGenerate={(fn) => { childGenerateRef.current = fn; }}
               />
             </TabsContent>
 
