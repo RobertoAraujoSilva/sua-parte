@@ -760,8 +760,31 @@ export default function Designacoes() {
           title="Sistema de Designações Ministeriais"
           subtitle="Automatize a atribuição de designações da Reunião Vida e Ministério Cristão"
         />
-        
+
+        {/* Card de instruções oficiais S-38-E */}
         <div className="container mx-auto p-6">
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="w-5 h-5" />
+                Instruções Oficiais S-38-E
+              </CardTitle>
+              <CardDescription>
+                Segue o fluxo e regras oficiais para atribuição de partes e designações da Reunião Vida e Ministério Cristão. <a href="https://www.jw.org/pt/publicacoes/jw-meeting-workbook/" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">Ver documento completo</a>
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm text-gray-700">
+              <ul className="list-disc pl-6">
+                <li><strong>Comentários Iniciais:</strong> 1 min. Gerar expectativa para o programa.</li>
+                <li><strong>Tesouros da Palavra de Deus:</strong> Discurso (10 min, ancião/servo qualificado), Joias espirituais (10 min, ancião/servo qualificado), Leitura da Bíblia (4 min, apenas homens).</li>
+                <li><strong>Ministério de Campo:</strong> Iniciando conversas, Revisita, Fazendo discípulos, Explicando crenças (ver regras de gênero e ajudante).</li>
+                <li><strong>Vivendo como Cristãos:</strong> Partes de aplicação, Estudo bíblico de congregação (30 min, ancião/servo qualificado).</li>
+                <li><strong>Comentários Finais:</strong> 3 min. Resumo, prévia da próxima semana, nomes dos designados.</li>
+                <li><strong>Regras de designação:</strong> Gênero, cargo, ajudante do mesmo sexo ou parente, tempo de cada parte, validação automática.</li>
+              </ul>
+              <div className="mt-2 text-xs text-gray-500">Baseado no documento S-38-E 11/23. Para detalhes completos, consulte o <a href="https://www.jw.org/pt/publicacoes/jw-meeting-workbook/" target="_blank" rel="noopener noreferrer" className="underline">site oficial</a>.</div>
+            </CardContent>
+          </Card>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="importar" className="flex items-center gap-2">
@@ -865,6 +888,10 @@ export default function Designacoes() {
         </div>
       </main>
       <Footer />
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32 }}>
+        <Button variant="outline" onClick={() => window.location.href = '/programas'}>Voltar</Button>
+        <Button variant="default" onClick={() => window.location.href = '/relatorios'}>Prosseguir</Button>
+      </div>
     </div>
   );
 }

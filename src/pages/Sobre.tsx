@@ -37,6 +37,14 @@ const Sobre = () => {
     }
   ];
 
+  // Funções de navegação
+  const handleNext = () => {
+    window.location.href = '/Dashboard';
+  };
+  const handleBack = () => {
+    window.history.back();
+  };
+
   const timeline = [
     {
       year: "2022",
@@ -214,6 +222,10 @@ const Sobre = () => {
                     <CardHeader>
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-jw-blue/10 rounded-lg flex items-center justify-center">
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32 }}>
+              <button className="btn btn-outline" onClick={handleBack}>Voltar</button>
+              <button className="btn btn-primary" onClick={handleNext}>Prosseguir</button>
+            </div>
                           <IconComponent className="w-5 h-5 text-jw-blue" />
                         </div>
                         <CardTitle className="text-lg">{feature.title}</CardTitle>

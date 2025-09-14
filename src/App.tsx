@@ -39,7 +39,7 @@ import DesignacoesSimplified from "./pages/DesignacoesSimplified";
 import DensityToggleTestPage from "./pages/DensityToggleTest";
 import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
-import DebugFab from "./components/DebugFab";
+
 import AuthRecoveryButton from "./components/AuthRecoveryButton";
 import { Button } from "@/components/ui/button";
 
@@ -283,8 +283,8 @@ const App = () => (
 
           {/* Debug Panel - Only shows in development */}
           <ConditionalDebugPanel />
-          {import.meta.env.DEV && <DebugFab />}
-          {import.meta.env.DEV && <LanguageDebug />}
+                    
+
           </TutorialProvider>
         </OnboardingProvider>
       </AuthProvider>

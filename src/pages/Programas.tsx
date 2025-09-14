@@ -176,6 +176,10 @@ const Programas: React.FC = () => {
       </div>
     </div>
   );
+    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32 }}>
+      <Button variant="outline" onClick={() => window.location.href = '/estudantes'}>Voltar</Button>
+      <Button variant="default" onClick={() => window.location.href = '/designacoes'}>Prosseguir</Button>
+    </div>
 };
 
 const PDFList: React.FC<{ entries: PDFEntry[]; selected: PDFEntry | null; onSelect: (e: PDFEntry) => void }>

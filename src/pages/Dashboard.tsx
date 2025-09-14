@@ -41,10 +41,12 @@ const Dashboard = () => {
           />
         </div>
         <Footer />
-      </div>
-    );
-  }
-
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32 }}>
+            <div className="max-w-6xl mx-auto">
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 32 }}>
+                <Button variant="outline" onClick={() => navigate('/bem-vindo')}>Voltar</Button>
+                <Button variant="default" onClick={() => navigate('/estudantes')}>Prosseguir</Button>
+              </div>
   // Se onboarding não está completo, mostrar guia
   if (!isComplete) {
     return (
@@ -98,24 +100,25 @@ const Dashboard = () => {
   }
 
   // Dashboard completo
+  // Mover definição do stats para depois do destructuring de useOnboarding
   const stats = [
     {
       title: "Estudantes Ativos",
-      value: systemData.studentsCount || 0,
+      value: systemData?.studentsCount || 0,
       icon: Users,
       route: "/estudantes",
       color: "text-blue-600"
     },
     {
       title: "Programas Importados", 
-      value: systemData.programsCount || 0,
+      value: systemData?.programsCount || 0,
       icon: Calendar,
       route: "/programas",
       color: "text-green-600"
     },
     {
       title: "Designações Geradas",
-      value: systemData.assignmentsCount || 0,
+      value: systemData?.assignmentsCount || 0,
       icon: FileText,
       route: "/designacoes",
       color: "text-purple-600"
@@ -241,3 +244,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+export { Dashboard };

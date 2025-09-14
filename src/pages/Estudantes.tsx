@@ -35,7 +35,7 @@ import {
   CARGO_LABELS,
   GENERO_LABELS,
 } from "@/types/estudantes";
-import { DebugPanel } from '@/components/DebugPanel';
+
 
 const Estudantes = () => {
   const { t } = useTranslation();
@@ -290,7 +290,11 @@ const Estudantes = () => {
         {renderMainContent()}
       </main>
       <Footer />
-      {import.meta.env.DEV && <DebugPanel />}
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32 }}>
+          <Button variant="outline" onClick={() => navigate('/dashboard')}>Voltar</Button>
+          <Button variant="default" onClick={() => navigate('/programas')}>Prosseguir</Button>
+        </div>
     </div>
   );
 };

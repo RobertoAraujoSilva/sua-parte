@@ -29,6 +29,16 @@ const BemVindo = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isSkipping, setIsSkipping] = useState(false);
+  
+  // Funções de navegação
+  const handleNext = () => {
+    // Exemplo: avançar para próxima página
+    navigate('/Dashboard');
+  };
+  const handleBack = () => {
+    // Exemplo: voltar para página anterior
+    navigate(-1);
+  };
 
   const welcomeSteps = [
     {
@@ -362,6 +372,10 @@ const BemVindo = () => {
       </div>
       
       <Footer />
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32 }}>
+          <Button variant="outline" onClick={handleBack}>Voltar</Button>
+          <Button variant="default" onClick={handleNext}>Prosseguir</Button>
+        </div>
     </div>
   );
 };
