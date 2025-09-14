@@ -5,23 +5,13 @@ import { Badge } from '@/components/ui/badge';
 import { Users, Home, ArrowLeft, Plus, Edit, Trash2, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import StudentsSpreadsheet from '@/components/StudentsSpreadsheet';
+import type { EstudanteWithParent } from '@/types/estudantes';
 
-interface Estudante {
-  id: string;
-  nome: string;
-  genero: 'masculino' | 'feminino';
-  cargo: string;
-  ativo: boolean;
-  idade: number;
-  email: string;
-  telefone: string;
-  data_batismo: string;
-  observacoes: string;
-}
 
 export default function EstudantesSimplified() {
   const navigate = useNavigate();
-  const [estudantes, setEstudantes] = useState<Estudante[]>([]);
+  const [estudantes, setEstudantes] = useState<EstudanteWithParent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -79,7 +69,7 @@ export default function EstudantesSimplified() {
     <div className="min-h-screen bg-gray-50">
       {/* Navigation Bar */}
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
+        <div className="w-full max-w-[1800px] mx-auto px-4 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <Button 
@@ -114,7 +104,7 @@ export default function EstudantesSimplified() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="w-full max-w-[1800px] mx-auto px-4 lg:px-8 py-6">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
@@ -167,6 +157,9 @@ export default function EstudantesSimplified() {
           </Card>
         </div>
 
+        {/* Planilha (edição rápida) */}
+        <StudentsSpreadsheet estudantes={estudantes} onRefresh={fetchEstudantes} />
+
         {/* Lista de Estudantes Ativos */}
         <Card className="mb-6">
           <CardHeader>
@@ -176,9 +169,9 @@ export default function EstudantesSimplified() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
               {estudantesAtivos.map((estudante) => (
-                <div key={estudante.id} className="flex items-center justify-between p-4 border rounded-lg hover:shadow-md transition-shadow">
+                <div key={estudante.id} className="flex items-center justify-between p-4 border rounded-lg hover:shadow-md transition-shadow h-full">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                           <span className="font-semibold text-blue-600">
@@ -227,9 +220,9 @@ export default function EstudantesSimplified() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                 {estudantesInativos.map((estudante) => (
-                  <div key={estudante.id} className="flex items-center justify-between p-4 border rounded-lg bg-gray-50">
+                  <div key={estudante.id} className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 hover:shadow-md h-full">
                       <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                           <span className="font-semibold text-gray-500">

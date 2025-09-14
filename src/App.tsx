@@ -2,7 +2,7 @@ import React from "react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { OnboardingProvider } from "@/contexts/OnboardingContext"; 
 import { TutorialProvider } from "@/contexts/TutorialContext";
@@ -14,6 +14,7 @@ import Auth from "./pages/Auth";
 import { LanguageDebug } from "@/components/LanguageDebug";
 import Demo from "./pages/Demo";
 import ProgramasTest from "./pages/ProgramasTest";
+import Programas from "./pages/Programas";
 import Relatorios from "./pages/Relatorios";
 import Reunioes from "./pages/Reunioes";
 import Designacoes from "./pages/Designacoes";
@@ -40,6 +41,7 @@ import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DebugFab from "./components/DebugFab";
 import AuthRecoveryButton from "./components/AuthRecoveryButton";
+import { Button } from "@/components/ui/button";
 
 const queryClient = new QueryClient();
 
@@ -66,6 +68,33 @@ if (import.meta.env.DEV) {
 const ConditionalDebugPanel: React.FC = () => {
   // Temporarily disabled to fix React hooks issue
   return null;
+};
+
+// Floating navigation between key instructor pages
+// Shows a "Continuar" button to go from: /dashboard -> /estudantes -> /programas -> /designacoes
+const FlowNav: React.FC = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const steps = ["/dashboard", "/estudantes", "/programas", "/designacoes"] as const;
+  const labels: Record<string, string> = {
+    "/dashboard": "Estudantes",
+    "/estudantes": "Programas",
+    "/programas": "Designações",
+  };
+
+  const idx = steps.indexOf(location.pathname as typeof steps[number]);
+  if (idx === -1 || idx === steps.length - 1) return null; // hide if not in flow or last step
+
+  const nextPath = steps[idx + 1];
+  const nextLabel = labels[location.pathname] || "Próximo";
+
+  return (
+    <div className="fixed bottom-6 right-6 z-50">
+      <Button size="lg" className="shadow-lg" onClick={() => navigate(nextPath)}>
+        Continuar para {nextLabel}
+      </Button>
+    </div>
+  );
 };
 
 const App = () => (
@@ -197,7 +226,7 @@ const App = () => (
                   path="/programas"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
-                      <ProgramasTest />
+                      <Programas />
                     </ProtectedRoute>
                   }
                 />
@@ -243,6 +272,7 @@ const App = () => (
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              <FlowNav />
             </BrowserRouter>
           </TooltipProvider>
 

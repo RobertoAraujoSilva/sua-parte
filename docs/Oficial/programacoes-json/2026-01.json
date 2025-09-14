@@ -1,0 +1,122 @@
+[
+  {
+    "idSemana": "2026-01-05",
+    "semanaLabel": "5-11 de janeiro 2026",
+    "tema": "Recomeçando com sabedoria",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          { "idParte": 1, "titulo": "Tesouros da Palavra de Deus", "duracaoMin": 10, "tipo": "consideracao" },
+          { "idParte": 2, "titulo": "Joias espirituais", "duracaoMin": 10, "tipo": "joias" },
+          { "idParte": 3, "titulo": "Leitura da Bíblia", "duracaoMin": 4, "tipo": "leitura", "restricoes": { "genero": "M" } }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          { "idParte": 4, "titulo": "Iniciando conversas", "duracaoMin": 2, "tipo": "testemunho informal" },
+          { "idParte": 5, "titulo": "Cultivando o interesse", "duracaoMin": 3, "tipo": "de casa em casa" },
+          { "idParte": 6, "titulo": "Fazendo discípulos", "duracaoMin": 5, "tipo": "estudo biblico" }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          { "idParte": 7, "titulo": "Tema local (ancião)", "duracaoMin": 15, "tipo": "consideracao" },
+          { "idParte": 8, "titulo": "Estudo bíblico de congregação", "duracaoMin": 30, "tipo": "estudo" }
+        ]
+      }
+    ]
+  },
+  {
+    "idSemana": "2026-01-12",
+    "semanaLabel": "12-18 de janeiro 2026",
+    "tema": "Confiança em Jeová no novo ano",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          { "idParte": 1, "titulo": "Confiando em Jeová", "duracaoMin": 10, "tipo": "consideracao" },
+          { "idParte": 2, "titulo": "Joias espirituais", "duracaoMin": 10, "tipo": "joias" },
+          { "idParte": 3, "titulo": "Leitura da Bíblia", "duracaoMin": 4, "tipo": "leitura", "restricoes": { "genero": "M" } }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          { "idParte": 4, "titulo": "Iniciando conversas", "duracaoMin": 3, "tipo": "de casa em casa" },
+          { "idParte": 5, "titulo": "Cultivando o interesse", "duracaoMin": 4, "tipo": "testemunho publico" },
+          { "idParte": 6, "titulo": "Demonstração", "duracaoMin": 5, "tipo": "demonstracao" }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          { "idParte": 7, "titulo": "Vídeo com consideração", "duracaoMin": 15, "tipo": "video+consideracao" },
+          { "idParte": 8, "titulo": "Estudo bíblico de congregação", "duracaoMin": 30, "tipo": "estudo" }
+        ]
+      }
+    ]
+  },
+  {
+    "idSemana": "2026-01-19",
+    "semanaLabel": "19-25 de janeiro 2026",
+    "tema": "Ande por fé e não por vista",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          { "idParte": 1, "titulo": "Fé ativa em ação", "duracaoMin": 10, "tipo": "consideracao" },
+          { "idParte": 2, "titulo": "Joias espirituais", "duracaoMin": 10, "tipo": "joias" },
+          { "idParte": 3, "titulo": "Leitura da Bíblia", "duracaoMin": 4, "tipo": "leitura", "restricoes": { "genero": "M" } }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          { "idParte": 4, "titulo": "Iniciando conversas", "duracaoMin": 3, "tipo": "testemunho informal" },
+          { "idParte": 5, "titulo": "Cultivando o interesse", "duracaoMin": 4, "tipo": "de casa em casa" },
+          { "idParte": 6, "titulo": "Fazendo discípulos", "duracaoMin": 5, "tipo": "estudo biblico" }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          { "idParte": 7, "titulo": "Necessidades locais", "duracaoMin": 15, "tipo": "necessidades" },
+          { "idParte": 8, "titulo": "Estudo bíblico de congregação", "duracaoMin": 30, "tipo": "estudo" }
+        ]
+      }
+    ]
+  },
+  {
+    "idSemana": "2026-01-26",
+    "semanaLabel": "26 de janeiro – 1º de fevereiro 2026",
+    "tema": "Sabedoria em decisões diárias",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          { "idParte": 1, "titulo": "Decisões guiadas por Jeová", "duracaoMin": 10, "tipo": "consideracao" },
+          { "idParte": 2, "titulo": "Joias espirituais", "duracaoMin": 10, "tipo": "joias" },
+          { "idParte": 3, "titulo": "Leitura da Bíblia", "duracaoMin": 4, "tipo": "leitura", "restricoes": { "genero": "M" } }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          { "idParte": 4, "titulo": "Iniciando conversas", "duracaoMin": 2, "tipo": "de casa em casa" },
+          { "idParte": 5, "titulo": "Cultivando o interesse", "duracaoMin": 3, "tipo": "testemunho publico" },
+          { "idParte": 6, "titulo": "Discurso (tema local)", "duracaoMin": 5, "tipo": "discurso", "restricoes": { "genero": "M" } }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          { "idParte": 7, "titulo": "Vídeo com consideração", "duracaoMin": 15, "tipo": "video+consideracao" },
+          { "idParte": 8, "titulo": "Estudo bíblico de congregação", "duracaoMin": 30, "tipo": "estudo" }
+        ]
+      }
+    ]
+  }
+]

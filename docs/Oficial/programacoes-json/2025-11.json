@@ -1,0 +1,183 @@
+[
+  {
+    "idSemana": "2025-11-03",
+    "semanaLabel": "3-9 de novembro 2025",
+    "tema": "Cântico de Salomão 1-2",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          {
+            "idParte": 1,
+            "titulo": "Uma história de amor verdadeiro",
+            "duracaoMin": 10,
+            "tipo": "consideracao",
+            "referencias": [
+              "Vídeo: Introdução a Cântico de Salomão",
+              "Cân. 1:9-11",
+              "Cân. 2:16, 17; w15 15/1 30 §§ 9-10"
+            ]
+          },
+          {
+            "idParte": 2,
+            "titulo": "Joias espirituais",
+            "duracaoMin": 10,
+            "tipo": "joias",
+            "referencias": [
+              "Cân. 2:7",
+              "w15 15/1 31 § 11"
+            ]
+          },
+          {
+            "idParte": 3,
+            "titulo": "Leitura da Bíblia",
+            "duracaoMin": 4,
+            "tipo": "leitura",
+            "referencias": ["Cân. 2:1-17", "th lição 12"],
+            "restricoes": { "genero": "M" }
+          }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          {
+            "idParte": 4,
+            "titulo": "Iniciando conversas",
+            "duracaoMin": 3,
+            "tipo": "de casa em casa",
+            "referencias": ["lmd lição 1 ponto 3"]
+          },
+          {
+            "idParte": 5,
+            "titulo": "Cultivando o interesse",
+            "duracaoMin": 4,
+            "tipo": "de casa em casa",
+            "referencias": ["lmd lição 9 ponto 3"]
+          },
+          {
+            "idParte": 6,
+            "titulo": "Fazendo discípulos",
+            "duracaoMin": 5,
+            "tipo": "estudo biblico",
+            "referencias": ["lff lição 18 introdução e pontos 1-3", "th lição 8"]
+          }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          {
+            "idParte": 7,
+            "titulo": "\"A pessoa generosa será abençoada\"",
+            "duracaoMin": 15,
+            "tipo": "video+consideracao",
+            "referencias": [
+              "Pro. 22:9",
+              "Pro. 19:17",
+              "Tia. 1:17",
+              "Vídeo: A Generosidade nos Traz Alegria"
+            ]
+          },
+          {
+            "idParte": 8,
+            "titulo": "Estudo bíblico de congregação",
+            "duracaoMin": 30,
+            "tipo": "estudo",
+            "referencias": ["lfb histórias 32-33"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "idSemana": "2025-11-10",
+    "semanaLabel": "10-16 de novembro 2025",
+    "tema": "Cântico de Salomão 3-4",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          { "idParte": 1, "titulo": "Lições de amor leal e pureza", "duracaoMin": 10, "tipo": "consideracao", "referencias": ["Cân. 3-4"] },
+          { "idParte": 2, "titulo": "Joias espirituais", "duracaoMin": 10, "tipo": "joias", "referencias": ["Cân. 3:1-11", "Cân. 4:7-12"] },
+          { "idParte": 3, "titulo": "Leitura da Bíblia", "duracaoMin": 4, "tipo": "leitura", "referencias": ["Cân. 3:1-11", "th lição 12"], "restricoes": { "genero": "M" } }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          { "idParte": 4, "titulo": "Iniciando conversas", "duracaoMin": 3, "tipo": "testemunho publico", "referencias": ["lmd li��ão 3 ponto 4"] },
+          { "idParte": 5, "titulo": "Cultivando o interesse", "duracaoMin": 4, "tipo": "de casa em casa", "referencias": ["lmd lição 9 ponto 4"] },
+          { "idParte": 6, "titulo": "Demonstração", "duracaoMin": 5, "tipo": "demonstracao", "referencias": ["lmd lição 10 ponto 3"] }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          { "idParte": 7, "titulo": "Tema local (ancião)", "duracaoMin": 15, "tipo": "consideracao" },
+          { "idParte": 8, "titulo": "Estudo bíblico de congregação", "duracaoMin": 30, "tipo": "estudo" }
+        ]
+      }
+    ]
+  },
+  {
+    "idSemana": "2025-11-17",
+    "semanaLabel": "17-23 de novembro 2025",
+    "tema": "Cântico de Salomão 5-6",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          { "idParte": 1, "titulo": "Fidelidade sob provação", "duracaoMin": 10, "tipo": "consideracao", "referencias": ["Cân. 5-6"] },
+          { "idParte": 2, "titulo": "Joias espirituais", "duracaoMin": 10, "tipo": "joias" },
+          { "idParte": 3, "titulo": "Leitura da Bíblia", "duracaoMin": 4, "tipo": "leitura", "referencias": ["Cân. 5:2-16", "th lição 12"], "restricoes": { "genero": "M" } }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          { "idParte": 4, "titulo": "Iniciando conversas", "duracaoMin": 2, "tipo": "testemunho informal", "referencias": ["lmd lição 2 ponto 3"] },
+          { "idParte": 5, "titulo": "Cultivando o interesse", "duracaoMin": 3, "tipo": "de casa em casa", "referencias": ["lmd lição 7 ponto 3"] },
+          { "idParte": 6, "titulo": "Fazendo discípulos", "duracaoMin": 5, "tipo": "estudo biblico", "referencias": ["lff lição 18"] }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          { "idParte": 7, "titulo": "Vídeo com consideração", "duracaoMin": 15, "tipo": "video+consideracao" },
+          { "idParte": 8, "titulo": "Estudo bíblico de congregação", "duracaoMin": 30, "tipo": "estudo" }
+        ]
+      }
+    ]
+  },
+  {
+    "idSemana": "2025-11-24",
+    "semanaLabel": "24-30 de novembro 2025",
+    "tema": "Cântico de Salomão 7-8",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          { "idParte": 1, "titulo": "O amor forte como a morte", "duracaoMin": 10, "tipo": "consideracao", "referencias": ["Cân. 8:6"] },
+          { "idParte": 2, "titulo": "Joias espirituais", "duracaoMin": 10, "tipo": "joias" },
+          { "idParte": 3, "titulo": "Leitura da Bíblia", "duracaoMin": 4, "tipo": "leitura", "referencias": ["Cân. 7:1-13", "th lição 12"], "restricoes": { "genero": "M" } }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          { "idParte": 4, "titulo": "Iniciando conversas", "duracaoMin": 3, "tipo": "de casa em casa" },
+          { "idParte": 5, "titulo": "Cultivando o interesse", "duracaoMin": 4, "tipo": "testemunho publico" },
+          { "idParte": 6, "titulo": "Discurso (tema local)", "duracaoMin": 5, "tipo": "discurso", "restricoes": { "genero": "M" } }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          { "idParte": 7, "titulo": "Necessidades locais", "duracaoMin": 15, "tipo": "necessidades" },
+          { "idParte": 8, "titulo": "Estudo bíblico de congregação", "duracaoMin": 30, "tipo": "estudo" }
+        ]
+      }
+    ]
+  }
+]

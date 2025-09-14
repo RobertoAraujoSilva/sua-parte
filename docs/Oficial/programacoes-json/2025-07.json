@@ -1,0 +1,122 @@
+[
+  {
+    "idSemana": "2025-07-07",
+    "semanaLabel": "7-13 de julho 2025",
+    "tema": "Sabedoria prática para a vida cristã",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          { "idParte": 1, "titulo": "Tesouros da Palavra de Deus", "duracaoMin": 10, "tipo": "consideracao" },
+          { "idParte": 2, "titulo": "Joias espirituais", "duracaoMin": 10, "tipo": "joias" },
+          { "idParte": 3, "titulo": "Leitura da Bíblia", "duracaoMin": 4, "tipo": "leitura", "restricoes": { "genero": "M" } }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          { "idParte": 4, "titulo": "Iniciando conversas", "duracaoMin": 3, "tipo": "de casa em casa" },
+          { "idParte": 5, "titulo": "Cultivando o interesse", "duracaoMin": 4, "tipo": "testemunho informal" },
+          { "idParte": 6, "titulo": "Estudo bíblico", "duracaoMin": 5, "tipo": "estudo biblico" }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          { "idParte": 7, "titulo": "Necessidades locais", "duracaoMin": 15, "tipo": "necessidades" },
+          { "idParte": 8, "titulo": "Estudo bíblico de congregação", "duracaoMin": 30, "tipo": "estudo" }
+        ]
+      }
+    ]
+  },
+  {
+    "idSemana": "2025-07-14",
+    "semanaLabel": "14-20 de julho 2025",
+    "tema": "Ande com sabedoria e discernimento",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          { "idParte": 1, "titulo": "Aplicando princípios de sabedoria", "duracaoMin": 10, "tipo": "consideracao" },
+          { "idParte": 2, "titulo": "Joias espirituais", "duracaoMin": 10, "tipo": "joias" },
+          { "idParte": 3, "titulo": "Leitura da Bíblia", "duracaoMin": 4, "tipo": "leitura", "restricoes": { "genero": "M" } }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          { "idParte": 4, "titulo": "Iniciando conversas", "duracaoMin": 3, "tipo": "testemunho publico" },
+          { "idParte": 5, "titulo": "Cultivando o interesse", "duracaoMin": 4, "tipo": "de casa em casa" },
+          { "idParte": 6, "titulo": "Demonstração de estudo", "duracaoMin": 5, "tipo": "demonstracao" }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          { "idParte": 7, "titulo": "Vídeo com consideração", "duracaoMin": 15, "tipo": "video+consideracao" },
+          { "idParte": 8, "titulo": "Estudo bíblico de congregação", "duracaoMin": 30, "tipo": "estudo" }
+        ]
+      }
+    ]
+  },
+  {
+    "idSemana": "2025-07-21",
+    "semanaLabel": "21-27 de julho 2025",
+    "tema": "Fortaleça sua confiança em Jeová",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          { "idParte": 1, "titulo": "Como Jeová nos fortalece", "duracaoMin": 10, "tipo": "consideracao" },
+          { "idParte": 2, "titulo": "Joias espirituais", "duracaoMin": 10, "tipo": "joias" },
+          { "idParte": 3, "titulo": "Leitura da Bíblia", "duracaoMin": 4, "tipo": "leitura", "restricoes": { "genero": "M" } }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          { "idParte": 4, "titulo": "Iniciando conversas", "duracaoMin": 3, "tipo": "de casa em casa" },
+          { "idParte": 5, "titulo": "Cultivando o interesse", "duracaoMin": 4, "tipo": "testemunho informal" },
+          { "idParte": 6, "titulo": "Estudo bíblico", "duracaoMin": 5, "tipo": "estudo biblico" }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          { "idParte": 7, "titulo": "Necessidades locais", "duracaoMin": 15, "tipo": "necessidades" },
+          { "idParte": 8, "titulo": "Estudo bíblico de congregação", "duracaoMin": 30, "tipo": "estudo" }
+        ]
+      }
+    ]
+  },
+  {
+    "idSemana": "2025-07-28",
+    "semanaLabel": "28 de julho – 3 de agosto 2025",
+    "tema": "Mostre amor nas suas decisões",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          { "idParte": 1, "titulo": "Decisões que agradam a Jeová", "duracaoMin": 10, "tipo": "consideracao" },
+          { "idParte": 2, "titulo": "Joias espirituais", "duracaoMin": 10, "tipo": "joias" },
+          { "idParte": 3, "titulo": "Leitura da Bíblia", "duracaoMin": 4, "tipo": "leitura", "restricoes": { "genero": "M" } }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          { "idParte": 4, "titulo": "Iniciando conversas", "duracaoMin": 3, "tipo": "testemunho publico" },
+          { "idParte": 5, "titulo": "Cultivando o interesse", "duracaoMin": 4, "tipo": "de casa em casa" },
+          { "idParte": 6, "titulo": "Discurso (tema local)", "duracaoMin": 5, "tipo": "discurso", "restricoes": { "genero": "M" } }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          { "idParte": 7, "titulo": "Vídeo com consideração", "duracaoMin": 15, "tipo": "video+consideracao" },
+          { "idParte": 8, "titulo": "Estudo bíblico de congregação", "duracaoMin": 30, "tipo": "estudo" }
+        ]
+      }
+    ]
+  }
+]

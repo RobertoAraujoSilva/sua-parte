@@ -1,0 +1,895 @@
+{
+  "ano": "2025",
+  "descricao": "Programação completa baseada nos PDFs oficiais JW.org",
+  "semanas": [
+    {
+      "periodo": "8-14 de setembro 2025",
+      "tema": "Provérbios 30",
+      "cantico_abertura": "136",
+      "cantico_meio": "80",
+      "cantico_encerramento": "128",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "tpd_1_sem1",
+              "titulo": "Não me dês nem pobreza nem riquezas",
+              "duracao": 10,
+              "tipo": "consideracao",
+              "referencias": [
+                "Pro. 30:8, 9; w18.01 24-25 §§ 10-12",
+                "Pro. 30:15, 16; w87 15/5 30 § 8",
+                "Pro. 30:24, 25; w11 1/6 10 § 3"
+              ],
+              "designado": null
+            },
+            {
+              "id": "tpd_2_sem1",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "participacao",
+              "referencias": ["Pro. 30:26 — w09 15/4 17 §§ 11-13"],
+              "designado": null
+            },
+            {
+              "id": "tpd_3_sem1",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Pro. 30:1-14 (th lição 2)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "fsm_1_sem1",
+              "titulo": "Iniciando conversas",
+              "duracao": 4,
+              "tipo": "de_casa_em_casa",
+              "referencias": "Use A Sentinela N.º 1 de 2025 (lmd lição 1 ponto 3)",
+              "designado": null
+            },
+            {
+              "id": "fsm_2_sem1",
+              "titulo": "Cultivando o interesse",
+              "duracao": 4,
+              "tipo": "testemunho_publico",
+              "referencias": "lmd lição 9 ponto 3",
+              "designado": null
+            },
+            {
+              "id": "fsm_3_sem1",
+              "titulo": "Explicando suas crenças",
+              "duracao": 4,
+              "tipo": "discurso",
+              "referencias": "ijwbq artigo 102 — Tema: Jogar é pecado? (th lição 7)",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "nvc_1_sem1",
+              "titulo": "Não Seja Enganado pela Falsa Paz! — Chibisa Selemani",
+              "duracao": 5,
+              "tipo": "video_consideracao",
+              "designado": null
+            },
+            {
+              "id": "nvc_2_sem1",
+              "titulo": "Realizações da Organização, setembro",
+              "duracao": 10,
+              "tipo": "video",
+              "designado": null
+            },
+            {
+              "id": "nvc_3_sem1",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "lfb histórias 16-17",
+              "tipo": "estudo_congregacao",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "15-21 de setembro 2025",
+      "tema": "Provérbios 31",
+      "cantico_abertura": "135",
+      "cantico_meio": "121",
+      "cantico_encerramento": "2",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "tpd_1_sem2",
+              "titulo": "O que aprendemos dos conselhos de uma mãe amorosa",
+              "duracao": 10,
+              "tipo": "consideracao",
+              "referencias": [
+                "Pro. 31:3, 10; w11 1/2 19 §§ 7-8",
+                "Pro. 31:4-6; ijwhf artigo 4 §§ 11-13",
+                "Pro. 31:8, 9; g17.6 9 § 5"
+              ],
+              "designado": null
+            },
+            {
+              "id": "tpd_2_sem2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "participacao",
+              "referencias": ["Pro. 31:10-31 — w92 1/11 11 §§ 7-8"],
+              "designado": null
+            },
+            {
+              "id": "tpd_3_sem2",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Pro. 31:10-31 (th lição 10)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "fsm_1_sem2",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "tipo": "testemunho_informal",
+              "referencias": "Comece uma conversa depois de alguém falar ou fazer algo bondoso (lmd lição 5 ponto 3)",
+              "designado": null
+            },
+            {
+              "id": "fsm_2_sem2",
+              "titulo": "Iniciando conversas",
+              "duracao": 4,
+              "tipo": "de_casa_em_casa",
+              "referencias": "Fale sobre uma das 'Verdades que amamos ensinar', do apêndice A da brochura Ame as Pessoas (lmd lição 1 ponto 4)",
+              "designado": null
+            },
+            {
+              "id": "fsm_3_sem2",
+              "titulo": "Cultivando o interesse",
+              "duracao": 5,
+              "tipo": "de_casa_em_casa",
+              "referencias": "Convide para o discurso especial alguém que aceitou A Sentinela N.º 1 de 2025 (lmd lição 7 ponto 4)",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "nvc_1_sem2",
+              "titulo": "Ajude seus filhos a usar aparelhos eletrônicos com sabedoria",
+              "duracao": 8,
+              "tipo": "video_consideracao",
+              "referencias": "Vídeo: Use Bem o Seu Tempo",
+              "designado": null
+            },
+            {
+              "id": "nvc_2_sem2",
+              "titulo": "Necessidades locais",
+              "duracao": 7,
+              "tipo": "consideracao_local",
+              "designado": null
+            },
+            {
+              "id": "nvc_3_sem2",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "lfb histórias 18-19",
+              "tipo": "estudo_congregacao",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "22-28 de setembro 2025",
+      "tema": "Eclesiastes 1-2",
+      "cantico_abertura": "103",
+      "cantico_meio": "84",
+      "cantico_encerramento": "148",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "tpd_1_sem3",
+              "titulo": "Continue treinando as próximas gerações",
+              "duracao": 10,
+              "tipo": "video_consideracao",
+              "referencias": [
+                "Vídeo: Introdução a Eclesiastes",
+                "Ecl. 1:4; w17.01 27-28 §§ 3-4",
+                "Ecl. 2:24"
+              ],
+              "designado": null
+            },
+            {
+              "id": "tpd_2_sem3",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "participacao",
+              "referencias": ["Ecl. 1:1 — it 'Eclesiastes' § 1"],
+              "designado": null
+            },
+            {
+              "id": "tpd_3_sem3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Ecl. 1:1-18 (th lição 11)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "fsm_1_sem3",
+              "titulo": "Iniciando conversas",
+              "duracao": 2,
+              "tipo": "testemunho_informal",
+              "referencias": "Descubra um assunto que interessa a pessoa. Combine de entrar em contato com ela de novo (lmd lição 3 ponto 5)",
+              "designado": null
+            },
+            {
+              "id": "fsm_2_sem3",
+              "titulo": "Iniciando conversas",
+              "duracao": 2,
+              "tipo": "testemunho_publico",
+              "referencias": "Fale sobre uma das 'Verdades que amamos ensinar', usando o método mencionado no início do apêndice A da brochura Ame as Pessoas (lmd lição 2 ponto 3)",
+              "designado": null
+            },
+            {
+              "id": "fsm_3_sem3",
+              "titulo": "Cultivando o interesse",
+              "duracao": 2,
+              "tipo": "testemunho_informal",
+              "referencias": "Responda a uma pergunta que a pessoa fez numa conversa anterior (lmd lição 9 ponto 5)",
+              "designado": null
+            },
+            {
+              "id": "fsm_4_sem3",
+              "titulo": "Fazendo discípulos",
+              "duracao": 5,
+              "tipo": "testemunho_publico",
+              "referencias": "Mostre como é feito um estudo bíblico e combine com a pessoa o próximo estudo (lmd lição 10 ponto 3)",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "nvc_1_sem3",
+              "titulo": "Três lições importantes sobre dar treinamento",
+              "duracao": 15,
+              "tipo": "video_consideracao",
+              "referencias": "Vídeo: Imite o Treinador Perfeito, Jeová (João 5:20) — Trecho",
+              "designado": null
+            },
+            {
+              "id": "nvc_2_sem3",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "lfb histórias 20-21",
+              "tipo": "estudo_congregacao",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "29 de setembro – 5 de outubro 2025",
+      "tema": "Eclesiastes 3-4",
+      "cantico_abertura": "93",
+      "cantico_meio": "131",
+      "cantico_encerramento": "51",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "tpd_1_sem4",
+              "titulo": "Fortaleçam o cordão tríplice do seu casamento",
+              "duracao": 10,
+              "tipo": "consideracao",
+              "referencias": [
+                "Ecl. 3:1; ijwhf artigo 10 §§ 2-8",
+                "Ecl. 4:9; w23.05 23-24 §§ 12-14",
+                "Ecl. 4:12; w23.05 21 § 3"
+              ],
+              "designado": null
+            },
+            {
+              "id": "tpd_2_sem4",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "participacao",
+              "referencias": ["Ecl. 3:8 — it 'Amor' § 39"],
+              "designado": null
+            },
+            {
+              "id": "tpd_3_sem4",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Ecl. 4:1-16 (th lição 2)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "fsm_1_sem4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "tipo": "de_casa_em_casa",
+              "referencias": "Use A Sentinela N.º 1 de 2025 (lmd lição 2 ponto 5)",
+              "designado": null
+            },
+            {
+              "id": "fsm_2_sem4",
+              "titulo": "Cultivando o interesse",
+              "duracao": 4,
+              "tipo": "testemunho_informal",
+              "referencias": "lmd lição 9 ponto 4",
+              "designado": null
+            },
+            {
+              "id": "fsm_3_sem4",
+              "titulo": "Discurso",
+              "duracao": 5,
+              "tipo": "discurso",
+              "referencias": "lmd apêndice A ponto 12 — Tema: Deus é justo e não tem preconceitos (th lição 19)",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "nvc_1_sem4",
+              "titulo": "Quando surgir problemas no seu casamento, não se esqueça de Jeová",
+              "duracao": 15,
+              "tipo": "video_consideracao",
+              "referencias": [
+                "Vídeo: Um Amor de Verdade — Trecho",
+                "Vídeo: Não Seja Enganado pela Falsa Paz! — Darrel e Deborah Freisinger"
+              ],
+              "designado": null
+            },
+            {
+              "id": "nvc_2_sem4",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "lfb história 22, introdução da seção 5 e história 23",
+              "tipo": "estudo_congregacao",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "6-12 de outubro 2025",
+      "tema": "Eclesiastes 5-6",
+      "cantico_abertura": "42",
+      "cantico_meio": "160",
+      "cantico_encerramento": "34",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "tpd_1_sem5",
+              "titulo": "Como mostrar profundo respeito pelo nosso grandioso Deus",
+              "duracao": 10,
+              "tipo": "consideracao",
+              "referencias": [
+                "Ecl. 5:1; w08 15/8 15-16 §§ 17-18",
+                "Ecl. 5:2; w09 15/11 11 § 21",
+                "Ecl. 5:4-6; w17.04 6 § 12"
+              ],
+              "designado": null
+            },
+            {
+              "id": "tpd_2_sem5",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "participacao",
+              "referencias": ["Ecl. 5:8 — w20.09 31 §§ 3-5"],
+              "designado": null
+            },
+            {
+              "id": "tpd_3_sem5",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Ecl. 5:1-17 (th lição 12)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "fsm_1_sem5",
+              "titulo": "Iniciando conversas",
+              "duracao": 1,
+              "tipo": "de_casa_em_casa",
+              "referencias": "lmd lição 4 ponto 5",
+              "designado": null
+            },
+            {
+              "id": "fsm_2_sem5",
+              "titulo": "Iniciando conversas",
+              "duracao": 2,
+              "tipo": "testemunho_informal",
+              "referencias": "lmd lição 1 ponto 3",
+              "designado": null
+            },
+            {
+              "id": "fsm_3_sem5",
+              "titulo": "Cultivando o interesse",
+              "duracao": 3,
+              "tipo": "de_casa_em_casa",
+              "referencias": "lmd lição 7 ponto 3",
+              "designado": null
+            },
+            {
+              "id": "fsm_4_sem5",
+              "titulo": "Fazendo discípulos",
+              "duracao": 5,
+              "tipo": "testemunho_publico",
+              "referencias": "lff lição 17 introdução e pontos 1-3 (lmd lição 11 ponto 3)",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "nvc_1_sem5",
+              "titulo": "Você está usando 'Verdades que amamos ensinar'?",
+              "duracao": 15,
+              "tipo": "video_consideracao",
+              "referencias": [
+                "Heb. 4:12",
+                "lmd apêndice A",
+                "Vídeo: Ferro Afia o Ferro — Alcance mais Pessoas"
+              ],
+              "designado": null
+            },
+            {
+              "id": "nvc_2_sem5",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "lfb histórias 24-25",
+              "tipo": "estudo_congregacao",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "13-19 de outubro 2025",
+      "tema": "Eclesiastes 7-8",
+      "cantico_abertura": "39",
+      "cantico_meio": "151",
+      "cantico_encerramento": "124",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "tpd_1_sem6",
+              "titulo": "'Vá à casa onde há luto'",
+              "duracao": 10,
+              "tipo": "consideracao",
+              "referencias": [
+                "Ecl. 7:2; it 'Pranto' § 9",
+                "Ecl. 7:1; w19.06 23 § 15",
+                "w17.07 16 §§ 16-19"
+              ],
+              "designado": null
+            },
+            {
+              "id": "tpd_2_sem6",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "participacao",
+              "referencias": ["Ecl. 7:20-22 — w23.03 31 § 18"],
+              "designado": null
+            },
+            {
+              "id": "tpd_3_sem6",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Ecl. 8:1-13 (th lição 10)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "fsm_1_sem6",
+              "titulo": "Iniciando conversas",
+              "duracao": 2,
+              "tipo": "testemunho_publico",
+              "referencias": "lmd lição 2 ponto 4",
+              "designado": null
+            },
+            {
+              "id": "fsm_2_sem6",
+              "titulo": "Iniciando conversas",
+              "duracao": 2,
+              "tipo": "testemunho_informal",
+              "referencias": "lmd lição 2 ponto 3",
+              "designado": null
+            },
+            {
+              "id": "fsm_3_sem6",
+              "titulo": "Cultivando o interesse",
+              "duracao": 2,
+              "tipo": "de_casa_em_casa",
+              "referencias": "lmd lição 9 ponto 4",
+              "designado": null
+            },
+            {
+              "id": "fsm_4_sem6",
+              "titulo": "Explicando suas crenças",
+              "duracao": 5,
+              "tipo": "demonstracao",
+              "referencias": "ijwfq artigo 50 — Tema: Como são os funerais das Testemunhas de Jeová? (th lição 17)",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "nvc_1_sem6",
+              "titulo": "Desenvolva uma forte fé na ressurreição",
+              "duracao": 15,
+              "tipo": "video_consideracao",
+              "referencias": [
+                "João 3:16",
+                "2 Cor. 4:16-18",
+                "1 Tes. 4:13",
+                "1 Cor. 15:19",
+                "João 11:21-24, 38-44",
+                "Vídeo: Imite Mulheres Que Mostraram Forte Fé! — Marta"
+              ],
+              "designado": null
+            },
+            {
+              "id": "nvc_2_sem6",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "lfb histórias 26-27",
+              "tipo": "estudo_congregacao",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "20-26 de outubro 2025",
+      "tema": "Eclesiastes 9-10",
+      "cantico_abertura": "30",
+      "cantico_meio": "47",
+      "cantico_encerramento": "28",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "tpd_1_sem7",
+              "titulo": "Encare seus problemas da maneira correta",
+              "duracao": 10,
+              "tipo": "consideracao",
+              "referencias": [
+                "Ecl. 9:11; w13 15/8 14 §§ 20-21",
+                "Ecl. 10:7; w19.09 5 § 10",
+                "Ecl. 9:7, 10; w11 15/10 8 §§ 1-2"
+              ],
+              "designado": null
+            },
+            {
+              "id": "tpd_2_sem7",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "participacao",
+              "referencias": ["Ecl. 10:12-14 — it 'Tagarelice, Calúnia' §§ 4, 8"],
+              "designado": null
+            },
+            {
+              "id": "tpd_3_sem7",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Ecl. 10:1-20 (th lição 11)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "fsm_1_sem7",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "tipo": "testemunho_publico",
+              "referencias": "lmd lição 3 ponto 4",
+              "designado": null
+            },
+            {
+              "id": "fsm_2_sem7",
+              "titulo": "Iniciando conversas",
+              "duracao": 4,
+              "tipo": "testemunho_informal",
+              "referencias": "lmd lição 4 ponto 4",
+              "designado": null
+            },
+            {
+              "id": "fsm_3_sem7",
+              "titulo": "Fazendo discípulos",
+              "duracao": 5,
+              "tipo": "testemunho_publico",
+              "referencias": "lff lição 17 'Resumo', 'Revisão' e 'Tente o Seguinte' (lmd lição 12 ponto 3)",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "nvc_1_sem7",
+              "titulo": "Como ter estabilidade quando enfrentar uma tragédia",
+              "duracao": 15,
+              "tipo": "video_consideracao",
+              "referencias": [
+                "Isa. 33:6",
+                "Pro. 11:2",
+                "Ecl. 4:6",
+                "2 Cor. 4:7-9",
+                "Vídeo: Jeová Está Perto dos Que Têm Coração Quebrantado"
+              ],
+              "designado": null
+            },
+            {
+              "id": "nvc_2_sem7",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "lfb história 28, introdução da seção 6 e história 29",
+              "tipo": "estudo_congregacao",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "27 de outubro – 2 de novembro 2025",
+      "tema": "Eclesiastes 11-12",
+      "cantico_abertura": "155",
+      "cantico_meio": "111",
+      "cantico_encerramento": "8",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "tpd_1_sem8",
+              "titulo": "Tenha uma vida feliz e saudável",
+              "duracao": 10,
+              "tipo": "consideracao",
+              "referencias": [
+                "Ecl. 11:7, 8; g 3/15 13 §§ 6-7",
+                "Ecl. 11:10; w23.02 21 §§ 6-7",
+                "Ecl. 12:13; w24.09 2 §§ 2-3"
+              ],
+              "designado": null
+            },
+            {
+              "id": "tpd_2_sem8",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "participacao",
+              "referencias": ["Ecl. 12:9, 10 — it 'Inspiração' § 10"],
+              "designado": null
+            },
+            {
+              "id": "tpd_3_sem8",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Ecl. 12:1-14 (th lição 12)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "fsm_1_sem8",
+              "titulo": "Cultivando o interesse",
+              "duracao": 3,
+              "tipo": "de_casa_em_casa",
+              "referencias": "lmd lição 8 ponto 3",
+              "designado": null
+            },
+            {
+              "id": "fsm_2_sem8",
+              "titulo": "Cultivando o interesse",
+              "duracao": 4,
+              "tipo": "testemunho_informal",
+              "referencias": "lmd lição 9 ponto 3",
+              "designado": null
+            },
+            {
+              "id": "fsm_3_sem8",
+              "titulo": "Discurso",
+              "duracao": 5,
+              "tipo": "discurso",
+              "referencias": "lmd apêndice A ponto 13 — Tema: Deus quer nos ajudar (th lição 20)",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "nvc_1_sem8",
+              "titulo": "Necessidades locais",
+              "duracao": 15,
+              "tipo": "consideracao_local",
+              "designado": null
+            },
+            {
+              "id": "nvc_2_sem8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "lfb histórias 30-31",
+              "tipo": "estudo_congregacao",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "3-9 de novembro 2025",
+      "tema": "Cântico de Salomão 1-2",
+      "cantico_abertura": "132",
+      "cantico_meio": "46",
+      "cantico_encerramento": "137",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "tpd_1_sem9",
+              "titulo": "Uma história de amor verdadeiro",
+              "duracao": 10,
+              "tipo": "video_consideracao",
+              "referencias": [
+                "Vídeo: Introdução a Cântico de Salomão",
+                "Cân. 1:9-11",
+                "Cân. 2:16, 17; w15 15/1 30 §§ 9-10"
+              ],
+              "designado": null
+            },
+            {
+              "id": "tpd_2_sem9",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "participacao",
+              "referencias": ["Cân. 2:7 — w15 15/1 31 § 11"],
+              "designado": null
+            },
+            {
+              "id": "tpd_3_sem9",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Cân. 2:1-17 (th lição 12)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "fsm_1_sem9",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "tipo": "de_casa_em_casa",
+              "referencias": "lmd lição 1 ponto 3",
+              "designado": null
+            },
+            {
+              "id": "fsm_2_sem9",
+              "titulo": "Cultivando o interesse",
+              "duracao": 4,
+              "tipo": "de_casa_em_casa",
+              "referencias": "lmd lição 9 ponto 3",
+              "designado": null
+            },
+            {
+              "id": "fsm_3_sem9",
+              "titulo": "Fazendo discípulos",
+              "duracao": 5,
+              "tipo": "testemunho_publico",
+              "referencias": "lff lição 18 introdução e pontos 1-3 (th lição 8)",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "nvc_1_sem9",
+              "titulo": "A pessoa generosa será abençoada",
+              "duracao": 15,
+              "tipo": "video_consideracao",
+              "referencias": [
+                "Pro. 22:9",
+                "Pro. 19:17",
+                "Tia. 1:17",
+                "Vídeo: A Generosidade nos Traz Alegria"
+              ],
+              "designado": null
+            },
+            {
+              "id": "nvc_2_sem9",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "lfb histórias 32-33",
+              "tipo": "estudo_congregacao",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar, Clock, User, Users, Save, ArrowLeft, Home, BookOpen } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import programacoesData from '@/data/programacoes-setembro-2025.json';
+import programacoesData from '@/data/programacoes-completas-2025.json';
 
 interface Estudante {
   id: string;
