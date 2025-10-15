@@ -41,12 +41,10 @@ const Dashboard = () => {
           />
         </div>
         <Footer />
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32 }}>
-            <div className="max-w-6xl mx-auto">
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 32 }}>
-                <Button variant="outline" onClick={() => navigate('/bem-vindo')}>Voltar</Button>
-                <Button variant="default" onClick={() => navigate('/estudantes')}>Prosseguir</Button>
-              </div>
+      </div>
+    );
+  }
+
   // Se onboarding não está completo, mostrar guia
   if (!isComplete) {
     return (

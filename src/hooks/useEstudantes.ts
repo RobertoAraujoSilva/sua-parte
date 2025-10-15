@@ -1,30 +1,12 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import type { EstudanteWithParent, EstudanteFilters as TypedFilters } from '../types/estudantes';
 
-export interface EstudanteWithParent {
-  id: string;
-  nome: string;
-  idade?: number;
-  genero: 'masculino' | 'feminino';
-  email?: string;
-  telefone?: string;
-  data_batismo?: string;
-  cargo: 'anciao' | 'servo_ministerial' | 'pioneiro_regular' | 'publicador_batizado' | 'publicador_nao_batizado' | 'estudante_novo';
-  pai_id?: string;
-  mae_id?: string;
-  ativo: boolean;
-  user_id: string;
-  congregacao?: string;
-  created_at: string;
-  updated_at: string;
-}
+export type { EstudanteWithParent } from '../types/estudantes';
 
-export interface EstudanteFilters {
-  searchTerm: string;
-  cargo: string;
-  genero: string;
-  ativo: string;
+export interface EstudanteFilters extends Omit<TypedFilters, 'ativo'> {
+  ativo?: string | boolean;
 }
 
 export interface EstudanteStatistics {
@@ -63,6 +45,8 @@ export function useEstudantes(activeTab?: string) {
           cargo,
           ativo,
           user_id,
+          id_pai_mae,
+          observacoes,
           created_at,
           updated_at
         `)
@@ -73,7 +57,7 @@ export function useEstudantes(activeTab?: string) {
         throw new Error(`Erro ao buscar estudantes: ${fetchError.message}`);
       }
 
-      setEstudantes(data || []);
+      setEstudantes((data || []) as EstudanteWithParent[]);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
       setError(errorMessage);
