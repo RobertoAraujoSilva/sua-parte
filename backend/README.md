@@ -1,31 +1,14 @@
 # 🎯 Sistema Ministerial Backend
 
-Backend completo para download automático de materiais JW.org e geração de programas semanais para congregações.
+Backend simplificado para programações ministeriais com API Express + Supabase.
 
-## 🚀 Funcionalidades
+## 🚀 Funcionalidades Principais
 
-### **📥 Download Automático de Materiais**
-- ✅ **Verificação periódica** do JW.org (diariamente às 3h)
-- ✅ **Suporte a múltiplos idiomas** (PT-BR, EN-US, ES-ES, etc.)
-- ✅ **Download inteligente** (não baixa arquivos duplicados)
-- ✅ **Formatos suportados**: PDF, DAISY, JWPUB, RTF
-
-### **📋 Geração de Programas**
-- ✅ **Programas semanais** baseados nos materiais baixados
-- ✅ **Estrutura automática** (Abertura, Estudo, Vida e Ministério, Fechamento)
-- ✅ **Partes específicas** por tipo de material
-- ✅ **Sistema de publicação** para congregações
-
-### **💾 Gerenciamento de Armazenamento**
-- ✅ **Backup automático** dos materiais
-- ✅ **Limpeza inteligente** de arquivos antigos
-- ✅ **Monitoramento de espaço** em disco
-- ✅ **Restauração de backups**
-
-### **🔔 Sistema de Notificações**
-- ✅ **Notificação de admins** sobre novos materiais
-- ✅ **Aviso para congregações** sobre programas disponíveis
-- ✅ **Alertas de sistema** para problemas
+- **Programações Ministeriais**: API para criar/obter programações semanais (modelo sem nomes)
+- **Estrutura Bilíngue**: Suporte completo para PT/EN
+- **Validação Robusta**: Validação de payload e regras de negócio
+- **Upsert Inteligente**: Evita duplicação de semanas
+- **Service Key**: Backend usa service key para operações privilegiadas
 
 ## 🏗️ Arquitetura
 

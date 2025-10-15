@@ -26,19 +26,18 @@ import Sobre from "./pages/Sobre";
 import Doar from "./pages/Doar";
 import BemVindo from "./pages/BemVindo";
 import ConfiguracaoInicial from "./pages/ConfiguracaoInicial";
-import PrimeiroPrograma from "./pages/PrimeiroPrograma";
+
 import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
 import UnifiedDashboard from "./components/UnifiedDashboard";
-import Dashboard from "./pages/Dashboard";
 import InstrutorDashboard from "./pages/InstrutorDashboard";
-import EstudantesSimplified from "./pages/EstudantesSimplified";
-import DesignacoesSimplified from "./pages/DesignacoesSimplified";
+import { EstudantePortal } from "./pages/EstudantePortal";
+import { ImportarProgramacao } from "./pages/ImportarProgramacao";
+import Estudantes from "./pages/Estudantes";
 
-import DensityToggleTestPage from "./pages/DensityToggleTest";
-import ZoomResponsivenessTestPage from "./pages/ZoomResponsivenessTest";
 import ProtectedRoute from "./components/ProtectedRoute";
+import SequentialFlow from "./components/SequentialFlow";
 
 import AuthRecoveryButton from "./components/AuthRecoveryButton";
 import { Button } from "@/components/ui/button";
@@ -70,22 +69,42 @@ const ConditionalDebugPanel: React.FC = () => {
   return null;
 };
 
-// Floating navigation between key instructor pages
-// Shows a "Continuar" button to go from: /dashboard -> /estudantes -> /programas -> /designacoes
+// Floating navigation between onboarding steps
+// Shows a "Continuar" button based on onboarding progress
 const FlowNav: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const steps = ["/dashboard", "/estudantes", "/programas", "/designacoes"] as const;
+  const onboardingSteps = ["/bem-vindo", "/configuracao-inicial", "/estudantes", "/programas", "/designacoes"] as const;
+  const postOnboardingSteps = ["/dashboard", "/estudantes", "/programas", "/designacoes"] as const;
+  
   const labels: Record<string, string> = {
-    "/dashboard": "Estudantes",
+    "/bem-vindo": "Configuração",
+    "/configuracao-inicial": "Estudantes", 
     "/estudantes": "Programas",
     "/programas": "Designações",
+    "/dashboard": "Estudantes",
   };
 
-  const idx = steps.indexOf(location.pathname as typeof steps[number]);
-  if (idx === -1 || idx === steps.length - 1) return null; // hide if not in flow or last step
+  // Check onboarding steps first
+  const onboardingIdx = onboardingSteps.indexOf(location.pathname as typeof onboardingSteps[number]);
+  if (onboardingIdx !== -1 && onboardingIdx < onboardingSteps.length - 1) {
+    const nextPath = onboardingSteps[onboardingIdx + 1];
+    const nextLabel = labels[location.pathname] || "Próximo";
+    
+    return (
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button size="lg" className="shadow-lg" onClick={() => navigate(nextPath)}>
+          Continuar para {nextLabel}
+        </Button>
+      </div>
+    );
+  }
+  
+  // Check post-onboarding steps
+  const postIdx = postOnboardingSteps.indexOf(location.pathname as typeof postOnboardingSteps[number]);
+  if (postIdx === -1 || postIdx === postOnboardingSteps.length - 1) return null;
 
-  const nextPath = steps[idx + 1];
+  const nextPath = postOnboardingSteps[postIdx + 1];
   const nextLabel = labels[location.pathname] || "Próximo";
 
   return (
@@ -112,7 +131,8 @@ const App = () => (
                 v7_relativeSplatPath: true
               }}
             >
-              <Routes>
+              <SequentialFlow>
+                <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
@@ -140,31 +160,16 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="/primeiro-programa"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <PrimeiroPrograma />
-                    </ProtectedRoute>
-                  }
-                />
+
 
                 {/* Debug Routes - Only in development */}
                 {import.meta.env.DEV && (
                   <>
-                    {/* Removed legacy route */}
-                    <Route
-                      path="/density-toggle-test" 
-                      element={<DensityToggleTestPage />} 
-                    />
-                    <Route 
-                      path="/zoom-responsiveness-test" 
-                      element={<ZoomResponsivenessTestPage />} 
-                    />
+                    {/* Debug routes removed */}
                   </>
                 )}
 
-                {/* Dashboard Principal */}
+                {/* Dashboard Principal - Rota única consolidada */}
                 <Route 
                   path="/dashboard" 
                   element={
@@ -173,16 +178,46 @@ const App = () => (
                     </ProtectedRoute>
                   } 
                 />
-                {/* Removed legacy route */}
-                <Route
-                  path="/programas-test"
+                <Route 
+                  path="/instrutor" 
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
-                      <ProgramasTest />
+                      <InstrutorDashboard />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/portal" 
+                  element={
+                    <ProtectedRoute allowedRoles={['estudante']}>
+                      <EstudantePortal />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/importar-programacao" 
+                  element={
+                    <ProtectedRoute allowedRoles={['instrutor']}>
+                      <ImportarProgramacao />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/estudantes" 
+                  element={
+                    <ProtectedRoute allowedRoles={['instrutor']}>
+                      <Estudantes />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route
+                  path="/programas"
+                  element={
+                    <ProtectedRoute allowedRoles={['instrutor']}>
+                      <Programas />
                     </ProtectedRoute>
                   }
                 />
-                {/* Removed legacy route */}
                 {/* Test Routes - Only in development */}
                 {import.meta.env.DEV && (
                   <>
@@ -196,7 +231,6 @@ const App = () => (
                     />
                   </>
                 )}
-                {/* Removed legacy route */}
                 <Route
                   path="/relatorios"
                   element={
@@ -213,23 +247,6 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
-                {/* Instrutor routes re-enabled */}
-                <Route
-                  path="/estudantes"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <EstudantesSimplified />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/programas"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Programas />
-                    </ProtectedRoute>
-                  }
-                />
                 <Route
                   path="/designacoes"
                   element={
@@ -238,6 +255,7 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
+                {/* Rotas consolidadas no Dashboard */}
                 {/* Admin routes removed - system simplified */}
 
                 {/* Estudante Only Routes */}
@@ -271,8 +289,9 @@ const App = () => (
 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
-              </Routes>
-              <FlowNav />
+                </Routes>
+                <FlowNav />
+              </SequentialFlow>
             </BrowserRouter>
           </TooltipProvider>
 

@@ -27,6 +27,13 @@ app.use('/materials', express.static(path.join(__dirname, '../docs/Oficial')));
 app.use('/api/programacoes', programacoesRoutes);
 app.use('/api/designacoes', designacoesRoutes);
 
+// Rota de compatibilidade - redireciona para /api/programacoes/mock
+app.get('/api/programas', (req, res) => {
+  const { mes, semana } = req.query;
+  const redirectUrl = `/api/programacoes/mock?${new URLSearchParams(req.query).toString()}`;
+  res.redirect(redirectUrl);
+});
+
 // Rota para programações mockadas a partir de JSON local
 // GET /api/programacoes/mock?mes=YYYY-MM
 // GET /api/programacoes/mock?semana=YYYY-MM-DD

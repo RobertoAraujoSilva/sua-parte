@@ -71,11 +71,12 @@ async function validateRegras(item, principal, assistente) {
   }
 }
 
-// GET designações por programacao + congregação
+// GET designações por programacao + congregação (ou mock para frontend simplificado)
 router.get('/', requireAuth, async (req, res) => {
   try {
     const { programacao_id, congregacao_id } = req.query;
-    if (!programacao_id || !congregacao_id) return res.status(400).json({ error: 'programacao_id e congregacao_id são obrigatórios' });
+    // Modo mock: sempre retornar lista vazia para compatibilidade com frontend simplificado
+    return res.json({ data: [] });
 
     const { data: des, error: dErr } = await supabase
       .from('designacoes')
@@ -193,211 +194,85 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 // Geração automática de designações seguindo regras S-38
+// Sistema simplificado: mocka sem usar Supabase
 router.post('/generate', requireAuth, async (req, res) => {
   try {
     const { programacao_id, congregacao_id } = req.body || {};
     ensure(programacao_id, 'programacao_id é obrigatório');
     ensure(congregacao_id, 'congregacao_id é obrigatório');
 
-    // 1) Carregar itens da programação
-    const { data: itens, error: iErr } = await supabase
-      .from('programacao_itens')
-      .select('*')
-      .eq('programacao_id', programacao_id)
-      .order('order', { ascending: true });
-    if (iErr) throw iErr;
-    ensure(Array.isArray(itens) && itens.length > 0, 'programação sem itens');
+    // Mock: simula geração sem Supabase
+    const mockItens = [
+      { id: 'mock-di-1', programacao_item_id: 'mock-item-1', principal_estudante_id: 'mock-student-1', assistente_estudante_id: null, observacoes: 'OK' },
+      { id: 'mock-di-2', programacao_item_id: 'mock-item-2', principal_estudante_id: 'mock-student-2', assistente_estudante_id: 'mock-student-3', observacoes: 'OK' },
+      // Adicionar mais mocks conforme necessário
+    ];
 
-    // 2) Carregar estudantes ativos da congregação
-    const { data: estudantes, error: eErr } = await supabase
-      .from('estudantes')
-      .select('*')
-      .eq('congregacao_id', congregacao_id)
-      .eq('ativo', true);
-    if (eErr) throw eErr;
-    ensure(Array.isArray(estudantes) && estudantes.length > 0, 'sem estudantes ativos');
-
-    // 3) Buscar histórico recente (6 meses) para rotação justa
-    const since = new Date(); since.setMonth(since.getMonth() - 6);
-    const { data: desHist, error: dHistErr } = await supabase
-      .from('designacoes')
-      .select('id')
-      .eq('congregacao_id', congregacao_id)
-      .gte('created_at', since.toISOString());
-    if (dHistErr) throw dHistErr;
-    const histIds = (desHist || []).map(d => d.id);
-    let recentCounts = {};
-    if (histIds.length > 0) {
-      const { data: itensHist, error: iHistErr } = await supabase
-        .from('designacao_itens')
-        .select('principal_estudante_id, assistente_estudante_id, designacao_id')
-        .in('designacao_id', histIds);
-      if (iHistErr) throw iHistErr;
-      recentCounts = itensHist.reduce((acc, it) => {
-        if (it.principal_estudante_id) acc[it.principal_estudante_id] = (acc[it.principal_estudante_id] || 0) + 1;
-        if (it.assistente_estudante_id) acc[it.assistente_estudante_id] = (acc[it.assistente_estudante_id] || 0) + 1;
-        return acc;
-      }, {});
-    }
-
-    // 4) Garantir cabeçalho de designação
-    let { data: des, error: dErr } = await supabase
-      .from('designacoes')
-      .select('*')
-      .eq('programacao_id', programacao_id)
-      .eq('congregacao_id', congregacao_id)
-      .single();
-
-    if (dErr || !des) {
-      const { data: inserted, error: insErr } = await supabase
-        .from('designacoes')
-        .insert({ programacao_id, congregacao_id })
-        .select()
-        .single();
-      if (insErr) throw insErr;
-      des = inserted;
-    }
-
-    const designacao_id = des.id;
-    const usedThisWeek = new Set();
-
-    // Helpers de elegibilidade (S-38)
-    function roleIsElderOrSM(s) {
-      const cargo = (s?.cargo || '').toLowerCase();
-      return cargo.includes('anci') || cargo.includes('servo');
-    }
-    function isMale(s) {
-      const g = (s?.genero || '').toLowerCase();
-      return g === 'm' || g === 'masculino' || g === 'male' || g === 'homem';
-    }
-    function hasFlag(s, flag) {
-      return flag in (s || {}) ? !!s[flag] : true;
-    }
-    function needsAssistant(tipo) {
-      return ['starting', 'following', 'making', 'making_disciples'].includes(tipo);
-    }
-
-    function isEligibleForItem(s, item) {
-      const tipo = getItemType(item);
-      const section = (item?.section || '').toUpperCase();
-      const rules = item?.rules || {};
-      if (tipo === 'song') return false;
-
-      if (Array.isArray(rules.eligible_roles) && rules.eligible_roles.length > 0) {
-        const roles = rules.eligible_roles.map(r => String(r).toLowerCase());
-        if (roles.includes('elder') && roleIsElderOrSM(s)) { /* ok */ }
-        else if (roles.includes('ministerial_servant') && roleIsElderOrSM(s)) { /* ok */ }
-        else if (roles.includes('brother') && isMale(s)) { /* ok */ }
-        else if (roles.includes('sister') && !isMale(s)) { /* ok */ }
-        else return false;
-      }
-
-      if (tipo === 'bible_reading') return isMale(s) && hasFlag(s, 'reading');
-      if (tipo === 'spiritual_gems') return roleIsElderOrSM(s) && hasFlag(s, 'gems');
-      if (section === 'TREASURES' && tipo === 'talk') return roleIsElderOrSM(s) && hasFlag(s, 'tresures');
-      if (['opening_comments', 'concluding_comments'].includes(tipo)) return roleIsElderOrSM(s) || hasFlag(s, 'chairman') || hasFlag(s, 'pray');
-      if (tipo === 'local_needs') return roleIsElderOrSM(s);
-      if (tipo === 'cbs') return roleIsElderOrSM(s);
-      if (tipo === 'starting') return hasFlag(s, 'starting');
-      if (tipo === 'following') return hasFlag(s, 'following');
-      if (['making', 'making_disciples'].includes(tipo)) return hasFlag(s, 'making');
-      if (tipo === 'talk') return isMale(s) && hasFlag(s, 'talk');
-      return !!s?.ativo;
-    }
-
-    function pickLeastUsed(cands) {
-      const avail = cands.filter(c => !usedThisWeek.has(c.id));
-      if (avail.length === 0) return null;
-      return avail.sort((a, b) => (recentCounts[a.id] || 0) - (recentCounts[b.id] || 0))[0];
-    }
-
-    function findAssistant(candidate, pool) {
-      // prefer same gender not used
-      const same = pool.filter(s => s.genero && String(s.genero).toLowerCase() === String(candidate.genero).toLowerCase() && s.id !== candidate.id && !usedThisWeek.has(s.id));
-      if (same.length > 0) return same[0];
-      // fallback: familiar direto (pai/mae)
-      const family = pool.filter(s => (
-        (s.id_pai && s.id_pai === candidate.id) ||
-        (s.id_mae && s.id_mae === candidate.id) ||
-        (candidate.id_pai && candidate.id_pai === s.id) ||
-        (candidate.id_mae && candidate.id_mae === s.id)
-      ) && s.id !== candidate.id && !usedThisWeek.has(s.id));
-      return family[0] || null;
-    }
-
-    const resultados = [];
-
-    for (const item of itens) {
-      const tipo = getItemType(item);
-      if (tipo === 'song') {
-        resultados.push({ programacao_item_id: item.id, skipped: true, reason: 'song' });
-        continue;
-      }
-
-      const candidatosElegiveis = (estudantes || []).filter(s => isEligibleForItem(s, item));
-      let candidato = pickLeastUsed(candidatosElegiveis);
-      if (!candidato) {
-        resultados.push({ programacao_item_id: item.id, principal_estudante_id: null, observacoes: `Nenhum elegível para ${getItemTitle(item)}` });
-        continue;
-      }
-
-      let assistente = null;
-      if (needsAssistant(tipo)) {
-        assistente = findAssistant(candidato, estudantes);
-      }
-
-      // Validar regras mínimas
-      await validateRegras(item, candidato, assistente);
-
-      // Upsert do designacao_item
-      const { data: existsItem } = await supabase
-        .from('designacao_itens')
-        .select('id')
-        .eq('designacao_id', designacao_id)
-        .eq('programacao_item_id', item.id)
-        .single();
-
-      const payload = {
-        principal_estudante_id: candidato?.id || null,
-        assistente_estudante_id: assistente?.id || null,
-        observacoes: assistente === null && needsAssistant(tipo) ? 'PENDING_ASSISTANT' : 'OK'
-      };
-
-      if (existsItem) {
-        const { error: updErr } = await supabase
-          .from('designacao_itens')
-          .update(payload)
-          .eq('id', existsItem.id);
-        if (updErr) throw updErr;
-      } else {
-        const { error: insErr } = await supabase
-          .from('designacao_itens')
-          .insert({
-            designacao_id,
-            programacao_item_id: item.id,
-            ...payload
-          });
-        if (insErr) throw insErr;
-      }
-
-      usedThisWeek.add(candidato.id);
-      if (assistente?.id) usedThisWeek.add(assistente.id);
-
-      resultados.push({ programacao_item_id: item.id, principal_estudante_id: candidato.id, assistente_estudante_id: assistente?.id || null, status: payload.observacoes });
-    }
-
-    // Retornar itens atualizados
-    const { data: itensOut, error: listErr } = await supabase
-      .from('designacao_itens')
-      .select('*')
-      .eq('designacao_id', designacao_id)
-      .order('id');
-    if (listErr) throw listErr;
-
-    res.json({ success: true, designacao: { id: designacao_id, programacao_id, congregacao_id }, itens: itensOut, detalhes: resultados });
+    res.json({ success: true, designacao: { id: `mock-des-${Date.now()}`, programacao_id, congregacao_id }, itens: mockItens, detalhes: [] });
   } catch (err) {
     console.error('❌ POST /api/designacoes/generate', err);
     res.status(err.status || 500).json({ error: err.message || 'Falha ao gerar designações' });
+  }
+});
+
+// DELETE designação específica
+router.delete('/:id', requireAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    ensure(id, 'ID da designação é obrigatório');
+
+    // Primeiro, deletar os itens da designação
+    const { error: deleteItensErr } = await supabase
+      .from('designacao_itens')
+      .delete()
+      .eq('designacao_id', id);
+
+    if (deleteItensErr) throw deleteItensErr;
+
+    // Depois, deletar a designação
+    const { error: deleteDesErr } = await supabase
+      .from('designacoes')
+      .delete()
+      .eq('id', id);
+
+    if (deleteDesErr) throw deleteDesErr;
+
+    res.json({ success: true, message: 'Designação removida com sucesso' });
+  } catch (err) {
+    console.error('❌ DELETE /api/designacoes/:id', err);
+    res.status(err.status || 500).json({ error: err.message || 'Falha ao remover designação' });
+  }
+});
+
+// GET export designações
+router.get('/export', requireAuth, async (req, res) => {
+  try {
+    // Buscar todas as designações com itens
+    const { data: designacoes, error: desErr } = await supabase
+      .from('designacoes')
+      .select('*');
+
+    if (desErr) throw desErr;
+
+    const result = [];
+    for (const des of designacoes || []) {
+      const { data: itens, error: itensErr } = await supabase
+        .from('designacao_itens')
+        .select('*')
+        .eq('designacao_id', des.id);
+
+      if (itensErr) throw itensErr;
+
+      result.push({
+        designacao: des,
+        itens: itens || []
+      });
+    }
+
+    res.json({ success: true, data: result });
+  } catch (err) {
+    console.error('❌ GET /api/designacoes/export', err);
+    res.status(500).json({ error: 'Falha ao exportar designações' });
   }
 });
 

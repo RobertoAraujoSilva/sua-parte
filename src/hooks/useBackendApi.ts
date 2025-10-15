@@ -138,6 +138,26 @@ export function useBackendApi() {
     }
   }, [getAuthHeader]);
 
+  const apiCall = useCallback(async (endpoint: string, options: RequestInit = {}) => {
+    try {
+      const headers = await getAuthHeader();
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...headers,
+          ...options.headers,
+        },
+        ...options,
+      });
+      if (!response.ok) throw new Error(`Status ${response.status}`);
+      const data = await response.json();
+      return { data };
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro na chamada da API');
+      throw err;
+    }
+  }, [getAuthHeader]);
+
   // Auto-check connection on mount
   useEffect(() => {
     checkConnection();
@@ -152,5 +172,6 @@ export function useBackendApi() {
     checkUpdates,
     getMaterials,
     getAdminStats,
+    apiCall,
   };
 }

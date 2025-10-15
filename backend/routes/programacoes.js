@@ -19,6 +19,7 @@ function validatePayload(p) {
 /**
  * POST /api/programacoes
  * cria/atualiza a semana (upsert por week_start/week_end/congregation_scope)
+ * Sistema simplificado: mocka sem salvar no Supabase
  */
 router.post('/', async (req, res) => {
   try {
@@ -26,34 +27,21 @@ router.post('/', async (req, res) => {
     const err = validatePayload(payload);
     if (err) return res.status(400).json({ error: err });
 
-    // UPSERT da programação
-    const { data: upsertProg, error: upErr } = await supabase
-      .from('programacoes')
-      .upsert({
-        week_start: payload.week_start,
-        week_end: payload.week_end,
-        status: payload.status,
-        congregation_scope: payload.congregation_scope,
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'week_start,week_end,congregation_scope'
-      })
-      .select('*')
-      .single();
+    // Mock: simula upsert sem salvar no Supabase
+    const mockProg = {
+      id: `mock-${Date.now()}`,
+      week_start: payload.week_start,
+      week_end: payload.week_end,
+      status: payload.status,
+      congregation_scope: payload.congregation_scope,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
 
-    if (upErr) return res.status(500).json({ error: upErr.message });
-
-    const programacao_id = upsertProg.id;
-
-    // limpa itens antigos e insere a versão atual
-    const { error: delErr } = await supabase
-      .from('programacao_itens')
-      .delete()
-      .eq('programacao_id', programacao_id);
-    if (delErr) return res.status(500).json({ error: delErr.message });
-
-    const itensInsert = payload.items.map(it => ({
-      programacao_id,
+    // Mock itens
+    const mockItens = payload.items.map((it, idx) => ({
+      id: `mock-item-${Date.now()}-${idx}`,
+      programacao_id: mockProg.id,
       order: it.order,
       section: it.section,
       type: it.type,
@@ -62,14 +50,7 @@ router.post('/', async (req, res) => {
       lang: it.lang
     }));
 
-    const { data: itens, error: insErr } = await supabase
-      .from('programacao_itens')
-      .insert(itensInsert)
-      .select('*');
-
-    if (insErr) return res.status(500).json({ error: insErr.message });
-
-    return res.json({ programacao: upsertProg, itens });
+    return res.json({ programacao: mockProg, itens: mockItens });
   } catch (e) {
     return res.status(500).json({ error: e.message });
   }

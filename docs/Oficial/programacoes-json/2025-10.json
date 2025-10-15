@@ -1,0 +1,385 @@
+[
+  {
+    "idSemana": "2025-10-06",
+    "semanaLabel": "6-12 de outubro 2025",
+    "tema": "Eclesiastes 5-6",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          {
+            "idParte": 1,
+            "titulo": "Como mostrar profundo respeito pelo nosso grandioso Deus",
+            "duracaoMin": 10,
+            "tipo": "consideracao",
+            "referencias": [
+              "Ecl. 5:1; w08 15/8 15-16 §§ 17-18",
+              "Ecl. 5:2; w09 15/11 11 § 21",
+              "Ecl. 5:4-6; w17.04 6 § 12"
+            ]
+          },
+          {
+            "idParte": 2,
+            "titulo": "Joias espirituais",
+            "duracaoMin": 10,
+            "tipo": "joias",
+            "referencias": [
+              "Ecl. 5:8",
+              "w20.09 31 §§ 3-5"
+            ]
+          },
+          {
+            "idParte": 3,
+            "titulo": "Leitura da Bíblia",
+            "duracaoMin": 4,
+            "tipo": "leitura",
+            "referencias": ["Ecl. 5:1-17", "th lição 12"],
+            "restricoes": { "genero": "M" }
+          }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          {
+            "idParte": 4,
+            "titulo": "Iniciando conversas",
+            "duracaoMin": 1,
+            "tipo": "de casa em casa",
+            "referencias": ["lmd lição 4 ponto 5"]
+          },
+          {
+            "idParte": 5,
+            "titulo": "Iniciando conversas",
+            "duracaoMin": 2,
+            "tipo": "testemunho informal",
+            "referencias": ["lmd lição 1 ponto 3"]
+          },
+          {
+            "idParte": 6,
+            "titulo": "Cultivando o interesse",
+            "duracaoMin": 3,
+            "tipo": "de casa em casa",
+            "referencias": ["lmd lição 7 ponto 3"]
+          },
+          {
+            "idParte": 7,
+            "titulo": "Fazendo discípulos",
+            "duracaoMin": 5,
+            "referencias": [
+              "lff lição 17 introdução e pontos 1-3",
+              "lmd lição 11 ponto 3"
+            ]
+          }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          {
+            "idParte": 8,
+            "titulo": "Você está usando \"Verdades que amamos ensinar\"?",
+            "duracaoMin": 15,
+            "tipo": "video+consideracao",
+            "referencias": [
+              "Heb. 4:12",
+              "lmd apêndice A",
+              "Vídeo: Ferro Afia o Ferro — Alcance mais Pessoas"
+            ]
+          },
+          {
+            "idParte": 9,
+            "titulo": "Estudo bíblico de congregação",
+            "duracaoMin": 30,
+            "tipo": "estudo",
+            "referencias": ["lfb histórias 24-25"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "idSemana": "2025-10-13",
+    "semanaLabel": "13-19 de outubro 2025",
+    "tema": "Eclesiastes 7-8",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          {
+            "idParte": 1,
+            "titulo": "Vá à casa onde há luto",
+            "duracaoMin": 10,
+            "tipo": "consideracao",
+            "referencias": [
+              "Ecl. 7:2; it \"Pranto\" § 9",
+              "Ecl. 7:1; w19.06 23 § 15",
+              "w17.07 16 §§ 16-19"
+            ]
+          },
+          {
+            "idParte": 2,
+            "titulo": "Joias espirituais",
+            "duracaoMin": 10,
+            "tipo": "joias",
+            "referencias": [
+              "Ecl. 7:20-22",
+              "w23.03 31 § 18"
+            ]
+          },
+          {
+            "idParte": 3,
+            "titulo": "Leitura da Bíblia",
+            "duracaoMin": 4,
+            "tipo": "leitura",
+            "referencias": ["Ecl. 8:1-13", "th lição 10"],
+            "restricoes": { "genero": "M" }
+          }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          {
+            "idParte": 4,
+            "titulo": "Iniciando conversas",
+            "duracaoMin": 2,
+            "tipo": "testemunho público",
+            "referencias": ["lmd lição 2 ponto 4"]
+          },
+          {
+            "idParte": 5,
+            "titulo": "Iniciando conversas",
+            "duracaoMin": 2,
+            "tipo": "testemunho informal",
+            "referencias": ["lmd lição 2 ponto 3"]
+          },
+          {
+            "idParte": 6,
+            "titulo": "Cultivando o interesse",
+            "duracaoMin": 2,
+            "tipo": "de casa em casa",
+            "referencias": ["lmd lição 9 ponto 4", "jw.org"]
+          },
+          {
+            "idParte": 7,
+            "titulo": "Explicando suas crenças",
+            "duracaoMin": 5,
+            "tipo": "demonstração",
+            "referencias": [
+              "ijwfq artigo 50 — Tema: Como são os funerais das Testemunhas de Jeová?",
+              "th lição 17"
+            ]
+          }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          {
+            "idParte": 8,
+            "titulo": "Desenvolva uma forte fé na ressurreição",
+            "duracaoMin": 15,
+            "tipo": "video+consideracao",
+            "referencias": [
+              "João 3:16",
+              "2 Cor. 4:16-18",
+              "1 Tes. 4:13",
+              "1 Cor. 15:19",
+              "João 11:21-24, 38-44",
+              "Vídeo: Imite Mulheres Que Mostraram Forte Fé! — Marta"
+            ]
+          },
+          {
+            "idParte": 9,
+            "titulo": "Estudo bíblico de congregação",
+            "duracaoMin": 30,
+            "tipo": "estudo",
+            "referencias": ["lfb histórias 26-27"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "idSemana": "2025-10-20",
+    "semanaLabel": "20-26 de outubro 2025",
+    "tema": "Eclesiastes 9-10",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          {
+            "idParte": 1,
+            "titulo": "Encare seus problemas da maneira correta",
+            "duracaoMin": 10,
+            "tipo": "consideracao",
+            "referencias": [
+              "Ecl. 9:11; w13 15/8 14 §§ 20-21",
+              "Ecl. 10:7; w19.09 5 § 10",
+              "Ecl. 9:7, 10; w11 15/10 8 §§ 1-2"
+            ]
+          },
+          {
+            "idParte": 2,
+            "titulo": "Joias espirituais",
+            "duracaoMin": 10,
+            "tipo": "joias",
+            "referencias": [
+              "Ecl. 10:12-14",
+              "it \"Tagarelice, Calúnia\" §§ 4, 8"
+            ]
+          },
+          {
+            "idParte": 3,
+            "titulo": "Leitura da Bíblia",
+            "duracaoMin": 4,
+            "tipo": "leitura",
+            "referencias": ["Ecl. 10:1-20", "th lição 11"],
+            "restricoes": { "genero": "M" }
+          }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          {
+            "idParte": 4,
+            "titulo": "Iniciando conversas",
+            "duracaoMin": 3,
+            "tipo": "testemunho público",
+            "referencias": ["lmd lição 3 ponto 4"]
+          },
+          {
+            "idParte": 5,
+            "titulo": "Iniciando conversas",
+            "duracaoMin": 4,
+            "tipo": "testemunho informal",
+            "referencias": ["lmd lição 4 ponto 4"]
+          },
+          {
+            "idParte": 6,
+            "titulo": "Fazendo discípulos",
+            "duracaoMin": 5,
+            "referencias": [
+              "lff lição 17 'Resumo', 'Revisão' e 'Tente o Seguinte'",
+              "lmd lição 12 ponto 3"
+            ]
+          }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          {
+            "idParte": 7,
+            "titulo": "Como ter estabilidade quando enfrentar uma tragédia",
+            "duracaoMin": 15,
+            "tipo": "video+consideracao",
+            "referencias": [
+              "Isa. 33:6",
+              "Pro. 11:2",
+              "Ecl. 4:6",
+              "2 Cor. 4:7-9",
+              "Vídeo: Jeová Está Perto dos Que Têm Coração Quebrantado"
+            ]
+          },
+          {
+            "idParte": 8,
+            "titulo": "Estudo bíblico de congregação",
+            "duracaoMin": 30,
+            "tipo": "estudo",
+            "referencias": ["lfb história 28", "introdução da seção 6", "história 29"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "idSemana": "2025-10-27",
+    "semanaLabel": "27 de outubro – 2 de novembro 2025",
+    "tema": "Eclesiastes 11-12",
+    "programacao": [
+      {
+        "secao": "Tesouros da Palavra de Deus",
+        "partes": [
+          {
+            "idParte": 1,
+            "titulo": "Tenha uma vida feliz e saudável",
+            "duracaoMin": 10,
+            "tipo": "consideracao",
+            "referencias": [
+              "Ecl. 11:7, 8; g 3/15 13 §§ 6-7",
+              "Ecl. 11:10; w23.02 21 §§ 6-7",
+              "Ecl. 12:13; w24.09 2 §§ 2-3"
+            ]
+          },
+          {
+            "idParte": 2,
+            "titulo": "Joias espirituais",
+            "duracaoMin": 10,
+            "tipo": "joias",
+            "referencias": [
+              "Ecl. 12:9, 10",
+              "it \"Inspiração\" § 10"
+            ]
+          },
+          {
+            "idParte": 3,
+            "titulo": "Leitura da Bíblia",
+            "duracaoMin": 4,
+            "tipo": "leitura",
+            "referencias": ["Ecl. 12:1-14", "th lição 12"],
+            "restricoes": { "genero": "M" }
+          }
+        ]
+      },
+      {
+        "secao": "Faça Seu Melhor no Ministério",
+        "partes": [
+          {
+            "idParte": 4,
+            "titulo": "Cultivando o interesse",
+            "duracaoMin": 3,
+            "tipo": "de casa em casa",
+            "referencias": ["lmd lição 8 ponto 3"]
+          },
+          {
+            "idParte": 5,
+            "titulo": "Cultivando o interesse",
+            "duracaoMin": 4,
+            "tipo": "testemunho informal",
+            "referencias": ["lmd lição 9 ponto 3"]
+          },
+          {
+            "idParte": 6,
+            "titulo": "Discurso",
+            "duracaoMin": 5,
+            "referencias": [
+              "lmd apêndice A ponto 13",
+              "Tema: Deus quer nos ajudar",
+              "th lição 20"
+            ]
+          }
+        ]
+      },
+      {
+        "secao": "Nossa Vida Cristã",
+        "partes": [
+          {
+            "idParte": 7,
+            "titulo": "Necessidades locais",
+            "duracaoMin": 15
+          },
+          {
+            "idParte": 8,
+            "titulo": "Estudo bíblico de congregação",
+            "duracaoMin": 30,
+            "tipo": "estudo",
+            "referencias": ["lfb histórias 30-31"]
+          }
+        ]
+      }
+    ]
+  }
+]
