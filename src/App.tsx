@@ -30,7 +30,6 @@ import ConfiguracaoInicial from "./pages/ConfiguracaoInicial";
 import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
-import UnifiedDashboard from "./components/UnifiedDashboard";
 import InstrutorDashboard from "./pages/InstrutorDashboard";
 import { EstudantePortal } from "./pages/EstudantePortal";
 import { ImportarProgramacao } from "./pages/ImportarProgramacao";
@@ -179,14 +178,6 @@ const App = () => (
                   } 
                 />
                 <Route 
-                  path="/instrutor" 
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <InstrutorDashboard />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
                   path="/portal" 
                   element={
                     <ProtectedRoute allowedRoles={['estudante']}>
@@ -263,7 +254,7 @@ const App = () => (
                   path="/estudante/:id"
                   element={
                     <ProtectedRoute allowedRoles={['estudante']}>
-                      <UnifiedDashboard />
+                      <EstudantePortal />
                     </ProtectedRoute>
                   }
                 />
