@@ -11,43 +11,23 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Upload, Plus, Edit, Trash2, Download, Users, UserPlus } from 'lucide-react';
 import * as XLSX from 'xlsx';
-
-interface Estudante {
-  id?: string;
-  nome: string;
-  familia: string;
-  idade: number;
-  genero: 'masculino' | 'feminino';
-  email: string;
-  telefone: string;
-  data_batismo?: string;
-  cargo: string;
-  estado_civil: string;
-  papel_familiar: string;
-  ativo: boolean;
-  observacoes?: string;
-  created_at?: string;
-  updated_at?: string;
-}
+import type { EstudanteRow } from '@/types/estudantes';
 
 export function EstudantesManager() {
   const { user } = useAuth();
-  const [estudantes, setEstudantes] = useState<Estudante[]>([]);
+  const [estudantes, setEstudantes] = useState<EstudanteRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [editingEstudante, setEditingEstudante] = useState<Estudante | null>(null);
-  const [formData, setFormData] = useState<Partial<Estudante>>({
+  const [editingEstudante, setEditingEstudante] = useState<EstudanteRow | null>(null);
+  const [formData, setFormData] = useState<Partial<EstudanteRow>>({
     nome: '',
-    familia: '',
     idade: 0,
     genero: 'masculino',
     email: '',
     telefone: '',
     cargo: 'publicador_batizado',
-    estado_civil: 'solteiro',
-    papel_familiar: 'filho',
     ativo: true,
     observacoes: ''
   });
@@ -58,11 +38,13 @@ export function EstudantesManager() {
   }, []);
 
   const loadEstudantes = async () => {
+    if (!user?.id) return;
     setLoading(true);
     try {
       const { data, error } = await supabase
         .from('estudantes')
         .select('*')
+        .eq('user_id', user.id)
         .order('nome');
 
       if (error) throw error;
@@ -90,16 +72,14 @@ export function EstudantesManager() {
 
       // Converter dados do Excel para formato do banco
       const estudantesImportados = jsonData.map((row: any) => ({
+        user_id: user?.id,
         nome: row.nome || '',
-        familia: row.familia || '',
         idade: parseInt(row.idade) || 0,
         genero: row.genero || 'masculino',
         email: row.email || '',
         telefone: row.telefone || '',
         data_batismo: row.data_batismo || null,
         cargo: row.cargo || 'publicador_batizado',
-        estado_civil: row.estado_civil || 'solteiro',
-        papel_familiar: row.papel_familiar || 'filho',
         ativo: row.ativo !== false,
         observacoes: row.observacoes || ''
       }));
@@ -124,8 +104,8 @@ export function EstudantesManager() {
 
   // Salvar estudante (criar ou editar)
   const handleSave = async () => {
-    if (!formData.nome || !formData.familia) {
-      setError('Nome e família são obrigatórios');
+    if (!formData.nome) {
+      setError('Nome é obrigatório');
       return;
     }
 
@@ -141,10 +121,22 @@ export function EstudantesManager() {
         if (error) throw error;
         setSuccess('Estudante atualizado com sucesso!');
       } else {
-        // Criar novo
+        // Criar novo - garantir campos obrigatórios
+        const dataToInsert = {
+          user_id: user?.id!,
+          nome: formData.nome || '',
+          genero: formData.genero || 'masculino',
+          cargo: formData.cargo || 'publicador_batizado',
+          idade: formData.idade,
+          ativo: formData.ativo ?? true,
+          email: formData.email,
+          telefone: formData.telefone,
+          data_batismo: formData.data_batismo,
+          observacoes: formData.observacoes
+        };
         const { error } = await supabase
           .from('estudantes')
-          .insert([formData]);
+          .insert([dataToInsert]);
 
         if (error) throw error;
         setSuccess('Estudante criado com sucesso!');
@@ -184,14 +176,11 @@ export function EstudantesManager() {
   const resetForm = () => {
     setFormData({
       nome: '',
-      familia: '',
       idade: 0,
       genero: 'masculino',
       email: '',
       telefone: '',
       cargo: 'publicador_batizado',
-      estado_civil: 'solteiro',
-      papel_familiar: 'filho',
       ativo: true,
       observacoes: ''
     });
@@ -200,7 +189,7 @@ export function EstudantesManager() {
   };
 
   // Editar estudante
-  const handleEdit = (estudante: Estudante) => {
+  const handleEdit = (estudante: EstudanteRow) => {
     setFormData(estudante);
     setEditingEstudante(estudante);
     setShowForm(true);
@@ -336,15 +325,6 @@ export function EstudantesManager() {
                 />
               </div>
               <div>
-                <Label htmlFor="familia">Família *</Label>
-                <Input
-                  id="familia"
-                  value={formData.familia}
-                  onChange={(e) => setFormData({...formData, familia: e.target.value})}
-                  placeholder="Nome da família"
-                />
-              </div>
-              <div>
                 <Label htmlFor="idade">Idade</Label>
                 <Input
                   id="idade"
@@ -391,7 +371,7 @@ export function EstudantesManager() {
                 <Label htmlFor="cargo">Cargo</Label>
                 <Select
                   value={formData.cargo}
-                  onValueChange={(value) => setFormData({...formData, cargo: value})}
+                  onValueChange={(value) => setFormData({...formData, cargo: value as any})}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -401,24 +381,7 @@ export function EstudantesManager() {
                     <SelectItem value="publicador_nao_batizado">Publicador Não Batizado</SelectItem>
                     <SelectItem value="pioneiro_regular">Pioneiro Regular</SelectItem>
                     <SelectItem value="servo_ministerial">Servo Ministerial</SelectItem>
-                    <SelectItem value="anciao">Ancião</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="estado_civil">Estado Civil</Label>
-                <Select
-                  value={formData.estado_civil}
-                  onValueChange={(value) => setFormData({...formData, estado_civil: value})}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="solteiro">Solteiro</SelectItem>
-                    <SelectItem value="casado">Casado</SelectItem>
-                    <SelectItem value="viuvo">Viúvo</SelectItem>
-                    <SelectItem value="divorciado">Divorciado</SelectItem>
+                  <SelectItem value="anciao">Ancião</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -459,7 +422,6 @@ export function EstudantesManager() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
-                  <TableHead>Família</TableHead>
                   <TableHead>Idade</TableHead>
                   <TableHead>Gênero</TableHead>
                   <TableHead>Cargo</TableHead>
@@ -471,7 +433,6 @@ export function EstudantesManager() {
                 {estudantes.map((estudante) => (
                   <TableRow key={estudante.id}>
                     <TableCell className="font-medium">{estudante.nome}</TableCell>
-                    <TableCell>{estudante.familia}</TableCell>
                     <TableCell>{estudante.idade}</TableCell>
                     <TableCell>
                       <Badge variant={estudante.genero === 'masculino' ? 'default' : 'secondary'}>

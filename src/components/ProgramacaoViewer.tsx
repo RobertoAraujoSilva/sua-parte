@@ -6,11 +6,11 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Clock, Users, BookOpen, Play, Mic, User } from 'lucide-react';
-import { Estudante } from '@/types/estudantes';
+import type { EstudanteRow } from '@/types/estudantes';
 
 interface ProgramacaoViewerProps {
   programacao: any;
-  estudantes: Estudante[];
+  estudantes: EstudanteRow[];
   designacoes: any[];
   onDesignar: (parteId: string, estudanteId: string, ajudanteId?: string) => void;
   onRemoverDesignacao: (parteId: string) => void;
@@ -88,8 +88,8 @@ export function ProgramacaoViewer({
     return estudantes.filter(estudante => {
       // Verificar restrições de gênero
       if (parte.restricoes?.genero && parte.restricoes.genero !== 'todos') {
-        if (parte.restricoes.genero === 'M' && estudante.genero !== 'M') return false;
-        if (parte.restricoes.genero === 'F' && estudante.genero !== 'F') return false;
+        if (parte.restricoes.genero === 'M' && estudante.genero !== 'masculino') return false;
+        if (parte.restricoes.genero === 'F' && estudante.genero !== 'feminino') return false;
       }
       
       // Verificar se já foi designado para esta semana
@@ -236,7 +236,7 @@ export function ProgramacaoViewer({
                                     {estudante.nome}
                                     {estudante.genero && (
                                       <span className="ml-2 text-xs text-muted-foreground">
-                                        ({estudante.genero === 'M' ? 'M' : 'F'})
+                                        ({estudante.genero === 'masculino' ? 'M' : 'F'})
                                       </span>
                                     )}
                                   </SelectItem>
