@@ -6,23 +6,14 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { 
-  Calendar, 
   Users, 
   FileText, 
-  Upload, 
   Download, 
   Settings, 
   CheckCircle, 
   AlertCircle,
-  Clock,
-  User,
-  Mail,
-  MessageSquare,
-  QrCode,
-  Heart,
   ChevronLeft,
   ChevronRight
 } from "lucide-react";
@@ -74,199 +65,6 @@ interface ParteMeeting {
   instrucoes?: string;
 }
 
-// Componente para importação de PDFs das apostilas
-const ImportacaoPDF: React.FC<{ onImportComplete: (programa: ProgramaSemanal) => void }> = ({ onImportComplete }) => {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [extractedData, setExtractedData] = useState<any>(null);
-
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && file.type === 'application/pdf') {
-      setSelectedFile(file);
-    } else {
-      toast({
-        title: "Arquivo inválido",
-        description: "Por favor, selecione um arquivo PDF da apostila MWB.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  const processPDF = async () => {
-    if (!selectedFile) return;
-
-    setIsProcessing(true);
-    try {
-      // Simular processamento do PDF (implementar com pdf-parse)
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Dados mockados baseados nos PDFs fornecidos
-      const mockData = {
-        semana: "2-8 de dezembro de 2024",
-        data_inicio: "2024-12-02",
-        mes_ano: "dezembro de 2024",
-        partes: [
-          {
-            numero: 3,
-            titulo: "Leitura da Bíblia",
-            tempo: 4,
-            tipo: "leitura_biblica",
-            secao: "TESOUROS",
-            referencia: "Provérbios 25:1-17",
-            instrucoes: "Apenas homens. Sem introdução ou conclusão."
-          },
-          {
-            numero: 4,
-            titulo: "Iniciando conversas",
-            tempo: 3,
-            tipo: "demonstracao",
-            secao: "MINISTERIO",
-            cena: "De casa em casa",
-            instrucoes: "Demonstração. Ajudante do mesmo sexo ou parente."
-          },
-          {
-            numero: 5,
-            titulo: "Cultivando o interesse",
-            tempo: 4,
-            tipo: "demonstracao",
-            secao: "MINISTERIO",
-            cena: "Revisita",
-            instrucoes: "Demonstração. Ajudante do mesmo sexo."
-          },
-          {
-            numero: 6,
-            titulo: "Explicando suas crenças",
-            tempo: 5,
-            tipo: "discurso",
-            secao: "MINISTERIO",
-            instrucoes: "Discurso. Apenas homens qualificados."
-          }
-        ]
-      };
-
-      setExtractedData(mockData);
-      
-      toast({
-        title: "PDF processado com sucesso!",
-        description: `Extraídas ${mockData.partes.length} partes da reunião.`
-      });
-
-    } catch (error) {
-      toast({
-        title: "Erro ao processar PDF",
-        description: "Não foi possível extrair os dados da apostila.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
-
-  const confirmarImportacao = () => {
-    if (extractedData) {
-      const programa: ProgramaSemanal = {
-        id: Date.now().toString(),
-        semana: extractedData.semana,
-        data_inicio: extractedData.data_inicio,
-        mes_ano: extractedData.mes_ano,
-        partes: extractedData.partes,
-        criado_em: new Date().toISOString(),
-        atualizado_em: new Date().toISOString()
-      };
-      
-      onImportComplete(programa);
-      setSelectedFile(null);
-      setExtractedData(null);
-    }
-  };
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Upload className="w-5 h-5" />
-          Importar Apostila MWB (PDF)
-        </CardTitle>
-        <CardDescription>
-          Faça upload do PDF oficial da apostila "Vida e Ministério Cristão" para extrair automaticamente as partes da reunião
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Selecionar arquivo PDF:</label>
-          <Input
-            type="file"
-            accept=".pdf"
-            onChange={handleFileSelect}
-            disabled={isProcessing}
-          />
-          {selectedFile && (
-            <p className="text-sm text-gray-600">
-              Arquivo selecionado: {selectedFile.name}
-            </p>
-          )}
-        </div>
-
-        {selectedFile && !extractedData && (
-          <Button 
-            onClick={processPDF} 
-            disabled={isProcessing}
-            className="w-full"
-          >
-            {isProcessing ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                Processando PDF...
-              </>
-            ) : (
-              <>
-                <FileText className="w-4 h-4 mr-2" />
-                Processar Apostila
-              </>
-            )}
-          </Button>
-        )}
-
-        {extractedData && (
-          <div className="space-y-4">
-            <Alert>
-              <CheckCircle className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Dados extraídos:</strong> {extractedData.semana}
-                <br />
-                <strong>Partes identificadas:</strong> {extractedData.partes.length}
-              </AlertDescription>
-            </Alert>
-
-            <div className="space-y-2">
-              <h4 className="font-medium">Partes da reunião:</h4>
-              {extractedData.partes.map((parte: ParteMeeting, index: number) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                  <div>
-                    <span className="font-medium">{parte.numero}. {parte.titulo}</span>
-                    {parte.referencia && (
-                      <span className="text-sm text-gray-600 ml-2">({parte.referencia})</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{parte.tempo} min</Badge>
-                    <Badge variant="outline">{parte.tipo}</Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <Button onClick={confirmarImportacao} className="w-full">
-              <CheckCircle className="w-4 h-4 mr-2" />
-              Confirmar Importação
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-};
 
 // Componente para geração automática de designações (integrado ao backend)
 const GeradorDesignacoes: React.FC<{ 
@@ -519,214 +317,7 @@ const GeradorDesignacoes: React.FC<{
   );
 };
 
-// Componente para sistema de notificações
-const SistemaNotificacoes: React.FC<{ designacoes: DesignacaoMinisterial[] }> = ({ designacoes }) => {
-  const [isEnviando, setIsEnviando] = useState(false);
-  const [notificacoesEnviadas, setNotificacoesEnviadas] = useState<string[]>([]);
 
-  const enviarNotificacoes = async () => {
-    setIsEnviando(true);
-    try {
-      // Simular envio de notificações
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      const designacoesPendentes = designacoes.filter(d => d.status === 'pendente');
-      setNotificacoesEnviadas(designacoesPendentes.map(d => d.id));
-      
-      toast({
-        title: "Notificações enviadas!",
-        description: `${designacoesPendentes.length} estudantes foram notificados por e-mail e WhatsApp.`
-      });
-    } catch (error) {
-      toast({
-        title: "Erro ao enviar notificações",
-        description: "Não foi possível enviar as notificações.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsEnviando(false);
-    }
-  };
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Mail className="w-5 h-5" />
-          Sistema de Notificações
-        </CardTitle>
-        <CardDescription>
-          Envie notificações automáticas por e-mail e WhatsApp para os estudantes
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <p className="text-sm font-medium">Designações pendentes:</p>
-            <p className="text-sm text-gray-600">
-              {designacoes.filter(d => d.status === 'pendente').length}
-            </p>
-          </div>
-          <div>
-            <p className="text-sm font-medium">Já notificadas:</p>
-            <p className="text-sm text-gray-600">{notificacoesEnviadas.length}</p>
-          </div>
-        </div>
-
-        <Button 
-          onClick={enviarNotificacoes} 
-          disabled={isEnviando || designacoes.length === 0}
-          className="w-full"
-        >
-          {isEnviando ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-              Enviando notificações...
-            </>
-          ) : (
-            <>
-              <MessageSquare className="w-4 h-4 mr-2" />
-              Enviar Notificações
-            </>
-          )}
-        </Button>
-
-        <div className="space-y-2">
-          <h4 className="font-medium">Configurações de notificação:</h4>
-          <div className="space-y-2 text-sm">
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-600" />
-              <span>E-mail com detalhes da parte</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-600" />
-              <span>WhatsApp com link para portal</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-600" />
-              <span>Lembrete 24h antes da reunião</span>
-            </div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-// Componente para portal do estudante com PIX
-const PortalEstudante: React.FC = () => {
-  const [chavePixCopiada, setChavePixCopiada] = useState(false);
-  
-  // Chave PIX para doações (substitua pela chave real)
-  const chavePix = "sua-chave-pix@exemplo.com";
-
-  const copiarChavePix = () => {
-    navigator.clipboard.writeText(chavePix);
-    setChavePixCopiada(true);
-    toast({
-      title: "Chave PIX copiada!",
-      description: "A chave PIX foi copiada para a área de transferência."
-    });
-    setTimeout(() => setChavePixCopiada(false), 3000);
-  };
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <User className="w-5 h-5" />
-            Minhas Designações
-          </CardTitle>
-          <CardDescription>
-            Visualize suas designações e prepare-se para as partes
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {/* Exemplo de designação */}
-          <div className="border rounded-lg p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="font-medium">Leitura da Bíblia</h4>
-              <Badge variant="secondary">4 min</Badge>
-            </div>
-            <div className="space-y-2 text-sm">
-              <p><strong>Semana:</strong> 2-8 de dezembro de 2024</p>
-              <p><strong>Referência:</strong> Provérbios 25:1-17</p>
-              <p><strong>Instruções:</strong> Apenas homens. Sem introdução ou conclusão.</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge variant="outline" className="text-green-600">Confirmada</Badge>
-              <Button size="sm" variant="outline">
-                <CheckCircle className="w-4 h-4 mr-2" />
-                Marcar como Preparada
-              </Button>
-            </div>
-          </div>
-
-          <Alert>
-            <Clock className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Dica de preparação:</strong> Para a leitura da Bíblia, pratique a pronúncia e 
-              familiarize-se com o contexto dos versículos. Lembre-se de não fazer introdução ou conclusão.
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-
-      {/* Sistema de doações via PIX */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Heart className="w-5 h-5 text-red-500" />
-            Apoie o Sistema
-          </CardTitle>
-          <CardDescription>
-            Ajude a manter o sistema funcionando com uma doação voluntária
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="text-center space-y-4">
-            <div className="bg-gray-100 p-4 rounded-lg">
-              <QrCode className="w-32 h-32 mx-auto text-gray-400 mb-2" />
-              <p className="text-sm text-gray-600">QR Code PIX</p>
-            </div>
-            
-            <div className="space-y-2">
-              <p className="text-sm font-medium">Chave PIX:</p>
-              <div className="flex items-center gap-2">
-                <Input 
-                  value={chavePix} 
-                  readOnly 
-                  className="text-center"
-                />
-                <Button 
-                  size="sm" 
-                  onClick={copiarChavePix}
-                  variant={chavePixCopiada ? "default" : "outline"}
-                >
-                  {chavePixCopiada ? (
-                    <>
-                      <CheckCircle className="w-4 h-4 mr-2" />
-                      Copiado!
-                    </>
-                  ) : (
-                    "Copiar"
-                  )}
-                </Button>
-              </div>
-            </div>
-
-            <div className="text-xs text-gray-500 space-y-1">
-              <p>💝 Sua doação ajuda a manter o sistema gratuito para todas as congregações</p>
-              <p>🔒 Doações são anônimas e voluntárias</p>
-              <p>💰 Custo mensal: R$ 50 (servidor + domínio)</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
 
 // Componente principal
 export default function Designacoes() {
@@ -868,7 +459,10 @@ export default function Designacoes() {
 
   const handleDesignacoesGeradas = (novasDesignacoes: DesignacaoMinisterial[]) => {
     setDesignacoes(novasDesignacoes);
-    setActiveTab("notificar");
+    toast({
+      title: "Designações geradas!",
+      description: `${novasDesignacoes.length} designações foram criadas com sucesso.`
+    });
   };
 
   return (
@@ -947,34 +541,42 @@ export default function Designacoes() {
             </CardContent>
           </Card>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="importar" className="flex items-center gap-2">
-                <Upload className="w-4 h-4" />
+                <FileText className="w-4 h-4" />
                 Importar
               </TabsTrigger>
               <TabsTrigger value="gerar" className="flex items-center gap-2">
                 <Settings className="w-4 h-4" />
                 Gerar
               </TabsTrigger>
-              <TabsTrigger value="notificar" className="flex items-center gap-2">
-                <Mail className="w-4 h-4" />
-                Notificar
-              </TabsTrigger>
-              <TabsTrigger value="portal" className="flex items-center gap-2">
-                <User className="w-4 h-4" />
-                Portal
-              </TabsTrigger>
-              <TabsTrigger value="relatorios" className="flex items-center gap-2">
-                <FileText className="w-4 h-4" />
-                Relatórios
-              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="importar" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ImportacaoPDF onImportComplete={handleProgramaImportado} />
-                <JWContentParser onParseComplete={handleProgramaImportado} />
-              </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Importar Programação</CardTitle>
+                  <CardDescription>
+                    Use a página dedicada de importação para processar apostilas JW.org
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <Alert>
+                    <FileText className="h-4 w-4" />
+                    <AlertDescription>
+                      Para importar programações da JW.org ou fazer upload de PDFs, acesse a página de <strong>Importar Programação</strong>.
+                    </AlertDescription>
+                  </Alert>
+                  <Button 
+                    onClick={() => window.location.href = '/importar-programacao'}
+                    className="w-full"
+                  >
+                    <FileText className="w-4 h-4 mr-2" />
+                    Ir para Importar Programação
+                  </Button>
+                </CardContent>
+              </Card>
+              <JWContentParser onParseComplete={handleProgramaImportado} />
             </TabsContent>
 
             <TabsContent value="gerar" className="space-y-6">
@@ -984,67 +586,6 @@ export default function Designacoes() {
                 onDesignacoesGeradas={handleDesignacoesGeradas}
                 onBindGenerate={(fn) => { childGenerateRef.current = fn; }}
               />
-            </TabsContent>
-
-            <TabsContent value="notificar" className="space-y-6">
-              <SistemaNotificacoes designacoes={designacoes} />
-            </TabsContent>
-
-            <TabsContent value="portal" className="space-y-6">
-              <PortalEstudante />
-            </TabsContent>
-
-            <TabsContent value="relatorios" className="space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="w-5 h-5" />
-                    Relatórios e Estatísticas
-                  </CardTitle>
-                  <CardDescription>
-                    Visualize relatórios de participação e eficiência do sistema
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Card>
-                      <CardContent className="p-4 text-center">
-                        <div className="text-2xl font-bold text-blue-600">95%</div>
-                        <div className="text-sm text-gray-600">Designações automáticas</div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4 text-center">
-                        <div className="text-2xl font-bold text-green-600">87%</div>
-                        <div className="text-sm text-gray-600">Taxa de visualização</div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4 text-center">
-                        <div className="text-2xl font-bold text-orange-600">2.3min</div>
-                        <div className="text-sm text-gray-600">Tempo médio/semana</div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="p-4 text-center">
-                        <div className="text-2xl font-bold text-purple-600">R$ 47</div>
-                        <div className="text-sm text-gray-600">Doações mensais</div>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Button variant="outline" className="w-full">
-                      <Download className="w-4 h-4 mr-2" />
-                      Exportar Relatório PDF
-                    </Button>
-                    <Button variant="outline" className="w-full">
-                      <Download className="w-4 h-4 mr-2" />
-                      Exportar Planilha Excel
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
             </TabsContent>
           </Tabs>
         </div>
