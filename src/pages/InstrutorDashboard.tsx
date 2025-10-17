@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Clock, User, Users, Save, Home, BookOpen, Upload, Download } from 'lucide-react';
+import { Calendar, Clock, User, Users, Save, Home, BookOpen, Upload, Download, BarChart3 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ProgramacaoViewer } from '@/components/ProgramacaoViewer';
@@ -308,10 +308,23 @@ export default function InstrutorDashboard() {
 
         {/* Main Content */}
         <Tabs defaultValue="programacao" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="programacao">Programação</TabsTrigger>
-            <TabsTrigger value="designacoes">Designações</TabsTrigger>
-            <TabsTrigger value="estudantes">Estudantes</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="programacao">
+              <BookOpen className="h-4 w-4 mr-2" />
+              Programação
+            </TabsTrigger>
+            <TabsTrigger value="designacoes">
+              <Calendar className="h-4 w-4 mr-2" />
+              Designações
+            </TabsTrigger>
+            <TabsTrigger value="estudantes">
+              <Users className="h-4 w-4 mr-2" />
+              Estudantes
+            </TabsTrigger>
+            <TabsTrigger value="links">
+              <Home className="h-4 w-4 mr-2" />
+              Ações Rápidas
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="programacao">
@@ -430,6 +443,94 @@ export default function InstrutorDashboard() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="links">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/estudantes')}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5 text-blue-600" />
+                    Gestão de Estudantes
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">
+                    Gerencie todos os estudantes da congregação, adicione novos, edite informações e visualize histórico.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/importar-programacao')}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Upload className="h-5 w-5 text-green-600" />
+                    Importar Programação
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">
+                    Importe programações do JW.org ou faça upload de PDFs para gerar designações automaticamente.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/designacoes')}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-purple-600" />
+                    Designar Manualmente
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">
+                    Atribua designações manualmente ou use o gerador automático seguindo regras S-38.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/relatorios')}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-orange-600" />
+                    Relatórios
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">
+                    Visualize estatísticas, relatórios de participação e análise de equidade nas designações.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/reunioes')}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calendar className="h-5 w-5 text-red-600" />
+                    Reuniões
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">
+                    Gerencie reuniões especiais, eventos da congregação e ajuste programações conforme necessário.
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={exportarDesignacoes}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Download className="h-5 w-5 text-teal-600" />
+                    Exportar Dados
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">
+                    Exporte designações, relatórios e dados da congregação para backup ou impressão.
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>

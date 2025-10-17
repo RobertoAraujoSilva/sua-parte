@@ -7,13 +7,8 @@ import {
   BookOpen, 
   Calendar, 
   BarChart3, 
-  Settings, 
-  Shield, 
   UserCheck,
-  Globe,
-  FileText,
-  Activity,
-  Cog
+  FileText
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import UnifiedNotifications from './UnifiedNotifications';
@@ -26,54 +21,14 @@ export default function UnifiedNavigation() {
   // 🚨 SEM PERFIL = SEM NAVEGAÇÃO
   if (!profile) return null;
 
-  // 🏠 NAVEGAÇÃO ADMIN - CONTROLE GLOBAL
-  if (profile.role === 'admin') {
-    const adminNavItems = [
-      { href: '/admin', label: 'Dashboard', icon: Shield, exact: true },
-      { href: '/admin/users', label: 'Usuários', icon: Users },
-      { href: '/admin/congregations', label: 'Congregações', icon: Globe },
-      { href: '/admin/system', label: 'Sistema', icon: Cog },
-      { href: '/admin/monitoring', label: 'Monitoramento', icon: Activity },
-      { href: '/admin/developer', label: 'Developer', icon: Settings }
-    ];
-
-    return (
-      <nav className="flex items-center justify-between p-4 bg-background border-b">
-        <div className="flex space-x-2">
-          {adminNavItems.map((item) => {
-            const isActive = item.exact 
-              ? location.pathname === item.href
-              : location.pathname.startsWith(item.href);
-            
-            return (
-              <Link key={item.href} to={item.href}>
-                <Button
-                  variant={isActive ? "default" : "ghost"}
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
-                  <item.icon className="h-4 w-4" />
-                  {item.label}
-                </Button>
-              </Link>
-            );
-          })}
-        </div>
-        <UnifiedNotifications />
-      </nav>
-    );
-  }
-
   // 👨‍🏫 NAVEGAÇÃO INSTRUTOR - GESTÃO LOCAL
   if (profile.role === 'instrutor') {
     const instructorNavItems = [
       { href: '/dashboard', label: 'Dashboard', icon: Home, exact: true },
       { href: '/estudantes', label: 'Estudantes', icon: Users },
-      { href: '/programas', label: 'Programas', icon: BookOpen },
       { href: '/designacoes', label: 'Designações', icon: Calendar },
       { href: '/relatorios', label: 'Relatórios', icon: BarChart3 },
-      { href: '/reunioes', label: 'Reuniões', icon: Calendar },
-      { href: '/equidade', label: 'Equidade', icon: Activity }
+      { href: '/reunioes', label: 'Reuniões', icon: Calendar }
     ];
 
     return (
@@ -106,11 +61,8 @@ export default function UnifiedNavigation() {
   // 👨‍🎓 NAVEGAÇÃO ESTUDANTE - VISÃO INDIVIDUAL
   if (profile.role === 'estudante') {
     const studentNavItems = [
-      { href: `/estudante/${profile.id}`, label: 'Meu Dashboard', icon: UserCheck, exact: true },
-      { href: `/estudante/${profile.id}/designacoes`, label: 'Minhas Designações', icon: Calendar },
-      { href: `/estudante/${profile.id}/materiais`, label: 'Materiais', icon: BookOpen },
-      { href: `/estudante/${profile.id}/familia`, label: 'Família', icon: Users },
-      { href: `/estudante/${profile.id}/historico`, label: 'Histórico', icon: BarChart3 }
+      { href: '/portal', label: 'Portal', icon: UserCheck, exact: true },
+      { href: '/estudante/:id/familia', label: 'Família', icon: Users }
     ];
 
     return (
