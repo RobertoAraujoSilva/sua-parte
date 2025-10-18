@@ -16,20 +16,33 @@ export const SequentialFlow: React.FC<SequentialFlowProps> = ({ children }) => {
   const { steps, isComplete, loading: onboardingLoading } = useOnboarding();
   const location = useLocation();
 
-  // Rotas públicas que não precisam de validação
+  // 1️⃣ PRIMEIRO: Rotas públicas (renderizar IMEDIATAMENTE)
   const publicRoutes = ['/', '/auth', '/demo', '/funcionalidades', '/congregacoes', '/suporte', '/sobre', '/doar', '/convite/aceitar'];
   const isPublicRoute = publicRoutes.includes(location.pathname);
+  
+  // Log de diagnóstico
+  React.useEffect(() => {
+    console.log('🔍 SequentialFlow state:', {
+      pathname: location.pathname,
+      isPublicRoute,
+      authLoading,
+      onboardingLoading,
+      hasProfile: !!profile,
+      profileRole: profile?.role,
+    });
+  }, [location.pathname, isPublicRoute, authLoading, onboardingLoading, profile]);
 
-  // Aguardar carregamento
+  if (isPublicRoute) {
+    console.log('✅ SequentialFlow: Public route, rendering immediately');
+    return <>{children}</>;
+  }
+
+  // 2️⃣ DEPOIS: Aguardar loading (apenas para rotas protegidas)
   if (authLoading || onboardingLoading) {
+    console.log('⏳ SequentialFlow: Loading auth/onboarding...');
     return <div className="flex items-center justify-center min-h-screen">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
     </div>;
-  }
-
-  // Permitir acesso a rotas públicas
-  if (isPublicRoute) {
-    return <>{children}</>;
   }
 
   // Apenas para instrutores logados

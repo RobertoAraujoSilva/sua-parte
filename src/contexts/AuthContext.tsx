@@ -46,6 +46,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
+
+  // 🔄 Timeout para loading (evita loading infinito)
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('⚠️ Auth loading timeout reached (3s), forcing loading=false');
+        setLoading(false);
+        setLoadingTimeout(true);
+      }
+    }, 3000);
+
+    return () => clearTimeout(timeout);
+  }, [loading]);
 
   // 🔄 Função para recuperar autenticação
   const refreshAuth = useCallback(async () => {
