@@ -71,7 +71,9 @@
     "CONGREGAÇÕES": "Congregations",
     "SUPORTE": "Support",
     "SOBRE": "About",
-    "DOAR": "Donate"
+    "DOAR": "Donate",
+    "continueTo": "Continue to {{label}}",
+    "next": "Next"
   },
   "language": {
     "portuguese": "Portuguese",

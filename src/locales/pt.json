@@ -71,7 +71,9 @@
     "CONGREGAÇÕES": "Congregações",
     "SUPORTE": "Suporte",
     "SOBRE": "Sobre",
-    "DOAR": "Doar"
+    "DOAR": "Doar",
+    "continueTo": "Continuar para {{label}}",
+    "next": "Próximo"
   },
   "language": {
     "switchToEnglish": "Mudar para Inglês",
