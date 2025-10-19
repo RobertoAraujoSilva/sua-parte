@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Download, FileText, BookOpen, Calendar, Eye, AlertTriangle } from 'lucide-react';
 import { parseMWBContent, MWBProgram } from '@/utils/mwbParser';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface PDFEntry {
   label: string;
@@ -57,6 +58,7 @@ const extractMonthCode = (fileName: string): string | null => {
 };
 
 const Programas: React.FC = () => {
+  const { t } = useTranslation();
   const [activeLang, setActiveLang] = useState<'pt' | 'en'>('pt');
   const [selected, setSelected] = useState<PDFEntry | null>(ptPDFs[0]);
   const [loading, setLoading] = useState(false);
@@ -112,10 +114,10 @@ const Programas: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="w-full max-w-[1600px] mx-auto px-4 lg:px-8 py-8">
+      <div className="w-full max-w-[1600px] mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Programação da Reunião</h1>
-          <p className="text-gray-600">Selecione um PDF oficial da Apostila Vida e Ministério para visualizar a programação do mês. Quando disponível, o sistema carrega a programação real do JSON local; caso contrário, mostra uma prévia baseada no mês.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{t('programs.pageTitle')}</h1>
+          <p className="text-sm sm:text-base text-gray-600">{t('programs.pageSubtitle')}</p>
         </div>
 
         <Tabs defaultValue="pt" value={activeLang} onValueChange={(v) => {
@@ -123,9 +125,9 @@ const Programas: React.FC = () => {
           setActiveLang(lang);
           setSelected((lang === 'pt' ? ptPDFs : enPDFs)[0] || null);
         }}>
-          <TabsList>
-            <TabsTrigger value="pt">Português</TabsTrigger>
-            <TabsTrigger value="en">English</TabsTrigger>
+          <TabsList className="w-full sm:w-auto">
+            <TabsTrigger value="pt" className="flex-1 sm:flex-initial">{t('programs.languageTabs.portuguese')}</TabsTrigger>
+            <TabsTrigger value="en" className="flex-1 sm:flex-initial">{t('programs.languageTabs.english')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="pt">
@@ -140,31 +142,31 @@ const Programas: React.FC = () => {
         {/* Área de preview/real */}
         {selected && (
           <Card className="mt-6">
-            <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <CardTitle className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-blue-600" />
-                Mês: <span className="font-normal text-gray-700">{selected.label}</span>
+            <CardHeader className="flex flex-col gap-4">
+              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                <BookOpen className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                <span className="truncate">{t('programs.monthLabel')} <span className="font-normal text-gray-700">{selected.label}</span></span>
               </CardTitle>
-              <div className="flex items-center gap-2">
-                <a href={selected.url} target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <Download className="h-4 w-4" /> Baixar PDF
+              <div className="responsive-buttons">
+                <a href={selected.url} target="_blank" rel="noopener noreferrer" className="flex-1 sm:flex-initial">
+                  <Button variant="outline" className="w-full flex items-center justify-center gap-2">
+                    <Download className="h-4 w-4" /> {t('programs.downloadPdf')}
                   </Button>
                 </a>
-                <Button variant="secondary" className="flex items-center gap-2" onClick={() => window.open(selected.url, '_blank') }>
-                  <Eye className="h-4 w-4" /> Abrir em nova aba
+                <Button variant="secondary" className="flex-1 sm:flex-initial w-full flex items-center justify-center gap-2" onClick={() => window.open(selected.url, '_blank') }>
+                  <Eye className="h-4 w-4" /> {t('programs.openNewTab')}
                 </Button>
               </div>
             </CardHeader>
             <CardContent>
               {error && (
                 <div className="flex items-center gap-2 p-3 mb-4 text-sm text-red-700 bg-red-50 border border-red-200 rounded">
-                  <AlertTriangle className="h-4 w-4" />
-                  Erro ao carregar programação: {error}
+                  <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+                  {t('programs.loadingError', { error })}
                 </div>
               )}
               {loading ? (
-                <div className="text-sm text-gray-600">Carregando programação...</div>
+                <div className="text-sm text-gray-600">{t('programs.loadingSchedule')}</div>
               ) : semanas.length > 0 ? (
                 <RealSchedule semanas={semanas} />
               ) : (
@@ -176,36 +178,32 @@ const Programas: React.FC = () => {
       </div>
     </div>
   );
-    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32 }}>
-      <Button variant="outline" onClick={() => window.location.href = '/estudantes'}>Voltar</Button>
-      <Button variant="default" onClick={() => window.location.href = '/designacoes'}>Prosseguir</Button>
-    </div>
 };
 
 const PDFList: React.FC<{ entries: PDFEntry[]; selected: PDFEntry | null; onSelect: (e: PDFEntry) => void }>
 = ({ entries, selected, onSelect }) => {
+  const { t } = useTranslation();
   return (
     <Card className="mt-4">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5 text-gray-700" /> Arquivos Disponíveis
+        <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+          <FileText className="h-5 w-5 text-gray-700" /> {t('programs.availableFiles')}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {entries.map((e) => (
-            <div key={e.fileName} className={`p-4 border rounded-lg bg-white flex items-start justify-between gap-4 ${selected?.fileName === e.fileName ? 'border-blue-400 ring-1 ring-blue-200' : 'border-gray-200'}`}>
-              <div>
-                <div className="font-semibold text-gray-900">{e.label}</div>
-                <div className="text-xs text-gray-500">{e.fileName}</div>
-                <div className="text-xs text-gray-500">{e.url}</div>
+            <div key={e.fileName} className={`p-4 border rounded-lg bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${selected?.fileName === e.fileName ? 'border-blue-400 ring-1 ring-blue-200' : 'border-gray-200'}`}>
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-gray-900 truncate">{e.label}</div>
+                <div className="text-xs text-gray-500 truncate">{e.fileName}</div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button size="sm" variant={selected?.fileName === e.fileName ? 'default' : 'outline'} onClick={() => onSelect(e)}>
-                  Visualizar
+              <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+                <Button size="sm" variant={selected?.fileName === e.fileName ? 'default' : 'outline'} onClick={() => onSelect(e)} className="flex-1 sm:flex-initial">
+                  {t('programs.viewButton')}
                 </Button>
-                <a href={e.url} target="_blank" rel="noopener noreferrer">
-                  <Button size="sm" variant="secondary" className="flex items-center gap-2">
+                <a href={e.url} target="_blank" rel="noopener noreferrer" className="flex-1 sm:flex-initial">
+                  <Button size="sm" variant="secondary" className="w-full flex items-center justify-center gap-2">
                     <Download className="h-4 w-4" /> PDF
                   </Button>
                 </a>
@@ -220,8 +218,9 @@ const PDFList: React.FC<{ entries: PDFEntry[]; selected: PDFEntry | null; onSele
 
 const RealSchedule: React.FC<{ semanas: SemanaJSON[] }>
 = ({ semanas }) => {
+  const { t } = useTranslation();
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
       {semanas.map((semana, idx) => (
         <Card key={semana.idSemana} className="border-blue-100">
           <CardHeader>
@@ -258,27 +257,29 @@ const RealSchedule: React.FC<{ semanas: SemanaJSON[] }>
 
 const FallbackPreview: React.FC<{ preview: MWBProgram[] }>
 = ({ preview }) => {
+  const { t } = useTranslation();
   return (
     <div>
       <div className="p-3 mb-4 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded">
-        Nenhum JSON local encontrado para este mês. Exibindo prévia gerada pelo parser simplificado (baseado no nome do arquivo).
+        {t('programs.noJsonFound')}
       </div>
       {preview.length === 0 ? (
-        <div className="text-sm text-gray-600">Nenhuma semana encontrada.</div>
+        <div className="text-sm text-gray-600">{t('programs.noWeeksFound')}</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {preview.map((week, idx) => (
             <Card key={idx} className="border-blue-100">
               <CardHeader>
                 <CardTitle className="text-base font-semibold flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-blue-600" /> Semana {idx + 1} — {week.date}
+                  <Calendar className="h-4 w-4 text-blue-600 flex-shrink-0" /> 
+                  <span className="truncate">{t('programs.weekLabel', { number: idx + 1, date: week.date })}</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <Section title="Tesouros da Palavra de Deus" items={week.parts.treasures.map(t => ({ title: t.title + (t.reading ? ` — ${t.reading}` : ''), time: t.time }))} />
-                  <Section title="Faça seu Melhor no Ministério" items={week.parts.ministry.map(t => ({ title: t.title, time: t.time }))} />
-                  <Section title="Nossa Vida Cristã" items={week.parts.christianLife.map(t => ({ title: t.title, time: t.time }))} />
+                  <Section title={t('programs.sections.treasures')} items={week.parts.treasures.map(t => ({ title: t.title + (t.reading ? ` — ${t.reading}` : ''), time: t.time }))} />
+                  <Section title={t('programs.sections.ministry')} items={week.parts.ministry.map(t => ({ title: t.title, time: t.time }))} />
+                  <Section title={t('programs.sections.christianLife')} items={week.parts.christianLife.map(t => ({ title: t.title, time: t.time }))} />
                 </div>
               </CardContent>
             </Card>

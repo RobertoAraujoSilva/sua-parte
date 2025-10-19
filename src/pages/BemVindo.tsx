@@ -372,10 +372,6 @@ const BemVindo = () => {
       </div>
       
       <Footer />
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 32 }}>
-          <Button variant="outline" onClick={handleBack}>Voltar</Button>
-          <Button variant="default" onClick={handleNext}>Prosseguir</Button>
-        </div>
     </div>
   );
 };

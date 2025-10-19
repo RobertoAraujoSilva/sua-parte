@@ -173,7 +173,28 @@
     "edit": "Editar",
     "delete": "Excluir",
     "noPrograms": "Nenhum programa encontrado",
-    "uploadInstructions": "Faça upload do PDF da apostila ou cole o conteúdo do JW.org"
+    "uploadInstructions": "Faça upload do PDF da apostila ou cole o conteúdo do JW.org",
+    "pageTitle": "Programação da Reunião",
+    "pageSubtitle": "Selecione um PDF oficial da Apostila Vida e Ministério para visualizar a programação do mês. Quando disponível, o sistema carrega a programação real do JSON local; caso contrário, mostra uma prévia baseada no mês.",
+    "languageTabs": {
+      "portuguese": "Português",
+      "english": "English"
+    },
+    "availableFiles": "Arquivos Disponíveis",
+    "viewButton": "Visualizar",
+    "downloadPdf": "Baixar PDF",
+    "openNewTab": "Abrir em nova aba",
+    "monthLabel": "Mês:",
+    "loadingError": "Erro ao carregar programação: {{error}}",
+    "loadingSchedule": "Carregando programação...",
+    "noJsonFound": "Nenhum JSON local encontrado para este mês. Exibindo prévia gerada pelo parser simplificado (baseado no nome do arquivo).",
+    "noWeeksFound": "Nenhuma semana encontrada.",
+    "weekLabel": "Semana {{number}} — {{date}}",
+    "sections": {
+      "treasures": "Tesouros da Palavra de Deus",
+      "ministry": "Faça seu Melhor no Ministério",
+      "christianLife": "Nossa Vida Cristã"
+    }
   },
   "assignments": {
     "title": "Designações",
