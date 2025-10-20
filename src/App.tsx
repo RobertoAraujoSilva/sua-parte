@@ -27,6 +27,7 @@ import Sobre from "./pages/Sobre";
 import Doar from "./pages/Doar";
 import BemVindo from "./pages/BemVindo";
 import ConfiguracaoInicial from "./pages/ConfiguracaoInicial";
+import PrimeiroPrograma from "./pages/PrimeiroPrograma";
 
 import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
@@ -172,6 +173,14 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
                       <ConfiguracaoInicial />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/primeiro-programa"
+                  element={
+                    <ProtectedRoute allowedRoles={['instrutor']}>
+                      <PrimeiroPrograma />
                     </ProtectedRoute>
                   }
                 />
