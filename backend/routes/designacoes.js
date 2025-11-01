@@ -194,21 +194,130 @@ router.post('/', requireAuth, async (req, res) => {
 });
 
 // Geração automática de designações seguindo regras S-38
-// Sistema simplificado: mocka sem usar Supabase
+// Sistema de geração real de designações
 router.post('/generate', requireAuth, async (req, res) => {
   try {
     const { programacao_id, congregacao_id } = req.body || {};
     ensure(programacao_id, 'programacao_id é obrigatório');
     ensure(congregacao_id, 'congregacao_id é obrigatório');
 
-    // Mock: simula geração sem Supabase
-    const mockItens = [
-      { id: 'mock-di-1', programacao_item_id: 'mock-item-1', principal_estudante_id: 'mock-student-1', assistente_estudante_id: null, observacoes: 'OK' },
-      { id: 'mock-di-2', programacao_item_id: 'mock-item-2', principal_estudante_id: 'mock-student-2', assistente_estudante_id: 'mock-student-3', observacoes: 'OK' },
-      // Adicionar mais mocks conforme necessário
-    ];
+    console.log(`🔄 Gerando designações para programacao_id=${programacao_id}, congregacao_id=${congregacao_id}`);
 
-    res.json({ success: true, designacao: { id: `mock-des-${Date.now()}`, programacao_id, congregacao_id }, itens: mockItens, detalhes: [] });
+    // 1. Buscar programação e itens
+    const { data: programacao, error: progErr } = await supabase
+      .from('programacoes')
+      .select('*')
+      .eq('id', programacao_id)
+      .single();
+
+    if (progErr) {
+      console.error('❌ Erro ao buscar programação:', progErr);
+      throw new Error(`Programação não encontrada: ${progErr.message}`);
+    }
+
+    const { data: itens, error: itensErr } = await supabase
+      .from('programacao_itens')
+      .select('*')
+      .eq('programacao_id', programacao_id)
+      .order('order', { ascending: true });
+
+    if (itensErr) {
+      console.error('❌ Erro ao buscar itens da programação:', itensErr);
+      throw new Error(`Itens não encontrados: ${itensErr.message}`);
+    }
+
+    if (!itens || itens.length === 0) {
+      throw new Error('Nenhum item encontrado na programação');
+    }
+
+    // 2. Buscar estudantes disponíveis da congregação
+    const { data: estudantes, error: estudantesErr } = await supabase
+      .from('estudantes')
+      .select('*')
+      .eq('congregacao_id', congregacao_id)
+      .eq('ativo', true);
+
+    if (estudantesErr) {
+      console.error('❌ Erro ao buscar estudantes:', estudantesErr);
+      throw new Error(`Estudantes não encontrados: ${estudantesErr.message}`);
+    }
+
+    if (!estudantes || estudantes.length === 0) {
+      throw new Error('Nenhum estudante ativo encontrado na congregação');
+    }
+
+    console.log(`📊 Encontrados ${itens.length} itens e ${estudantes.length} estudantes`);
+
+    // 3. Criar registro de designação
+    const { data: designacao, error: desErr } = await supabase
+      .from('designacoes')
+      .insert({
+        programacao_id,
+        congregacao_id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .select()
+      .single();
+
+    if (desErr) {
+      console.error('❌ Erro ao criar designação:', desErr);
+      throw new Error(`Falha ao criar designação: ${desErr.message}`);
+    }
+
+    console.log(`✅ Designação criada: ${designacao.id}`);
+
+    // 4. Gerar itens de designação (algoritmo simplificado)
+    const designacaoItens = [];
+    let estudanteIndex = 0;
+
+    for (const item of itens) {
+      // Determinar se precisa de assistente
+      const precisaAssistente = item.type === 'demonstracao' || item.type === 'parte_ministerio';
+      
+      // Selecionar estudante principal
+      const principalEstudante = estudantes[estudanteIndex % estudantes.length];
+      estudanteIndex++;
+
+      // Selecionar assistente se necessário
+      const assistenteEstudante = precisaAssistente 
+        ? estudantes[estudanteIndex % estudantes.length]
+        : null;
+      
+      if (precisaAssistente) estudanteIndex++;
+
+      const designacaoItem = {
+        designacao_id: designacao.id,
+        programacao_item_id: item.id,
+        principal_estudante_id: principalEstudante.id,
+        assistente_estudante_id: assistenteEstudante?.id || null,
+        observacoes: '',
+        created_at: new Date().toISOString()
+      };
+
+      designacaoItens.push(designacaoItem);
+    }
+
+    // 5. Inserir itens de designação
+    const { data: insertedItens, error: insertErr } = await supabase
+      .from('designacao_itens')
+      .insert(designacaoItens)
+      .select();
+
+    if (insertErr) {
+      console.error('❌ Erro ao inserir itens de designação:', insertErr);
+      throw new Error(`Falha ao inserir itens: ${insertErr.message}`);
+    }
+
+    console.log(`✅ ${insertedItens.length} itens de designação criados`);
+
+    res.json({ 
+      success: true, 
+      designacao, 
+      itens: insertedItens,
+      detalhes: [`Geradas ${insertedItens.length} designações com ${estudantes.length} estudantes disponíveis`]
+    });
+
   } catch (err) {
     console.error('❌ POST /api/designacoes/generate', err);
     res.status(err.status || 500).json({ error: err.message || 'Falha ao gerar designações' });

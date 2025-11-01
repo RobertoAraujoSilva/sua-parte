@@ -245,8 +245,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Garantir que o perfil tenha o campo role
         const profileWithRole = {
           ...profileData,
-          role: profileData.role || 'instrutor', // Fallback se role não existir
-          email: user?.email || '', // Adicionar email do user
+          role: profileData.role || 'instrutor',
+          email: user?.email || '',
         };
         
         setProfile(profileWithRole);
