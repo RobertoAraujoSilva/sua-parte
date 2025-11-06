@@ -14,7 +14,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import LanguageSwitch from "@/components/LanguageSwitch";
 import { useTranslation } from "@/hooks/useTranslation";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 
 const AuthPage: React.FC = () => {
   const navigate = useNavigate();

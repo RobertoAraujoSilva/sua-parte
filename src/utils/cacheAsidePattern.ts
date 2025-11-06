@@ -8,7 +8,7 @@
  * 4. A aplicação atualiza o cache quando necessário
  */
 
-import { supabase } from '../lib/supabase';
+import { supabase } from '@/integrations/supabase/client';
 
 // ✅ Interface para métricas de cache
 interface CacheMetrics {
