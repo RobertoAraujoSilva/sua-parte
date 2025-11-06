@@ -14,16 +14,344 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      congregacoes: {
+        Row: {
+          cidade: string | null
+          created_at: string | null
+          endereco: string | null
+          estado: string | null
+          id: string
+          nome: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cidade?: string | null
+          created_at?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          nome: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cidade?: string | null
+          created_at?: string | null
+          endereco?: string | null
+          estado?: string | null
+          id?: string
+          nome?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      designacoes: {
+        Row: {
+          cena: string | null
+          created_at: string | null
+          data_designacao: string | null
+          id: string
+          id_ajudante: string | null
+          id_estudante: string
+          id_programa: string | null
+          tempo_minutos: number | null
+          titulo_parte: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cena?: string | null
+          created_at?: string | null
+          data_designacao?: string | null
+          id?: string
+          id_ajudante?: string | null
+          id_estudante: string
+          id_programa?: string | null
+          tempo_minutos?: number | null
+          titulo_parte: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cena?: string | null
+          created_at?: string | null
+          data_designacao?: string | null
+          id?: string
+          id_ajudante?: string | null
+          id_estudante?: string
+          id_programa?: string | null
+          tempo_minutos?: number | null
+          titulo_parte?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "designacoes_id_ajudante_fkey"
+            columns: ["id_ajudante"]
+            isOneToOne: false
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "designacoes_id_estudante_fkey"
+            columns: ["id_estudante"]
+            isOneToOne: false
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "designacoes_id_programa_fkey"
+            columns: ["id_programa"]
+            isOneToOne: false
+            referencedRelation: "programas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      estudantes: {
+        Row: {
+          ativo: boolean | null
+          cargo: Database["public"]["Enums"]["app_cargo"]
+          created_at: string | null
+          data_batismo: string | null
+          email: string | null
+          genero: Database["public"]["Enums"]["app_genero"]
+          id: string
+          id_pai_mae: string | null
+          idade: number
+          nome: string
+          observacoes: string | null
+          telefone: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean | null
+          cargo?: Database["public"]["Enums"]["app_cargo"]
+          created_at?: string | null
+          data_batismo?: string | null
+          email?: string | null
+          genero: Database["public"]["Enums"]["app_genero"]
+          id?: string
+          id_pai_mae?: string | null
+          idade: number
+          nome: string
+          observacoes?: string | null
+          telefone?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean | null
+          cargo?: Database["public"]["Enums"]["app_cargo"]
+          created_at?: string | null
+          data_batismo?: string | null
+          email?: string | null
+          genero?: Database["public"]["Enums"]["app_genero"]
+          id?: string
+          id_pai_mae?: string | null
+          idade?: number
+          nome?: string
+          observacoes?: string | null
+          telefone?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estudantes_id_pai_mae_fkey"
+            columns: ["id_pai_mae"]
+            isOneToOne: false
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          cargo: string | null
+          congregacao: string | null
+          created_at: string | null
+          date_of_birth: string | null
+          id: string
+          nome_completo: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cargo?: string | null
+          congregacao?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          id: string
+          nome_completo?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cargo?: string | null
+          congregacao?: string | null
+          created_at?: string | null
+          date_of_birth?: string | null
+          id?: string
+          nome_completo?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      programas: {
+        Row: {
+          conteudo: Json | null
+          created_at: string | null
+          data: string
+          id: string
+          semana: string | null
+          status: string | null
+          titulo: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          conteudo?: Json | null
+          created_at?: string | null
+          data: string
+          id?: string
+          semana?: string | null
+          status?: string | null
+          titulo: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          conteudo?: Json | null
+          created_at?: string | null
+          data?: string
+          id?: string
+          semana?: string | null
+          status?: string | null
+          titulo?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      student_progress: {
+        Row: {
+          bible_reading: boolean | null
+          bible_study: boolean | null
+          can_be_helper: boolean | null
+          can_teach_others: boolean | null
+          created_at: string | null
+          demonstration: boolean | null
+          id: string
+          initial_call: boolean | null
+          instructor_feedback: string | null
+          last_assignment_date: string | null
+          performance_notes: string | null
+          progress_level: Database["public"]["Enums"]["progress_level"]
+          return_visit: boolean | null
+          student_id: string
+          talk: boolean | null
+          total_assignments: number | null
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          bible_reading?: boolean | null
+          bible_study?: boolean | null
+          can_be_helper?: boolean | null
+          can_teach_others?: boolean | null
+          created_at?: string | null
+          demonstration?: boolean | null
+          id?: string
+          initial_call?: boolean | null
+          instructor_feedback?: string | null
+          last_assignment_date?: string | null
+          performance_notes?: string | null
+          progress_level?: Database["public"]["Enums"]["progress_level"]
+          return_visit?: boolean | null
+          student_id: string
+          talk?: boolean | null
+          total_assignments?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          bible_reading?: boolean | null
+          bible_study?: boolean | null
+          can_be_helper?: boolean | null
+          can_teach_others?: boolean | null
+          created_at?: string | null
+          demonstration?: boolean | null
+          id?: string
+          initial_call?: boolean | null
+          instructor_feedback?: string | null
+          last_assignment_date?: string | null
+          performance_notes?: string | null
+          progress_level?: Database["public"]["Enums"]["progress_level"]
+          return_visit?: boolean | null
+          student_id?: string
+          talk?: boolean | null
+          total_assignments?: number | null
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_progress_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: true
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_cargo:
+        | "anciao"
+        | "servo_ministerial"
+        | "pioneiro_regular"
+        | "publicador_batizado"
+        | "publicador_nao_batizado"
+        | "estudante_novo"
+      app_genero: "masculino" | "feminino"
+      app_role: "admin" | "instrutor" | "estudante" | "family_member"
+      progress_level: "beginning" | "developing" | "qualified" | "advanced"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +478,18 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_cargo: [
+        "anciao",
+        "servo_ministerial",
+        "pioneiro_regular",
+        "publicador_batizado",
+        "publicador_nao_batizado",
+        "estudante_novo",
+      ],
+      app_genero: ["masculino", "feminino"],
+      app_role: ["admin", "instrutor", "estudante", "family_member"],
+      progress_level: ["beginning", "developing", "qualified", "advanced"],
+    },
   },
 } as const
