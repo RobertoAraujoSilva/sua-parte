@@ -14,6 +14,47 @@ export type Database = {
   }
   public: {
     Tables: {
+      administrative_assignments: {
+        Row: {
+          assigned_room: string | null
+          assignment_date: string
+          created_at: string | null
+          id: string
+          id_estudante: string | null
+          role: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          assigned_room?: string | null
+          assignment_date: string
+          created_at?: string | null
+          id?: string
+          id_estudante?: string | null
+          role: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          assigned_room?: string | null
+          assignment_date?: string
+          created_at?: string | null
+          id?: string
+          id_estudante?: string | null
+          role?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "administrative_assignments_id_estudante_fkey"
+            columns: ["id_estudante"]
+            isOneToOne: false
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       congregacoes: {
         Row: {
           cidade: string | null
@@ -50,39 +91,48 @@ export type Database = {
       designacoes: {
         Row: {
           cena: string | null
+          confirmado: boolean | null
           created_at: string | null
           data_designacao: string | null
           id: string
           id_ajudante: string | null
           id_estudante: string
           id_programa: string | null
+          numero_parte: number | null
           tempo_minutos: number | null
+          tipo_parte: string | null
           titulo_parte: string
           updated_at: string | null
           user_id: string
         }
         Insert: {
           cena?: string | null
+          confirmado?: boolean | null
           created_at?: string | null
           data_designacao?: string | null
           id?: string
           id_ajudante?: string | null
           id_estudante: string
           id_programa?: string | null
+          numero_parte?: number | null
           tempo_minutos?: number | null
+          tipo_parte?: string | null
           titulo_parte: string
           updated_at?: string | null
           user_id: string
         }
         Update: {
           cena?: string | null
+          confirmado?: boolean | null
           created_at?: string | null
           data_designacao?: string | null
           id?: string
           id_ajudante?: string | null
           id_estudante?: string
           id_programa?: string | null
+          numero_parte?: number | null
           tempo_minutos?: number | null
+          tipo_parte?: string | null
           titulo_parte?: string
           updated_at?: string | null
           user_id?: string
@@ -170,6 +220,151 @@ export type Database = {
           },
         ]
       }
+      family_members: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          gender: string | null
+          id: string
+          invitation_status: string | null
+          name: string
+          phone: string | null
+          relation: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          gender?: string | null
+          id?: string
+          invitation_status?: string | null
+          name: string
+          phone?: string | null
+          relation?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          gender?: string | null
+          id?: string
+          invitation_status?: string | null
+          name?: string
+          phone?: string | null
+          relation?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      meeting_parts: {
+        Row: {
+          assigned_student_id: string | null
+          created_at: string | null
+          duration_minutes: number | null
+          helper_id: string | null
+          id: string
+          meeting_id: string | null
+          part_number: number | null
+          part_type: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_student_id?: string | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          helper_id?: string | null
+          id?: string
+          meeting_id?: string | null
+          part_number?: number | null
+          part_type?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_student_id?: string | null
+          created_at?: string | null
+          duration_minutes?: number | null
+          helper_id?: string | null
+          id?: string
+          meeting_id?: string | null
+          part_number?: number | null
+          part_type?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_parts_assigned_student_id_fkey"
+            columns: ["assigned_student_id"]
+            isOneToOne: false
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_parts_helper_id_fkey"
+            columns: ["helper_id"]
+            isOneToOne: false
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_parts_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      meetings: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          event_details: Json | null
+          id: string
+          meeting_date: string
+          meeting_flow: Json | null
+          meeting_type: string
+          start_time: string | null
+          status: string | null
+          title: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          event_details?: Json | null
+          id?: string
+          meeting_date: string
+          meeting_flow?: Json | null
+          meeting_type: string
+          start_time?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          event_details?: Json | null
+          id?: string
+          meeting_date?: string
+          meeting_flow?: Json | null
+          meeting_type?: string
+          start_time?: string | null
+          status?: string | null
+          title?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           cargo: string | null
@@ -202,10 +397,13 @@ export type Database = {
       }
       programas: {
         Row: {
+          assignment_status: string | null
           conteudo: Json | null
           created_at: string | null
           data: string
+          data_inicio_semana: string | null
           id: string
+          mes_apostila: string | null
           semana: string | null
           status: string | null
           titulo: string
@@ -213,10 +411,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          assignment_status?: string | null
           conteudo?: Json | null
           created_at?: string | null
           data: string
+          data_inicio_semana?: string | null
           id?: string
+          mes_apostila?: string | null
           semana?: string | null
           status?: string | null
           titulo: string
@@ -224,13 +425,85 @@ export type Database = {
           user_id: string
         }
         Update: {
+          assignment_status?: string | null
           conteudo?: Json | null
           created_at?: string | null
           data?: string
+          data_inicio_semana?: string | null
           id?: string
+          mes_apostila?: string | null
           semana?: string | null
           status?: string | null
           titulo?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      rooms: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          room_name: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          room_name: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          room_name?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      special_events: {
+        Row: {
+          cancel_midweek_meetings: boolean | null
+          cancel_weekend_meetings: boolean | null
+          created_at: string | null
+          end_date: string | null
+          event_name: string
+          event_type: string | null
+          id: string
+          start_date: string
+          study_materials: Json | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          cancel_midweek_meetings?: boolean | null
+          cancel_weekend_meetings?: boolean | null
+          created_at?: string | null
+          end_date?: string | null
+          event_name: string
+          event_type?: string | null
+          id?: string
+          start_date: string
+          study_materials?: Json | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          cancel_midweek_meetings?: boolean | null
+          cancel_weekend_meetings?: boolean | null
+          created_at?: string | null
+          end_date?: string | null
+          event_name?: string
+          event_type?: string | null
+          id?: string
+          start_date?: string
+          study_materials?: Json | null
           updated_at?: string | null
           user_id?: string
         }
