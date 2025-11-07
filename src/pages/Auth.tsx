@@ -112,7 +112,13 @@ const AuthPage: React.FC = () => {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!nomeCompleto.trim()) {
+    // Trim and sanitize all inputs
+    const trimmedNomeCompleto = nomeCompleto.trim();
+    const trimmedEmail = signUpEmail.trim();
+    const trimmedCongregacao = congregacao.trim();
+    const trimmedCargo = cargo.trim();
+
+    if (!trimmedNomeCompleto) {
       toast({
         title: t('forms.error'),
         description: 'Nome completo é obrigatório',
@@ -121,7 +127,7 @@ const AuthPage: React.FC = () => {
       return;
     }
 
-    if (!signUpEmail.trim()) {
+    if (!trimmedEmail) {
       toast({
         title: t('forms.error'),
         description: t('auth.validation.emailRequired'),
@@ -130,7 +136,7 @@ const AuthPage: React.FC = () => {
       return;
     }
 
-    if (!validateEmail(signUpEmail)) {
+    if (!validateEmail(trimmedEmail)) {
       toast({
         title: t('forms.error'),
         description: t('auth.validation.emailInvalid'),
@@ -160,37 +166,46 @@ const AuthPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email: signUpEmail,
-        password: signUpPassword,
-        options: {
-          data: {
-            nome_completo: nomeCompleto,
-            congregacao: congregacao,
-            cargo: cargo,
-            role: role,
-            date_of_birth: dateOfBirth,
-          }
+      // Use AuthContext's signUp instead of direct Supabase call
+      const { error } = await signUp(
+        trimmedEmail,
+        signUpPassword,
+        {
+          nome_completo: trimmedNomeCompleto,
+          congregacao: trimmedCongregacao,
+          cargo: trimmedCargo,
+          role: role,
+          date_of_birth: dateOfBirth,
         }
-      });
+      );
 
       if (error) {
-        toast({
-          title: t('forms.error'),
-          description: error.message,
-          variant: "destructive"
-        });
+        // Handle specific error cases
+        if (error.message.includes('already registered')) {
+          toast({
+            title: t('forms.error'),
+            description: 'Este email já está cadastrado. Tente fazer login.',
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: t('forms.error'),
+            description: error.message,
+            variant: "destructive"
+          });
+        }
       } else {
         toast({
           title: t('auth.success'),
-          description: t('auth.signupSuccess'),
+          description: 'Conta criada com sucesso! Você pode fazer login agora.',
         });
-        setActiveTab("login");
+        // Auto-redirect to dashboard if user is logged in
+        navigate('/dashboard');
       }
     } catch (error) {
       toast({
         title: t('forms.error'),
-        description: 'Erro ao criar conta',
+        description: 'Erro ao criar conta. Tente novamente.',
         variant: "destructive"
       });
     } finally {
