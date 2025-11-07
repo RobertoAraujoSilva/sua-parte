@@ -146,10 +146,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       console.log('🔄 Tentando carregar perfil do Supabase...');
       
+      // Fetch profile data
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
+        .maybeSingle();
+      
+      // Fetch user role from user_roles table
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
         .maybeSingle();
         
       // Verificar se houve erro na requisição
@@ -168,13 +176,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (userData.user) {
           const metadata = userData.user.user_metadata;
           
+          // Get role from user_roles table
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', userId)
+            .maybeSingle();
+          
           // Criar perfil a partir dos metadados
           const profileFromMetadata = {
             id: userId,
             nome_completo: metadata.nome_completo || userData.user.email?.split('@')[0] || 'Usuário',
             congregacao: metadata.congregacao || 'Não informado',
             cargo: metadata.cargo || 'instrutor',
-            role: metadata.role || 'instrutor',
+            role: roleData?.role || metadata.role || 'instrutor',
             email: userData.user.email || '',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
@@ -206,12 +221,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (userData.user) {
           const metadata = userData.user.user_metadata;
           
+          // Get role from user_roles table
+          const { data: roleData } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', userId)
+            .maybeSingle();
+          
           const profileFromMetadata = {
             id: userId,
             nome_completo: metadata.nome_completo || userData.user.email?.split('@')[0] || 'Usuário',
             congregacao: metadata.congregacao || 'Não informado',
             cargo: metadata.cargo || 'instrutor',
-            role: metadata.role || 'instrutor',
+            role: roleData?.role || metadata.role || 'instrutor',
             email: userData.user.email || '',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
@@ -242,11 +264,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (profileData) {
         console.log('✅ Profile loaded successfully:', profileData);
         
-        // Garantir que o perfil tenha o campo role
+        // Get user email
+        const { data: userData } = await supabase.auth.getUser();
+        
+        // Combine profile with role from user_roles table
         const profileWithRole = {
           ...profileData,
-          role: profileData.role || 'instrutor',
-          email: user?.email || '',
+          role: roleData?.role || 'instrutor', // Default to instrutor if no role found
+          email: userData.user?.email || '',
         };
         
         setProfile(profileWithRole);

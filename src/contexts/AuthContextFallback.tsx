@@ -54,6 +54,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('id', userId)
         .single();
 
+      // Fetch user role from user_roles table
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .maybeSingle();
+
       if (profileError) {
         console.log('Profile not found in profiles table, creating from user metadata');
         
@@ -80,7 +87,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             return {
               ...insertData,
               email: userData.user.email || '',
-              role: metadata.role || 'instrutor', // Default fallback
+              role: roleData?.role || metadata.role || 'instrutor', // Get from user_roles or metadata
             } as UserProfile;
           }
         }
@@ -92,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return {
         ...profileData,
         email: userData.user?.email || '',
-        role: profileData.role || 'instrutor', // Fallback if role column doesn't exist
+        role: roleData?.role || 'instrutor', // Get role from user_roles table
       } as UserProfile;
 
     } catch (error) {
