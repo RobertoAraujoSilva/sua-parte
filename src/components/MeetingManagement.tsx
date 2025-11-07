@@ -14,6 +14,9 @@ import {
 } from '@/types/meetings';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { MeetingCalendar } from './MeetingCalendar';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { MeetingScheduler } from './MeetingScheduler';
 
 const MeetingManagement = () => {
   const { 
@@ -23,10 +26,12 @@ const MeetingManagement = () => {
     rooms,
     loading,
     checkMeetingCancellation,
-    checkSpecialMeetingWeek 
+    checkSpecialMeetingWeek,
+    fetchMeetings
   } = useMeetings();
 
   const [activeTab, setActiveTab] = useState('meetings');
+  const [showScheduler, setShowScheduler] = useState(false);
 
   const getStatusColor = (status: MeetingStatus) => {
     switch (status) {
@@ -98,7 +103,10 @@ const MeetingManagement = () => {
             Gerencie reuniões, eventos especiais e designações administrativas
           </p>
         </div>
-        <Button className="bg-jw-blue hover:bg-jw-blue-dark">
+        <Button
+          className="bg-jw-blue hover:bg-jw-blue-dark"
+          onClick={() => setShowScheduler(true)}
+        >
           <Calendar className="w-4 h-4 mr-2" />
           Nova Reunião
         </Button>
@@ -136,12 +144,18 @@ const MeetingManagement = () => {
 
       {/* Main Content */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="calendar">Calendário</TabsTrigger>
           <TabsTrigger value="meetings">Reuniões</TabsTrigger>
           <TabsTrigger value="assignments">Designações</TabsTrigger>
           <TabsTrigger value="events">Eventos</TabsTrigger>
           <TabsTrigger value="rooms">Salas</TabsTrigger>
         </TabsList>
+
+        {/* Calendar Tab */}
+        <TabsContent value="calendar" className="space-y-6">
+          <MeetingCalendar />
+        </TabsContent>
 
         {/* Meetings Tab */}
         <TabsContent value="meetings" className="space-y-6">
@@ -396,6 +410,22 @@ const MeetingManagement = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Meeting Scheduler Dialog */}
+      <Dialog open={showScheduler} onOpenChange={setShowScheduler}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Agendar Reunião</DialogTitle>
+          </DialogHeader>
+          <MeetingScheduler
+            onClose={() => setShowScheduler(false)}
+            onSave={() => {
+              fetchMeetings();
+              setShowScheduler(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
