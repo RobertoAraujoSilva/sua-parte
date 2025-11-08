@@ -339,14 +339,11 @@ const MeetingManagement = () => {
                       <div className="flex items-start justify-between">
                         <div>
                           <h3 className="font-medium">{event.event_name}</h3>
-                          <p className="text-sm text-gray-600">{event.theme}</p>
+                          <p className="text-sm text-gray-600 capitalize">{event.event_type}</p>
                           <p className="text-xs text-gray-500 mt-1">
                             {format(new Date(event.start_date), 'dd/MM', { locale: ptBR })} - {' '}
                             {format(new Date(event.end_date), 'dd/MM/yyyy', { locale: ptBR })}
                           </p>
-                          {event.location && (
-                            <p className="text-xs text-gray-500">{event.location}</p>
-                          )}
                         </div>
                         <Badge variant="outline">
                           {event.event_type}
@@ -380,26 +377,13 @@ const MeetingManagement = () => {
                     <Card key={room.id} className="border">
                       <CardHeader className="pb-3">
                         <CardTitle className="text-lg">{room.room_name}</CardTitle>
-                        <CardDescription>{room.room_type}</CardDescription>
                       </CardHeader>
                       <CardContent>
-                        <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-gray-600">Capacidade:</span>
-                            <span>{room.capacity} pessoas</span>
-                          </div>
-                          {room.equipment_available && room.equipment_available.length > 0 && (
-                            <div>
-                              <span className="text-gray-600">Equipamentos:</span>
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {room.equipment_available.map((equipment, index) => (
-                                  <Badge key={index} variant="secondary" className="text-xs">
-                                    {equipment}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                          )}
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Status:</span>
+                          <Badge variant={room.is_active ? 'secondary' : 'outline'}>
+                            {room.is_active ? 'Ativa' : 'Inativa'}
+                          </Badge>
                         </div>
                       </CardContent>
                     </Card>

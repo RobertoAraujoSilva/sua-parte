@@ -270,6 +270,7 @@ export const useFamilyMembers = (studentId?: string) => {
         const { data: invitation, error: invitationError } = await supabase
           .from('invitations_log')
           .insert({
+            user_id: user.id,
             family_member_id: familyMemberId,
             sent_by_student_id: targetStudentId,
             invite_method: method,

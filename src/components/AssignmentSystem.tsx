@@ -48,15 +48,20 @@ const AssignmentSystem: React.FC<AssignmentSystemProps> = ({ programId, onAssign
     
     setLoading(true);
     try {
+      const selected = parts.find(p => p.id === selectedPart);
+      const titulo = selected?.name || selectedPart;
+      const tempo = selected?.time ? parseInt(selected.time) : undefined;
+
       const { error } = await supabase
         .from('designacoes')
         .insert({
           id_estudante: selectedStudent,
-          programa_id: programId,
+          id_programa: programId,
           tipo_parte: selectedPart,
+          titulo_parte: titulo,
+          tempo_minutos: tempo,
           user_id: user?.id,
-          confirmado: false,
-          status: 'pendente'
+          confirmado: false
         });
 
       if (!error) {

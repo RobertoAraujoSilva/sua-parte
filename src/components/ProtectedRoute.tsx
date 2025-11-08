@@ -5,7 +5,7 @@ import { useOnboarding } from '@/contexts/OnboardingContext';
 import { Database } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
 
-type UserRole = Database['public']['Enums']['user_role'];
+type UserRole = Database['public']['Enums']['app_role'];
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
