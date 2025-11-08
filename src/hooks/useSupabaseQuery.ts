@@ -26,20 +26,20 @@ export function useSupabaseQuery<T = any>(
     queryKey: [table, filters, orderBy, limit],
     queryFn: async () => {
       // Start with any to avoid type issues with Supabase's complex types
-      let query: any = supabase.from(table).select(select);
+      let query: any = (supabase as any).from(table).select(select);
 
       // Apply filters
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
-            query = query.eq(key, value);
+            query = query.eq(key as any, value);
           }
         });
       }
 
       // Apply ordering
       if (orderBy) {
-        query = query.order(orderBy.column, {
+        query = query.order(orderBy.column as any, {
           ascending: orderBy.ascending ?? true,
         });
       }
