@@ -227,9 +227,11 @@ export type Database = {
           gender: string | null
           id: string
           invitation_status: string | null
+          invitation_token: string | null
           name: string
           phone: string | null
           relation: string | null
+          student_id: string | null
           updated_at: string | null
           user_id: string
         }
@@ -239,9 +241,11 @@ export type Database = {
           gender?: string | null
           id?: string
           invitation_status?: string | null
+          invitation_token?: string | null
           name: string
           phone?: string | null
           relation?: string | null
+          student_id?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -251,13 +255,59 @@ export type Database = {
           gender?: string | null
           id?: string
           invitation_status?: string | null
+          invitation_token?: string | null
           name?: string
           phone?: string | null
           relation?: string | null
+          student_id?: string | null
           updated_at?: string | null
           user_id?: string
         }
         Relationships: []
+      }
+      invitations_log: {
+        Row: {
+          created_at: string | null
+          expires_at: string
+          family_member_id: string
+          id: string
+          invitation_token: string
+          invite_method: string | null
+          invite_status: string | null
+          sent_by_student_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string
+          family_member_id: string
+          id?: string
+          invitation_token?: string
+          invite_method?: string | null
+          invite_status?: string | null
+          sent_by_student_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string
+          family_member_id?: string
+          id?: string
+          invitation_token?: string
+          invite_method?: string | null
+          invite_status?: string | null
+          sent_by_student_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_log_family_member_id_fkey"
+            columns: ["family_member_id"]
+            isOneToOne: false
+            referencedRelation: "family_members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       meeting_parts: {
         Row: {
@@ -606,6 +656,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_student_duplicate: {
+        Args: {
+          p_email: string
+          p_nome: string
+          p_telefone: string
+          p_user_id: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
