@@ -21,11 +21,41 @@ export type MeetingPartRow = Database["public"]["Tables"]["meeting_parts"]["Row"
 export type MeetingPartInsert = Database["public"]["Tables"]["meeting_parts"]["Insert"];
 export type MeetingPartUpdate = Database["public"]["Tables"]["meeting_parts"]["Update"];
 
-// Enums from database
-export type MeetingType = Database["public"]["Enums"]["meeting_type"];
-export type AdministrativeRole = Database["public"]["Enums"]["administrative_role"];
-export type MeetingStatus = Database["public"]["Enums"]["meeting_status"];
-export type RoomType = Database["public"]["Enums"]["room_type"];
+// Enums from database - comprehensive type definitions
+export type MeetingType = 
+  | 'midweek' 
+  | 'weekend' 
+  | 'special'
+  | 'regular_midweek'
+  | 'regular_weekend'
+  | 'circuit_overseer_visit'
+  | 'assembly_week'
+  | 'convention_week'
+  | 'memorial'
+  | 'special_event'
+  | 'cancelled';
+
+export type AdministrativeRole = 
+  | 'chairman' 
+  | 'reader' 
+  | 'attendant' 
+  | 'sound' 
+  | 'stage'
+  | 'meeting_overseer'
+  | 'room_overseer';
+
+export type MeetingStatus = 
+  | 'scheduled' 
+  | 'completed' 
+  | 'cancelled'
+  | 'in_progress'
+  | 'postponed';
+
+export type RoomType = 
+  | 'main_hall' 
+  | 'auxiliary_room_1' 
+  | 'auxiliary_room_2'
+  | 'auxiliary_room_3';
 
 // Extended types for UI
 export interface MeetingWithParts extends MeetingRow {
@@ -286,8 +316,8 @@ export const shouldCancelMeeting = (
     
     if (!isInEventPeriod) return false;
     
-    return (meetingType === 'midweek' && event.cancels_midweek_meetings) ||
-           (meetingType === 'weekend' && event.cancels_weekend_meetings);
+    return (meetingType === 'midweek' && event.cancel_midweek_meetings) ||
+           (meetingType === 'weekend' && event.cancel_weekend_meetings);
   });
 };
 

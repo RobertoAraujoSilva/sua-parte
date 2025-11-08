@@ -5,7 +5,8 @@ import { Database } from '@/integrations/supabase/types';
 import { authLogger, createAuthMetrics } from '@/utils/authLogger';
 import { withRefreshTokenErrorHandling } from '@/utils/refreshTokenHandler';
 
-type UserRole = Database['public']['Enums']['user_role'];
+// Use the actual app_role enum from the database
+type UserRole = Database['public']['Enums']['app_role'];
 
 interface UserProfile {
   id: string;
