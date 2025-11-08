@@ -175,7 +175,6 @@ const AuthPage: React.FC = () => {
           congregacao: trimmedCongregacao,
           cargo: trimmedCargo,
           role: role,
-          date_of_birth: dateOfBirth,
         }
       );
 

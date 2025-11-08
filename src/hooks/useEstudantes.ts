@@ -72,8 +72,9 @@ export function useEstudantes(activeTab?: string) {
 
     try {
       // Garantir que campos obrigatórios estejam presentes
-      const dataToInsert = {
+      const dataToInsert: any = {
         nome: estudanteData.nome || '',
+        idade: estudanteData.idade ?? 0,
         genero: estudanteData.genero || 'masculino',
         cargo: estudanteData.cargo || 'estudante_novo',
         ...estudanteData,
@@ -83,7 +84,7 @@ export function useEstudantes(activeTab?: string) {
 
       const { data, error } = await supabase
         .from('estudantes')
-        .insert(dataToInsert)
+        .insert([dataToInsert])
         .select()
         .single();
 

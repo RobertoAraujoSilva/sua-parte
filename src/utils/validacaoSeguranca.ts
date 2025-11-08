@@ -56,7 +56,22 @@ export class ValidadorSeguranca {
         };
       }
 
-      if (profile.role !== 'instrutor') {
+      // Check if user has instrutor role
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'instrutor')
+        .maybeSingle();
+
+      if (rolesError) {
+        return {
+          temPermissao: false,
+          motivo: 'Erro ao verificar permissões do usuário'
+        };
+      }
+
+      if (!userRoles) {
         return {
           temPermissao: false,
           motivo: 'Apenas instrutores podem criar designações'

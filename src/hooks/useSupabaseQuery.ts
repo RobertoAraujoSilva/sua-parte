@@ -5,7 +5,6 @@
 
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { PostgrestFilterBuilder } from '@supabase/postgrest-js';
 
 export interface SupabaseQueryOptions<T> {
   table: string;
@@ -26,6 +25,7 @@ export function useSupabaseQuery<T = any>(
   return useQuery<T[], Error>({
     queryKey: [table, filters, orderBy, limit],
     queryFn: async () => {
+      // Start with any to avoid type issues with Supabase's complex types
       let query: any = supabase.from(table).select(select);
 
       // Apply filters

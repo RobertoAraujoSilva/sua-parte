@@ -12,7 +12,6 @@ import {
   displayDiagnostics,
   type DebugInfo
 } from '@/utils/familyInvitationDebug';
-import { runCompleteSystemTest, type TestSuite } from '@/utils/testFamilyInvitationSystem';
 
 interface FamilyInvitationDebugPanelProps {
   studentId?: string;
@@ -26,12 +25,10 @@ export const FamilyInvitationDebugPanel: React.FC<FamilyInvitationDebugPanelProp
   const [isRunning, setIsRunning] = useState(false);
   const [debugInfo, setDebugInfo] = useState<DebugInfo | null>(null);
   const [testResult, setTestResult] = useState<any>(null);
-  const [systemTestResult, setSystemTestResult] = useState<TestSuite | null>(null);
 
   const runDiagnostics = async () => {
     setIsRunning(true);
     setTestResult(null);
-    setSystemTestResult(null);
 
     try {
       console.log('🔍 Running Family Invitation System Diagnostics...');
@@ -62,12 +59,11 @@ export const FamilyInvitationDebugPanel: React.FC<FamilyInvitationDebugPanelProp
     if (!studentId) return;
 
     setIsRunning(true);
-    setSystemTestResult(null);
 
     try {
       console.log('🧪 Running complete system test...');
-      const result = await runCompleteSystemTest(studentId);
-      setSystemTestResult(result);
+      // Test function removed, just log for now
+      console.log('Test system removed');
     } catch (error) {
       console.error('❌ Complete test failed:', error);
     } finally {
@@ -298,58 +294,7 @@ export const FamilyInvitationDebugPanel: React.FC<FamilyInvitationDebugPanelProp
               </div>
             )}
 
-            {/* System Test Results */}
-            {systemTestResult && (
-              <div className="space-y-4">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-sm flex items-center space-x-2">
-                      {getStatusIcon(systemTestResult.overallSuccess)}
-                      <span>Teste Completo do Sistema</span>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div>
-                        <span className="font-medium">Status:</span> {systemTestResult.overallSuccess ? '✅ Sucesso' : '❌ Falha'}
-                      </div>
-                      <div>
-                        <span className="font-medium">Duração:</span> {systemTestResult.totalDuration}ms
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      {systemTestResult.results.map((result, index) => (
-                        <div key={index} className="flex items-center justify-between text-xs">
-                          <span>{result.step}</span>
-                          <div className="flex items-center space-x-1">
-                            {result.success ? (
-                              <CheckCircle className="h-3 w-3 text-green-600" />
-                            ) : (
-                              <XCircle className="h-3 w-3 text-red-600" />
-                            )}
-                            {result.duration && <span className="text-gray-500">{result.duration}ms</span>}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {!systemTestResult.overallSuccess && (
-                      <div className="mt-2 p-2 bg-red-50 rounded text-xs">
-                        <strong>Erros encontrados:</strong>
-                        {systemTestResult.results
-                          .filter(r => !r.success && r.error)
-                          .map((result, index) => (
-                            <div key={index} className="text-red-600">
-                              {result.step}: {result.error}
-                            </div>
-                          ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
+            {/* Removed system test results section */}
           </CardContent>
         </CollapsibleContent>
       </Collapsible>

@@ -143,6 +143,9 @@ export interface MeetingPartFormData {
 
 // Label mappings for UI
 export const MEETING_TYPE_LABELS: Record<MeetingType, string> = {
+  midweek: "Reunião de Meio de Semana",
+  weekend: "Reunião de Fim de Semana",
+  special: "Evento Especial",
   regular_midweek: "Reunião de Meio de Semana",
   regular_weekend: "Reunião de Fim de Semana",
   circuit_overseer_visit: "Visita do Superintendente de Circuito",
@@ -154,11 +157,13 @@ export const MEETING_TYPE_LABELS: Record<MeetingType, string> = {
 };
 
 export const ADMINISTRATIVE_ROLE_LABELS: Record<AdministrativeRole, string> = {
+  chairman: "Presidente",
+  reader: "Leitor",
+  attendant: "Atendente",
+  sound: "Som",
+  stage: "Palco",
   meeting_overseer: "Superintendente da Reunião",
-  meeting_chairman: "Presidente da Reunião",
-  assistant_counselor: "Conselheiro Assistente",
-  room_overseer: "Superintendente de Sala",
-  circuit_overseer: "Superintendente de Circuito"
+  room_overseer: "Superintendente de Sala"
 };
 
 export const MEETING_STATUS_LABELS: Record<MeetingStatus, string> = {
@@ -324,9 +329,9 @@ export const shouldCancelMeeting = (
 export const getQualifiedAdministrativeRoles = (cargo: string): AdministrativeRole[] => {
   const roles: AdministrativeRole[] = [];
   
-  // Only elders can be meeting overseers, chairmen, and assistant counselors
+  // Only elders can be meeting overseers and chairmen
   if (cargo === 'anciao') {
-    roles.push('meeting_overseer', 'meeting_chairman', 'assistant_counselor', 'room_overseer');
+    roles.push('meeting_overseer', 'chairman', 'room_overseer');
   }
   
   // Ministerial servants can be room overseers

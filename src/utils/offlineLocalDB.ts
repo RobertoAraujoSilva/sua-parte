@@ -135,34 +135,34 @@ export async function downloadDataForOffline() {
     const { data: programas, error: errProg } = await supabase
       .from('programas')
       .select(`
-        id,
-        data_inicio_semana,
-        mes_apostila,
-        partes,
-        status,
-        assignment_status,
-        updated_at,
-        designacoes:designacoes (
           id,
-          id_estudante,
-          numero_parte,
-          titulo_parte,
-          tipo_parte,
-          cena,
-          tempo_minutos,
-          id_ajudante,
-          confirmado,
-          updated_at
-        )
-      `)
+          data_inicio_semana,
+          mes_apostila,
+          status,
+          assignment_status,
+          updated_at,
+          conteudo,
+          designacoes:designacoes (
+            id,
+            id_estudante,
+            numero_parte,
+            titulo_parte,
+            tipo_parte,
+            cena,
+            tempo_minutos,
+            id_ajudante,
+            confirmado,
+            updated_at
+          )
+        `)
       .order('data_inicio_semana', { ascending: false });
     if (errProg) throw errProg;
 
-    const programs = (programas || []).map(p => ({
+    const programs = (programas || []).map((p: any) => ({
       id: p.id,
       data_inicio_semana: p.data_inicio_semana,
       mes_apostila: p.mes_apostila,
-      partes: p.partes,
+      conteudo: p.conteudo,
       status: p.status,
       assignment_status: p.assignment_status,
       updated_at: p.updated_at || new Date().toISOString(),

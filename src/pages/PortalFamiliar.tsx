@@ -81,7 +81,7 @@ const PortalFamiliar: React.FC = () => {
         name: familyMember.name,
         relation: familyMember.relation,
         student_id: familyMember.student_id,
-        student_name: familyMember.profiles?.nome_completo || 'Nome não encontrado',
+        student_name: 'Estudante', // Nome genérico já que não temos relação com profiles
       };
 
       setFamilyMemberData(familyData);

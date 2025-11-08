@@ -184,8 +184,8 @@ const MeetingManagement = () => {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <h3 className="font-medium">{meeting.title}</h3>
-                              <Badge className={getMeetingTypeColor(meeting.meeting_type)}>
-                                {MEETING_TYPE_LABELS[meeting.meeting_type]}
+                              <Badge className={getMeetingTypeColor(meeting.meeting_type as MeetingType)}>
+                                {MEETING_TYPE_LABELS[meeting.meeting_type as MeetingType]}
                               </Badge>
                             </div>
                             <div className="flex items-center gap-4 text-sm text-gray-600">
@@ -204,8 +204,8 @@ const MeetingManagement = () => {
                               <p className="text-sm text-gray-600 mt-2">{meeting.description}</p>
                             )}
                           </div>
-                          <Badge className={getStatusColor(meeting.status || 'scheduled')}>
-                            {MEETING_STATUS_LABELS[meeting.status || 'scheduled']}
+                          <Badge className={getStatusColor((meeting.status || 'scheduled') as MeetingStatus)}>
+                            {MEETING_STATUS_LABELS[(meeting.status || 'scheduled') as MeetingStatus]}
                           </Badge>
                         </div>
                       </div>

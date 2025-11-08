@@ -68,8 +68,15 @@ const FamiliaPage: React.FC = () => {
   }
 
   const handleAddMember = async (data: FamilyMemberFormData) => {
+    if (!user?.id || !studentId) return;
+    
     try {
-      await addFamilyMember(data);
+      const memberWithUserId = {
+        ...data,
+        student_id: studentId,
+        user_id: user.id
+      };
+      await addFamilyMember(memberWithUserId);
       setActiveTab('list');
     } catch (error) {
       console.error('Error adding family member:', error);

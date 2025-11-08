@@ -72,7 +72,10 @@ export const useFamilyMembers = (studentId?: string) => {
       // Process the data to include latest invitation and can_invite flag
       const processedMembers: FamilyMemberWithInvitations[] = (members || []).map(member => {
         const invitations = Array.isArray(member.invitations_log) ? member.invitations_log : [];
-        const latestInvitation = invitations.length > 0 ? invitations[0] : undefined;
+        const latestInvitation = invitations.length > 0 ? {
+          ...invitations[0],
+          user_id: member.user_id // Add user_id from parent member
+        } : undefined;
         
         return {
           ...member,
