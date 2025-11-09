@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface JWorgMeeting {
   week: string;
@@ -179,23 +180,53 @@ export const useJWorgIntegration = (): JWorgIntegration => {
     setError(null);
     
     try {
-      // Simular download da apostila MWB
-      const url = JW_ORG_URLS[language];
-      console.log(`📥 Baixando apostila MWB ${language.toUpperCase()} - ${month} ${year}`);
-      console.log(`🔗 URL: ${url}`);
+      console.log(`📥 Downloading MWB workbook ${language.toUpperCase()} - ${month} ${year}`);
       
-      // Em produção, aqui seria feita a requisição real para JW.org
-      // Por enquanto, simulamos o download
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      console.log(`✅ Apostila MWB ${language.toUpperCase()} baixada com sucesso!`);
-      
-      // Atualizar lista de apostilas disponíveis
-      setAvailableWorkbooks(prev => [...prev, `mwb${year.slice(-2)}.${month}-${language.toUpperCase()}`]);
+      const { data, error: fetchError } = await supabase.functions.invoke('fetch-jworg-content', {
+        body: { language },
+      });
+
+      if (fetchError) throw fetchError;
+
+      if (data?.success && data?.weeks?.length > 0) {
+        console.log(`✅ MWB workbook downloaded successfully! Found ${data.weeks.length} weeks`);
+        setAvailableWorkbooks(prev => [...prev, `mwb${year.slice(-2)}.${month}-${language.toUpperCase()}`]);
+        
+        // Update current week with first week from fetched data
+        if (data.weeks[0]) {
+          const firstWeek = data.weeks[0];
+          setCurrentWeek({
+            week: firstWeek.week,
+            date: new Date().toISOString().split('T')[0],
+            book: firstWeek.bibleReading.split(' ')[0] || 'BIBLE',
+            chapter: firstWeek.bibleReading.split(' ')[1] || '1',
+            parts: firstWeek.parts.map((part: any) => ({
+              ...part,
+              notes: part.references.join('; '),
+            })),
+          });
+        }
+
+        // Update next weeks
+        if (data.weeks.length > 1) {
+          setNextWeeks(data.weeks.slice(1, 4).map((week: any) => ({
+            week: week.week,
+            date: new Date().toISOString().split('T')[0],
+            book: week.bibleReading.split(' ')[0] || 'BIBLE',
+            chapter: week.bibleReading.split(' ')[1] || '1',
+            parts: week.parts.map((part: any) => ({
+              ...part,
+              notes: part.references.join('; '),
+            })),
+          })));
+        }
+      } else {
+        throw new Error('No weeks found in the downloaded content');
+      }
       
     } catch (err) {
-      setError(`Erro ao baixar apostila: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
-      console.error('❌ Erro ao baixar apostila:', err);
+      setError(`Error downloading workbook: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      console.error('❌ Error downloading workbook:', err);
     } finally {
       setIsLoading(false);
     }
@@ -206,13 +237,39 @@ export const useJWorgIntegration = (): JWorgIntegration => {
     setError(null);
     
     try {
-      // Simular busca da semana atual
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setCurrentWeek(mockCurrentWeek);
-      console.log('✅ Semana atual carregada:', mockCurrentWeek.week);
+      console.log('📡 Fetching current week from JW.org...');
+      
+      const { data, error: fetchError } = await supabase.functions.invoke('fetch-jworg-content', {
+        body: { language: currentLanguage },
+      });
+
+      if (fetchError) throw fetchError;
+
+      if (data?.success && data?.weeks?.length > 0) {
+        const firstWeek = data.weeks[0];
+        const currentWeekData = {
+          week: firstWeek.week,
+          date: new Date().toISOString().split('T')[0],
+          book: firstWeek.bibleReading.split(' ')[0] || 'BIBLE',
+          chapter: firstWeek.bibleReading.split(' ')[1] || '1',
+          parts: firstWeek.parts.map((part: any) => ({
+            ...part,
+            notes: part.references.join('; '),
+          })),
+        };
+        
+        setCurrentWeek(currentWeekData);
+        console.log('✅ Current week loaded:', currentWeekData.week);
+      } else {
+        // Fallback to mock data if fetch fails
+        setCurrentWeek(mockCurrentWeek);
+        console.log('⚠️ Using mock data as fallback');
+      }
     } catch (err) {
-      setError(`Erro ao carregar semana atual: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
-      console.error('❌ Erro ao carregar semana atual:', err);
+      setError(`Error loading current week: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      console.error('❌ Error loading current week:', err);
+      // Fallback to mock data
+      setCurrentWeek(mockCurrentWeek);
     } finally {
       setIsLoading(false);
     }
@@ -223,13 +280,38 @@ export const useJWorgIntegration = (): JWorgIntegration => {
     setError(null);
     
     try {
-      // Simular busca das próximas semanas
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setNextWeeks(mockNextWeeks);
-      console.log('✅ Próximas semanas carregadas:', mockNextWeeks.length);
+      console.log('📡 Fetching next weeks from JW.org...');
+      
+      const { data, error: fetchError } = await supabase.functions.invoke('fetch-jworg-content', {
+        body: { language: currentLanguage },
+      });
+
+      if (fetchError) throw fetchError;
+
+      if (data?.success && data?.weeks?.length > 1) {
+        const nextWeeksData = data.weeks.slice(1, 4).map((week: any) => ({
+          week: week.week,
+          date: new Date().toISOString().split('T')[0],
+          book: week.bibleReading.split(' ')[0] || 'BIBLE',
+          chapter: week.bibleReading.split(' ')[1] || '1',
+          parts: week.parts.map((part: any) => ({
+            ...part,
+            notes: part.references.join('; '),
+          })),
+        }));
+        
+        setNextWeeks(nextWeeksData);
+        console.log('✅ Next weeks loaded:', nextWeeksData.length);
+      } else {
+        // Fallback to mock data
+        setNextWeeks(mockNextWeeks);
+        console.log('⚠️ Using mock data as fallback');
+      }
     } catch (err) {
-      setError(`Erro ao carregar próximas semanas: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
-      console.error('❌ Erro ao carregar próximas semanas:', err);
+      setError(`Error loading next weeks: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      console.error('❌ Error loading next weeks:', err);
+      // Fallback to mock data
+      setNextWeeks(mockNextWeeks);
     } finally {
       setIsLoading(false);
     }
