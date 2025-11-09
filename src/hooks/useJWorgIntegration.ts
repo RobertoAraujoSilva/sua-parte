@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { saveJWorgPrograms } from '@/utils/jworgProgramSaver';
+import { useToast } from '@/hooks/use-toast';
 
 interface JWorgMeeting {
   week: string;
@@ -30,6 +32,8 @@ interface JWorgIntegration {
   fetchCurrentWeek: () => Promise<void>;
   fetchNextWeeks: () => Promise<void>;
   setLanguage: (lang: 'pt' | 'en') => void;
+  saveToDatabase: () => Promise<void>;
+  isSaving: boolean;
 }
 
 const JW_ORG_URLS = {
@@ -43,12 +47,15 @@ const WOL_MEETING_URLS = {
 };
 
 export const useJWorgIntegration = (): JWorgIntegration => {
+  const { toast } = useToast();
   const [currentLanguage, setCurrentLanguage] = useState<'pt' | 'en'>('pt');
   const [availableWorkbooks, setAvailableWorkbooks] = useState<string[]>([]);
   const [currentWeek, setCurrentWeek] = useState<JWorgMeeting | null>(null);
   const [nextWeeks, setNextWeeks] = useState<JWorgMeeting[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rawWeeksData, setRawWeeksData] = useState<any[]>([]);
 
   // Dados mockados baseados nas URLs fornecidas
   const mockCurrentWeek: JWorgMeeting = {
@@ -246,6 +253,9 @@ export const useJWorgIntegration = (): JWorgIntegration => {
       if (fetchError) throw fetchError;
 
       if (data?.success && data?.weeks?.length > 0) {
+        // Store raw weeks data for database saving
+        setRawWeeksData(data.weeks);
+        
         const firstWeek = data.weeks[0];
         const currentWeekData = {
           week: firstWeek.week,
@@ -263,6 +273,7 @@ export const useJWorgIntegration = (): JWorgIntegration => {
       } else {
         // Fallback to mock data if fetch fails
         setCurrentWeek(mockCurrentWeek);
+        setRawWeeksData([]);
         console.log('⚠️ Using mock data as fallback');
       }
     } catch (err) {
@@ -289,6 +300,9 @@ export const useJWorgIntegration = (): JWorgIntegration => {
       if (fetchError) throw fetchError;
 
       if (data?.success && data?.weeks?.length > 1) {
+        // Store raw weeks data for database saving
+        setRawWeeksData(data.weeks);
+        
         const nextWeeksData = data.weeks.slice(1, 4).map((week: any) => ({
           week: week.week,
           date: new Date().toISOString().split('T')[0],
@@ -305,6 +319,7 @@ export const useJWorgIntegration = (): JWorgIntegration => {
       } else {
         // Fallback to mock data
         setNextWeeks(mockNextWeeks);
+        setRawWeeksData([]);
         console.log('⚠️ Using mock data as fallback');
       }
     } catch (err) {
@@ -322,6 +337,60 @@ export const useJWorgIntegration = (): JWorgIntegration => {
     console.log(`🌐 Idioma alterado para: ${lang === 'pt' ? 'Português' : 'English'}`);
   };
 
+  const saveToDatabase = async (): Promise<void> => {
+    if (rawWeeksData.length === 0) {
+      toast({
+        title: 'No data to save',
+        description: 'Please fetch programs from JW.org first',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      console.log(`💾 Saving ${rawWeeksData.length} programs to database...`);
+      
+      const result = await saveJWorgPrograms(rawWeeksData, user.id);
+
+      if (result.success && result.saved > 0) {
+        toast({
+          title: 'Programs saved successfully!',
+          description: `${result.saved} program(s) saved to database. ${result.skipped > 0 ? `${result.skipped} already existed.` : ''}`,
+        });
+      } else if (result.skipped > 0 && result.saved === 0) {
+        toast({
+          title: 'All programs already exist',
+          description: `${result.skipped} program(s) are already in the database`,
+        });
+      } else {
+        toast({
+          title: 'Error saving programs',
+          description: result.errors.join('; '),
+          variant: 'destructive',
+        });
+      }
+
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      console.error('❌ Error saving to database:', err);
+      toast({
+        title: 'Failed to save programs',
+        description: errorMsg,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   useEffect(() => {
     // Carregar dados iniciais
     fetchCurrentWeek();
@@ -337,10 +406,12 @@ export const useJWorgIntegration = (): JWorgIntegration => {
     currentWeek,
     nextWeeks,
     isLoading,
+    isSaving,
     error,
     downloadWorkbook,
     fetchCurrentWeek,
     fetchNextWeeks,
-    setLanguage
+    setLanguage,
+    saveToDatabase,
   };
 };

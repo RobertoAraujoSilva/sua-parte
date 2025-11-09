@@ -2,7 +2,7 @@ import React from 'react';
 import { useJWorgIntegration } from '../hooks/useJWorgIntegration';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { RefreshCw, AlertCircle, Download } from 'lucide-react';
+import { RefreshCw, AlertCircle, Download, Database, Loader2 } from 'lucide-react';
 
 export const JWorgTest: React.FC = () => {
   const jworg = useJWorgIntegration();
@@ -39,7 +39,7 @@ export const JWorgTest: React.FC = () => {
                 disabled={jworg.isLoading}
                 className="w-full"
               >
-                <RefreshCw className="h-4 w-4 mr-2" />
+                {jworg.isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
                 Recarregar Semana Atual
               </Button>
               
@@ -49,7 +49,7 @@ export const JWorgTest: React.FC = () => {
                 variant="outline"
                 className="w-full"
               >
-                <RefreshCw className="h-4 w-4 mr-2" />
+                {jworg.isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
                 Recarregar Próximas Semanas
               </Button>
               
@@ -59,9 +59,23 @@ export const JWorgTest: React.FC = () => {
                 variant="outline"
                 className="w-full"
               >
-                <Download className="h-4 w-4 mr-2" />
+                {jworg.isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
                 Testar Download PT
               </Button>
+
+              <div className="border-t pt-2 mt-4">
+                <Button 
+                  onClick={() => jworg.saveToDatabase()}
+                  disabled={jworg.isLoading || jworg.isSaving || !jworg.currentWeek}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
+                >
+                  {jworg.isSaving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Database className="h-4 w-4 mr-2" />}
+                  Salvar no Banco de Dados
+                </Button>
+                <p className="text-xs text-muted-foreground mt-1 text-center">
+                  Salva os programas buscados para acesso offline
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
