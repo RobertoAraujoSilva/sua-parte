@@ -36,6 +36,7 @@ import InstrutorDashboard from "./pages/InstrutorDashboard";
 import { EstudantePortal } from "./pages/EstudantePortal";
 import { ImportarProgramacao } from "./pages/ImportarProgramacao";
 import Estudantes from "./pages/Estudantes";
+import ProgramasDashboard from "./pages/admin/ProgramasDashboard";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import SequentialFlow from "./components/SequentialFlow";
@@ -269,8 +270,16 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
-                {/* Rotas consolidadas no Dashboard */}
-                {/* Admin routes removed - system simplified */}
+                
+                {/* Admin Routes */}
+                <Route
+                  path="/admin/programas"
+                  element={
+                    <ProtectedRoute allowedRoles={['instrutor']}>
+                      <ProgramasDashboard />
+                    </ProtectedRoute>
+                  }
+                />
 
                 {/* Estudante Only Routes */}
                 <Route
