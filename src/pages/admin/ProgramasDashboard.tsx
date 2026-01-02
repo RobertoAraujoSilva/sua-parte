@@ -3,20 +3,23 @@
  * Complete management interface for viewing, filtering, and bulk operations on programs
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import IntelligentToolbar from '@/components/layout/IntelligentToolbar';
 import { ProgramsStatsCards } from '@/components/admin/ProgramsStatsCards';
 import { ProgramsFilters } from '@/components/admin/ProgramsFilters';
 import { ProgramsDataTable } from '@/components/admin/ProgramsDataTable';
 import { BulkActionsDropdown } from '@/components/admin/BulkActionsDropdown';
+import { ProgramasImportDialog } from '@/components/admin/ProgramasImportDialog';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Download } from 'lucide-react';
+import { RefreshCw, Download, Upload } from 'lucide-react';
 import { useProgramasAdmin } from '@/hooks/useProgramasAdmin';
 import { exportProgramsToExcel, exportProgramsToPDF } from '@/utils/programsExport';
 import { toast } from 'sonner';
 import UnifiedNavigation from '@/components/UnifiedNavigation';
 
 export default function ProgramasDashboard() {
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+
   const {
     programs,
     isLoading,
@@ -111,6 +114,14 @@ export default function ProgramasDashboard() {
                 />
               )}
               <Button
+                variant="default"
+                size="sm"
+                onClick={() => setImportDialogOpen(true)}
+              >
+                <Upload className="mr-2 h-4 w-4" />
+                Importar Excel
+              </Button>
+              <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleExportExcel(programs)}
@@ -129,6 +140,13 @@ export default function ProgramasDashboard() {
               </Button>
             </div>
           }
+        />
+
+        {/* Import Dialog */}
+        <ProgramasImportDialog
+          open={importDialogOpen}
+          onOpenChange={setImportDialogOpen}
+          onImportComplete={() => refetch()}
         />
 
         {/* Data Table */}
