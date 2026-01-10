@@ -308,7 +308,13 @@
       },
       "superintendent": "Superintendente da Escola",
       "assistantCounselor": "Conselheiro Assistente"
-    }
+    },
+    "forcedLogout": "Logout Forçado",
+    "usingEmergencyLogout": "Usando logout de emergência...",
+    "sessionEnded": "Sessão encerrada",
+    "disconnectedSuccessfully": "Você foi desconectado com sucesso.",
+    "emergencyLogout": "Logout de Emergência",
+    "usingForcedLogout": "Usando logout forçado..."
   },
   "forms": {
     "save": "Salvar",

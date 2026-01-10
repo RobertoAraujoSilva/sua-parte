@@ -51,8 +51,8 @@ const Header = () => {
         // Use force logout as fallback
         console.log('🔄 Using force logout as fallback...');
         toast({
-          title: t("Logout Forçado"),
-          description: t("Usando logout de emergência..."),
+          title: t("auth.forcedLogout"),
+          description: t("auth.usingEmergencyLogout"),
         });
         
         forceLogout();
@@ -63,8 +63,8 @@ const Header = () => {
         logNavigation(window.location.pathname, '/', user);
 
         toast({
-          title: t("Sessão encerrada"),
-          description: t("Você foi desconectado com sucesso."),
+          title: t("auth.sessionEnded"),
+          description: t("auth.disconnectedSuccessfully"),
         });
 
         // Small delay to ensure logs are captured
@@ -80,8 +80,8 @@ const Header = () => {
       // Use force logout as fallback
       console.log('🔄 Using force logout as fallback due to exception...');
       toast({
-        title: t("Logout de Emergência"),
-        description: t("Usando logout forçado..."),
+        title: t("auth.emergencyLogout"),
+        description: t("auth.usingForcedLogout"),
       });
       
       forceLogout();
@@ -269,7 +269,7 @@ const Header = () => {
                                   onClick={() => navigate('/auth')}
                                 >
                                   <span className="hidden sm:inline">{t('navigation.login')}</span>
-                                  <span className="sm:hidden">Login</span>
+                                  <span className="sm:hidden">{t('navigation.login')}</span>
                                 </Button>
                                 <Button
                                   variant="hero"
@@ -278,7 +278,7 @@ const Header = () => {
                                   onClick={() => navigate('/auth')}
                                 >
                                   <span className="hidden sm:inline">{t('navigation.getStarted')}</span>
-                                  <span className="sm:hidden">Start</span>
+                                  <span className="sm:hidden">{t('navigation.getStarted')}</span>
                                 </Button>
               </>
             )}
