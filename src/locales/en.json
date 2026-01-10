@@ -278,6 +278,25 @@
     "passwordMinLength": "Minimum 6 characters",
     "creatingAccount": "Creating account...",
     "createAccount": "Create Account",
+    "validation": {
+      "birthDateRequired": "Birth date is required.",
+      "birthDateFuture": "Birth date cannot be in the future.",
+      "ageMinimum": "Minimum age to participate in the Ministry School is 6 years.",
+      "ageMaximum": "Please verify the birth date provided.",
+      "allFieldsRequired": "Please fill in all required fields.",
+      "roleRequired": "Please select your congregation role.",
+      "passwordMismatch": "Passwords do not match.",
+      "passwordMinLength": "Password must be at least 6 characters.",
+      "emailAlreadyExists": "This email is already registered. Try logging in.",
+      "unexpectedError": "An unexpected error occurred. Please try again."
+    },
+    "messages": {
+      "accountCreated": "Registration complete!",
+      "accountCreatedDesc": "Your account was created successfully. You can now log in.",
+      "signupError": "Registration error",
+      "credentialsFilled": "Credentials filled",
+      "credentialsFilledDesc": "{{type}} credentials loaded."
+    },
     "roles": {
       "instrutor": {
         "title": "Instructor/Assigner",
@@ -289,7 +308,13 @@
       },
       "superintendent": "School Superintendent",
       "assistantCounselor": "Assistant Counselor"
-    }
+    },
+    "forcedLogout": "Forced Logout",
+    "usingEmergencyLogout": "Using emergency logout...",
+    "sessionEnded": "Session ended",
+    "disconnectedSuccessfully": "You have been disconnected successfully.",
+    "emergencyLogout": "Emergency Logout",
+    "usingForcedLogout": "Using forced logout..."
   },
   "forms": {
     "save": "Save",
@@ -332,7 +357,16 @@
   },
   "terms": {
     "bibleReading": "Bible Reading",
-    "talk": "Talk"
+    "talk": "Talk",
+    "theocraticMinistrySchool": "Theocratic Ministry School",
+    "congregation": "Congregation",
+    "anciao": "Elder",
+    "servo_ministerial": "Ministerial Servant",
+    "pioneiro_regular": "Regular Pioneer",
+    "publicador_batizado": "Baptized Publisher",
+    "publicador_nao_batizado": "Unbaptized Publisher",
+    "estudante_novo": "New Student",
+    "instructor": "Instructor"
   },
   "initialSetup": {
     "title": "Initial Setup",
@@ -516,6 +550,7 @@
     "searchPlaceholder": "Search questions...",
     "categories": "Categories",
     "question": "question",
+    "questions": "questions",
     "noResults": "No results found",
     "tryOtherTerms": "Try using other search terms",
     "needHelp": "Need more help?",
@@ -710,7 +745,9 @@
   },
   "faqHardcoded": {
     "question": "question",
-    "questions": "questions"
+    "questions": "questions",
+    "comingSoon": "Coming soon...",
+    "moreQuestions": "More questions will be added soon."
   },
   "footer": {
     "appName": "Ministerial System",
@@ -729,6 +766,70 @@
     "technicalContact": "Technical Contact",
     "updates": "Updates",
     "community": "Community",
-    "developedFor": "Developed to serve Jehovah's Witnesses congregations."
+    "developedFor": "Developed to serve Jehovah's Witnesses congregations.",
+    "testimonialQuote": "\"{testimonial}\"",
+    "testimonialAuthor": "— {author}",
+    "checkmark": "✅"
+  },
+  "welcome": {
+    "welcomeUser": "Welcome, {{name}}!",
+    "title": "Welcome to the Ministerial System",
+    "subtitle": "Let's configure your environment to start using all features.",
+    "howItWorks": "How it works",
+    "howItWorksDesc": "A simple three-step flow to get everything running.",
+    "letsStart": "Let's start",
+    "letsStartDesc": "Follow the steps below or skip to the Dashboard.",
+    "stepsTitle": "Initial steps",
+    "stepsSubtitle": "Follow this step-by-step guide to get started",
+    "step1Title": "Register Students",
+    "step1Desc": "Add students with basic data and relationships.",
+    "step2Title": "Import a Program",
+    "step2Desc": "Upload the workbook PDF or paste the content.",
+    "step3Title": "Generate Assignments",
+    "step3Desc": "Automatically create assignments from the program.",
+    "benefitsTitle": "Onboarding Benefits",
+    "benefitsSubtitle": "Completing these steps brings the following advantages:",
+    "benefits": [
+      "Guided and faster setup",
+      "Fewer errors in initial assignments",
+      "Consistent experience for the congregation"
+    ],
+    "complianceTitle": "Compliance from the start",
+    "complianceSubtitle": "The system already applies TMS rules during setup.",
+    "genderRestrictions": "Gender restrictions",
+    "genderRestrictionsDesc": "Assignments respect gender participation guidelines.",
+    "qualifications": "Congregational qualifications",
+    "qualificationsDesc": "Rules and qualifications are validated automatically.",
+    "familyRelationships": "Family relationships",
+    "familyRelationshipsDesc": "Avoids improper combinations in joint parts.",
+    "startSetup": "Start Setup",
+    "skipToDashboard": "Skip to Dashboard",
+    "setupTime": "Complete setup in less than 10 minutes.",
+    "configuring": "Configuring..."
+  },
+  "configuracaoInicial": {
+    "toast": {
+      "success": {
+        "title": "Setup Complete!",
+        "description": "Your profile was configured successfully. Let's create your first program!"
+      },
+      "error": {
+        "title": "Setup Error",
+        "description": "Could not save settings. Please try again."
+      }
+    }
+  },
+  "congregacoes": {
+    "stats": {
+      "activeCongregationsValue": "100+",
+      "registeredStudentsValue": "2,500+",
+      "generatedAssignmentsValue": "50,000+",
+      "satisfactionValue": "98%"
+    },
+    "successStories": {
+      "timeReductionValue": "95%",
+      "engagementValue": "87%",
+      "complianceValue": "100%"
+    }
   }
 }
