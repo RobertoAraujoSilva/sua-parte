@@ -113,7 +113,7 @@ export const MobileNavigation = ({ className = "" }: MobileNavigationProps) => {
                 <Button
                   variant="ghost"
                   className="w-full justify-start text-white hover:text-jw-gold hover:bg-jw-blue/20"
-                  onClick={() => handleNavigation('/programas')}
+                  onClick={() => handleNavigation('/admin/programas')}
                 >
                   {t('navigation.programs')}
                 </Button>
