@@ -26,6 +26,7 @@ export default function UnifiedNavigation() {
     const instructorNavItems = [
       { href: '/dashboard', label: 'Dashboard', icon: Home, exact: true },
       { href: '/estudantes', label: 'Estudantes', icon: Users },
+      { href: '/admin/programas', label: 'Programas', icon: BookOpen },
       { href: '/designacoes', label: 'Designações', icon: Calendar },
       { href: '/relatorios', label: 'Relatórios', icon: BarChart3 },
       { href: '/reunioes', label: 'Reuniões', icon: Calendar }
