@@ -216,7 +216,64 @@
     "pending": "Pending",
     "approved": "Approved",
     "completed": "Completed",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "preview": {
+      "title": "Assignment Preview",
+      "weekOf": "Week of",
+      "withChanges": "With changes",
+      "conflictsDetected": "conflict(s) detected",
+      "tabs": {
+        "designations": "Assignments",
+        "statistics": "Statistics",
+        "warnings": "Warnings"
+      },
+      "editInstructions": "Click Edit to adjust any assignment before saving.",
+      "confirmAndSave": "Confirm and Save",
+      "saving": "Saving...",
+      "designationUpdated": "Assignment updated",
+      "partModified": "was modified"
+    },
+    "statistics": {
+      "totalAssignments": "Total Assignments",
+      "maleStudents": "Male Students",
+      "femaleStudents": "Female Students",
+      "withHelper": "With Helper",
+      "pairsFormed": "Pairs Formed",
+      "familyPairs": "Family Pairs",
+      "genderDistribution": "Gender distribution in assignments",
+      "roleDistribution": "Distribution by Role"
+    },
+    "partTypes": {
+      "bibleReading": "Bible Reading",
+      "demonstration": "Demonstration",
+      "talk": "Talk",
+      "ministryPart": "Ministry Part",
+      "openingPrayer": "Opening Prayer",
+      "initialComments": "Initial Comments",
+      "wordTreasures": "Word Treasures",
+      "spiritualGems": "Spiritual Gems",
+      "christianLiving": "Christian Living",
+      "congregationBibleStudy": "Bible Study",
+      "closingPrayer": "Closing Prayer",
+      "finalComments": "Final Comments"
+    },
+    "conflicts": {
+      "title": "Conflicts",
+      "suggestion": "Suggestion"
+    },
+    "recommendations": {
+      "title": "Recommendations"
+    },
+    "noIssues": {
+      "title": "All good!",
+      "description": "No conflicts or recommendations found."
+    },
+    "card": {
+      "mainStudent": "Student",
+      "helper": "Helper",
+      "notAssigned": "Not assigned",
+      "scene": "Scene"
+    }
   },
   "reports": {
     "title": "Reports",

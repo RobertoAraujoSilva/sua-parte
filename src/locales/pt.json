@@ -216,7 +216,64 @@
     "pending": "Pendente",
     "approved": "Aprovado",
     "completed": "Concluído",
-    "cancelled": "Cancelado"
+    "cancelled": "Cancelado",
+    "preview": {
+      "title": "Prévia de Designações",
+      "weekOf": "Semana de",
+      "withChanges": "Com alterações",
+      "conflictsDetected": "conflito(s) detectado(s)",
+      "tabs": {
+        "designations": "Designações",
+        "statistics": "Estatísticas",
+        "warnings": "Avisos"
+      },
+      "editInstructions": "Clique em Editar para ajustar qualquer designação antes de salvar.",
+      "confirmAndSave": "Confirmar e Salvar",
+      "saving": "Salvando...",
+      "designationUpdated": "Designação atualizada",
+      "partModified": "foi modificada"
+    },
+    "statistics": {
+      "totalAssignments": "Total de Designações",
+      "maleStudents": "Estudantes Masculinos",
+      "femaleStudents": "Estudantes Femininas",
+      "withHelper": "Com Ajudante",
+      "pairsFormed": "Pares Formados",
+      "familyPairs": "Pares Familiares",
+      "genderDistribution": "Distribuição de gênero nas designações",
+      "roleDistribution": "Distribuição por Cargo"
+    },
+    "partTypes": {
+      "bibleReading": "Leitura da Bíblia",
+      "demonstration": "Demonstração",
+      "talk": "Discurso",
+      "ministryPart": "Parte do Ministério",
+      "openingPrayer": "Oração de Abertura",
+      "initialComments": "Comentários Iniciais",
+      "wordTreasures": "Tesouros da Palavra",
+      "spiritualGems": "Joias Espirituais",
+      "christianLiving": "Vida Cristã",
+      "congregationBibleStudy": "Estudo Bíblico",
+      "closingPrayer": "Oração de Encerramento",
+      "finalComments": "Comentários Finais"
+    },
+    "conflicts": {
+      "title": "Conflitos",
+      "suggestion": "Sugestão"
+    },
+    "recommendations": {
+      "title": "Recomendações"
+    },
+    "noIssues": {
+      "title": "Tudo certo!",
+      "description": "Nenhum conflito ou recomendação encontrada."
+    },
+    "card": {
+      "mainStudent": "Estudante",
+      "helper": "Ajudante",
+      "notAssigned": "Não atribuído",
+      "scene": "Cenário"
+    }
   },
   "reports": {
     "title": "Relatórios",
