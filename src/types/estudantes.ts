@@ -10,21 +10,38 @@ export type Genero = Database["public"]["Enums"]["app_genero"];
 export type Cargo = Database["public"]["Enums"]["app_cargo"];
 
 // Extended types for UI
-export interface EstudanteWithParent extends EstudanteRow {
+// Note: S-38 qualification fields (q_chairman, q_pray, etc.) are now part of EstudanteRow
+export interface EstudanteWithParent extends Omit<EstudanteRow, 'familia' | 'family_id' | 'estado_civil' | 'papel_familiar' | 'id_mae' | 'id_conjuge' | 'coabitacao' | 'menor' | 'responsavel_primario' | 'responsavel_secundario' | 'data_nascimento' | 'q_chairman' | 'q_pray' | 'q_treasures' | 'q_gems' | 'q_reading' | 'q_starting' | 'q_following' | 'q_making' | 'q_explaining' | 'q_talk' | 'q_living'> {
+  // Optional override for new fields until data is migrated
+  familia?: string | null;
+  family_id?: string | null;
+  estado_civil?: string | null;
+  papel_familiar?: string | null;
+  id_mae?: string | null;
+  id_conjuge?: string | null;
+  coabitacao?: boolean | null;
+  menor?: boolean | null;
+  responsavel_primario?: string | null;
+  responsavel_secundario?: string | null;
+  data_nascimento?: string | null;
+  
+  // S-38 Qualifications
+  q_chairman?: boolean | null;
+  q_pray?: boolean | null;
+  q_treasures?: boolean | null;
+  q_gems?: boolean | null;
+  q_reading?: boolean | null;
+  q_starting?: boolean | null;
+  q_following?: boolean | null;
+  q_making?: boolean | null;
+  q_explaining?: boolean | null;
+  q_talk?: boolean | null;
+  q_living?: boolean | null;
+  
+  // Relationships
   pai_mae?: EstudanteRow | null;
   filhos?: EstudanteRow[];
-  familia?: string;
   congregacao?: string;
-  chairman?: boolean;
-  pray?: boolean;
-  tresures?: boolean;
-  gems?: boolean;
-  reading?: boolean;
-  starting?: boolean;
-  following?: boolean;
-  making?: boolean;
-  explaining?: boolean;
-  talk?: boolean;
 }
 
 // S-38-T Speech Types and Qualifications

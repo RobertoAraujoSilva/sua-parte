@@ -100,9 +100,11 @@ export function useEstudantes(activeTab?: string) {
 
   const updateEstudante = useCallback(async ({ id, data }: { id: string; data: Partial<EstudanteWithParent> }) => {
     try {
+      // Filter out UI-only fields before sending to database
+      const { pai_mae, filhos, congregacao, ...dbData } = data as any;
       const { data: updatedData, error } = await supabase
         .from('estudantes')
-        .update(data)
+        .update(dbData)
         .eq('id', id)
         .select()
         .single();

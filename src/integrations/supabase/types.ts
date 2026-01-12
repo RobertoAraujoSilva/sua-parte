@@ -165,15 +165,39 @@ export type Database = {
         Row: {
           ativo: boolean | null
           cargo: Database["public"]["Enums"]["app_cargo"]
+          coabitacao: boolean | null
           created_at: string | null
           data_batismo: string | null
+          data_nascimento: string | null
           email: string | null
+          estado_civil: Database["public"]["Enums"]["estado_civil_type"] | null
+          familia: string | null
+          family_id: string | null
           genero: Database["public"]["Enums"]["app_genero"]
           id: string
+          id_conjuge: string | null
+          id_mae: string | null
           id_pai_mae: string | null
           idade: number
+          menor: boolean | null
           nome: string
           observacoes: string | null
+          papel_familiar:
+            | Database["public"]["Enums"]["papel_familiar_type"]
+            | null
+          q_chairman: boolean | null
+          q_explaining: boolean | null
+          q_following: boolean | null
+          q_gems: boolean | null
+          q_living: boolean | null
+          q_making: boolean | null
+          q_pray: boolean | null
+          q_reading: boolean | null
+          q_starting: boolean | null
+          q_talk: boolean | null
+          q_treasures: boolean | null
+          responsavel_primario: string | null
+          responsavel_secundario: string | null
           telefone: string | null
           updated_at: string | null
           user_id: string
@@ -181,15 +205,39 @@ export type Database = {
         Insert: {
           ativo?: boolean | null
           cargo?: Database["public"]["Enums"]["app_cargo"]
+          coabitacao?: boolean | null
           created_at?: string | null
           data_batismo?: string | null
+          data_nascimento?: string | null
           email?: string | null
+          estado_civil?: Database["public"]["Enums"]["estado_civil_type"] | null
+          familia?: string | null
+          family_id?: string | null
           genero: Database["public"]["Enums"]["app_genero"]
           id?: string
+          id_conjuge?: string | null
+          id_mae?: string | null
           id_pai_mae?: string | null
           idade: number
+          menor?: boolean | null
           nome: string
           observacoes?: string | null
+          papel_familiar?:
+            | Database["public"]["Enums"]["papel_familiar_type"]
+            | null
+          q_chairman?: boolean | null
+          q_explaining?: boolean | null
+          q_following?: boolean | null
+          q_gems?: boolean | null
+          q_living?: boolean | null
+          q_making?: boolean | null
+          q_pray?: boolean | null
+          q_reading?: boolean | null
+          q_starting?: boolean | null
+          q_talk?: boolean | null
+          q_treasures?: boolean | null
+          responsavel_primario?: string | null
+          responsavel_secundario?: string | null
           telefone?: string | null
           updated_at?: string | null
           user_id: string
@@ -197,23 +245,75 @@ export type Database = {
         Update: {
           ativo?: boolean | null
           cargo?: Database["public"]["Enums"]["app_cargo"]
+          coabitacao?: boolean | null
           created_at?: string | null
           data_batismo?: string | null
+          data_nascimento?: string | null
           email?: string | null
+          estado_civil?: Database["public"]["Enums"]["estado_civil_type"] | null
+          familia?: string | null
+          family_id?: string | null
           genero?: Database["public"]["Enums"]["app_genero"]
           id?: string
+          id_conjuge?: string | null
+          id_mae?: string | null
           id_pai_mae?: string | null
           idade?: number
+          menor?: boolean | null
           nome?: string
           observacoes?: string | null
+          papel_familiar?:
+            | Database["public"]["Enums"]["papel_familiar_type"]
+            | null
+          q_chairman?: boolean | null
+          q_explaining?: boolean | null
+          q_following?: boolean | null
+          q_gems?: boolean | null
+          q_living?: boolean | null
+          q_making?: boolean | null
+          q_pray?: boolean | null
+          q_reading?: boolean | null
+          q_starting?: boolean | null
+          q_talk?: boolean | null
+          q_treasures?: boolean | null
+          responsavel_primario?: string | null
+          responsavel_secundario?: string | null
           telefone?: string | null
           updated_at?: string | null
           user_id?: string
         }
         Relationships: [
           {
+            foreignKeyName: "estudantes_id_conjuge_fkey"
+            columns: ["id_conjuge"]
+            isOneToOne: false
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estudantes_id_mae_fkey"
+            columns: ["id_mae"]
+            isOneToOne: false
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "estudantes_id_pai_mae_fkey"
             columns: ["id_pai_mae"]
+            isOneToOne: false
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estudantes_responsavel_primario_fkey"
+            columns: ["responsavel_primario"]
+            isOneToOne: false
+            referencedRelation: "estudantes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estudantes_responsavel_secundario_fkey"
+            columns: ["responsavel_secundario"]
             isOneToOne: false
             referencedRelation: "estudantes"
             referencedColumns: ["id"]
@@ -656,6 +756,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_form_pair: {
+        Args: { p_student1_id: string; p_student2_id: string }
+        Returns: Json
+      }
+      can_receive_part: {
+        Args: { p_part_type: string; p_student_id: string }
+        Returns: boolean
+      }
       check_student_duplicate: {
         Args: {
           p_email: string
@@ -683,6 +791,26 @@ export type Database = {
         | "estudante_novo"
       app_genero: "masculino" | "feminino"
       app_role: "admin" | "instrutor" | "estudante" | "family_member"
+      estado_civil_type:
+        | "solteiro"
+        | "casado"
+        | "divorciado"
+        | "viuvo"
+        | "separado"
+      papel_familiar_type:
+        | "pai"
+        | "mae"
+        | "filho"
+        | "filha"
+        | "avo"
+        | "avo_f"
+        | "tio"
+        | "tia"
+        | "sobrinho"
+        | "sobrinha"
+        | "primo"
+        | "prima"
+        | "outro"
       progress_level: "beginning" | "developing" | "qualified" | "advanced"
     }
     CompositeTypes: {
@@ -821,6 +949,28 @@ export const Constants = {
       ],
       app_genero: ["masculino", "feminino"],
       app_role: ["admin", "instrutor", "estudante", "family_member"],
+      estado_civil_type: [
+        "solteiro",
+        "casado",
+        "divorciado",
+        "viuvo",
+        "separado",
+      ],
+      papel_familiar_type: [
+        "pai",
+        "mae",
+        "filho",
+        "filha",
+        "avo",
+        "avo_f",
+        "tio",
+        "tia",
+        "sobrinho",
+        "sobrinha",
+        "primo",
+        "prima",
+        "outro",
+      ],
       progress_level: ["beginning", "developing", "qualified", "advanced"],
     },
   },

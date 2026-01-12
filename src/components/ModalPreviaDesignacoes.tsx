@@ -25,7 +25,7 @@ import { useTranslation } from "react-i18next";
 import { DesignacaoPreviewCard } from "@/components/designacoes/DesignacaoPreviewCard";
 import { EstatisticasDesignacoes } from "@/components/designacoes/EstatisticasDesignacoes";
 import type { DesignacaoGerada, EstatisticasDesignacao, ConflitosDesignacao } from "@/types/designacoes";
-import type { EstudanteRow } from "@/types/estudantes";
+import type { EstudanteWithParent } from "@/types/estudantes";
 
 interface ModalPreviaDesignacoesProps {
   aberto: boolean;
@@ -33,7 +33,7 @@ interface ModalPreviaDesignacoesProps {
   onConfirmar: (designacoesEditadas?: DesignacaoGerada[]) => void;
   onRegenerar: () => void;
   designacoes: DesignacaoGerada[];
-  estudantes: EstudanteRow[];
+  estudantes: EstudanteWithParent[];
   estatisticas: EstatisticasDesignacao;
   conflitos: ConflitosDesignacao[];
   recomendacoes: string[];
