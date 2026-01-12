@@ -6,11 +6,11 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Clock, Users, BookOpen, Play, Mic, User } from 'lucide-react';
-import type { EstudanteRow } from '@/types/estudantes';
+import type { EstudanteWithParent } from '@/types/estudantes';
 
 interface ProgramacaoViewerProps {
   programacao: any;
-  estudantes: EstudanteRow[];
+  estudantes: EstudanteWithParent[];
   designacoes: any[];
   onDesignar: (parteId: string, estudanteId: string, ajudanteId?: string) => void;
   onRemoverDesignacao: (parteId: string) => void;

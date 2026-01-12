@@ -17,11 +17,11 @@ import {
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { DesignacaoGerada } from "@/types/designacoes";
-import type { EstudanteRow } from "@/types/estudantes";
+import type { EstudanteWithParent } from "@/types/estudantes";
 
 interface DesignacaoPreviewCardProps {
   designacao: DesignacaoGerada;
-  estudantes: EstudanteRow[];
+  estudantes: EstudanteWithParent[];
   onUpdate: (designacao: DesignacaoGerada) => void;
   editable?: boolean;
 }
