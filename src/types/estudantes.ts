@@ -141,7 +141,12 @@ export const SPEECH_TYPE_ICONS: Record<SpeechType, string> = {
   demonstration: '👥'
 };
 
+// Estado Civil and Papel Familiar types from database
+export type EstadoCivil = Database["public"]["Enums"]["estado_civil_type"];
+export type PapelFamiliar = Database["public"]["Enums"]["papel_familiar_type"];
+
 export interface EstudanteFormData {
+  // Basic Info
   nome: string;
   idade: number;
   genero: Genero;
@@ -149,9 +154,35 @@ export interface EstudanteFormData {
   telefone?: string;
   data_batismo?: string;
   cargo: Cargo;
-  id_pai_mae?: string;
   ativo: boolean;
   observacoes?: string;
+  
+  // Family Info
+  familia?: string;
+  family_id?: string;
+  estado_civil?: EstadoCivil | null;
+  papel_familiar?: PapelFamiliar | null;
+  id_pai_mae?: string;
+  id_mae?: string;
+  id_conjuge?: string;
+  coabitacao?: boolean;
+  menor?: boolean;
+  responsavel_primario?: string;
+  responsavel_secundario?: string;
+  data_nascimento?: string;
+  
+  // S-38 Qualifications
+  q_chairman?: boolean;
+  q_pray?: boolean;
+  q_treasures?: boolean;
+  q_gems?: boolean;
+  q_reading?: boolean;
+  q_starting?: boolean;
+  q_following?: boolean;
+  q_making?: boolean;
+  q_explaining?: boolean;
+  q_talk?: boolean;
+  q_living?: boolean;
 }
 
 // Filter and search types
