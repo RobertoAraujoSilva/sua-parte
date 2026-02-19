@@ -127,7 +127,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ position = 'fixed' }) =>
 
   const handleForceLogout = () => {
     console.log('🚨 Debug Panel - Force Logout');
-    logLogoutAttempt('force', user);
+    logLogoutAttempt('test', user);
 
     // Download log before force logout
     downloadLog();
