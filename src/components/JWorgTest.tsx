@@ -10,6 +10,29 @@ export const JWorgTest: React.FC = () => {
   return (
     <div className="p-4 space-y-4">
       <h2 className="text-xl font-bold">🧪 Teste JW.org Integration</h2>
+
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-sm font-medium">Idioma:</span>
+        <Button
+          size="sm"
+          variant={jworg.currentLanguage === 'pt' ? 'default' : 'outline'}
+          onClick={() => jworg.setLanguage('pt')}
+        >
+          🇧🇷 Português
+        </Button>
+        <Button
+          size="sm"
+          variant={jworg.currentLanguage === 'en' ? 'default' : 'outline'}
+          onClick={() => jworg.setLanguage('en')}
+        >
+          🇺🇸 English
+        </Button>
+        {jworg.dataSource && (
+          <span className="ml-auto text-xs px-2 py-1 rounded bg-muted text-muted-foreground">
+            Fonte: <strong>{jworg.dataSource}</strong>
+          </span>
+        )}
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
@@ -21,6 +44,7 @@ export const JWorgTest: React.FC = () => {
               <div>Idioma: {jworg.currentLanguage}</div>
               <div>Carregando: {jworg.isLoading ? 'Sim' : 'Não'}</div>
               <div>Erro: {jworg.error || 'Nenhum'}</div>
+              <div>Fonte: {jworg.dataSource || 'N/A'}</div>
               <div>Semana atual: {jworg.currentWeek ? 'Carregada' : 'Não carregada'}</div>
               <div>Próximas semanas: {jworg.nextWeeks.length}</div>
               <div>Apostilas: {jworg.availableWorkbooks.join(', ')}</div>
