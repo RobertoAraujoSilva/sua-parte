@@ -190,7 +190,7 @@ export const useJWorgIntegration = (): JWorgIntegration => {
 
   useEffect(() => {
     fetchAllWeeks();
-  }, []);
+  }, [currentLanguage]);
 
   return {
     currentLanguage, availableWorkbooks, currentWeek, nextWeeks,
