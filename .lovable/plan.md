@@ -1,63 +1,32 @@
 
 
-# Corrigir erro de build + Integrar Firecrawl para JW.org em tempo real
+# Fazer o Firecrawl buscar dados atualizados do JW.org conforme idioma
 
-## Parte 1: Corrigir erro de build (DebugPanel.tsx)
+## Situacao Atual
 
-O erro esta na linha 130 do `DebugPanel.tsx` onde `logLogoutAttempt('force', user)` e chamado, mas o tipo so aceita `'dropdown' | 'test'`.
+A Edge Function `firecrawl-jworg` ja existe e esta correta -- ela recebe `{ language }`, monta a URL correspondente, chama Firecrawl, parseia o markdown e retorna `ParsedWeek[]`. O hook `useJWorgIntegration` e o API helper `firecrawl-jworg.ts` tambem ja estao implementados com a cadeia de fallback (Firecrawl -> Cheerio -> Mock).
 
-**Solucao:** Alterar para `logLogoutAttempt('test', user)` no `handleForceLogout`, ja que e uma variacao de teste.
+Porem, ha um bug: quando o usuario muda o idioma via `setLanguage()`, os dados **nao sao rebuscados**. O `useEffect` so roda na montagem (sem dependencia de `currentLanguage`).
 
----
+## Plano
 
-## Parte 2: Conectar Firecrawl
+### 1. Corrigir re-fetch ao mudar idioma no hook
 
-Configurar o conector Firecrawl no projeto para disponibilizar `FIRECRAWL_API_KEY` como variavel de ambiente nas Edge Functions.
+No `src/hooks/useJWorgIntegration.ts`:
+- Adicionar `currentLanguage` como dependencia do `useEffect` para que ao mudar o idioma, o sistema automaticamente busque novos dados do JW.org na lingua selecionada
+- Isso garante que `fetchAllWeeks()` sera chamado novamente com o idioma correto
 
----
+### 2. Mostrar fonte de dados e idioma na UI de teste
 
-## Parte 3: Criar Edge Function `firecrawl-jworg`
+No `src/components/JWorgTest.tsx`:
+- Adicionar display do `dataSource` (firecrawl/cheerio/mock) para o usuario saber de onde vieram os dados
+- Adicionar botoes para alternar idioma (PT/EN) que chamam `setLanguage()`
+- Isso permite testar facilmente se o Firecrawl esta buscando dados nas duas linguas
 
-Nova Edge Function em `supabase/functions/firecrawl-jworg/index.ts` que:
+### Arquivos a modificar
 
-1. Recebe `{ language: 'pt' | 'en' }` no body
-2. Usa `FIRECRAWL_API_KEY` para chamar a API Firecrawl `/v1/scrape`
-3. Faz scrape da URL correspondente ao idioma em formato `markdown`
-4. Parseia o markdown com regex para extrair:
-   - Semanas (datas, leitura biblica)
-   - Canticos (abertura, meio, encerramento)
-   - Partes por secao (Tesouros, Ministerio, Vida Crista)
-   - Tipo, duracao, titulo, descricao, referencias
-5. Retorna `{ success: true, weeks: ParsedWeek[] }`
-
-URLs:
-- PT: `https://www.jw.org/pt/biblioteca/jw-apostila-do-mes/`
-- EN: `https://www.jw.org/en/library/jw-meeting-workbook/`
-
----
-
-## Parte 4: Criar API helper frontend
-
-Novo arquivo `src/lib/api/firecrawl-jworg.ts` com funcao para invocar a edge function `firecrawl-jworg` via `supabase.functions.invoke()`.
-
----
-
-## Parte 5: Atualizar hook `useJWorgIntegration`
-
-Modificar `src/hooks/useJWorgIntegration.ts` para:
-- Chamar `firecrawl-jworg` como fonte primaria
-- Fallback para `fetch-jworg-content` (cheerio) se Firecrawl falhar
-- Fallback final para dados mock
-- Cadeia: **Firecrawl -> Cheerio -> Mock**
-
----
-
-## Arquivos afetados
-
-| Arquivo | Acao |
-|---------|------|
-| `src/components/DebugPanel.tsx` | Corrigir tipo do logLogoutAttempt |
-| `supabase/functions/firecrawl-jworg/index.ts` | Criar - edge function com Firecrawl |
-| `src/lib/api/firecrawl-jworg.ts` | Criar - helper API |
-| `src/hooks/useJWorgIntegration.ts` | Modificar - fallback chain |
+| Arquivo | Mudanca |
+|---------|---------|
+| `src/hooks/useJWorgIntegration.ts` | Adicionar `currentLanguage` no `useEffect` deps |
+| `src/components/JWorgTest.tsx` | Adicionar seletor de idioma e indicador de fonte |
 
