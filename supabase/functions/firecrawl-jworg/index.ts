@@ -53,7 +53,6 @@ async function scrapeUrl(url: string, apiKey: string): Promise<string> {
 function extractWeekUrls(markdown: string, language: string): { weekTitle: string; url: string }[] {
   const weeks: { weekTitle: string; url: string }[] = [];
   
-  // Pattern: ## [6-12 de julho](URL) or ## [July 6-12](URL)
   const linkPattern = /##\s*\[([^\]]+)\]\(([^)]+)\)/g;
   let match;
   
@@ -62,7 +61,6 @@ function extractWeekUrls(markdown: string, language: string): { weekTitle: strin
     let url = match[2].trim();
     
     // Only match actual week links (contain day numbers like "6-12" or "6 de julho")
-    // Skip workbook issue titles like "July–August 2026" or "Julho–agosto de 2026"
     const hasDateNumbers = /\d{1,2}[-–]\d{1,2}/.test(title) 
       || /\d{1,2}\s+de\s+\w+/.test(title);
     
@@ -71,12 +69,7 @@ function extractWeekUrls(markdown: string, language: string): { weekTitle: strin
       || /^\w+[–-]\w+\s+de\s+\d{4}$/i.test(title);
     
     if (!hasDateNumbers || isWorkbookTitle) continue;
-    
-    // Also verify URL points to a week schedule page, not a workbook index
-    const isScheduleUrl = url.includes('Schedule') || url.includes('Programa') 
-      || /\d{1,2}[-–]\d{1,2}/.test(url);
 
-    // Make URL absolute
     if (url.startsWith('/')) {
       url = `https://www.jw.org${url}`;
     }
@@ -101,6 +94,40 @@ function parseWeekPage(markdown: string, weekTitle: string, language: string): P
     songNumbers.push(parseInt(m[1]));
   }
 
+  // ===== BIBLE READING EXTRACTION =====
+  // Strategy: look for the "Leitura da Bíblia" / "Bible Reading" part and extract
+  // the scripture reference from its content line, e.g.:
+  //   ### 3\. Leitura da Bíblia
+  //   (4 min) [Jer. 13:1-14](...)
+  // Also try broader patterns from the page title/header area
+
+  // Pattern 1: Scripture ref right after "Leitura da Bíblia" / "Bible Reading" header
+  const brHeaderPattern = language === 'pt'
+    ? /Leitura da B[ií]blia[\s\S]{0,200}?\((\d+)\s*min\.?\)\s*\[([^\]]+)\]/i
+    : /Bible Reading[\s\S]{0,200}?\((\d+)\s*min\.?\)\s*\[([^\]]+)\]/i;
+  const brHeaderMatch = markdown.match(brHeaderPattern);
+  if (brHeaderMatch) {
+    bibleReading = brHeaderMatch[2].trim();
+  }
+
+  // Pattern 2: Fallback - look for book+chapter pattern near "Leitura" / "Reading"
+  if (!bibleReading) {
+    const brFallback = language === 'pt'
+      ? markdown.match(/Leitura da B[ií]blia[\s\S]{0,300}?\[([A-ZÀ-Ú][a-zà-ú]+\.?\s+\d+[:\d\-–,\s]*)\]/i)
+      : markdown.match(/Bible Reading[\s\S]{0,300}?\[([A-Z][a-z]+\.?\s+\d+[:\d\-–,\s]*)\]/i);
+    if (brFallback) {
+      bibleReading = brFallback[1].trim();
+    }
+  }
+
+  // Pattern 3: From the page title area - e.g. "JEREMIAS 13-16" in the header
+  if (!bibleReading) {
+    const titlePattern = markdown.match(/^#\s+.*?([A-ZÀ-Ú]{3,}(?:\s+\d+[-–]\d+)?)/m);
+    if (titlePattern && /\d/.test(titlePattern[1])) {
+      bibleReading = titlePattern[1].trim();
+    }
+  }
+
   const lines = markdown.split('\n');
   
   for (let i = 0; i < lines.length; i++) {
@@ -121,11 +148,10 @@ function parseWeekPage(markdown: string, weekTitle: string, language: string): P
       continue;
     }
 
-    // Parse numbered parts: "### 1. Title" or "### 1\. Title" followed by "(X min)"
+    // Parse numbered parts: "### 1. Title" or "### 1\. Title"
     const numberedPartMatch = line.match(/^#{1,4}\s*(\d+)\\?\.\s*(.+)/);
     if (numberedPartMatch) {
-      const partNum = parseInt(numberedPartMatch[1]);
-      let title = numberedPartMatch[2].replace(/\*+/g, '').replace(/\[|\]/g, '').trim();
+      const title = numberedPartMatch[2].replace(/\*+/g, '').replace(/\[|\]/g, '').trim();
       
       // Look for duration in current line or next few lines
       let duration = 0;
@@ -141,9 +167,8 @@ function parseWeekPage(markdown: string, weekTitle: string, language: string): P
       for (let j = i + 1; j < Math.min(i + 8, lines.length); j++) {
         const nextLine = lines[j].trim();
         if (!nextLine || nextLine.startsWith('#') || nextLine.startsWith('![')) continue;
-        if (nextLine.startsWith('Sua resposta')) break;
+        if (nextLine.startsWith('Sua resposta') || nextLine.startsWith('Your Answer')) break;
         if (/^\((\d+)\s*min/.test(nextLine)) {
-          // Duration line - extract rest as description
           const afterDuration = nextLine.replace(/^\(\d+\s*min\.?\)\s*/, '').trim();
           if (afterDuration) description = afterDuration;
           continue;
@@ -165,7 +190,6 @@ function parseWeekPage(markdown: string, weekTitle: string, language: string): P
         }
       }
 
-      // Determine part type
       const type = determinePartType(title, description + ' ' + refArea, currentSection, language);
 
       parts.push({
@@ -179,35 +203,7 @@ function parseWeekPage(markdown: string, weekTitle: string, language: string): P
       });
       continue;
     }
-
-    // Parse "Estudo bíblico de congregação" / "Congregation Bible Study" pattern
-    if (/#{1,4}\s*\d+\.\s*(Estudo bíblico de congregação|Congregation Bible Study)/i.test(line)) {
-      const durationMatch = line.match(/\((\d+)\s*min\.?\)/i) 
-        || lines.slice(i, i + 3).join(' ').match(/\((\d+)\s*min\.?\)/i);
-      
-      parts.push({
-        id: partId++,
-        title: language === 'pt' ? 'Estudo bíblico de congregação' : 'Congregation Bible Study',
-        duration: durationMatch ? parseInt(durationMatch[1]) : 30,
-        type: 'study',
-        description: lines.slice(i, i + 3).join(' ').replace(/#{1,4}\s*\d+\.\s*/, '').replace(/\*+/g, '').trim(),
-        references: [],
-        section: 'living',
-      });
-    }
-
-    // Extract Bible reading reference from the treasures section content
-    if (currentSection === 'treasures' && /Leitura da Bíblia|Bible Reading/i.test(line)) {
-      const brMatch = lines.slice(i, i + 3).join(' ').match(/\[([^\]]*(?:Jer|Gen|Exo|Lev|Num|Deu|Jos|Jud|Rut|Sam|Rei|Crô|Esd|Nee|Est|Jó|Sal|Pro|Ecl|Isa|Eze|Dan|Ose|Joe|Amó|Oba|Jon|Miq|Nau|Hab|Sof|Ag|Zac|Mal|Mat|Mar|Luc|João|At|Rom|Cor|Gal|Efé|Fil|Col|Tes|Tim|Tit|File|Heb|Tia|Ped|Jud|Apo)[^\]]*)\]/i);
-      if (brMatch) {
-        bibleReading = brMatch[1].trim();
-      }
-    }
   }
-
-  // Also check for "Comentários finais" / "Concluding Comments" as last part
-  const concludingMatch = markdown.match(/Coment[aá]rios finais\s*\((\d+)\s*min\.?\)|Concluding Comments\s*\((\d+)\s*min\.?\)/i);
-  // We don't add this as a separate part since it's standard
 
   return {
     week: weekTitle,
@@ -224,9 +220,9 @@ function parseWeekPage(markdown: string, weekTitle: string, language: string): P
 
 function cleanTitle(title: string): string {
   return title
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove markdown links
-    .replace(/\*+/g, '') // Remove bold/italic
-    .replace(/\\+/g, '') // Remove backslashes
+    .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+    .replace(/\*+/g, '')
+    .replace(/\\+/g, '')
     .trim();
 }
 
@@ -237,13 +233,12 @@ function determinePartType(title: string, context: string, section: string, lang
   if (/joias espirituais|spiritual gems/i.test(lower)) return 'gems';
   if (/leitura da b[ií]blia|bible reading/i.test(lower)) return 'reading';
   if (/iniciando conversa|starting conversation|primeira conversa|initial call/i.test(lower)) return 'starting';
-  if (/cultivando|making return|revisita|return visit/i.test(lower)) return 'following';
+  if (/cultivando|following up|revisita|return visit/i.test(lower)) return 'following';
   if (/fazendo disc[ií]pulos|making disciples/i.test(lower)) return 'making';
   if (/explicando|explaining/i.test(lower)) return 'explaining';
-  if (/discurso(?! bíblico)|^talk$/i.test(lower)) return 'talk';
+  if (/discurso|^talk$/i.test(lower)) return 'talk';
   if (/estudo b[ií]blico de congrega[çc][ãa]o|congregation bible study/i.test(lower)) return 'study';
 
-  // Fallback based on section
   if (section === 'treasures') {
     if (/joias|gems/i.test(lower)) return 'gems';
     return 'treasures';
@@ -259,21 +254,13 @@ function determinePartType(title: string, context: string, section: string, lang
 
 /** Determine current workbook URL from index page */
 function findCurrentWorkbookUrl(markdown: string, language: string): string | null {
-  // Look for workbook links - the first one is usually the most recent/current
-  const pattern = language === 'pt'
-    ? /\[([^\]]*\d{4}[^\]]*)\]\((https:\/\/www\.jw\.org\/pt\/biblioteca\/jw-apostila-do-mes\/[^\s)]+)\)/g
-    : /\[([^\]]*\d{4}[^\]]*)\]\((https:\/\/www\.jw\.org\/en\/library\/jw-meeting-workbook\/[^\s)]+)\)/g;
-
-  // Also match relative paths from ## headers
   const headerPattern = /##\s*\[([^\]]+)\]\(([^)]+mwb[^)]*)\)/g;
-  
   let match;
   const urls: string[] = [];
 
   while ((match = headerPattern.exec(markdown)) !== null) {
     let url = match[2];
     if (url.startsWith('/')) url = `https://www.jw.org${url}`;
-    // Only include workbook issue pages (not individual week pages)
     if (url.includes('mwb/') && !url.includes('Programa') && !url.includes('Schedule')) {
       urls.push(url);
     }
@@ -299,7 +286,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // STEP 1: Scrape the index page to find the current workbook
+    // STEP 1: Scrape index page to find current workbook
     console.log(`📚 Step 1: Scraping index page: ${indexUrl}`);
     const indexMarkdown = await scrapeUrl(indexUrl, apiKey);
     console.log(`📄 Index page: ${indexMarkdown.length} chars`);
@@ -311,10 +298,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Find the current workbook URL from index
     const workbookUrl = findCurrentWorkbookUrl(indexMarkdown, language);
-    
-    // Try to extract week URLs directly from index (if it's a workbook page already)
     let weekEntries = extractWeekUrls(indexMarkdown, language);
     
     // If no weeks found on index, try scraping the first workbook link
@@ -326,28 +310,28 @@ Deno.serve(async (req) => {
     }
 
     if (weekEntries.length === 0) {
-      console.log('⚠️ No week URLs found in index/workbook pages');
+      console.log('⚠️ No week URLs found');
       return new Response(
-        JSON.stringify({ success: true, weeks: [], source: 'firecrawl', fetchedAt: new Date().toISOString(), debug: 'No week URLs found' }),
+        JSON.stringify({ success: true, weeks: [], source: 'firecrawl', fetchedAt: new Date().toISOString() }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     console.log(`🗓️ Found ${weekEntries.length} weeks, scraping up to 4...`);
 
-    // STEP 2: Scrape individual week pages (limit to first 4 for performance)
+    // STEP 2: Scrape individual week pages
     const weeksToScrape = weekEntries.slice(0, 4);
     const weeks: ParsedWeek[] = [];
 
     for (const entry of weeksToScrape) {
       try {
-        console.log(`  📄 Scraping week: ${entry.weekTitle} → ${entry.url}`);
+        console.log(`  📄 Scraping: ${entry.weekTitle}`);
         const weekMarkdown = await scrapeUrl(entry.url, apiKey);
         const parsed = parseWeekPage(weekMarkdown, entry.weekTitle, language);
         
         if (parsed.parts.length > 0) {
           weeks.push(parsed);
-          console.log(`  ✅ ${entry.weekTitle}: ${parsed.parts.length} parts, songs: ${parsed.songs.opening}/${parsed.songs.middle}/${parsed.songs.closing}`);
+          console.log(`  ✅ ${entry.weekTitle}: ${parsed.parts.length} parts, bible: "${parsed.bibleReading}", songs: ${parsed.songs.opening}/${parsed.songs.middle}/${parsed.songs.closing}`);
         } else {
           console.log(`  ⚠️ ${entry.weekTitle}: no parts parsed`);
         }
@@ -356,7 +340,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    console.log(`✅ Total: ${weeks.length} weeks parsed successfully`);
+    console.log(`✅ Total: ${weeks.length} weeks parsed`);
 
     return new Response(
       JSON.stringify({
