@@ -248,7 +248,7 @@ function ProgrammingView({
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div><strong>Arquivo:</strong> {programming.fileName}</div>
           <div><strong>Idioma:</strong> {getLanguageIcon(programming.language)} {programming.language}</div>
-          <div><strong>Extraído em:</strong> {formatDate(programming.extractedAt)}</div>
+          <div><strong>Extraído em:</strong> {formatDate(new Date(programming.extractedAt))}</div>
           <div><strong>Semanas:</strong> {programming.weeks.length}</div>
         </div>
       </div>
