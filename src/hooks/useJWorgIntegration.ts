@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { saveJWorgPrograms } from '@/utils/jworgProgramSaver';
 import { fetchJWorgContent } from '@/lib/api/firecrawl-jworg';
@@ -38,29 +38,25 @@ interface JWorgIntegration {
   dataSource: string | null;
 }
 
-// Mock data as final fallback
-const mockCurrentWeek: JWorgMeeting = {
-  week: '18-24 de agosto',
-  date: '2025-08-18',
-  book: 'PROVÉRBIOS 27',
-  chapter: '27',
-  parts: [
-    { id: 1, title: 'Ter amigos de verdade faz bem', duration: 10, type: 'treasures', description: 'Amigos de verdade têm coragem de nos dar conselhos quando precisamos', references: ['Pro. 27:5, 6', 'Pro. 27:10', 'Pro. 27:17'] },
-    { id: 2, title: 'Joias espirituais', duration: 10, type: 'gems', description: 'Pro. 27:21 — Por que um elogio pode ser um teste para nós?', references: ['w06 15/9 19 § 12'] },
-    { id: 3, title: 'Leitura da Bíblia', duration: 4, type: 'reading', description: 'Pro. 27:1-17', references: ['th lição 5'] },
-    { id: 4, title: 'Iniciando conversas', duration: 3, type: 'starting', description: 'DE CASA EM CASA', references: ['lmd lição 6 ponto 5'] },
-    { id: 5, title: 'Cultivando o interesse', duration: 4, type: 'following', description: 'TESTEMUNHO INFORMAL', references: ['lmd lição 8 ponto 3'] },
-    { id: 6, title: 'Discurso', duration: 5, type: 'talk', description: 'O que fazer se meu amigo me deixou chateado?', references: ['ijwyp artigo 75'] },
-    { id: 7, title: '"Um irmão em tempos de aflição"', duration: 15, type: 'discussion', description: 'Discussão sobre amizades cristãs', references: [] },
-    { id: 8, title: 'Estudo bíblico de congregação', duration: 30, type: 'study', description: 'lfb histórias 10-11', references: [] },
-  ],
-};
-
-const mockNextWeeks: JWorgMeeting[] = [
-  { week: '25-31 de agosto', date: '2025-08-25', book: 'PROVÉRBIOS 28', chapter: '28', parts: [{ id: 1, title: 'Diferenças entre os maus e os justos', duration: 10, type: 'treasures', description: 'Contrastes entre pessoas más e justas', references: ['Pro. 28:1'] }] },
-  { week: '1-7 de setembro', date: '2025-09-01', book: 'PROVÉRBIOS 29', chapter: '29', parts: [{ id: 1, title: 'Rejeite crenças e costumes que não são baseados na Bíblia', duration: 10, type: 'treasures', description: 'Obedeça a Jeová e seja feliz de verdade', references: ['Pro. 29:18'] }] },
-  { week: '8-14 de setembro', date: '2025-09-08', book: 'PROVÉRBIOS 30', chapter: '30', parts: [{ id: 1, title: '"Não me dês nem pobreza nem riquezas"', duration: 10, type: 'treasures', description: 'A verdadeira felicidade vem de confiar em Deus', references: ['Pro. 30:8, 9'] }] },
-];
+/** Convert DB program row back to JWorgMeeting */
+function mapProgramToMeeting(program: any): JWorgMeeting {
+  const conteudo = program.conteudo || {};
+  return {
+    week: program.semana || '',
+    date: program.data || '',
+    book: conteudo.leitura_biblica?.split(' ')[0] || '',
+    chapter: conteudo.leitura_biblica?.split(' ')[1] || '',
+    parts: (conteudo.partes || []).map((p: any) => ({
+      id: p.numero,
+      title: p.titulo,
+      duration: p.duracao_min,
+      type: p.tipo,
+      description: p.descricao || '',
+      references: p.referencias || [],
+      notes: '',
+    })),
+  };
+}
 
 /** Convert API week data to JWorgMeeting format */
 function mapWeekToMeeting(week: any): JWorgMeeting {
@@ -76,6 +72,9 @@ function mapWeekToMeeting(week: any): JWorgMeeting {
   };
 }
 
+// Cache TTL: 24 hours
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
 export const useJWorgIntegration = (): JWorgIntegration => {
   const { toast } = useToast();
   const [currentLanguage, setCurrentLanguage] = useState<'pt' | 'en'>('pt');
@@ -88,42 +87,89 @@ export const useJWorgIntegration = (): JWorgIntegration => {
   const [rawWeeksData, setRawWeeksData] = useState<any[]>([]);
   const [dataSource, setDataSource] = useState<string | null>(null);
 
-  /** Fetch all weeks using fallback chain: Firecrawl → Cheerio → Mock */
-  const fetchAllWeeks = async (): Promise<void> => {
+  /** Try loading from the programas table first (cache) */
+  const loadFromCache = useCallback(async (): Promise<boolean> => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+
+      const cutoff = new Date(Date.now() - CACHE_TTL_MS).toISOString();
+
+      const { data: programs, error: dbError } = await supabase
+        .from('programas')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('updated_at', cutoff)
+        .order('data_inicio_semana', { ascending: true })
+        .limit(10);
+
+      if (dbError || !programs || programs.length === 0) return false;
+
+      console.log(`📦 Cache hit: ${programs.length} programs from DB`);
+      const meetings = programs.map(mapProgramToMeeting);
+      setCurrentWeek(meetings[0]);
+      setNextWeeks(meetings.slice(1, 4));
+      setDataSource('cache');
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  /** Auto-save fetched weeks to DB */
+  const autoSaveToDb = useCallback(async (weeks: any[]) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const result = await saveJWorgPrograms(weeks, user.id);
+      if (result.saved > 0) {
+        console.log(`💾 Auto-cached ${result.saved} programs to DB`);
+      }
+    } catch (err) {
+      console.warn('⚠️ Auto-cache failed:', err);
+    }
+  }, []);
+
+  /** Fetch all weeks: Cache → Firecrawl → Cheerio → Mock */
+  const fetchAllWeeks = useCallback(async (): Promise<void> => {
     setIsLoading(true);
     setError(null);
 
     try {
-      console.log('📡 Fetching JW.org content (Firecrawl → Cheerio → Mock)...');
+      // Step 1: Try cache
+      const cached = await loadFromCache();
+      if (cached) {
+        setIsLoading(false);
+        return;
+      }
+
+      // Step 2: Fetch from API
+      console.log('📡 Cache miss — fetching from JW.org...');
       const result = await fetchJWorgContent(currentLanguage);
 
       if (result.success && result.weeks && result.weeks.length > 0) {
         setRawWeeksData(result.weeks);
         setDataSource(result.source || 'firecrawl');
-
         setCurrentWeek(mapWeekToMeeting(result.weeks[0]));
         if (result.weeks.length > 1) {
           setNextWeeks(result.weeks.slice(1, 4).map(mapWeekToMeeting));
         }
         console.log(`✅ Loaded ${result.weeks.length} weeks from ${result.source || 'firecrawl'}`);
+
+        // Auto-save to DB for next time
+        autoSaveToDb(result.weeks);
       } else {
-        // Final fallback: mock data
-        console.log('⚠️ Using mock data as final fallback');
-        setCurrentWeek(mockCurrentWeek);
-        setNextWeeks(mockNextWeeks);
-        setRawWeeksData([]);
-        setDataSource('mock');
+        console.log('⚠️ No data from API, no cache available');
+        setDataSource('empty');
       }
     } catch (err) {
       console.error('❌ All fetch methods failed:', err);
       setError(`Erro ao carregar: ${err instanceof Error ? err.message : 'Erro desconhecido'}`);
-      setCurrentWeek(mockCurrentWeek);
-      setNextWeeks(mockNextWeeks);
-      setDataSource('mock');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentLanguage, loadFromCache, autoSaveToDb]);
 
   const fetchCurrentWeek = async (): Promise<void> => fetchAllWeeks();
   const fetchNextWeeks = async (): Promise<void> => fetchAllWeeks();
@@ -142,6 +188,7 @@ export const useJWorgIntegration = (): JWorgIntegration => {
         if (result.weeks.length > 1) {
           setNextWeeks(result.weeks.slice(1, 4).map(mapWeekToMeeting));
         }
+        autoSaveToDb(result.weeks);
         console.log(`✅ Workbook downloaded: ${result.weeks.length} weeks`);
       } else {
         throw new Error('No weeks found');
@@ -170,7 +217,6 @@ export const useJWorgIntegration = (): JWorgIntegration => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuário não autenticado');
 
-      console.log(`💾 Saving ${rawWeeksData.length} programs...`);
       const result = await saveJWorgPrograms(rawWeeksData, user.id);
 
       if (result.success && result.saved > 0) {
