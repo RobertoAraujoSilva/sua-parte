@@ -1,32 +1,78 @@
 
 
-# Fazer o Firecrawl buscar dados atualizados do JW.org conforme idioma
+# O que falta para ir para produção
 
-## Situacao Atual
+## Estado atual
 
-A Edge Function `firecrawl-jworg` ja existe e esta correta -- ela recebe `{ language }`, monta a URL correspondente, chama Firecrawl, parseia o markdown e retorna `ParsedWeek[]`. O hook `useJWorgIntegration` e o API helper `firecrawl-jworg.ts` tambem ja estao implementados com a cadeia de fallback (Firecrawl -> Cheerio -> Mock).
+O projeto está **~90% completo** segundo a auditoria do plano. A maioria das funcionalidades (autenticação, RBAC, dashboards, designações, importação/exportação, RLS, CI/CD) já está implementada.
 
-Porem, ha um bug: quando o usuario muda o idioma via `setLanguage()`, os dados **nao sao rebuscados**. O `useEffect` so roda na montagem (sem dependencia de `currentLanguage`).
+## Problemas críticos a resolver
 
-## Plano
+### 1. Credenciais e segurança expostas no código
+**Prioridade: URGENTE**
 
-### 1. Corrigir re-fetch ao mudar idioma no hook
+- `scripts/setup-github-secrets.md` contém senhas em texto puro (`13a21r15`) e emails reais
+- `scripts/README.md` contém credenciais de teste
+- `.env` contém chaves de um projeto Supabase antigo (`nwpuurgw...`) que não é o projeto Cloud atual (`plusukkkqhhlkvikhhfi`)
+- `src/utils/emergencyLogout.ts` e `src/utils/forceLogout.ts` referenciam o projeto Supabase antigo (`sb-nwpuurgwnnuejqinkvrh-auth-token`)
 
-No `src/hooks/useJWorgIntegration.ts`:
-- Adicionar `currentLanguage` como dependencia do `useEffect` para que ao mudar o idioma, o sistema automaticamente busque novos dados do JW.org na lingua selecionada
-- Isso garante que `fetchAllWeeks()` sera chamado novamente com o idioma correto
+**Ação:** Remover credenciais dos arquivos versionados, atualizar referências hardcoded para usar o projeto Cloud correto.
 
-### 2. Mostrar fonte de dados e idioma na UI de teste
+### 2. Backend Node.js incompatível com Lovable
+**Prioridade: ALTA**
 
-No `src/components/JWorgTest.tsx`:
-- Adicionar display do `dataSource` (firecrawl/cheerio/mock) para o usuario saber de onde vieram os dados
-- Adicionar botoes para alternar idioma (PT/EN) que chamam `setLanguage()`
-- Isso permite testar facilmente se o Firecrawl esta buscando dados nas duas linguas
+- O diretório `backend/` contém um servidor Express que **não pode rodar** no Lovable (apenas frontend + Edge Functions)
+- `src/hooks/useMaterials.ts` faz fetch para `http://localhost:3001` — vai quebrar em produção
+- `src/hooks/usePDFProgramming.ts` depende de `VITE_API_BASE` apontando para backend local
 
-### Arquivos a modificar
+**Ação:** Migrar endpoints necessários para Edge Functions ou remover código de backend que não será usado, substituindo por chamadas diretas ao banco ou Edge Functions.
 
-| Arquivo | Mudanca |
-|---------|---------|
-| `src/hooks/useJWorgIntegration.ts` | Adicionar `currentLanguage` no `useEffect` deps |
-| `src/components/JWorgTest.tsx` | Adicionar seletor de idioma e indicador de fonte |
+### 3. Storage bucket não existe
+**Prioridade: ALTA**
+
+- O bucket `programas` (para upload de PDFs) não foi criado no projeto Cloud atual
+- Docs mencionam necessidade de criação manual
+
+**Ação:** Criar o storage bucket via migração.
+
+### 4. Referências hardcoded ao Supabase antigo
+**Prioridade: MÉDIA**
+
+- `emergencyLogout.ts` e `forceLogout.ts` referenciam `sb-nwpuurgwnnuejqinkvrh` em vez do projeto Cloud atual
+- Precisam ser atualizados para funcionar corretamente
+
+**Ação:** Substituir pelo projeto correto ou usar pattern genérico.
+
+## Itens pendentes do plano (não-bloqueantes)
+
+Estes itens estão marcados como incompletos mas **não bloqueiam** produção:
+
+- 4.4 Busca global/navegação avançada
+- 8.1 REST API + OpenAPI
+- 8.4 Monitoring API
+- 9.1 Unit tests
+- 11.1 UI de geração ligada ao engine
+
+## Checklist resumido para produção
+
+| Item | Status | Bloqueante? |
+|------|--------|-------------|
+| Remover credenciais expostas nos docs/scripts | Pendente | Sim |
+| Limpar referências ao Supabase antigo | Pendente | Sim |
+| Resolver `useMaterials.ts` (localhost hardcoded) | Pendente | Sim |
+| Resolver `usePDFProgramming.ts` (backend dependence) | Pendente | Sim |
+| Criar storage bucket `programas` | Pendente | Sim |
+| Remover `ProductionDebugPanel` em prod | OK (já tem check `import.meta.env.DEV`) | Não |
+| RLS policies | Implementadas | Não |
+| Autenticação + RBAC | Implementado | Não |
+| Edge Functions (Firecrawl, JW.org) | Implementadas | Não |
+
+## Plano de ação (ordem sugerida)
+
+1. **Limpar segurança**: remover senhas/credenciais de arquivos versionados
+2. **Atualizar referências Supabase**: corrigir `emergencyLogout.ts`, `forceLogout.ts` para projeto Cloud
+3. **Criar storage bucket** `programas` no Cloud
+4. **Migrar ou remover backend**: substituir `useMaterials` e `usePDFProgramming` por Edge Functions ou chamadas diretas ao Supabase
+5. **Testar fluxos principais**: login, dashboard, designações, upload PDF
+6. **Publicar** via botão Publish do Lovable
 
