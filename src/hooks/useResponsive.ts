@@ -71,7 +71,7 @@ export const useResponsive = (): ScreenInfo => {
     };
 
     // Debounce resize events
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     const debouncedHandleResize = () => {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(handleResize, 150);

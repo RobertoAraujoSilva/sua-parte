@@ -109,7 +109,7 @@ export function createSafeQuery<T>(
  * Debounce utility to prevent excessive API calls
  */
 export function createDebouncer(delay: number = 1000) {
-  let timeoutId: NodeJS.Timeout | null = null;
+  let timeoutId: ReturnType<typeof setTimeout> | null = null;
   let lastCallTime = 0;
 
   return function<T extends (...args: any[]) => any>(fn: T): T {
