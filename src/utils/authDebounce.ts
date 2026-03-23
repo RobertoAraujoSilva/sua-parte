@@ -5,7 +5,7 @@
 
 interface DebouncedOperation {
   lastCall: number;
-  timeout?: NodeJS.Timeout;
+  timeout?: ReturnType<typeof setTimeout>;
   inProgress: boolean;
 }
 

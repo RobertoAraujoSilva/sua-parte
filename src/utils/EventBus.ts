@@ -45,7 +45,7 @@ class EventBusClass {
 
   constructor() {
     // Enable debug mode in development
-    this.debugMode = process.env.NODE_ENV === 'development';
+    this.debugMode = import.meta.env.DEV;
   }
 
   // Subscribe to an event

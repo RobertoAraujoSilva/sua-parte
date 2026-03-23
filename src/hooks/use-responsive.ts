@@ -98,7 +98,7 @@ export function useResponsive(): BreakpointState {
     if (typeof window === 'undefined') return;
 
     // Debounce resize events to improve performance
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     
     const debouncedUpdate = () => {
       clearTimeout(timeoutId);
