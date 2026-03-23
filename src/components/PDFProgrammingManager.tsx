@@ -260,26 +260,16 @@ function ProgrammingView({
           <div key={week.weekNumber} className="p-3 border rounded-lg bg-white">
             <div className="flex items-center justify-between">
               <div>
-                <h5 className="font-medium">{week.title}</h5>
+                <h5 className="font-medium">Semana {week.weekNumber}</h5>
                 <p className="text-sm text-muted-foreground">
                   {week.startDate} - {week.endDate}
                 </p>
                 <div className="flex gap-2 mt-1">
-                  <Badge variant="outline" className="text-xs">
-                    {week.sections.opening.length} Abertura
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {week.sections.treasures.length} Tesouros
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {week.sections.ministry.length} Ministério
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {week.sections.living.length} Vida Cristã
-                  </Badge>
-                  <Badge variant="outline" className="text-xs">
-                    {week.sections.closing.length} Encerramento
-                  </Badge>
+                  {week.sections.map((section, i) => (
+                    <Badge key={i} variant="outline" className="text-xs">
+                      {section.parts.length} {section.name}
+                    </Badge>
+                  ))}
                 </div>
               </div>
               <div className="flex space-x-2">
