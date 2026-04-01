@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface Material {
   filename: string;
@@ -7,6 +8,7 @@ export interface Material {
   sizeFormatted: string;
   modifiedAt: string;
   path: string;
+  signedUrl?: string;
 }
 
 interface UseMaterials {
@@ -24,27 +26,43 @@ const formatSize = (bytes: number): string => {
 };
 
 export const useMaterials = (): UseMaterials => {
+  const { user } = useAuth();
   const [materials, setMaterials] = useState<Material[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const listMaterials = useCallback(async () => {
+    if (!user) return;
     setIsLoading(true);
     setError(null);
     try {
+      // List files inside the user's own folder
+      const userFolder = user.id;
       const { data, error: storageError } = await supabase.storage
         .from('programas')
-        .list('', { limit: 100 });
+        .list(userFolder, { limit: 100 });
 
       if (storageError) throw storageError;
 
-      const mapped: Material[] = (data || []).map(file => ({
-        filename: file.name,
-        size: file.metadata?.size || 0,
-        sizeFormatted: formatSize(file.metadata?.size || 0),
-        modifiedAt: file.updated_at || file.created_at || '',
-        path: file.name,
-      }));
+      const files = data || [];
+      const mapped: Material[] = [];
+
+      for (const file of files) {
+        const filePath = `${userFolder}/${file.name}`;
+        // Generate a signed URL (valid for 1 hour)
+        const { data: urlData } = await supabase.storage
+          .from('programas')
+          .createSignedUrl(filePath, 3600);
+
+        mapped.push({
+          filename: file.name,
+          size: file.metadata?.size || 0,
+          sizeFormatted: formatSize(file.metadata?.size || 0),
+          modifiedAt: file.updated_at || file.created_at || '',
+          path: filePath,
+          signedUrl: urlData?.signedUrl,
+        });
+      }
 
       setMaterials(mapped);
     } catch (err) {
@@ -53,11 +71,9 @@ export const useMaterials = (): UseMaterials => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [user]);
 
   const syncAllMaterials = useCallback(async () => {
-    // In production, materials are managed via storage bucket directly
-    // No backend sync needed
     await listMaterials();
   }, [listMaterials]);
 
