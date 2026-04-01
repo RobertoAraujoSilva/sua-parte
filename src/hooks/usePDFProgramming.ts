@@ -13,6 +13,7 @@ export interface PDFFile {
   isValid: boolean;
   reason?: string;
   dateCode?: string;
+  signedUrl?: string;
 }
 
 export interface PartDetails {
@@ -54,6 +55,7 @@ export interface LoadingState {
 
 /**
  * Hook para gerenciar PDFs de programação via Supabase Storage
+ * Files are stored under {user_id}/{filename} for RLS scoping.
  */
 export function usePDFProgramming() {
   const [availablePDFs, setAvailablePDFs] = useState<PDFFile[]>([]);
@@ -70,29 +72,39 @@ export function usePDFProgramming() {
     setError(null);
     
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Não autenticado');
+
+      const userFolder = user.id;
       const { data, error: storageError } = await supabase.storage
         .from('programas')
-        .list('', { limit: 100 });
+        .list(userFolder, { limit: 100 });
 
       if (storageError) throw storageError;
 
-      const pdfs: PDFFile[] = (data || [])
-        .filter(f => f.name.endsWith('.pdf'))
-        .map(f => {
-          const match = f.name.match(/mwb_([A-Z])_(\d{4})(\d{2})/);
-          const lang = match?.[1] === 'T' ? 'pt' : 'en';
-          const year = match ? parseInt(match[2]) : 0;
-          const month = match ? parseInt(match[3]) : 0;
-          return {
-            fileName: f.name,
-            filePath: f.name,
-            size: f.metadata?.size || 0,
-            lastModified: f.updated_at || f.created_at || '',
-            language: lang as 'pt' | 'en',
-            year, month,
-            isValid: !!match,
-          };
+      const pdfs: PDFFile[] = [];
+      for (const f of (data || []).filter(f => f.name.endsWith('.pdf'))) {
+        const match = f.name.match(/mwb_([A-Z])_(\d{4})(\d{2})/);
+        const lang = match?.[1] === 'T' ? 'pt' : 'en';
+        const year = match ? parseInt(match[2]) : 0;
+        const month = match ? parseInt(match[3]) : 0;
+        const filePath = `${userFolder}/${f.name}`;
+
+        const { data: urlData } = await supabase.storage
+          .from('programas')
+          .createSignedUrl(filePath, 3600);
+
+        pdfs.push({
+          fileName: f.name,
+          filePath,
+          size: f.metadata?.size || 0,
+          lastModified: f.updated_at || f.created_at || '',
+          language: lang as 'pt' | 'en',
+          year, month,
+          isValid: !!match,
+          signedUrl: urlData?.signedUrl,
         });
+      }
 
       setAvailablePDFs(pdfs);
     } catch (err) {
