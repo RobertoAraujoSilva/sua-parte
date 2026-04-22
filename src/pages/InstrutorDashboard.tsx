@@ -30,6 +30,39 @@ const PERIODO_TO_DATE: Record<string, string> = {
 const dataParaSemana = (periodo: string): string =>
   PERIODO_TO_DATE[periodo] ?? new Date().toISOString().split('T')[0];
 
+// Group flat parts list returned by Firecrawl into the secao-based structure used by ProgramacaoViewer
+function agruparPartesPorSecao(parts: any[]): Semana['programacao'] {
+  const secoes: Record<string, Parte[]> = {
+    'Tesouros da Palavra de Deus': [],
+    'Faça Seu Melhor no Ministério': [],
+    'Nossa Vida Cristã': [],
+  };
+
+  parts.forEach((p, idx) => {
+    const parte: Parte = {
+      id: `jw_${idx}_${p.id ?? idx}`,
+      titulo: p.title || 'Sem título',
+      duracao: Number(p.duration) || 0,
+      tipo: p.type || 'consideracao',
+      referencias: Array.isArray(p.references) ? p.references : [],
+      designado: null,
+    };
+
+    const sec = (p.section || '').toLowerCase();
+    if (sec.includes('tesouro') || sec.includes('treasure')) {
+      secoes['Tesouros da Palavra de Deus'].push(parte);
+    } else if (sec.includes('ministério') || sec.includes('ministry') || sec.includes('ministerio')) {
+      secoes['Faça Seu Melhor no Ministério'].push(parte);
+    } else {
+      secoes['Nossa Vida Cristã'].push(parte);
+    }
+  });
+
+  return Object.entries(secoes)
+    .filter(([, partes]) => partes.length > 0)
+    .map(([secao, partes]) => ({ secao, partes }));
+}
+
 export default function InstrutorDashboard() {
   const { toast } = useToast();
   const navigate = useNavigate();
