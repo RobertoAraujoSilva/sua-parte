@@ -3,13 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Clock, Users, Save, Home, BookOpen, Download } from 'lucide-react';
+import { Calendar, Clock, Users, Save, Home, BookOpen, Download, RefreshCw, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ProgramacaoViewer, type DesignacaoLocal, type Parte, type Semana } from '@/components/ProgramacaoViewer';
 import { useEstudantes } from '@/hooks/useEstudantes';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchJWorgContent } from '@/lib/api/firecrawl-jworg';
 import programacaoData from '@/data/programacoes-completas-2025.json';
 
 // Approximate Monday date for each "periodo" string in the JSON.
