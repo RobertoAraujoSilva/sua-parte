@@ -36,9 +36,12 @@ export default function InstrutorDashboard() {
   const { user } = useAuth();
   const { estudantes, isLoading: estudantesLoading } = useEstudantes();
 
-  const semanas = (programacaoData as { semanas: Semana[] }).semanas;
+  const semanasIniciais = (programacaoData as { semanas: Semana[] }).semanas;
+  const [semanas, setSemanas] = useState<Semana[]>(semanasIniciais);
   const [designacoes, setDesignacoes] = useState<DesignacaoLocal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastSync, setLastSync] = useState<string | null>(null);
 
   const carregarDesignacoes = useCallback(async () => {
     if (!user?.id) return;
