@@ -68,46 +68,21 @@ const FlowNav: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  
-  // Hide FlowNav on /bem-vindo to avoid conflicts with page's own CTAs
+
   if (location.pathname === '/bem-vindo') return null;
-  
-  const onboardingSteps = ["/bem-vindo", "/configuracao-inicial", "/estudantes", "/programas", "/designacoes"] as const;
-  const postOnboardingSteps = ["/dashboard", "/estudantes", "/programas", "/designacoes"] as const;
-  
+
+  const onboardingSteps = ["/bem-vindo", "/configuracao-inicial", "/estudantes", "/dashboard"] as const;
+
   const labels: Record<string, string> = {
     "/bem-vindo": t('initialSetup.title') || "Configuração",
-    "/configuracao-inicial": t('common.students') || "Estudantes", 
-    "/estudantes": t('common.programs') || "Programas",
-    "/programas": t('common.assignments') || "Designações",
-    "/dashboard": t('common.students') || "Estudantes",
+    "/configuracao-inicial": t('common.students') || "Estudantes",
+    "/estudantes": t('common.dashboard') || "Dashboard",
   };
 
-  // Check onboarding steps first
   const onboardingIdx = onboardingSteps.indexOf(location.pathname as typeof onboardingSteps[number]);
-  if (onboardingIdx !== -1 && onboardingIdx < onboardingSteps.length - 1) {
-    const nextPath = onboardingSteps[onboardingIdx + 1];
-    const nextLabel = labels[location.pathname] || t('common.next') || "Próximo";
-    
-    return (
-      <div
-        className="fixed inset-x-4 sm:inset-auto sm:right-6 sm:left-auto z-50"
-        style={{ bottom: 'max(env(safe-area-inset-bottom, 0px), 24px)' }}
-      >
-        <div className="flex justify-center sm:justify-end">
-          <Button size="lg" className="w-full sm:w-auto shadow-lg" onClick={() => navigate(nextPath)}>
-            {t('navigation.continueTo', { label: nextLabel })}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  
-  // Check post-onboarding steps
-  const postIdx = postOnboardingSteps.indexOf(location.pathname as typeof postOnboardingSteps[number]);
-  if (postIdx === -1 || postIdx === postOnboardingSteps.length - 1) return null;
+  if (onboardingIdx === -1 || onboardingIdx >= onboardingSteps.length - 1) return null;
 
-  const nextPath = postOnboardingSteps[postIdx + 1];
+  const nextPath = onboardingSteps[onboardingIdx + 1];
   const nextLabel = labels[location.pathname] || t('common.next') || "Próximo";
 
   return (
