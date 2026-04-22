@@ -143,108 +143,37 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="/primeiro-programa"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <PrimeiroPrograma />
-                    </ProtectedRoute>
-                  }
-                />
-
-
-                {/* Debug Routes - Only in development */}
-                {import.meta.env.DEV && (
-                  <>
-                    {/* Debug routes removed */}
-                  </>
-                )}
 
                 {/* Dashboard Principal - Rota única consolidada */}
-                <Route 
-                  path="/dashboard" 
+                <Route
+                  path="/dashboard"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
                       <InstrutorDashboard />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/portal" 
+                <Route
+                  path="/portal"
                   element={
                     <ProtectedRoute allowedRoles={['estudante']}>
                       <EstudantePortal />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/importar-programacao" 
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <ImportarProgramacao />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/estudantes" 
+                <Route
+                  path="/estudantes"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
                       <Estudantes />
                     </ProtectedRoute>
-                  } 
-                />
-                <Route
-                  path="/programas"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Programas />
-                    </ProtectedRoute>
                   }
                 />
-                {/* Test Routes - Only in development */}
-                {import.meta.env.DEV && (
-                  <>
-                    <Route
-                      path="/programas-test"
-                      element={
-                        <ProtectedRoute allowedRoles={['instrutor']}>
-                          <ProgramasTest />
-                        </ProtectedRoute>
-                      }
-                    />
-                  </>
-                )}
                 <Route
                   path="/relatorios"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
                       <Relatorios />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/reunioes"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Reunioes />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/designacoes"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Designacoes />
-                    </ProtectedRoute>
-                  }
-                />
-                
-                {/* Admin Routes */}
-                <Route
-                  path="/admin/programas"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <ProgramasDashboard />
                     </ProtectedRoute>
                   }
                 />
