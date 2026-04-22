@@ -302,6 +302,11 @@ export default function InstrutorDashboard() {
           <p className="text-muted-foreground">
             Visualize a programação oficial e designe estudantes para cada parte da reunião.
           </p>
+          {lastSync && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Última atualização do JW.org: {lastSync}
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
