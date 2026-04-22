@@ -14,11 +14,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import { LanguageDebug } from "@/components/LanguageDebug";
 import Demo from "./pages/Demo";
-import ProgramasTest from "./pages/ProgramasTest";
-import Programas from "./pages/Programas";
 import Relatorios from "./pages/Relatorios";
-import Reunioes from "./pages/Reunioes";
-import Designacoes from "./pages/Designacoes";
 import FamiliaPage from "./pages/estudante/[id]/familia";
 import Funcionalidades from "./pages/Funcionalidades";
 import Congregacoes from "./pages/Congregacoes";
@@ -27,16 +23,13 @@ import Sobre from "./pages/Sobre";
 import Doar from "./pages/Doar";
 import BemVindo from "./pages/BemVindo";
 import ConfiguracaoInicial from "./pages/ConfiguracaoInicial";
-import PrimeiroPrograma from "./pages/PrimeiroPrograma";
 
 import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
 import InstrutorDashboard from "./pages/InstrutorDashboard";
 import { EstudantePortal } from "./pages/EstudantePortal";
-import { ImportarProgramacao } from "./pages/ImportarProgramacao";
 import Estudantes from "./pages/Estudantes";
-import ProgramasDashboard from "./pages/admin/ProgramasDashboard";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import SequentialFlow from "./components/SequentialFlow";
@@ -75,46 +68,21 @@ const FlowNav: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  
-  // Hide FlowNav on /bem-vindo to avoid conflicts with page's own CTAs
+
   if (location.pathname === '/bem-vindo') return null;
-  
-  const onboardingSteps = ["/bem-vindo", "/configuracao-inicial", "/estudantes", "/programas", "/designacoes"] as const;
-  const postOnboardingSteps = ["/dashboard", "/estudantes", "/programas", "/designacoes"] as const;
-  
+
+  const onboardingSteps = ["/bem-vindo", "/configuracao-inicial", "/estudantes", "/dashboard"] as const;
+
   const labels: Record<string, string> = {
     "/bem-vindo": t('initialSetup.title') || "Configuração",
-    "/configuracao-inicial": t('common.students') || "Estudantes", 
-    "/estudantes": t('common.programs') || "Programas",
-    "/programas": t('common.assignments') || "Designações",
-    "/dashboard": t('common.students') || "Estudantes",
+    "/configuracao-inicial": t('common.students') || "Estudantes",
+    "/estudantes": t('common.dashboard') || "Dashboard",
   };
 
-  // Check onboarding steps first
   const onboardingIdx = onboardingSteps.indexOf(location.pathname as typeof onboardingSteps[number]);
-  if (onboardingIdx !== -1 && onboardingIdx < onboardingSteps.length - 1) {
-    const nextPath = onboardingSteps[onboardingIdx + 1];
-    const nextLabel = labels[location.pathname] || t('common.next') || "Próximo";
-    
-    return (
-      <div
-        className="fixed inset-x-4 sm:inset-auto sm:right-6 sm:left-auto z-50"
-        style={{ bottom: 'max(env(safe-area-inset-bottom, 0px), 24px)' }}
-      >
-        <div className="flex justify-center sm:justify-end">
-          <Button size="lg" className="w-full sm:w-auto shadow-lg" onClick={() => navigate(nextPath)}>
-            {t('navigation.continueTo', { label: nextLabel })}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  
-  // Check post-onboarding steps
-  const postIdx = postOnboardingSteps.indexOf(location.pathname as typeof postOnboardingSteps[number]);
-  if (postIdx === -1 || postIdx === postOnboardingSteps.length - 1) return null;
+  if (onboardingIdx === -1 || onboardingIdx >= onboardingSteps.length - 1) return null;
 
-  const nextPath = postOnboardingSteps[postIdx + 1];
+  const nextPath = onboardingSteps[onboardingIdx + 1];
   const nextLabel = labels[location.pathname] || t('common.next') || "Próximo";
 
   return (
@@ -175,108 +143,37 @@ const App = () => (
                     </ProtectedRoute>
                   }
                 />
-                <Route
-                  path="/primeiro-programa"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <PrimeiroPrograma />
-                    </ProtectedRoute>
-                  }
-                />
-
-
-                {/* Debug Routes - Only in development */}
-                {import.meta.env.DEV && (
-                  <>
-                    {/* Debug routes removed */}
-                  </>
-                )}
 
                 {/* Dashboard Principal - Rota única consolidada */}
-                <Route 
-                  path="/dashboard" 
+                <Route
+                  path="/dashboard"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
                       <InstrutorDashboard />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/portal" 
+                <Route
+                  path="/portal"
                   element={
                     <ProtectedRoute allowedRoles={['estudante']}>
                       <EstudantePortal />
                     </ProtectedRoute>
-                  } 
+                  }
                 />
-                <Route 
-                  path="/importar-programacao" 
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <ImportarProgramacao />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/estudantes" 
+                <Route
+                  path="/estudantes"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
                       <Estudantes />
                     </ProtectedRoute>
-                  } 
-                />
-                <Route
-                  path="/programas"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Programas />
-                    </ProtectedRoute>
                   }
                 />
-                {/* Test Routes - Only in development */}
-                {import.meta.env.DEV && (
-                  <>
-                    <Route
-                      path="/programas-test"
-                      element={
-                        <ProtectedRoute allowedRoles={['instrutor']}>
-                          <ProgramasTest />
-                        </ProtectedRoute>
-                      }
-                    />
-                  </>
-                )}
                 <Route
                   path="/relatorios"
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
                       <Relatorios />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/reunioes"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Reunioes />
-                    </ProtectedRoute>
-                  }
-                />
-                <Route
-                  path="/designacoes"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <Designacoes />
-                    </ProtectedRoute>
-                  }
-                />
-                
-                {/* Admin Routes */}
-                <Route
-                  path="/admin/programas"
-                  element={
-                    <ProtectedRoute allowedRoles={['instrutor']}>
-                      <ProgramasDashboard />
                     </ProtectedRoute>
                   }
                 />
