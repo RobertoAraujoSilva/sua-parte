@@ -45,7 +45,6 @@ function agruparPartesPorSecao(parts: any[]): Semana['programacao'] {
       duracao: Number(p.duration) || 0,
       tipo: p.type || 'consideracao',
       referencias: Array.isArray(p.references) ? p.references : [],
-      designado: null,
     };
 
     const sec = (p.section || '').toLowerCase();
