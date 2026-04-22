@@ -3,13 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Clock, Users, Save, Home, BookOpen, Download } from 'lucide-react';
+import { Calendar, Clock, Users, Save, Home, BookOpen, Download, RefreshCw, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ProgramacaoViewer, type DesignacaoLocal, type Parte, type Semana } from '@/components/ProgramacaoViewer';
 import { useEstudantes } from '@/hooks/useEstudantes';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { fetchJWorgContent } from '@/lib/api/firecrawl-jworg';
 import programacaoData from '@/data/programacoes-completas-2025.json';
 
 // Approximate Monday date for each "periodo" string in the JSON.
@@ -29,15 +30,50 @@ const PERIODO_TO_DATE: Record<string, string> = {
 const dataParaSemana = (periodo: string): string =>
   PERIODO_TO_DATE[periodo] ?? new Date().toISOString().split('T')[0];
 
+// Group flat parts list returned by Firecrawl into the secao-based structure used by ProgramacaoViewer
+function agruparPartesPorSecao(parts: any[]): Semana['programacao'] {
+  const secoes: Record<string, Parte[]> = {
+    'Tesouros da Palavra de Deus': [],
+    'Faça Seu Melhor no Ministério': [],
+    'Nossa Vida Cristã': [],
+  };
+
+  parts.forEach((p, idx) => {
+    const parte: Parte = {
+      id: `jw_${idx}_${p.id ?? idx}`,
+      titulo: p.title || 'Sem título',
+      duracao: Number(p.duration) || 0,
+      tipo: p.type || 'consideracao',
+      referencias: Array.isArray(p.references) ? p.references : [],
+    };
+
+    const sec = (p.section || '').toLowerCase();
+    if (sec.includes('tesouro') || sec.includes('treasure')) {
+      secoes['Tesouros da Palavra de Deus'].push(parte);
+    } else if (sec.includes('ministério') || sec.includes('ministry') || sec.includes('ministerio')) {
+      secoes['Faça Seu Melhor no Ministério'].push(parte);
+    } else {
+      secoes['Nossa Vida Cristã'].push(parte);
+    }
+  });
+
+  return Object.entries(secoes)
+    .filter(([, partes]) => partes.length > 0)
+    .map(([secao, partes]) => ({ secao, partes }));
+}
+
 export default function InstrutorDashboard() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { estudantes, isLoading: estudantesLoading } = useEstudantes();
 
-  const semanas = (programacaoData as { semanas: Semana[] }).semanas;
+  const semanasIniciais = (programacaoData as { semanas: Semana[] }).semanas;
+  const [semanas, setSemanas] = useState<Semana[]>(semanasIniciais);
   const [designacoes, setDesignacoes] = useState<DesignacaoLocal[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastSync, setLastSync] = useState<string | null>(null);
 
   const carregarDesignacoes = useCallback(async () => {
     if (!user?.id) return;
@@ -156,6 +192,46 @@ export default function InstrutorDashboard() {
     }
   };
 
+  const atualizarDoJWorg = async () => {
+    setRefreshing(true);
+    try {
+      const result = await fetchJWorgContent('pt');
+      if (!result.success || !result.weeks?.length) {
+        throw new Error(result.error || 'Nenhuma semana retornada do JW.org');
+      }
+
+      // Map Firecrawl weeks to our Semana shape
+      const semanasJWorg: Semana[] = result.weeks.map((w: any, idx: number) => ({
+        periodo: w.dateRange || w.week || `Semana ${idx + 1}`,
+        tema: w.week || w.bibleReading || '',
+        cantico_abertura: String(w.songs?.opening ?? ''),
+        cantico_meio: String(w.songs?.middle ?? ''),
+        cantico_encerramento: String(w.songs?.closing ?? ''),
+        programacao: agruparPartesPorSecao(w.parts || []),
+      }));
+
+      // Merge: JW.org weeks first, fallback static weeks for the rest
+      const periodosJW = new Set(semanasJWorg.map((s) => s.periodo));
+      const estaticasFiltradas = semanasIniciais.filter((s) => !periodosJW.has(s.periodo));
+      setSemanas([...semanasJWorg, ...estaticasFiltradas]);
+      setLastSync(new Date().toLocaleString('pt-BR'));
+
+      toast({
+        title: 'Programação atualizada',
+        description: `${semanasJWorg.length} semana(s) carregada(s) do JW.org via ${result.source ?? 'Firecrawl'}.`,
+      });
+    } catch (err) {
+      console.error('Erro ao atualizar do JW.org:', err);
+      toast({
+        title: 'Falha ao atualizar',
+        description: err instanceof Error ? err.message : 'Tente novamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const exportarDesignacoes = () => {
     const blob = new Blob([JSON.stringify(designacoes, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -204,6 +280,14 @@ export default function InstrutorDashboard() {
               <Users className="h-4 w-4 mr-2" />
               Estudantes ({estudantes.length})
             </Button>
+            <Button variant="outline" size="sm" onClick={atualizarDoJWorg} disabled={refreshing}>
+              {refreshing ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Atualizar do JW.org
+            </Button>
             <Button variant="outline" size="sm" onClick={exportarDesignacoes} disabled={!designacoes.length}>
               <Download className="h-4 w-4 mr-2" />
               Exportar
@@ -218,6 +302,11 @@ export default function InstrutorDashboard() {
           <p className="text-muted-foreground">
             Visualize a programação oficial e designe estudantes para cada parte da reunião.
           </p>
+          {lastSync && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Última atualização do JW.org: {lastSync}
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
