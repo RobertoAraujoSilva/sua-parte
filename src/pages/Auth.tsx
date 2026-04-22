@@ -224,21 +224,21 @@ const AuthPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 flex flex-col overflow-x-hidden">
       {/* Header */}
-      <header className="w-full p-6">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-3">
-            <div className="p-2 rounded-lg bg-primary text-primary-foreground">
-              <Church className="h-6 w-6" />
+      <header className="w-full p-3 sm:p-6">
+        <div className="max-w-6xl mx-auto flex flex-wrap gap-3 justify-between items-center">
+          <div className="flex items-center space-x-3 min-w-0 flex-1">
+            <div className="p-2 rounded-lg bg-primary text-primary-foreground shrink-0">
+              <Church className="h-5 w-5 sm:h-6 sm:w-6" />
             </div>
-            <div>
-              <h1 className="font-bold text-xl text-gray-900">Sistema Ministerial</h1>
-              <p className="text-sm text-gray-600">Gestão da Escola do Ministério Teocrático</p>
+            <div className="min-w-0">
+              <h1 className="font-bold text-base sm:text-xl text-gray-900 truncate">Sistema Ministerial</h1>
+              <p className="text-xs sm:text-sm text-gray-600 truncate">Gestão da Escola do Ministério Teocrático</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4 shrink-0">
             <LanguageSwitch />
             <Button 
               variant="ghost" 
@@ -247,14 +247,14 @@ const AuthPage: React.FC = () => {
               className="flex items-center gap-2"
             >
               <Home className="h-4 w-4" />
-              {t('navigation.home')}
+              <span className="hidden sm:inline">{t('navigation.home')}</span>
             </Button>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center px-6">
+      <main className="flex-1 flex items-center justify-center px-3 sm:px-6 pb-6">
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="space-y-2 text-center pb-4">
             <CardTitle className="text-2xl font-bold">
