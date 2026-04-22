@@ -14,11 +14,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import { LanguageDebug } from "@/components/LanguageDebug";
 import Demo from "./pages/Demo";
-import ProgramasTest from "./pages/ProgramasTest";
-import Programas from "./pages/Programas";
 import Relatorios from "./pages/Relatorios";
-import Reunioes from "./pages/Reunioes";
-import Designacoes from "./pages/Designacoes";
 import FamiliaPage from "./pages/estudante/[id]/familia";
 import Funcionalidades from "./pages/Funcionalidades";
 import Congregacoes from "./pages/Congregacoes";
@@ -27,16 +23,13 @@ import Sobre from "./pages/Sobre";
 import Doar from "./pages/Doar";
 import BemVindo from "./pages/BemVindo";
 import ConfiguracaoInicial from "./pages/ConfiguracaoInicial";
-import PrimeiroPrograma from "./pages/PrimeiroPrograma";
 
 import NotFound from "./pages/NotFound";
 import ConviteAceitar from "./pages/convite/aceitar";
 import PortalFamiliar from "./pages/PortalFamiliar";
 import InstrutorDashboard from "./pages/InstrutorDashboard";
 import { EstudantePortal } from "./pages/EstudantePortal";
-import { ImportarProgramacao } from "./pages/ImportarProgramacao";
 import Estudantes from "./pages/Estudantes";
-import ProgramasDashboard from "./pages/admin/ProgramasDashboard";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import SequentialFlow from "./components/SequentialFlow";
