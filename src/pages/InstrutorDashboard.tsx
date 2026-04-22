@@ -1,314 +1,238 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Clock, User, Users, Save, Home, BookOpen, Upload, Download, BarChart3 } from 'lucide-react';
+import { Calendar, Clock, Users, Save, Home, BookOpen, Download } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { ProgramacaoViewer } from '@/components/ProgramacaoViewer';
+import { ProgramacaoViewer, type DesignacaoLocal, type Parte, type Semana } from '@/components/ProgramacaoViewer';
 import { useEstudantes } from '@/hooks/useEstudantes';
-import { useBackendApi } from '@/hooks/useBackendApi';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import programacaoData from '@/data/programacoes-completas-2025.json';
 
-interface Programacao {
-  semana: string;
-  mesAno: string;
-  dataInicio: string;
-  dataFim: string;
-  partes: any[];
-}
+// Approximate Monday date for each "periodo" string in the JSON.
+// Used to populate `data_designacao` so portals can sort/filter by date.
+const PERIODO_TO_DATE: Record<string, string> = {
+  '8-14 de setembro 2025': '2025-09-08',
+  '15-21 de setembro 2025': '2025-09-15',
+  '22-28 de setembro 2025': '2025-09-22',
+  '29 de setembro – 5 de outubro 2025': '2025-09-29',
+  '6-12 de outubro 2025': '2025-10-06',
+  '13-19 de outubro 2025': '2025-10-13',
+  '20-26 de outubro 2025': '2025-10-20',
+  '27 de outubro – 2 de novembro 2025': '2025-10-27',
+  '3-9 de novembro 2025': '2025-11-03',
+};
 
-interface Designacao {
-  id: string;
-  idParte: string;
-  idEstudante: string;
-  idAjudante?: string;
-  semanaId: string;
-  tituloParte: string;
-  tipoParte: string;
-  tempoMinutos: number;
-  observacoes?: string;
-  createdAt: string;
-}
+const dataParaSemana = (periodo: string): string =>
+  PERIODO_TO_DATE[periodo] ?? new Date().toISOString().split('T')[0];
 
 export default function InstrutorDashboard() {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { apiCall } = useBackendApi();
+  const { user } = useAuth();
   const { estudantes, isLoading: estudantesLoading } = useEstudantes();
-  
-  const [programacoes, setProgramacoes] = useState<Programacao[]>([]);
-  const [designacoes, setDesignacoes] = useState<Designacao[]>([]);
+
+  const semanas = (programacaoData as { semanas: Semana[] }).semanas;
+  const [designacoes, setDesignacoes] = useState<DesignacaoLocal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [salvando, setSalvando] = useState(false);
 
-  // Carregar programações do Supabase
+  const carregarDesignacoes = useCallback(async () => {
+    if (!user?.id) return;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('designacoes')
+        .select('*')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      const mapped: DesignacaoLocal[] = (data ?? []).map((d) => ({
+        id: d.id,
+        parte_id: d.cena ?? '',
+        semana_periodo: (d as any).observacoes_semana ?? '',
+        id_estudante: d.id_estudante,
+        id_ajudante: d.id_ajudante,
+        titulo_parte: d.titulo_parte,
+        tipo_parte: d.tipo_parte,
+        tempo_minutos: d.tempo_minutos,
+      }));
+
+      // We store `parte_id` in the `cena` column and `semana_periodo`
+      // is encoded into `data_designacao` via PERIODO_TO_DATE lookup.
+      const semanaPorData = new Map<string, string>();
+      Object.entries(PERIODO_TO_DATE).forEach(([periodo, date]) => semanaPorData.set(date, periodo));
+
+      const enriched = mapped.map((d, i) => {
+        const raw = data![i];
+        return {
+          ...d,
+          semana_periodo: raw.data_designacao ? semanaPorData.get(raw.data_designacao) ?? '' : '',
+        };
+      });
+
+      setDesignacoes(enriched);
+    } catch (err) {
+      console.error('Erro ao carregar designações:', err);
+      toast({
+        title: 'Erro ao carregar designações',
+        description: err instanceof Error ? err.message : 'Tente novamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [user?.id, toast]);
+
   useEffect(() => {
-    const carregarProgramacoes = async () => {
-      try {
-        const response = await apiCall('/programas');
-        setProgramacoes(response.data || []);
-      } catch (error) {
-        console.error('Erro ao carregar programações:', error);
-        toast({
-          title: "Erro ao carregar programações",
-          description: "Não foi possível carregar as programações disponíveis.",
-          variant: "destructive"
-        });
-      }
-    };
-
-    carregarProgramacoes();
-  }, [apiCall, toast]);
-
-  // Carregar designações do Supabase
-  useEffect(() => {
-    const carregarDesignacoes = async () => {
-      try {
-        const response = await apiCall('/designacoes');
-        setDesignacoes(response.data || []);
-      } catch (error) {
-        console.error('Erro ao carregar designações:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     carregarDesignacoes();
-  }, [apiCall]);
+  }, [carregarDesignacoes]);
 
-  const handleDesignar = async (parteId: string, estudanteId: string, ajudanteId?: string) => {
+  const handleDesignar = async (parte: Parte, semana: Semana, estudanteId: string, ajudanteId?: string) => {
+    if (!user?.id) {
+      toast({ title: 'Sessão expirada', description: 'Faça login novamente.', variant: 'destructive' });
+      return;
+    }
+
     try {
-      // Encontrar a parte na programação para obter detalhes
-      let parteDetalhes = null;
-      for (const prog of programacoes) {
-        for (const parte of prog.partes) {
-          if (parte.id === parteId) {
-            parteDetalhes = { ...parte, semanaId: prog.semana };
-            break;
-          }
-        }
-      }
+      const { data, error } = await supabase
+        .from('designacoes')
+        .insert({
+          user_id: user.id,
+          id_estudante: estudanteId,
+          id_ajudante: ajudanteId ?? null,
+          titulo_parte: parte.titulo,
+          tipo_parte: parte.tipo ?? null,
+          tempo_minutos: parte.duracao,
+          data_designacao: dataParaSemana(semana.periodo),
+          cena: parte.id,
+        })
+        .select()
+        .single();
 
-      if (!parteDetalhes) {
-        throw new Error('Parte não encontrada');
-      }
+      if (error) throw error;
 
-      const designacao = {
-        idParte: parteId,
-        idEstudante: estudanteId,
-        idAjudante: ajudanteId,
-        semanaId: parteDetalhes.semanaId,
-        tituloParte: parteDetalhes.titulo,
-        tipoParte: parteDetalhes.tipo,
-        tempoMinutos: parteDetalhes.duracaoMin,
-        observacoes: ''
-      };
+      setDesignacoes((prev) => [
+        ...prev,
+        {
+          id: data.id,
+          parte_id: parte.id,
+          semana_periodo: semana.periodo,
+          id_estudante: estudanteId,
+          id_ajudante: ajudanteId ?? null,
+          titulo_parte: parte.titulo,
+          tipo_parte: parte.tipo ?? null,
+          tempo_minutos: parte.duracao,
+        },
+      ]);
 
-      await apiCall('/designacoes', {
-        method: 'POST',
-        body: JSON.stringify(designacao)
-      });
-
-      // Atualizar estado local
-      setDesignacoes(prev => [...prev, { ...designacao, id: Date.now().toString(), createdAt: new Date().toISOString() }]);
-
+      toast({ title: 'Designação realizada', description: 'Estudante designado com sucesso.' });
+    } catch (err) {
+      console.error('Erro ao designar:', err);
       toast({
-        title: "Designação realizada!",
-        description: "Estudante designado com sucesso para a parte.",
-      });
-    } catch (error) {
-      console.error('Erro ao designar:', error);
-      toast({
-        title: "Erro ao designar",
-        description: "Não foi possível realizar a designação. Tente novamente.",
-        variant: "destructive"
+        title: 'Erro ao designar',
+        description: err instanceof Error ? err.message : 'Tente novamente.',
+        variant: 'destructive',
       });
     }
   };
 
-  const handleRemoverDesignacao = async (parteId: string) => {
+  const handleRemover = async (designacaoId: string) => {
     try {
-      const designacao = designacoes.find(d => d.idParte === parteId);
-      if (!designacao) return;
-
-      await apiCall(`/designacoes/${designacao.id}`, {
-        method: 'DELETE'
-      });
-
-      setDesignacoes(prev => prev.filter(d => d.idParte !== parteId));
-
+      const { error } = await supabase.from('designacoes').delete().eq('id', designacaoId);
+      if (error) throw error;
+      setDesignacoes((prev) => prev.filter((d) => d.id !== designacaoId));
+      toast({ title: 'Designação removida' });
+    } catch (err) {
+      console.error('Erro ao remover:', err);
       toast({
-        title: "Designação removida!",
-        description: "A designação foi removida com sucesso.",
-      });
-    } catch (error) {
-      console.error('Erro ao remover designação:', error);
-      toast({
-        title: "Erro ao remover designação",
-        description: "Não foi possível remover a designação. Tente novamente.",
-        variant: "destructive"
+        title: 'Erro ao remover',
+        description: err instanceof Error ? err.message : 'Tente novamente.',
+        variant: 'destructive',
       });
     }
   };
 
-  const exportarDesignacoes = async () => {
-    try {
-      const response = await apiCall('/designacoes/export');
-      const blob = new Blob([JSON.stringify(response.data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `designacoes-${new Date().toISOString().split('T')[0]}.json`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-
-      toast({
-        title: "Designações exportadas!",
-        description: "As designações foram baixadas com sucesso.",
-      });
-    } catch (error) {
-      console.error('Erro ao exportar:', error);
-      toast({
-        title: "Erro ao exportar",
-        description: "Não foi possível exportar as designações.",
-        variant: "destructive"
-      });
-    }
+  const exportarDesignacoes = () => {
+    const blob = new Blob([JSON.stringify(designacoes, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `designacoes-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const totalDesignacoes = designacoes.length;
-  const designacoesEstaSemana = designacoes.filter(d => 
-    d.semanaId === programacoes[0]?.semana
+  const designacoesPrimeiraSemana = designacoes.filter(
+    (d) => d.semana_periodo === semanas[0]?.periodo
   ).length;
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Carregando dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Carregando dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navigation Bar */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => navigate('/')}
-                className="flex items-center gap-2"
-              >
-                <Home className="h-4 w-4" />
-                Início
-              </Button>
-              <div className="h-6 w-px bg-gray-300" />
-              <div className="flex items-center gap-2">
-                <BookOpen className="h-5 w-5 text-blue-600" />
-                <span className="font-semibold text-gray-900">Sistema Ministerial</span>
-              </div>
-            </div>
+    <div className="min-h-screen bg-background">
+      <header className="bg-card shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+              <Home className="h-4 w-4 mr-2" />
+              Início
+            </Button>
+            <div className="h-6 w-px bg-border" />
             <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/estudantes')}
-              >
-                <Users className="h-4 w-4 mr-2" />
-                Estudantes ({estudantes.length})
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/importar-programacao')}
-              >
-                <Upload className="h-4 w-4 mr-2" />
-                Importar
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={exportarDesignacoes}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Exportar
-              </Button>
+              <BookOpen className="h-5 w-5 text-primary" />
+              <span className="font-semibold">Sistema Ministerial</span>
             </div>
           </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate('/estudantes')}>
+              <Users className="h-4 w-4 mr-2" />
+              Estudantes ({estudantes.length})
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportarDesignacoes} disabled={!designacoes.length}>
+              <Download className="h-4 w-4 mr-2" />
+              Exportar
+            </Button>
+          </div>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Header */}
+      <main className="max-w-7xl mx-auto p-6">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Dashboard do Instrutor
-          </h1>
-          <p className="text-gray-600">
-            Gerencie as designações da Escola do Ministério Teocrático
+          <h1 className="text-3xl font-bold mb-2">Dashboard do Instrutor</h1>
+          <p className="text-muted-foreground">
+            Visualize a programação oficial e designe estudantes para cada parte da reunião.
           </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center">
-                <Calendar className="h-8 w-8 text-blue-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Programações</p>
-                  <p className="text-2xl font-bold text-gray-900">{programacoes.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center">
-                <Users className="h-8 w-8 text-green-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Estudantes</p>
-                  <p className="text-2xl font-bold text-gray-900">{estudantes.length}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center">
-                <Save className="h-8 w-8 text-purple-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Designações</p>
-                  <p className="text-2xl font-bold text-gray-900">{totalDesignacoes}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center">
-                <Clock className="h-8 w-8 text-orange-600" />
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Esta Semana</p>
-                  <p className="text-2xl font-bold text-gray-900">{designacoesEstaSemana}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+          <StatCard icon={<Calendar className="h-7 w-7 text-primary" />} label="Semanas" value={semanas.length} />
+          <StatCard icon={<Users className="h-7 w-7 text-primary" />} label="Estudantes" value={estudantes.length} />
+          <StatCard icon={<Save className="h-7 w-7 text-primary" />} label="Designações" value={totalDesignacoes} />
+          <StatCard
+            icon={<Clock className="h-7 w-7 text-primary" />}
+            label="Próxima semana"
+            value={designacoesPrimeiraSemana}
+          />
         </div>
 
-        {/* Main Content */}
         <Tabs defaultValue="programacao" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="programacao">
               <BookOpen className="h-4 w-4 mr-2" />
               Programação
@@ -321,86 +245,43 @@ export default function InstrutorDashboard() {
               <Users className="h-4 w-4 mr-2" />
               Estudantes
             </TabsTrigger>
-            <TabsTrigger value="links">
-              <Home className="h-4 w-4 mr-2" />
-              Ações Rápidas
-            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="programacao">
-            <Card>
-              <CardHeader>
-                <CardTitle>Programação Semanal</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {programacoes.length > 0 ? (
-                  <ProgramacaoViewer
-                    programacao={programacoes}
-                    estudantes={estudantes}
-                    designacoes={designacoes}
-                    onDesignar={handleDesignar}
-                    onRemoverDesignacao={handleRemoverDesignacao}
-                  />
-                ) : (
-                  <div className="text-center py-8">
-                    <BookOpen className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Nenhuma programação encontrada
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      Importe uma programação do JW.org para começar a fazer designações.
-                    </p>
-                    <Button onClick={() => navigate('/importar-programacao')}>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Importar Programação
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <ProgramacaoViewer
+              semanas={semanas}
+              estudantes={estudantes}
+              designacoes={designacoes}
+              onDesignar={handleDesignar}
+              onRemover={handleRemover}
+            />
           </TabsContent>
 
           <TabsContent value="designacoes">
             <Card>
               <CardHeader>
-                <CardTitle>Todas as Designações</CardTitle>
+                <CardTitle>Todas as designações</CardTitle>
               </CardHeader>
               <CardContent>
-                {designacoes.length > 0 ? (
-                  <div className="space-y-4">
-                    {designacoes.map((designacao) => {
-                      const estudante = estudantes.find(e => e.id === designacao.idEstudante);
-                      const ajudante = designacao.idAjudante ? estudantes.find(e => e.id === designacao.idAjudante) : null;
-                      
+                {designacoes.length ? (
+                  <div className="space-y-3">
+                    {designacoes.map((d) => {
+                      const estudante = estudantes.find((e) => e.id === d.id_estudante);
                       return (
-                        <div key={designacao.id} className="border rounded-lg p-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-medium">{designacao.tituloParte}</h4>
-                              <p className="text-sm text-gray-600">
-                                {designacao.semanaId} • {designacao.tempoMinutos} minutos
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant="default">
-                                {estudante?.nome || 'N/A'}
-                              </Badge>
-                              {ajudante && (
-                                <Badge variant="secondary">
-                                  {ajudante.nome}
-                                </Badge>
-                              )}
-                            </div>
+                        <div key={d.id} className="border rounded-lg p-4 flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium">{d.titulo_parte}</h4>
+                            <p className="text-sm text-muted-foreground">
+                              {d.semana_periodo || '—'} • {d.tempo_minutos ?? 0} min
+                            </p>
                           </div>
+                          <Badge>{estudante?.nome ?? 'N/A'}</Badge>
                         </div>
                       );
                     })}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-gray-600">
-                    <Save className="mx-auto h-12 w-12 mb-4 opacity-50" />
-                    <p>Nenhuma designação realizada ainda.</p>
-                  </div>
+                  <p className="text-center text-muted-foreground py-8">Nenhuma designação ainda.</p>
                 )}
               </CardContent>
             </Card>
@@ -409,131 +290,51 @@ export default function InstrutorDashboard() {
           <TabsContent value="estudantes">
             <Card>
               <CardHeader>
-                <CardTitle>Estudantes Cadastrados</CardTitle>
+                <CardTitle>Estudantes cadastrados</CardTitle>
               </CardHeader>
               <CardContent>
                 {estudantesLoading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Carregando estudantes...</p>
-                  </div>
-                ) : estudantes.length > 0 ? (
+                  <p className="text-center text-muted-foreground py-8">Carregando...</p>
+                ) : estudantes.length ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {estudantes.map((estudante) => (
-                      <div key={estudante.id} className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium">{estudante.nome}</h4>
-                          <Badge variant={estudante.genero === 'masculino' ? 'default' : 'secondary'}>
-                            {estudante.genero}
+                    {estudantes.map((e) => (
+                      <div key={e.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-1">
+                          <h4 className="font-medium">{e.nome}</h4>
+                          <Badge variant={e.genero === 'masculino' ? 'default' : 'secondary'}>
+                            {e.genero === 'masculino' ? 'M' : 'F'}
                           </Badge>
                         </div>
-                        {estudante.cargo && (
-                          <p className="text-sm text-gray-600">
-                            Cargo: {estudante.cargo}
-                          </p>
-                        )}
+                        {e.cargo && <p className="text-sm text-muted-foreground">{e.cargo}</p>}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-gray-600">
+                  <div className="text-center py-8 text-muted-foreground">
                     <Users className="mx-auto h-12 w-12 mb-4 opacity-50" />
-                    <p>Nenhum estudante cadastrado ainda.</p>
+                    <p className="mb-4">Nenhum estudante cadastrado ainda.</p>
+                    <Button onClick={() => navigate('/estudantes')}>Cadastrar estudantes</Button>
                   </div>
                 )}
               </CardContent>
             </Card>
           </TabsContent>
-
-          <TabsContent value="links">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/estudantes')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="h-5 w-5 text-blue-600" />
-                    Gestão de Estudantes
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600">
-                    Gerencie todos os estudantes da congregação, adicione novos, edite informações e visualize histórico.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/importar-programacao')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Upload className="h-5 w-5 text-green-600" />
-                    Importar Programação
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600">
-                    Importe programações do JW.org ou faça upload de PDFs para gerar designações automaticamente.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/designacoes')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-purple-600" />
-                    Designar Manualmente
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600">
-                    Atribua designações manualmente ou use o gerador automático seguindo regras S-38.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/relatorios')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5 text-orange-600" />
-                    Relatórios
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600">
-                    Visualize estatísticas, relatórios de participação e análise de equidade nas designações.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate('/reunioes')}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-red-600" />
-                    Reuniões
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600">
-                    Gerencie reuniões especiais, eventos da congregação e ajuste programações conforme necessário.
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="hover:shadow-lg transition-shadow cursor-pointer" onClick={exportarDesignacoes}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Download className="h-5 w-5 text-teal-600" />
-                    Exportar Dados
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-gray-600">
-                    Exporte designações, relatórios e dados da congregação para backup ou impressão.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
         </Tabs>
-      </div>
+      </main>
     </div>
+  );
+}
+
+function StatCard({ icon, label, value }: { icon: React.ReactNode; label: string; value: number }) {
+  return (
+    <Card>
+      <CardContent className="pt-6 flex items-center gap-4">
+        {icon}
+        <div>
+          <p className="text-sm text-muted-foreground">{label}</p>
+          <p className="text-2xl font-bold">{value}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
