@@ -280,6 +280,14 @@ export default function InstrutorDashboard() {
               <Users className="h-4 w-4 mr-2" />
               Estudantes ({estudantes.length})
             </Button>
+            <Button variant="outline" size="sm" onClick={atualizarDoJWorg} disabled={refreshing}>
+              {refreshing ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <RefreshCw className="h-4 w-4 mr-2" />
+              )}
+              Atualizar do JW.org
+            </Button>
             <Button variant="outline" size="sm" onClick={exportarDesignacoes} disabled={!designacoes.length}>
               <Download className="h-4 w-4 mr-2" />
               Exportar
