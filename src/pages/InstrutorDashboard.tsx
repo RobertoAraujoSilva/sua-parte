@@ -160,6 +160,46 @@ export default function InstrutorDashboard() {
     }
   };
 
+  const atualizarDoJWorg = async () => {
+    setRefreshing(true);
+    try {
+      const result = await fetchJWorgContent('pt');
+      if (!result.success || !result.weeks?.length) {
+        throw new Error(result.error || 'Nenhuma semana retornada do JW.org');
+      }
+
+      // Map Firecrawl weeks to our Semana shape
+      const semanasJWorg: Semana[] = result.weeks.map((w: any, idx: number) => ({
+        periodo: w.dateRange || w.week || `Semana ${idx + 1}`,
+        tema: w.week || w.bibleReading || '',
+        cantico_abertura: String(w.songs?.opening ?? ''),
+        cantico_meio: String(w.songs?.middle ?? ''),
+        cantico_encerramento: String(w.songs?.closing ?? ''),
+        programacao: agruparPartesPorSecao(w.parts || []),
+      }));
+
+      // Merge: JW.org weeks first, fallback static weeks for the rest
+      const periodosJW = new Set(semanasJWorg.map((s) => s.periodo));
+      const estaticasFiltradas = semanasIniciais.filter((s) => !periodosJW.has(s.periodo));
+      setSemanas([...semanasJWorg, ...estaticasFiltradas]);
+      setLastSync(new Date().toLocaleString('pt-BR'));
+
+      toast({
+        title: 'Programação atualizada',
+        description: `${semanasJWorg.length} semana(s) carregada(s) do JW.org via ${result.source ?? 'Firecrawl'}.`,
+      });
+    } catch (err) {
+      console.error('Erro ao atualizar do JW.org:', err);
+      toast({
+        title: 'Falha ao atualizar',
+        description: err instanceof Error ? err.message : 'Tente novamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const exportarDesignacoes = () => {
     const blob = new Blob([JSON.stringify(designacoes, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
