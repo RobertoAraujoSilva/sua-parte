@@ -360,6 +360,22 @@ export default function InstrutorDashboard() {
                 </span>
               )}
             </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={testarImportacaoJWorg}
+              disabled={testing}
+              title="Testar parsing do JW.org sem alterar a programação"
+            >
+              {testing ? (
+                <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" />
+              ) : (
+                <FlaskConical className="h-4 w-4 sm:mr-2" />
+              )}
+              <span className="hidden sm:inline">
+                {testing ? 'Testando...' : 'Testar Importação'}
+              </span>
+            </Button>
             <Button variant="outline" size="sm" onClick={exportarDesignacoes} disabled={!designacoes.length}>
               <Download className="h-4 w-4 mr-2" />
               Exportar
