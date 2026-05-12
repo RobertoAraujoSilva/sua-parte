@@ -216,7 +216,9 @@ export default function InstrutorDashboard() {
       const periodosJW = new Set(semanasJWorg.map((s) => s.periodo));
       const estaticasFiltradas = semanasIniciais.filter((s) => !periodosJW.has(s.periodo));
       setSemanas([...semanasJWorg, ...estaticasFiltradas]);
-      setLastSync(new Date().toLocaleString('pt-BR'));
+      const ts = new Date().toLocaleString('pt-BR');
+      setLastSync(ts);
+      try { localStorage.setItem('jworg:lastSync', ts); } catch {}
 
       toast({
         title: 'Programação atualizada',
