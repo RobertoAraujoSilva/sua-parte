@@ -246,7 +246,50 @@ export default function InstrutorDashboard() {
     }
   };
 
-  const exportarDesignacoes = () => {
+  const testarImportacaoJWorg = async () => {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const result = await fetchJWorgContent('pt');
+      const weeks = (result.weeks || []) as any[];
+      const totalParts = weeks.reduce((sum, w) => sum + (Array.isArray(w.parts) ? w.parts.length : 0), 0);
+      const periodos = weeks.map((w, i) => w.dateRange || w.week || `Semana ${i + 1}`);
+      const success = !!result.success && weeks.length > 0;
+
+      setTestResult({
+        success,
+        weeksCount: weeks.length,
+        totalParts,
+        source: result.source,
+        periodos,
+        error: success ? undefined : (result.error || 'Nenhuma semana extraída'),
+        timestamp: new Date().toLocaleString('pt-BR'),
+      });
+
+      toast({
+        title: success ? 'Parsing OK' : 'Parsing falhou',
+        description: success
+          ? `${weeks.length} semana(s) e ${totalParts} parte(s) extraídas via ${result.source ?? 'Firecrawl'}.`
+          : (result.error || 'Nenhuma semana extraída do JW.org.'),
+        variant: success ? 'default' : 'destructive',
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Erro desconhecido';
+      setTestResult({
+        success: false,
+        weeksCount: 0,
+        totalParts: 0,
+        periodos: [],
+        error: msg,
+        timestamp: new Date().toLocaleString('pt-BR'),
+      });
+      toast({ title: 'Falha no teste', description: msg, variant: 'destructive' });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+
     const blob = new Blob([JSON.stringify(designacoes, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
