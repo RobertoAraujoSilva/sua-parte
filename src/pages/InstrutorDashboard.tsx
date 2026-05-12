@@ -73,6 +73,16 @@ export default function InstrutorDashboard() {
   const [designacoes, setDesignacoes] = useState<DesignacaoLocal[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{
+    success: boolean;
+    weeksCount: number;
+    totalParts: number;
+    source?: string;
+    periodos: string[];
+    error?: string;
+    timestamp: string;
+  } | null>(null);
   const [lastSync, setLastSync] = useState<string | null>(() => {
     try { return localStorage.getItem('jworg:lastSync'); } catch { return null; }
   });
