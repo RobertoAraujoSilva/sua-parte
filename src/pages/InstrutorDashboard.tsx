@@ -73,7 +73,9 @@ export default function InstrutorDashboard() {
   const [designacoes, setDesignacoes] = useState<DesignacaoLocal[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [lastSync, setLastSync] = useState<string | null>(null);
+  const [lastSync, setLastSync] = useState<string | null>(() => {
+    try { return localStorage.getItem('jworg:lastSync'); } catch { return null; }
+  });
 
   const carregarDesignacoes = useCallback(async () => {
     if (!user?.id) return;
