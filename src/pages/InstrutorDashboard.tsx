@@ -289,7 +289,7 @@ export default function InstrutorDashboard() {
     }
   };
 
-
+  const exportarDesignacoes = () => {
     const blob = new Blob([JSON.stringify(designacoes, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
