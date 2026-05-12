@@ -284,22 +284,29 @@ export default function InstrutorDashboard() {
               <Users className="h-4 w-4 mr-2" />
               Estudantes ({estudantes.length})
             </Button>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={atualizarDoJWorg}
-              disabled={refreshing}
-              title="Atualizar Programação do JW.org"
-            >
-              {refreshing ? (
-                <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" />
-              ) : (
-                <RefreshCw className="h-4 w-4 sm:mr-2" />
+            <div className="flex items-center gap-2">
+              <Button
+                variant="default"
+                size="sm"
+                onClick={atualizarDoJWorg}
+                disabled={refreshing}
+                title={lastSync ? `Última sincronização: ${lastSync}` : 'Atualizar Programação do JW.org'}
+              >
+                {refreshing ? (
+                  <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4 sm:mr-2" />
+                )}
+                <span className="hidden sm:inline">
+                  {refreshing ? 'Atualizando...' : 'Atualizar Programação'}
+                </span>
+              </Button>
+              {lastSync && (
+                <span className="hidden md:inline text-xs text-muted-foreground" title="Última sincronização com JW.org">
+                  Sincronizado: {lastSync}
+                </span>
               )}
-              <span className="hidden sm:inline">
-                {refreshing ? 'Atualizando...' : 'Atualizar Programação'}
-              </span>
-            </Button>
+            </div>
             <Button variant="outline" size="sm" onClick={exportarDesignacoes} disabled={!designacoes.length}>
               <Download className="h-4 w-4 mr-2" />
               Exportar
