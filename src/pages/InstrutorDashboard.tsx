@@ -397,6 +397,50 @@ export default function InstrutorDashboard() {
           )}
         </div>
 
+        {testResult && (
+          <Card className="mb-6 border-l-4" style={{ borderLeftColor: testResult.success ? 'hsl(var(--primary))' : 'hsl(var(--destructive))' }}>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                {testResult.success ? (
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-destructive" />
+                )}
+                Teste de Importação JW.org
+                <Badge variant="outline" className="ml-2 font-normal">{testResult.timestamp}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {testResult.success ? (
+                <>
+                  <div className="flex flex-wrap gap-4 text-sm">
+                    <div><span className="text-muted-foreground">Semanas extraídas:</span> <strong>{testResult.weeksCount}</strong></div>
+                    <div><span className="text-muted-foreground">Total de partes:</span> <strong>{testResult.totalParts}</strong></div>
+                    {testResult.source && (
+                      <div><span className="text-muted-foreground">Fonte:</span> <Badge variant="secondary">{testResult.source}</Badge></div>
+                    )}
+                  </div>
+                  {testResult.periodos.length > 0 && (
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">Períodos:</span>
+                      <ul className="mt-1 ml-4 list-disc text-xs space-y-0.5">
+                        {testResult.periodos.slice(0, 10).map((p, i) => (
+                          <li key={i}>{p}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground pt-2">
+                    Validação concluída. Use "Atualizar Programação" para aplicar os dados.
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-destructive">{testResult.error}</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <StatCard icon={<Calendar className="h-7 w-7 text-primary" />} label="Semanas" value={semanas.length} />
           <StatCard icon={<Users className="h-7 w-7 text-primary" />} label="Estudantes" value={estudantes.length} />
