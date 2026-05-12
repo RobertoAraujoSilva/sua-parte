@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, Clock, Users, Save, Home, BookOpen, Download, RefreshCw, Loader2 } from 'lucide-react';
+import { Calendar, Clock, Users, Save, Home, BookOpen, Download, RefreshCw, Loader2, FlaskConical, CheckCircle2, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { ProgramacaoViewer, type DesignacaoLocal, type Parte, type Semana } from '@/components/ProgramacaoViewer';
@@ -73,6 +73,16 @@ export default function InstrutorDashboard() {
   const [designacoes, setDesignacoes] = useState<DesignacaoLocal[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{
+    success: boolean;
+    weeksCount: number;
+    totalParts: number;
+    source?: string;
+    periodos: string[];
+    error?: string;
+    timestamp: string;
+  } | null>(null);
   const [lastSync, setLastSync] = useState<string | null>(() => {
     try { return localStorage.getItem('jworg:lastSync'); } catch { return null; }
   });
@@ -236,6 +246,49 @@ export default function InstrutorDashboard() {
     }
   };
 
+  const testarImportacaoJWorg = async () => {
+    setTesting(true);
+    setTestResult(null);
+    try {
+      const result = await fetchJWorgContent('pt');
+      const weeks = (result.weeks || []) as any[];
+      const totalParts = weeks.reduce((sum, w) => sum + (Array.isArray(w.parts) ? w.parts.length : 0), 0);
+      const periodos = weeks.map((w, i) => w.dateRange || w.week || `Semana ${i + 1}`);
+      const success = !!result.success && weeks.length > 0;
+
+      setTestResult({
+        success,
+        weeksCount: weeks.length,
+        totalParts,
+        source: result.source,
+        periodos,
+        error: success ? undefined : (result.error || 'Nenhuma semana extraída'),
+        timestamp: new Date().toLocaleString('pt-BR'),
+      });
+
+      toast({
+        title: success ? 'Parsing OK' : 'Parsing falhou',
+        description: success
+          ? `${weeks.length} semana(s) e ${totalParts} parte(s) extraídas via ${result.source ?? 'Firecrawl'}.`
+          : (result.error || 'Nenhuma semana extraída do JW.org.'),
+        variant: success ? 'default' : 'destructive',
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Erro desconhecido';
+      setTestResult({
+        success: false,
+        weeksCount: 0,
+        totalParts: 0,
+        periodos: [],
+        error: msg,
+        timestamp: new Date().toLocaleString('pt-BR'),
+      });
+      toast({ title: 'Falha no teste', description: msg, variant: 'destructive' });
+    } finally {
+      setTesting(false);
+    }
+  };
+
   const exportarDesignacoes = () => {
     const blob = new Blob([JSON.stringify(designacoes, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -307,6 +360,22 @@ export default function InstrutorDashboard() {
                 </span>
               )}
             </div>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={testarImportacaoJWorg}
+              disabled={testing}
+              title="Testar parsing do JW.org sem alterar a programação"
+            >
+              {testing ? (
+                <Loader2 className="h-4 w-4 sm:mr-2 animate-spin" />
+              ) : (
+                <FlaskConical className="h-4 w-4 sm:mr-2" />
+              )}
+              <span className="hidden sm:inline">
+                {testing ? 'Testando...' : 'Testar Importação'}
+              </span>
+            </Button>
             <Button variant="outline" size="sm" onClick={exportarDesignacoes} disabled={!designacoes.length}>
               <Download className="h-4 w-4 mr-2" />
               Exportar
@@ -327,6 +396,50 @@ export default function InstrutorDashboard() {
             </p>
           )}
         </div>
+
+        {testResult && (
+          <Card className="mb-6 border-l-4" style={{ borderLeftColor: testResult.success ? 'hsl(var(--primary))' : 'hsl(var(--destructive))' }}>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base flex items-center gap-2">
+                {testResult.success ? (
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-destructive" />
+                )}
+                Teste de Importação JW.org
+                <Badge variant="outline" className="ml-2 font-normal">{testResult.timestamp}</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {testResult.success ? (
+                <>
+                  <div className="flex flex-wrap gap-4 text-sm">
+                    <div><span className="text-muted-foreground">Semanas extraídas:</span> <strong>{testResult.weeksCount}</strong></div>
+                    <div><span className="text-muted-foreground">Total de partes:</span> <strong>{testResult.totalParts}</strong></div>
+                    {testResult.source && (
+                      <div><span className="text-muted-foreground">Fonte:</span> <Badge variant="secondary">{testResult.source}</Badge></div>
+                    )}
+                  </div>
+                  {testResult.periodos.length > 0 && (
+                    <div className="text-sm">
+                      <span className="text-muted-foreground">Períodos:</span>
+                      <ul className="mt-1 ml-4 list-disc text-xs space-y-0.5">
+                        {testResult.periodos.slice(0, 10).map((p, i) => (
+                          <li key={i}>{p}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground pt-2">
+                    Validação concluída. Use "Atualizar Programação" para aplicar os dados.
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-destructive">{testResult.error}</p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <StatCard icon={<Calendar className="h-7 w-7 text-primary" />} label="Semanas" value={semanas.length} />
