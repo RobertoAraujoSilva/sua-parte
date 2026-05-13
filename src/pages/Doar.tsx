@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import SEO from "@/components/SEO";
 import Footer from "@/components/Footer";
 import DonationCard from "@/components/DonationCard";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -69,6 +70,7 @@ const Doar = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Doar — Apoie o Sistema Ministerial" description="Apoie o desenvolvimento do Sistema Ministerial, gratuito para todas as congregações." path="/doar" />
       <Header />
       
       <main className="pt-16">

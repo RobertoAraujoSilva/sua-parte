@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import SEO from "@/components/SEO";
 import Footer from "@/components/Footer";
 import Features from "@/components/Features";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -78,6 +79,7 @@ const Funcionalidades = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Funcionalidades — Sistema Ministerial" description="Conheça os recursos do Sistema Ministerial: gestão de estudantes, importação de programas e designações automáticas." path="/funcionalidades" />
       <Header />
       
       <main className="pt-16">

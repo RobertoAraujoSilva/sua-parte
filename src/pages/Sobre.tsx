@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import SEO from "@/components/SEO";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -100,6 +101,7 @@ const Sobre = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Sobre — Sistema Ministerial" description="Conheça o propósito, valores e a equipe por trás do Sistema Ministerial." path="/sobre" />
       <Header />
       
       <main className="pt-16">
