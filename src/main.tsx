@@ -7,6 +7,7 @@ import i18n from './i18n' // Import i18n instance
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import SafeAreaLayout from "@/layouts/SafeAreaLayout";
 import { DensityProvider } from "@/contexts/DensityContext";
+import { HelmetProvider } from 'react-helmet-async';
 import { monitorWebVitals, analyzeBundle } from './config/performance';
 // Register Service Worker only in production to avoid HMR conflicts in dev
 if (import.meta.env.PROD) {
