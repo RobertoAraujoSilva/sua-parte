@@ -18,11 +18,13 @@ if (import.meta.env.PROD) {
 const renderApp = () => {
   createRoot(document.getElementById("root")!).render(
     <ErrorBoundary>
-      <DensityProvider>
-        <SafeAreaLayout>
-          <App />
-        </SafeAreaLayout>
-      </DensityProvider>
+      <HelmetProvider>
+        <DensityProvider>
+          <SafeAreaLayout>
+            <App />
+          </SafeAreaLayout>
+        </DensityProvider>
+      </HelmetProvider>
     </ErrorBoundary>
   );
 };
