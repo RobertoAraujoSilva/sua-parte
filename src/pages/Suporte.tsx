@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import SEO from "@/components/SEO";
 import Footer from "@/components/Footer";
 import DonationCard from "@/components/DonationCard";
 import { Button } from "@/components/ui/button";
@@ -124,6 +125,7 @@ const Suporte = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Suporte — Sistema Ministerial" description="Canais de suporte, documentação e ajuda para o Sistema Ministerial." path="/suporte" />
       <Header />
       
       <main className="pt-16">

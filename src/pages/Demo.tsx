@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import SEO from "@/components/SEO";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,6 +56,7 @@ const Demo = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Demonstração — Sistema Ministerial" description="Veja na prática como o Sistema Ministerial gerencia estudantes, importa programas e gera designações." path="/demo" />
       <Header />
       
       <main className="pt-16">

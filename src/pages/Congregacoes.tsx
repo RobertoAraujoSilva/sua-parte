@@ -1,4 +1,5 @@
 import Header from "@/components/Header";
+import SEO from "@/components/SEO";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,6 +60,7 @@ const Congregacoes = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <SEO title="Congregações — Sistema Ministerial" description="Depoimentos e informações para congregações que usam o Sistema Ministerial." path="/congregacoes" />
       <Header />
       
       <main className="pt-16">
