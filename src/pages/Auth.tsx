@@ -15,6 +15,7 @@ import LanguageSwitch from "@/components/LanguageSwitch";
 import { useTranslation } from "@/hooks/useTranslation";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
+import SEO from "@/components/SEO";
 
 const AuthPage: React.FC = () => {
   const navigate = useNavigate();
