@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
-    <title>Sistema Ministerial</title>
-    <meta name="description" content="Sistema de gestão para congregações das Testemunhas de Jeová" />
+    <title>Sistema Ministerial — Designações da Escola do Ministério</title>
+    <meta name="description" content="Plataforma para congregações das Testemunhas de Jeová: gestão de estudantes e designações automáticas da Escola do Ministério Teocrático (S-38)." />
     <meta name="author" content="Sistema Ministerial" />
+    <link rel="canonical" href="https://sua-parte.lovable.app/" />
 
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#0b2a4a" />
@@ -19,15 +20,35 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.svg" />
     <link rel="mask-icon" href="/masked-icon.svg" color="#1f2937" />
 
-    <meta property="og:title" content="Sistema Ministerial" />
-    <meta property="og:description" content="Sistema de gestão para congregações das Testemunhas de Jeová" />
+    <meta property="og:site_name" content="Sistema Ministerial" />
+    <meta property="og:title" content="Sistema Ministerial — Designações da Escola do Ministério" />
+    <meta property="og:description" content="Plataforma para congregações das Testemunhas de Jeová: gestão de estudantes e designações automáticas (S-38)." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/pwa-512x512.svg" />
+    <meta property="og:url" content="https://sua-parte.lovable.app/" />
+    <meta property="og:image" content="https://sua-parte.lovable.app/pwa-512x512.svg" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Sistema Ministerial" />
-    <meta name="twitter:description" content="Sistema de gestão para congregações das Testemunhas de Jeová" />
-    <meta name="twitter:image" content="/pwa-512x512.svg" />
+    <meta name="twitter:description" content="Gestão de estudantes e designações automáticas da Escola do Ministério Teocrático." />
+    <meta name="twitter:image" content="https://sua-parte.lovable.app/pwa-512x512.svg" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Sistema Ministerial",
+        "url": "https://sua-parte.lovable.app/",
+        "logo": "https://sua-parte.lovable.app/pwa-512x512.svg"
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "Sistema Ministerial",
+        "url": "https://sua-parte.lovable.app/"
+      }
+    </script>
   </head>
 
   <body>
@@ -51,7 +72,7 @@
       })();
     </script>
     <script>
-      // Recarrega se um chunk de lazy split falhar (evita “tela branca”)
+      // Recarrega se um chunk de lazy split falhar (evita "tela branca")
       window.addEventListener('error', function (e) {
         if (/ChunkLoadError|Loading chunk \d+ failed/.test(e.message || '')) {
           if (caches && caches.keys) { caches.keys().then(keys => keys.forEach(k => caches.delete(k))); }
