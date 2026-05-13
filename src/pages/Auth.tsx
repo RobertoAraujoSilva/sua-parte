@@ -226,6 +226,7 @@ const AuthPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-slate-100 flex flex-col overflow-x-hidden">
+      <SEO title="Entrar — Sistema Ministerial" description="Acesse o Sistema Ministerial como instrutor ou estudante." path="/auth" />
       {/* Header */}
       <header className="w-full p-3 sm:p-6">
         <div className="max-w-6xl mx-auto flex flex-wrap gap-3 justify-between items-center">
