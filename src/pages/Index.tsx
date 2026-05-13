@@ -45,6 +45,14 @@ const Index = () => {
   
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
+      <SEO
+        title="Sistema Ministerial — Designações da Escola do Ministério"
+        description="Plataforma para congregações das Testemunhas de Jeová: gestão de estudantes e designações automáticas (S-38)."
+        path="/"
+      />
+      <Helmet>
+        <script type="application/ld+json">{JSON.stringify(FAQ_JSONLD)}</script>
+      </Helmet>
       <Header />
       <LandingHero />
       <Features />
