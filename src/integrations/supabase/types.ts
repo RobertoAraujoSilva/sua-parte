@@ -88,6 +88,370 @@ export type Database = {
         }
         Relationships: []
       }
+      connect_matches: {
+        Row: {
+          created_at: string
+          id: string
+          profile_a: string
+          profile_b: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_a: string
+          profile_b: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_a?: string
+          profile_b?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connect_matches_profile_a_fkey"
+            columns: ["profile_a"]
+            isOneToOne: false
+            referencedRelation: "connect_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connect_matches_profile_b_fkey"
+            columns: ["profile_b"]
+            isOneToOne: false
+            referencedRelation: "connect_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      connect_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          match_id: string
+          sender_profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          match_id: string
+          sender_profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          match_id?: string
+          sender_profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connect_messages_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "connect_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connect_messages_sender_profile_id_fkey"
+            columns: ["sender_profile_id"]
+            isOneToOne: false
+            referencedRelation: "connect_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      connect_moderators: {
+        Row: {
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      connect_photos: {
+        Row: {
+          created_at: string
+          id: string
+          is_primary: boolean
+          moderation_note: string | null
+          moderation_status: string
+          profile_id: string
+          storage_path: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          moderation_note?: string | null
+          moderation_status?: string
+          profile_id: string
+          storage_path: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_primary?: boolean
+          moderation_note?: string | null
+          moderation_status?: string
+          profile_id?: string
+          storage_path?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connect_photos_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "connect_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      connect_preferences: {
+        Row: {
+          apenas_dispostos_mudar: boolean
+          created_at: string
+          generos_interesse: string[]
+          id: string
+          idade_max: number
+          idade_min: number
+          idiomas: string[]
+          paises: string[]
+          profile_id: string
+          status_espiritual: string[]
+          updated_at: string
+        }
+        Insert: {
+          apenas_dispostos_mudar?: boolean
+          created_at?: string
+          generos_interesse?: string[]
+          id?: string
+          idade_max?: number
+          idade_min?: number
+          idiomas?: string[]
+          paises?: string[]
+          profile_id: string
+          status_espiritual?: string[]
+          updated_at?: string
+        }
+        Update: {
+          apenas_dispostos_mudar?: boolean
+          created_at?: string
+          generos_interesse?: string[]
+          id?: string
+          idade_max?: number
+          idade_min?: number
+          idiomas?: string[]
+          paises?: string[]
+          profile_id?: string
+          status_espiritual?: string[]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connect_preferences_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "connect_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      connect_profiles: {
+        Row: {
+          apelido: string
+          approved_at: string | null
+          approved_by: string | null
+          bio: string | null
+          cidade: string | null
+          code_of_conduct_accepted_at: string | null
+          congregacao: string | null
+          consent_religious_data: boolean
+          created_at: string
+          data_nascimento: string
+          disposto_mudar_cidade: boolean
+          disposto_mudar_pais: boolean
+          genero: string
+          id: string
+          idiomas: string[]
+          pais: string | null
+          rejection_reason: string | null
+          status: string
+          status_espiritual: string
+          tempo_na_verdade_anos: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          apelido: string
+          approved_at?: string | null
+          approved_by?: string | null
+          bio?: string | null
+          cidade?: string | null
+          code_of_conduct_accepted_at?: string | null
+          congregacao?: string | null
+          consent_religious_data?: boolean
+          created_at?: string
+          data_nascimento: string
+          disposto_mudar_cidade?: boolean
+          disposto_mudar_pais?: boolean
+          genero: string
+          id?: string
+          idiomas?: string[]
+          pais?: string | null
+          rejection_reason?: string | null
+          status?: string
+          status_espiritual: string
+          tempo_na_verdade_anos?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          apelido?: string
+          approved_at?: string | null
+          approved_by?: string | null
+          bio?: string | null
+          cidade?: string | null
+          code_of_conduct_accepted_at?: string | null
+          congregacao?: string | null
+          consent_religious_data?: boolean
+          created_at?: string
+          data_nascimento?: string
+          disposto_mudar_cidade?: boolean
+          disposto_mudar_pais?: boolean
+          genero?: string
+          id?: string
+          idiomas?: string[]
+          pais?: string | null
+          rejection_reason?: string | null
+          status?: string
+          status_espiritual?: string
+          tempo_na_verdade_anos?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      connect_reports: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          moderator_id: string | null
+          reported_profile_id: string
+          reporter_profile_id: string
+          resolution_note: string | null
+          resolved_at: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          moderator_id?: string | null
+          reported_profile_id: string
+          reporter_profile_id: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          moderator_id?: string | null
+          reported_profile_id?: string
+          reporter_profile_id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connect_reports_reported_profile_id_fkey"
+            columns: ["reported_profile_id"]
+            isOneToOne: false
+            referencedRelation: "connect_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connect_reports_reporter_profile_id_fkey"
+            columns: ["reporter_profile_id"]
+            isOneToOne: false
+            referencedRelation: "connect_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      connect_swipes: {
+        Row: {
+          created_at: string
+          direction: string
+          id: string
+          swiper_profile_id: string
+          target_profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          direction: string
+          id?: string
+          swiper_profile_id: string
+          target_profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          direction?: string
+          id?: string
+          swiper_profile_id?: string
+          target_profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connect_swipes_swiper_profile_id_fkey"
+            columns: ["swiper_profile_id"]
+            isOneToOne: false
+            referencedRelation: "connect_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "connect_swipes_target_profile_id_fkey"
+            columns: ["target_profile_id"]
+            isOneToOne: false
+            referencedRelation: "connect_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       designacoes: {
         Row: {
           cena: string | null
@@ -773,6 +1137,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      connect_in_match: { Args: { _match_id: string }; Returns: boolean }
+      connect_is_approved: { Args: { _user_id?: string }; Returns: boolean }
+      connect_my_profile_id: { Args: never; Returns: string }
+      connect_profile_is_approved: {
+        Args: { _profile_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -780,6 +1151,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_connect_moderator: { Args: { _user_id?: string }; Returns: boolean }
     }
     Enums: {
       app_cargo:
