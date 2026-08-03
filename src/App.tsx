@@ -34,6 +34,7 @@ import ConnectHome from "./pages/connect/ConnectHome";
 import ConnectSolicitar from "./pages/connect/ConnectSolicitar";
 import ConnectPerfil from "./pages/connect/ConnectPerfil";
 import ConnectDescobrir from "./pages/connect/ConnectDescobrir";
+import ConnectMatches from "./pages/connect/ConnectMatches";
 import ConnectRoute from "./components/connect/ConnectRoute";
 
 import ProtectedRoute from "./components/ProtectedRoute";
