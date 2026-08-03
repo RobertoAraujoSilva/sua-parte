@@ -30,6 +30,11 @@ import PortalFamiliar from "./pages/PortalFamiliar";
 import InstrutorDashboard from "./pages/InstrutorDashboard";
 import { EstudantePortal } from "./pages/EstudantePortal";
 import Estudantes from "./pages/Estudantes";
+import ConnectHome from "./pages/connect/ConnectHome";
+import ConnectSolicitar from "./pages/connect/ConnectSolicitar";
+import ConnectPerfil from "./pages/connect/ConnectPerfil";
+import ConnectDescobrir from "./pages/connect/ConnectDescobrir";
+import ConnectRoute from "./components/connect/ConnectRoute";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import SequentialFlow from "./components/SequentialFlow";
@@ -204,6 +209,26 @@ const App = () => (
                     <ProtectedRoute allowedRoles={['family_member']}>
                       <PortalFamiliar />
                     </ProtectedRoute>
+                  }
+                />
+
+                {/* JW Connect */}
+                <Route path="/connect" element={<ConnectHome />} />
+                <Route path="/connect/solicitar" element={<ConnectSolicitar />} />
+                <Route
+                  path="/connect/perfil"
+                  element={
+                    <ConnectRoute>
+                      <ConnectPerfil />
+                    </ConnectRoute>
+                  }
+                />
+                <Route
+                  path="/connect/descobrir"
+                  element={
+                    <ConnectRoute>
+                      <ConnectDescobrir />
+                    </ConnectRoute>
                   }
                 />
 
