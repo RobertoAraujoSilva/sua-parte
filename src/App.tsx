@@ -232,6 +232,15 @@ const App = () => (
                     </ConnectRoute>
                   }
                 />
+                <Route
+                  path="/connect/matches"
+                  element={
+                    <ConnectRoute>
+                      <ConnectMatches />
+                    </ConnectRoute>
+                  }
+                />
+
 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
