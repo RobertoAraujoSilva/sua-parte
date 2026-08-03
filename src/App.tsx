@@ -34,6 +34,7 @@ import ConnectHome from "./pages/connect/ConnectHome";
 import ConnectSolicitar from "./pages/connect/ConnectSolicitar";
 import ConnectPerfil from "./pages/connect/ConnectPerfil";
 import ConnectDescobrir from "./pages/connect/ConnectDescobrir";
+import ConnectMatches from "./pages/connect/ConnectMatches";
 import ConnectRoute from "./components/connect/ConnectRoute";
 
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -231,6 +232,15 @@ const App = () => (
                     </ConnectRoute>
                   }
                 />
+                <Route
+                  path="/connect/matches"
+                  element={
+                    <ConnectRoute>
+                      <ConnectMatches />
+                    </ConnectRoute>
+                  }
+                />
+
 
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
