@@ -212,6 +212,26 @@ const App = () => (
                   }
                 />
 
+                {/* JW Connect */}
+                <Route path="/connect" element={<ConnectHome />} />
+                <Route path="/connect/solicitar" element={<ConnectSolicitar />} />
+                <Route
+                  path="/connect/perfil"
+                  element={
+                    <ConnectRoute>
+                      <ConnectPerfil />
+                    </ConnectRoute>
+                  }
+                />
+                <Route
+                  path="/connect/descobrir"
+                  element={
+                    <ConnectRoute>
+                      <ConnectDescobrir />
+                    </ConnectRoute>
+                  }
+                />
+
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
                 </Routes>
