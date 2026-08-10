@@ -1144,6 +1144,16 @@ export type Database = {
         Args: { _profile_id: string }
         Returns: boolean
       }
+      connect_profile_status_unchanged: {
+        Args: {
+          _approved_at: string
+          _approved_by: string
+          _id: string
+          _status: string
+        }
+        Returns: boolean
+      }
+      current_user_verified_email: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
