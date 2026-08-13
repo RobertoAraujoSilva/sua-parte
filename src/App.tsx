@@ -12,6 +12,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 // Debug tools will be loaded conditionally in development only
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import { LanguageDebug } from "@/components/LanguageDebug";
 import Demo from "./pages/Demo";
 import Relatorios from "./pages/Relatorios";
