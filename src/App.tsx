@@ -12,6 +12,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 // Debug tools will be loaded conditionally in development only
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import { LanguageDebug } from "@/components/LanguageDebug";
 import Demo from "./pages/Demo";
 import Relatorios from "./pages/Relatorios";
@@ -125,6 +126,7 @@ const App = () => (
                 {/* Public Routes */}
                 <Route path="/" element={<Index />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
                 <Route path="/demo" element={<Demo />} />
                 <Route path="/funcionalidades" element={<Funcionalidades />} />
                 <Route path="/congregacoes" element={<Congregacoes />} />

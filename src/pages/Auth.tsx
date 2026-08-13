@@ -37,6 +37,40 @@ const AuthPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
+  const [resetLoading, setResetLoading] = useState(false);
+
+  const handleForgotPassword = async () => {
+    const trimmedEmail = email.trim();
+
+    if (!trimmedEmail || !validateEmail(trimmedEmail)) {
+      toast({
+        title: t('forms.error'),
+        description: "Informe seu e-mail no campo acima para receber o link de redefinição.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setResetLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    setResetLoading(false);
+
+    if (error) {
+      toast({
+        title: t('forms.error'),
+        description: error.message,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "E-mail enviado",
+      description: "Se existir uma conta com esse e-mail, você receberá o link para redefinir a senha.",
+    });
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -326,6 +360,20 @@ const AuthPage: React.FC = () => {
                       </Button>
                     </div>
                   </div>
+
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="h-auto p-0 text-sm"
+                      onClick={handleForgotPassword}
+                      disabled={resetLoading}
+                    >
+                      {resetLoading ? "Enviando..." : "Esqueci minha senha"}
+                    </Button>
+                  </div>
+
+
                   
                   <Button 
                     type="submit" 
