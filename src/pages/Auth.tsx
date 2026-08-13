@@ -58,9 +58,14 @@ const AuthPage: React.FC = () => {
     setResetLoading(false);
 
     if (error) {
+      const isRateLimited =
+        (error as { status?: number }).status === 429 ||
+        error.message?.toLowerCase().includes("rate limit");
       toast({
         title: t('forms.error'),
-        description: error.message,
+        description: isRateLimited
+          ? "Muitas tentativas de recuperação. Aguarde alguns minutos antes de tentar novamente."
+          : error.message,
         variant: "destructive",
       });
       return;
