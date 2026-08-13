@@ -326,6 +326,20 @@ const AuthPage: React.FC = () => {
                       </Button>
                     </div>
                   </div>
+
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="h-auto p-0 text-sm"
+                      onClick={handleForgotPassword}
+                      disabled={resetLoading}
+                    >
+                      {resetLoading ? "Enviando..." : "Esqueci minha senha"}
+                    </Button>
+                  </div>
+
+
                   
                   <Button 
                     type="submit" 
