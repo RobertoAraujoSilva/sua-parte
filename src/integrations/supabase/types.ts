@@ -1154,6 +1154,10 @@ export type Database = {
         Returns: boolean
       }
       current_user_verified_email: { Args: never; Returns: string }
+      family_member_email_is_unique: {
+        Args: { _email: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
