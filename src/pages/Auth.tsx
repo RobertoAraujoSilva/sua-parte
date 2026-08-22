@@ -38,6 +38,9 @@ const AuthPage: React.FC = () => {
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
   const [resetLoading, setResetLoading] = useState(false);
+  const [resetCooldown, setResetCooldown] = useState(0);
+
+  const RESET_COOLDOWN_KEY = "reset-password-cooldown-until";
 
   const handleForgotPassword = async () => {
     const trimmedEmail = email.trim();
