@@ -68,11 +68,11 @@ const DEFAULT_STEPS: OnboardingStep[] = [
   },
   {
     id: 'programs',
-    title: 'Importar Programas',
-    description: 'Importar programas das reuniões',
+    title: 'Ver Programação',
+    description: 'Acessar a programação das reuniões no dashboard',
     completed: false,
     required: true,
-    route: '/programas'
+    route: '/dashboard'
   },
   {
     id: 'assignments',
@@ -80,7 +80,7 @@ const DEFAULT_STEPS: OnboardingStep[] = [
     description: 'Criar primeiras designações',
     completed: false,
     required: false,
-    route: '/designacoes'
+    route: '/dashboard'
   }
 ];
 
