@@ -17,7 +17,7 @@ export const SequentialFlow: React.FC<SequentialFlowProps> = ({ children }) => {
   const location = useLocation();
 
   // 1️⃣ PRIMEIRO: Rotas públicas (renderizar IMEDIATAMENTE)
-  const publicRoutes = ['/', '/auth', '/demo', '/funcionalidades', '/congregacoes', '/suporte', '/sobre', '/doar', '/convite/aceitar'];
+  const publicRoutes = ['/', '/auth', '/reset-password', '/demo', '/funcionalidades', '/congregacoes', '/suporte', '/sobre', '/doar', '/convite/aceitar'];
   const isPublicRoute = publicRoutes.includes(location.pathname);
   
   // Log de diagnóstico
