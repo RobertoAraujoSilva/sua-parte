@@ -448,16 +448,25 @@ const AuthPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex justify-end">
+                  <div className="flex flex-col items-end gap-1">
                     <Button
                       type="button"
                       variant="link"
                       className="h-auto p-0 text-sm"
                       onClick={handleForgotPassword}
-                      disabled={resetLoading}
+                      disabled={resetLoading || resetCooldown > 0}
                     >
-                      {resetLoading ? "Enviando..." : "Esqueci minha senha"}
+                      {resetLoading
+                        ? "Enviando..."
+                        : resetCooldown > 0
+                        ? `Reenviar em ${formatCooldown(resetCooldown)}`
+                        : "Esqueci minha senha"}
                     </Button>
+                    {resetCooldown > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        Limite atingido. Tente novamente em {formatCooldown(resetCooldown)}.
+                      </p>
+                    )}
                   </div>
 
 
