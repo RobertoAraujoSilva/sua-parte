@@ -38,6 +38,69 @@ const AuthPage: React.FC = () => {
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
   const [resetLoading, setResetLoading] = useState(false);
+  const [resetCooldown, setResetCooldown] = useState(0);
+
+  const RESET_COOLDOWN_KEY = "reset-password-cooldown-until";
+
+  useEffect(() => {
+    const storedUntil = localStorage.getItem(RESET_COOLDOWN_KEY);
+    if (storedUntil) {
+      const until = parseInt(storedUntil, 10);
+      const remaining = Math.max(0, Math.ceil((until - Date.now()) / 1000));
+      setResetCooldown(remaining);
+    }
+
+    const interval = setInterval(() => {
+      const until = localStorage.getItem(RESET_COOLDOWN_KEY);
+      if (!until) {
+        setResetCooldown(0);
+        return;
+      }
+      const remaining = Math.max(0, Math.ceil((parseInt(until, 10) - Date.now()) / 1000));
+      setResetCooldown(remaining);
+      if (remaining === 0) {
+        localStorage.removeItem(RESET_COOLDOWN_KEY);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const startResetCooldown = (seconds: number) => {
+    const until = Date.now() + seconds * 1000;
+    localStorage.setItem(RESET_COOLDOWN_KEY, until.toString());
+    setResetCooldown(seconds);
+  };
+
+  const extractRetryAfter = (error: unknown): number | null => {
+    if (!error || typeof error !== "object") return null;
+    const err = error as Record<string, unknown>;
+
+    if (typeof err.retryAfter === "number") return err.retryAfter;
+
+    const headers = err.headers;
+    if (headers && typeof headers === "object") {
+      const retryAfter = (headers as Record<string, string>)["retry-after"];
+      if (retryAfter) {
+        const parsed = parseInt(retryAfter, 10);
+        if (!isNaN(parsed)) return parsed;
+      }
+    }
+
+    if (typeof err.message === "string") {
+      const match = err.message.match(/(\d+)\s*seconds?/i);
+      if (match) return parseInt(match[1], 10);
+    }
+
+    return null;
+  };
+
+  const formatCooldown = (seconds: number): string => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    if (m > 0) return `${m}min ${s.toString().padStart(2, "0")}s`;
+    return `${s}s`;
+  };
 
   const handleForgotPassword = async () => {
     const trimmedEmail = email.trim();
@@ -51,6 +114,15 @@ const AuthPage: React.FC = () => {
       return;
     }
 
+    if (resetCooldown > 0) {
+      toast({
+        title: t('forms.error'),
+        description: `Aguarde ${formatCooldown(resetCooldown)} antes de solicitar novamente.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setResetLoading(true);
     const { error } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
       redirectTo: `${window.location.origin}/reset-password`,
@@ -58,16 +130,26 @@ const AuthPage: React.FC = () => {
     setResetLoading(false);
 
     if (error) {
+      const errStatus = (error as { status?: number }).status;
       const isRateLimited =
-        (error as { status?: number }).status === 429 ||
-        error.message?.toLowerCase().includes("rate limit");
-      toast({
-        title: t('forms.error'),
-        description: isRateLimited
-          ? "Muitas tentativas de recuperação. Aguarde alguns minutos antes de tentar novamente."
-          : error.message,
-        variant: "destructive",
-      });
+        errStatus === 429 || error.message?.toLowerCase().includes("rate limit");
+
+      if (isRateLimited) {
+        const retryAfter = extractRetryAfter(error);
+        const cooldownSeconds = retryAfter && retryAfter > 0 ? retryAfter : 60;
+        startResetCooldown(cooldownSeconds);
+        toast({
+          title: "Muitas tentativas",
+          description: `Você poderá reenviar o e-mail em ${formatCooldown(cooldownSeconds)}.`,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: t('forms.error'),
+          description: error.message,
+          variant: "destructive",
+        });
+      }
       return;
     }
 
@@ -366,16 +448,25 @@ const AuthPage: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex justify-end">
+                  <div className="flex flex-col items-end gap-1">
                     <Button
                       type="button"
                       variant="link"
                       className="h-auto p-0 text-sm"
                       onClick={handleForgotPassword}
-                      disabled={resetLoading}
+                      disabled={resetLoading || resetCooldown > 0}
                     >
-                      {resetLoading ? "Enviando..." : "Esqueci minha senha"}
+                      {resetLoading
+                        ? "Enviando..."
+                        : resetCooldown > 0
+                        ? `Reenviar em ${formatCooldown(resetCooldown)}`
+                        : "Esqueci minha senha"}
                     </Button>
+                    {resetCooldown > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        Limite atingido. Tente novamente em {formatCooldown(resetCooldown)}.
+                      </p>
+                    )}
                   </div>
 
 
