@@ -9,6 +9,10 @@ import SafeAreaLayout from "@/layouts/SafeAreaLayout";
 import { DensityProvider } from "@/contexts/DensityContext";
 import { HelmetProvider } from 'react-helmet-async';
 import { monitorWebVitals, analyzeBundle } from './config/performance';
+import { installDomMutationGuards } from '@/utils/domPatch';
+
+// Must run before React renders so translated/extension-mutated nodes can't crash the tree
+installDomMutationGuards();
 // Register Service Worker only in production to avoid HMR conflicts in dev
 if (import.meta.env.PROD) {
   import('./sw-register');
