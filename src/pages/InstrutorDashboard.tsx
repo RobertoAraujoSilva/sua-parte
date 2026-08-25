@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchJWorgContent } from '@/lib/api/firecrawl-jworg';
 import programacaoData from '@/data/programacoes-completas-2025.json';
+import { periodoDaSemanaAtual } from '@/utils/programacaoDates';
 
 // Approximate Monday date for each "periodo" string in the JSON.
 // Used to populate `data_designacao` so portals can sort/filter by date.
@@ -302,8 +303,9 @@ export default function InstrutorDashboard() {
   };
 
   const totalDesignacoes = designacoes.length;
-  const designacoesPrimeiraSemana = designacoes.filter(
-    (d) => d.semana_periodo === semanas[0]?.periodo
+  const periodoAtual = periodoDaSemanaAtual(semanas);
+  const designacoesSemanaAtual = designacoes.filter(
+    (d) => d.semana_periodo === periodoAtual
   ).length;
 
   if (loading) {
@@ -390,6 +392,9 @@ export default function InstrutorDashboard() {
           <p className="text-muted-foreground">
             Visualize a programação oficial e designe estudantes para cada parte da reunião.
           </p>
+          <p className="text-sm font-medium mt-2">
+            Hoje: {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date())}
+          </p>
           {lastSync && (
             <p className="text-xs text-muted-foreground mt-1">
               Última atualização do JW.org: {lastSync}
@@ -447,8 +452,8 @@ export default function InstrutorDashboard() {
           <StatCard icon={<Save className="h-7 w-7 text-primary" />} label="Designações" value={totalDesignacoes} />
           <StatCard
             icon={<Clock className="h-7 w-7 text-primary" />}
-            label="Próxima semana"
-            value={designacoesPrimeiraSemana}
+            label="Semana atual"
+            value={designacoesSemanaAtual}
           />
         </div>
 
