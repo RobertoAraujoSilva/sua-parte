@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Clock, Users, BookOpen, Play, Mic, X } from 'lucide-react';
 import type { EstudanteWithParent } from '@/types/estudantes';
+import { periodoDaSemanaAtual } from '@/utils/programacaoDates';
 
 export interface Parte {
   id: string;
@@ -83,20 +84,51 @@ export function ProgramacaoViewer({
   onDesignar,
   onRemover,
 }: ProgramacaoViewerProps) {
-  const [selectedPeriodo, setSelectedPeriodo] = useState<string>(semanas[0]?.periodo ?? '');
+  const periodoAtual = useMemo(() => periodoDaSemanaAtual(semanas), [semanas]);
+  const [selectedPeriodo, setSelectedPeriodo] = useState<string>(() => periodoDaSemanaAtual(semanas) ?? '');
+
+  useEffect(() => {
+    setSelectedPeriodo((periodoSelecionado) => {
+      if (periodoSelecionado && semanas.some((semana) => semana.periodo === periodoSelecionado)) {
+        return periodoSelecionado;
+      }
+      return periodoAtual ?? '';
+    });
+  }, [periodoAtual, semanas]);
 
   const semanaAtual = useMemo(
-    () => semanas.find((s) => s.periodo === selectedPeriodo) ?? semanas[0],
+    () => semanas.find((s) => s.periodo === selectedPeriodo),
     [semanas, selectedPeriodo]
   );
 
   if (!semanaAtual) {
     return (
       <Card>
-        <CardContent className="flex items-center justify-center py-8">
-          <div className="text-center text-muted-foreground">
+        <CardContent className="flex items-center justify-center py-10">
+          <div className="w-full max-w-xl text-center">
             <BookOpen className="mx-auto h-12 w-12 mb-4 opacity-50" />
-            <p>Nenhuma programação disponível</p>
+            <h2 className="text-lg font-semibold text-foreground">Programação da semana atual não carregada</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Hoje é {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date())}.
+              Atualize a programação do JW.org ou consulte uma semana arquivada abaixo.
+            </p>
+            {semanas.length > 0 && (
+              <div className="mx-auto mt-5 flex max-w-sm flex-col gap-2 text-left">
+                <label className="text-sm font-medium text-foreground">Programações arquivadas</label>
+                <Select value={selectedPeriodo} onValueChange={setSelectedPeriodo}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecionar uma semana" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {semanas.map((semana) => (
+                      <SelectItem key={semana.periodo} value={semana.periodo}>
+                        {semana.periodo}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
