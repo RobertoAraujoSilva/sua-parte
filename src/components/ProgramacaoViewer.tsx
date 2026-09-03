@@ -4,7 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Clock, Users, BookOpen, Play, Mic, X } from 'lucide-react';
+import {
+  Clock,
+  Users,
+  BookOpen,
+  Play,
+  Mic,
+  X,
+  CalendarX,
+  Download,
+  FlaskConical,
+  Plus,
+  ChevronDown,
+} from 'lucide-react';
 import type { EstudanteWithParent } from '@/types/estudantes';
 import { periodoDaSemanaAtual } from '@/utils/programacaoDates';
 
