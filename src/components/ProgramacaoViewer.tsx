@@ -100,6 +100,11 @@ export function ProgramacaoViewer({
   designacoes,
   onDesignar,
   onRemover,
+  onAtualizarJWorg,
+  onTestarImportacao,
+  onAdicionarManual,
+  loadingAtualizar,
+  loadingTestar,
 }: ProgramacaoViewerProps) {
   const periodoAtual = useMemo(() => periodoDaSemanaAtual(semanas), [semanas]);
   const [selectedPeriodo, setSelectedPeriodo] = useState<string>(() => periodoDaSemanaAtual(semanas) ?? '');
