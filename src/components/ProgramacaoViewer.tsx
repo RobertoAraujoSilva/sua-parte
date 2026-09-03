@@ -59,6 +59,11 @@ interface ProgramacaoViewerProps {
   designacoes: DesignacaoLocal[];
   onDesignar: (parte: Parte, semana: Semana, estudanteId: string, ajudanteId?: string) => void;
   onRemover: (designacaoId: string) => void;
+  onAtualizarJWorg?: () => void;
+  onTestarImportacao?: () => void;
+  onAdicionarManual?: () => void;
+  loadingAtualizar?: boolean;
+  loadingTestar?: boolean;
 }
 
 const getIconForTipo = (tipo?: string) => {
