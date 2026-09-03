@@ -4,7 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Clock, Users, BookOpen, Play, Mic, X } from 'lucide-react';
+import {
+  Clock,
+  Users,
+  BookOpen,
+  Play,
+  Mic,
+  X,
+  CalendarX,
+  Download,
+  FlaskConical,
+  Plus,
+  ChevronDown,
+} from 'lucide-react';
 import type { EstudanteWithParent } from '@/types/estudantes';
 import { periodoDaSemanaAtual } from '@/utils/programacaoDates';
 
@@ -47,6 +59,11 @@ interface ProgramacaoViewerProps {
   designacoes: DesignacaoLocal[];
   onDesignar: (parte: Parte, semana: Semana, estudanteId: string, ajudanteId?: string) => void;
   onRemover: (designacaoId: string) => void;
+  onAtualizarJWorg?: () => void;
+  onTestarImportacao?: () => void;
+  onAdicionarManual?: () => void;
+  loadingAtualizar?: boolean;
+  loadingTestar?: boolean;
 }
 
 const getIconForTipo = (tipo?: string) => {
@@ -83,6 +100,11 @@ export function ProgramacaoViewer({
   designacoes,
   onDesignar,
   onRemover,
+  onAtualizarJWorg,
+  onTestarImportacao,
+  onAdicionarManual,
+  loadingAtualizar,
+  loadingTestar,
 }: ProgramacaoViewerProps) {
   const periodoAtual = useMemo(() => periodoDaSemanaAtual(semanas), [semanas]);
   const [selectedPeriodo, setSelectedPeriodo] = useState<string>(() => periodoDaSemanaAtual(semanas) ?? '');
@@ -102,22 +124,38 @@ export function ProgramacaoViewer({
   );
 
   if (!semanaAtual) {
+    const hojeFormatado = new Intl.DateTimeFormat('pt-BR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    }).format(new Date());
+
     return (
-      <Card>
-        <CardContent className="flex items-center justify-center py-10">
-          <div className="w-full max-w-xl text-center">
-            <BookOpen className="mx-auto h-12 w-12 mb-4 opacity-50" />
-            <h2 className="text-lg font-semibold text-foreground">Programação da semana atual não carregada</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              Hoje é {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(new Date())}.
-              Atualize a programação do JW.org ou consulte uma semana arquivada abaixo.
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="rounded-full bg-muted p-4 mb-5">
+              <CalendarX className="h-10 w-10 text-muted-foreground" />
+            </div>
+            <h2 className="text-xl font-semibold text-foreground">
+              Nenhuma programação para esta semana
+            </h2>
+            <p className="mt-2 max-w-lg text-sm text-muted-foreground">
+              Hoje é <strong className="text-foreground">{hojeFormatado}</strong>. Ainda não temos a
+              programação cadastrada para o período atual. Escolha uma das opções abaixo para
+              continuar.
             </p>
+
             {semanas.length > 0 && (
-              <div className="mx-auto mt-5 flex max-w-sm flex-col gap-2 text-left">
-                <label className="text-sm font-medium text-foreground">Programações arquivadas</label>
+              <div className="mx-auto mt-6 flex w-full max-w-sm flex-col gap-2 text-left">
+                <label className="text-sm font-medium text-foreground">
+                  Ver uma semana já cadastrada
+                </label>
                 <Select value={selectedPeriodo} onValueChange={setSelectedPeriodo}>
                   <SelectTrigger>
                     <SelectValue placeholder="Selecionar uma semana" />
+                    <ChevronDown className="h-4 w-4 opacity-50" />
                   </SelectTrigger>
                   <SelectContent>
                     {semanas.map((semana) => (
@@ -129,9 +167,97 @@ export function ProgramacaoViewer({
                 </Select>
               </div>
             )}
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Card className="flex flex-col">
+            <CardHeader>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary mb-3">
+                <Download className="h-5 w-5" />
+              </div>
+              <CardTitle className="text-base">Importar do JW.org</CardTitle>
+              <CardDescription>
+                Baixe a programação mais recente diretamente da fonte oficial.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="mt-auto pt-0">
+              <Button
+                className="w-full"
+                onClick={onAtualizarJWorg}
+                disabled={!onAtualizarJWorg || loadingAtualizar}
+              >
+                {loadingAtualizar ? (
+                  <>
+                    <Clock className="mr-2 h-4 w-4 animate-spin" />
+                    Importando...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" />
+                    Atualizar programação
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="flex flex-col">
+            <CardHeader>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-secondary text-secondary-foreground mb-3">
+                <FlaskConical className="h-5 w-5" />
+              </div>
+              <CardTitle className="text-base">Testar importação</CardTitle>
+              <CardDescription>
+                Verifique se o JW.org está respondendo e quantas semanas podem ser extraídas.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="mt-auto pt-0">
+              <Button
+                variant="secondary"
+                className="w-full"
+                onClick={onTestarImportacao}
+                disabled={!onTestarImportacao || loadingTestar}
+              >
+                {loadingTestar ? (
+                  <>
+                    <Clock className="mr-2 h-4 w-4 animate-spin" />
+                    Testando...
+                  </>
+                ) : (
+                  <>
+                    <FlaskConical className="mr-2 h-4 w-4" />
+                    Testar importação
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="flex flex-col sm:col-span-2 lg:col-span-1">
+            <CardHeader>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted text-foreground mb-3">
+                <Plus className="h-5 w-5" />
+              </div>
+              <CardTitle className="text-base">Adicionar manualmente</CardTitle>
+              <CardDescription>
+                Cadastre a programação desta semana você mesmo, parte por parte.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="mt-auto pt-0">
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={onAdicionarManual}
+                disabled={!onAdicionarManual}
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Criar programação
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     );
   }
 

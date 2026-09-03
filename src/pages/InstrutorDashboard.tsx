@@ -480,6 +480,16 @@ export default function InstrutorDashboard() {
               designacoes={designacoes}
               onDesignar={handleDesignar}
               onRemover={handleRemover}
+              onAtualizarJWorg={atualizarDoJWorg}
+              onTestarImportacao={testarImportacaoJWorg}
+              onAdicionarManual={() =>
+                toast({
+                  title: 'Em breve',
+                  description: 'O cadastro manual de programação será liberado em uma próxima versão.',
+                })
+              }
+              loadingAtualizar={refreshing}
+              loadingTestar={testing}
             />
           </TabsContent>
 
