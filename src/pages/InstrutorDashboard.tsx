@@ -12,24 +12,25 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchJWorgContent } from '@/lib/api/firecrawl-jworg';
 import programacaoData from '@/data/programacoes-completas-2025.json';
-import { periodoDaSemanaAtual } from '@/utils/programacaoDates';
+import programacao2026 from '@/data/programacoes-2026.json';
+import { periodoDaSemanaAtual, inicioDoPeriodo } from '@/utils/programacaoDates';
 
-// Approximate Monday date for each "periodo" string in the JSON.
+// Monday (ISO date) for each "periodo" string, derived from the period text itself.
 // Used to populate `data_designacao` so portals can sort/filter by date.
-const PERIODO_TO_DATE: Record<string, string> = {
-  '8-14 de setembro 2025': '2025-09-08',
-  '15-21 de setembro 2025': '2025-09-15',
-  '22-28 de setembro 2025': '2025-09-22',
-  '29 de setembro – 5 de outubro 2025': '2025-09-29',
-  '6-12 de outubro 2025': '2025-10-06',
-  '13-19 de outubro 2025': '2025-10-13',
-  '20-26 de outubro 2025': '2025-10-20',
-  '27 de outubro – 2 de novembro 2025': '2025-10-27',
-  '3-9 de novembro 2025': '2025-11-03',
+const dataParaSemana = (periodo: string): string => {
+  const inicio = inicioDoPeriodo(periodo);
+  if (!inicio) return new Date().toISOString().split('T')[0];
+  const mes = String(inicio.getMonth() + 1).padStart(2, '0');
+  const dia = String(inicio.getDate()).padStart(2, '0');
+  return `${inicio.getFullYear()}-${mes}-${dia}`;
 };
 
-const dataParaSemana = (periodo: string): string =>
-  PERIODO_TO_DATE[periodo] ?? new Date().toISOString().split('T')[0];
+// Programação oficial importada do JW.org (2026) + histórico de 2025.
+const SEMANAS_INICIAIS: Semana[] = [
+  ...(programacao2026 as { semanas: Semana[] }).semanas,
+  ...(programacaoData as { semanas: Semana[] }).semanas,
+];
+
 
 // Group flat parts list returned by Firecrawl into the secao-based structure used by ProgramacaoViewer
 function agruparPartesPorSecao(parts: any[]): Semana['programacao'] {
@@ -69,8 +70,7 @@ export default function InstrutorDashboard() {
   const { user } = useAuth();
   const { estudantes, isLoading: estudantesLoading } = useEstudantes();
 
-  const semanasIniciais = (programacaoData as { semanas: Semana[] }).semanas;
-  const [semanas, setSemanas] = useState<Semana[]>(semanasIniciais);
+  const [semanas, setSemanas] = useState<Semana[]>(SEMANAS_INICIAIS);
   const [designacoes, setDesignacoes] = useState<DesignacaoLocal[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -110,10 +110,10 @@ export default function InstrutorDashboard() {
         tempo_minutos: d.tempo_minutos,
       }));
 
-      // We store `parte_id` in the `cena` column and `semana_periodo`
-      // is encoded into `data_designacao` via PERIODO_TO_DATE lookup.
+      // We store `parte_id` in the `cena` column and the week period is
+      // recovered from `data_designacao` (Monday of the week).
       const semanaPorData = new Map<string, string>();
-      Object.entries(PERIODO_TO_DATE).forEach(([periodo, date]) => semanaPorData.set(date, periodo));
+      SEMANAS_INICIAIS.forEach((s) => semanaPorData.set(dataParaSemana(s.periodo), s.periodo));
 
       const enriched = mapped.map((d, i) => {
         const raw = data![i];
@@ -225,7 +225,7 @@ export default function InstrutorDashboard() {
 
       // Merge: JW.org weeks first, fallback static weeks for the rest
       const periodosJW = new Set(semanasJWorg.map((s) => s.periodo));
-      const estaticasFiltradas = semanasIniciais.filter((s) => !periodosJW.has(s.periodo));
+      const estaticasFiltradas = SEMANAS_INICIAIS.filter((s) => !periodosJW.has(s.periodo));
       setSemanas([...semanasJWorg, ...estaticasFiltradas]);
       const ts = new Date().toLocaleString('pt-BR');
       setLastSync(ts);
