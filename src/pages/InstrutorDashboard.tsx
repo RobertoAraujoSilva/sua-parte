@@ -70,8 +70,7 @@ export default function InstrutorDashboard() {
   const { user } = useAuth();
   const { estudantes, isLoading: estudantesLoading } = useEstudantes();
 
-  const semanasIniciais = (programacaoData as { semanas: Semana[] }).semanas;
-  const [semanas, setSemanas] = useState<Semana[]>(semanasIniciais);
+  const [semanas, setSemanas] = useState<Semana[]>(SEMANAS_INICIAIS);
   const [designacoes, setDesignacoes] = useState<DesignacaoLocal[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
