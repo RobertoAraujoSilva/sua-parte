@@ -105,10 +105,10 @@ export default function InstrutorDashboard() {
         tempo_minutos: d.tempo_minutos,
       }));
 
-      // We store `parte_id` in the `cena` column and `semana_periodo`
-      // is encoded into `data_designacao` via PERIODO_TO_DATE lookup.
+      // We store `parte_id` in the `cena` column and the week period is
+      // recovered from `data_designacao` (Monday of the week).
       const semanaPorData = new Map<string, string>();
-      Object.entries(PERIODO_TO_DATE).forEach(([periodo, date]) => semanaPorData.set(date, periodo));
+      SEMANAS_INICIAIS.forEach((s) => semanaPorData.set(dataParaSemana(s.periodo), s.periodo));
 
       const enriched = mapped.map((d, i) => {
         const raw = data![i];
