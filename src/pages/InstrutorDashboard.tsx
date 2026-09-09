@@ -225,7 +225,7 @@ export default function InstrutorDashboard() {
 
       // Merge: JW.org weeks first, fallback static weeks for the rest
       const periodosJW = new Set(semanasJWorg.map((s) => s.periodo));
-      const estaticasFiltradas = semanasIniciais.filter((s) => !periodosJW.has(s.periodo));
+      const estaticasFiltradas = SEMANAS_INICIAIS.filter((s) => !periodosJW.has(s.periodo));
       setSemanas([...semanasJWorg, ...estaticasFiltradas]);
       const ts = new Date().toLocaleString('pt-BR');
       setLastSync(ts);
