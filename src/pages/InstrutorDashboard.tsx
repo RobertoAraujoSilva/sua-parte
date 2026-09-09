@@ -12,24 +12,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { fetchJWorgContent } from '@/lib/api/firecrawl-jworg';
 import programacaoData from '@/data/programacoes-completas-2025.json';
-import { periodoDaSemanaAtual } from '@/utils/programacaoDates';
+import programacao2026 from '@/data/programacoes-2026.json';
+import { periodoDaSemanaAtual, inicioDoPeriodo } from '@/utils/programacaoDates';
 
-// Approximate Monday date for each "periodo" string in the JSON.
+// Monday (ISO date) for each "periodo" string, derived from the period text itself.
 // Used to populate `data_designacao` so portals can sort/filter by date.
-const PERIODO_TO_DATE: Record<string, string> = {
-  '8-14 de setembro 2025': '2025-09-08',
-  '15-21 de setembro 2025': '2025-09-15',
-  '22-28 de setembro 2025': '2025-09-22',
-  '29 de setembro – 5 de outubro 2025': '2025-09-29',
-  '6-12 de outubro 2025': '2025-10-06',
-  '13-19 de outubro 2025': '2025-10-13',
-  '20-26 de outubro 2025': '2025-10-20',
-  '27 de outubro – 2 de novembro 2025': '2025-10-27',
-  '3-9 de novembro 2025': '2025-11-03',
+const dataParaSemana = (periodo: string): string => {
+  const inicio = inicioDoPeriodo(periodo);
+  if (!inicio) return new Date().toISOString().split('T')[0];
+  const mes = String(inicio.getMonth() + 1).padStart(2, '0');
+  const dia = String(inicio.getDate()).padStart(2, '0');
+  return `${inicio.getFullYear()}-${mes}-${dia}`;
 };
 
-const dataParaSemana = (periodo: string): string =>
-  PERIODO_TO_DATE[periodo] ?? new Date().toISOString().split('T')[0];
 
 // Group flat parts list returned by Firecrawl into the secao-based structure used by ProgramacaoViewer
 function agruparPartesPorSecao(parts: any[]): Semana['programacao'] {
