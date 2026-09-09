@@ -25,6 +25,12 @@ const dataParaSemana = (periodo: string): string => {
   return `${inicio.getFullYear()}-${mes}-${dia}`;
 };
 
+// Programação oficial importada do JW.org (2026) + histórico de 2025.
+const SEMANAS_INICIAIS: Semana[] = [
+  ...(programacao2026 as { semanas: Semana[] }).semanas,
+  ...(programacaoData as { semanas: Semana[] }).semanas,
+];
+
 
 // Group flat parts list returned by Firecrawl into the secao-based structure used by ProgramacaoViewer
 function agruparPartesPorSecao(parts: any[]): Semana['programacao'] {
