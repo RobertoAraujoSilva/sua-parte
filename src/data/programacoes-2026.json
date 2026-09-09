@@ -1,0 +1,815 @@
+{
+  "ano": "2026",
+  "descricao": "Programação oficial importada de wol.jw.org",
+  "fonte": "https://wol.jw.org/pt/wol/meetings/r5/lp-t",
+  "semanas": [
+    {
+      "periodo": "31 de agosto–6 de setembro 2026",
+      "tema": "JEREMIAS 31",
+      "cantico_abertura": "27",
+      "cantico_meio": "67",
+      "cantico_encerramento": "132",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "p0_1",
+              "titulo": "“Farei . . . um novo pacto”",
+              "duracao": 10,
+              "referencias": "Jeová prometeu substituir o pacto da Lei mosaica por um “novo pacto”, que ajudaria mais pessoas e duraria para sempre. (Jer. 31:31, 32; jr 169 § 4) O novo pacto seria entre Jeová e o Israel de Deus, e daria uma base lega",
+              "tipo": "consideracao",
+              "designado": null
+            },
+            {
+              "id": "p0_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "referencias": "Jer. 31:15 — Quais foram os possíveis cumprimentos dessa profecia? (it “Ramá” n.º 1 § 3) Que joias espirituais você encontrou na leitura da Bíblia desta semana?",
+              "tipo": "participacao",
+              "designado": null
+            },
+            {
+              "id": "p0_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Jer. 31:1-11 (th lição 12)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "p0_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "referencias": "DE CASA EM CASA. Ofereça um estudo bíblico de maneira direta. (lmd lição 4 ponto 3)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p0_5",
+              "titulo": "Iniciando conversas",
+              "duracao": 4,
+              "referencias": "TESTEMUNHO INFORMAL. Use o artigo do site ijwyp número 106 para ajudar um colega de escola que está chateado porque acha que um professor o está tratando mal. (lmd lição 3 ponto 3)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p0_6",
+              "titulo": "Explicando suas crenças",
+              "duracao": 5,
+              "referencias": "Discurso. ijwfq artigo 37 — Tema: Por que as Testemunhas de Jeová são neutras em assuntos políticos? (th lição 14)",
+              "tipo": "ministerio",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "p0_7",
+              "titulo": "Seja adaptável — Use o JW.ORG",
+              "duracao": 15,
+              "referencias": "Consideração. Ser adaptável no ministério envolve imaginar situações que podem acontecer e se preparar para elas. Mas às vezes o morador pode falar sobre algo que nós não esperávamos. O que pode nos ajudar quando isso ac",
+              "tipo": "video+consideracao",
+              "designado": null
+            },
+            {
+              "id": "p0_8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "wcg cap. 6 Comentários finais (3 min) | Cântico 132 e oração",
+              "tipo": "estudo",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "7-13 de setembro 2026",
+      "tema": "JEREMIAS 32-33",
+      "cantico_abertura": "1",
+      "cantico_meio": "143",
+      "cantico_encerramento": "143",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "p1_1",
+              "titulo": "Meditar nas qualidades de Jeová fortalece a nossa fé",
+              "duracao": 10,
+              "referencias": "O poder de Jeová prova que ele pode nos ajudar. (Jer. 32:17; wp19.1 6 § 1–7 § 1) O amor leal de Jeová nos garante que ele quer nos ajudar. (Jer. 32:18; w21.11 7 § 18) O senso de justiça de Jeová nos lembra de que ele vê ",
+              "tipo": "video+consideracao",
+              "designado": null
+            },
+            {
+              "id": "p1_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "referencias": "Jer. 33:23, 24 — Quais são “as duas famílias” mencionadas aqui? (w07 15/3 11 § 4) Que joias espirituais você encontrou na leitura da Bíblia desta semana?",
+              "tipo": "participacao",
+              "designado": null
+            },
+            {
+              "id": "p1_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Jer. 32:6-18 (th lição 2)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "p1_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "referencias": "DE CASA EM CASA. Ofereça um estudo bíblico. (lmd lição 4 ponto 3)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p1_5",
+              "titulo": "Iniciando conversas",
+              "duracao": 4,
+              "referencias": "TESTEMUNHO INFORMAL. Ofereça um estudo bíblico. (lmd lição 4 ponto 4)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p1_6",
+              "titulo": "Cultivando o interesse",
+              "duracao": 5,
+              "referencias": "DE CASA EM CASA. Ofereça um estudo bíblico. (lmd lição 8 ponto 3)",
+              "tipo": "ministerio",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "p1_7",
+              "titulo": "Use seu tempo da melhor forma durante a campanha",
+              "duracao": 15,
+              "referencias": "Consideração. Você gostaria de iniciar um estudo bíblico este mês? Se você seguir algumas dicas simples, suas chances de conseguir um estudo podem aumentar. (1 Cor. 9:26) Vamos ver o que aprendemos de um boletim do Corpo",
+              "tipo": "video+consideracao",
+              "designado": null
+            },
+            {
+              "id": "p1_8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "wcg cap. 7 Comentários finais (3 min) | Cântico 143 e oração",
+              "tipo": "estudo",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "14-20 de setembro 2026",
+      "tema": "JEREMIAS 34-35",
+      "cantico_abertura": "161",
+      "cantico_meio": "28",
+      "cantico_encerramento": "28",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "p2_1",
+              "titulo": "Jeová recompensa quem sempre é obediente a ele",
+              "duracao": 10,
+              "referencias": "Muitos judeus obedeciam a Jeová só quando precisavam da ajuda dele. (Jer. 34:8-11; jr 49-50 §§ 13-14) Os recabitas fizeram exatamente o que Jonadabe tinha mandado. (Jer. 35:5, 6; jr 76 §§ 17-18) Jeová recompensou os reca",
+              "tipo": "consideracao",
+              "designado": null
+            },
+            {
+              "id": "p2_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "referencias": "Jer. 34:7 — Que descobertas arqueológicas apoiam o que esse versículo diz? (it “Arqueologia” §§ 27-28) Que joias espirituais você encontrou na leitura da Bíblia desta semana?",
+              "tipo": "participacao",
+              "designado": null
+            },
+            {
+              "id": "p2_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Jer. 35:1-14 (th lição 5)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "p2_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 2,
+              "referencias": "DE CASA EM CASA. Ofereça um estudo bíblico. (lmd lição 3 ponto 3)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p2_5",
+              "titulo": "Iniciando conversas",
+              "duracao": 2,
+              "referencias": "DE CASA EM CASA. Ofereça um estudo bíblico. Use um vídeo do nosso Kit de Ensino. (lmd lição 3 ponto 5)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p2_6",
+              "titulo": "Cultivando o interesse",
+              "duracao": 3,
+              "referencias": "TESTEMUNHO INFORMAL. Ofereça um estudo bíblico para uma pessoa que, numa conversa anterior, disse estar preocupada com algo que aconteceu recentemente. (lmd lição 7 ponto 4)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p2_7",
+              "titulo": "Fazendo discípulos",
+              "duracao": 4,
+              "referencias": "Converse com um estudante da Bíblia sobre a campanha de estudos bíblicos. Pergunte se ele conhece alguém que pode estar interessado em estudar a Bíblia. (th lição 11)",
+              "tipo": "ministerio",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "p2_8",
+              "titulo": "O autodomínio nos ajuda a obedecer",
+              "duracao": 6,
+              "referencias": "Consideração. Pensamentos negativos podem enfraquecer nossa determinação de fazer o que é certo. Por isso, é muito importante tentarmos ao máximo controlar nossos pensamentos. Como podemos fazer isso? Mostre o VÍDEO Cois",
+              "tipo": "video+consideracao",
+              "designado": null
+            },
+            {
+              "id": "p2_10",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "wcg cap. 8 Comentários finais (3 min) | Cântico 28 e oração",
+              "tipo": "estudo",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "21-27 de setembro 2026",
+      "tema": "JEREMIAS 36-37",
+      "cantico_abertura": "74",
+      "cantico_meio": "134",
+      "cantico_encerramento": "134",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "p3_1",
+              "titulo": "Jeová apoia aqueles que apoiam o Seu Reino",
+              "duracao": 10,
+              "referencias": "Em uma época de divisão política, Jeremias pregou uma mensagem que não agradava as pessoas. (Jer. 37:6-10; jr 27 § 22) Ele foi perseguido porque as pessoas entenderam errado a posição dele. (Jer. 37:13-15; jr 28 § 23) Je",
+              "tipo": "consideracao",
+              "designado": null
+            },
+            {
+              "id": "p3_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "referencias": "Jer. 36:30 — Como essa profecia sobre Jeoiaquim se cumpriu? (it “Jeoiaquim” § 9) Que joias espirituais você encontrou na leitura da Bíblia desta semana?",
+              "tipo": "participacao",
+              "designado": null
+            },
+            {
+              "id": "p3_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Jer. 36:1-13 (th lição 10)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "p3_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "referencias": "TESTEMUNHO PÚBLICO. Ofereça um estudo bíblico para uma pessoa de uma cultura não cristã. (lmd lição 5 ponto 5)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p3_5",
+              "titulo": "Cultivando o interesse",
+              "duracao": 4,
+              "referencias": "DE CASA EM CASA. Ofereça um estudo bíblico para uma pessoa que aceitou um folheto na última visita. (lmd lição 9 ponto 4)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p3_6",
+              "titulo": "O que você diria?",
+              "duracao": 6,
+              "referencias": "Consideração. DE CASA EM CASA. Faça um resumo da lmd lição 2 ponto 5 . Depois, pergunte: O morador diz que está preocupado com o aumento do custo de vida. O que você diria para mostrar que entende a preocupação dele? Que",
+              "tipo": "consideracao",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "p3_7",
+              "titulo": "Continue neutro no seu coração",
+              "duracao": 15,
+              "referencias": "Consideração. O mundo está cada vez mais dividido. Por isso, podemos esperar que nossa neutralidade seja cada vez mais testada. Para ter certeza de que não vamos tomar nenhum lado em assuntos políticos, nossa neutralidad",
+              "tipo": "video+consideracao",
+              "designado": null
+            },
+            {
+              "id": "p3_8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "wcg cap. 9 Comentários finais (3 min) | Cântico 134 e oração",
+              "tipo": "estudo",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "28 de setembro–4 de outubro 2026",
+      "tema": "JEREMIAS 38-39",
+      "cantico_abertura": "102",
+      "cantico_meio": "90",
+      "cantico_encerramento": "56",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "p4_1",
+              "titulo": "Continuem ajudando uns aos outros",
+              "duracao": 10,
+              "referencias": "Defenda outros, como Ebede-Meleque fez. (Jer. 38:7-9; w13 15/1 9 § 12) Console outros, como Jeremias fez. (Jer. 39:15-18; w19.11 6 § 17) Incentive outros a obedecer a Jeová, como Jeremias fez. (Jer. 38:20) PERGUNTE-SE: ‘",
+              "tipo": "consideracao",
+              "designado": null
+            },
+            {
+              "id": "p4_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "referencias": "Jer. 39:6, 7 — Que escolha ruim o rei Zedequias fez, e o que os chefes de família podem aprender disso? (jr 92 § 1) Que joias espirituais você encontrou na leitura da Bíblia desta semana?",
+              "tipo": "participacao",
+              "designado": null
+            },
+            {
+              "id": "p4_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Jer. 38:1-13 (th lição 12)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "p4_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "referencias": "TESTEMUNHO INFORMAL. Ofereça um estudo bíblico para uma pessoa que está preocupada com os eventos climáticos extremos. (lmd lição 9 ponto 3)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p4_5",
+              "titulo": "Cultivando o interesse",
+              "duracao": 4,
+              "referencias": "TESTEMUNHO INFORMAL. Ofereça um estudo bíblico para uma pessoa que é pai ou mãe. (lmd lição 9 ponto 5)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p4_6",
+              "titulo": "O que você diria?",
+              "duracao": 6,
+              "referencias": "Consideração. DE CASA EM CASA. Faça um resumo da lmd lição 1 ponto 4 . Mostre a imagem. Depois, pergunte: De acordo com o que você está vendo, que pergunta você faria para começar uma conversa? Que verdade da Bíblia você",
+              "tipo": "consideracao",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "p4_8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "wcg cap. 10 Comentários finais (3 min) | Cântico 56 e oração",
+              "tipo": "estudo",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "5-11 de outubro 2026",
+      "tema": "JEREMIAS 40-41",
+      "cantico_abertura": "33",
+      "cantico_meio": "17",
+      "cantico_encerramento": "38",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "p5_1",
+              "titulo": "Tenha o ponto de vista correto sobre a proteção de Jeová",
+              "duracao": 10,
+              "referencias": "Jeová salvou a vida de Jeremias. (Jer. 40:2-4; jr 189 § 16) Jeová não salvou a vida de Gedalias, embora ele fosse um homem que temia a Jeová. (Jer. 41:1, 2; it “Gedalias” n.° 4) Jeová nem sempre vai nos livrar milagrosam",
+              "tipo": "consideracao",
+              "designado": null
+            },
+            {
+              "id": "p5_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "referencias": "Jer. 40:12 — Como este versículo confirma que Jeová deu ao seu povo a boa terra descrita em Deuteronômio 8:6-8 ? (w06 15/6 16 § 4) Que joias espirituais você encontrou na leitura da Bíblia desta semana?",
+              "tipo": "participacao",
+              "designado": null
+            },
+            {
+              "id": "p5_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Jer. 40:1-10 (th lição 2)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "p5_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 2,
+              "referencias": "DE CASA EM CASA. (lmd lição 2 ponto 3)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p5_5",
+              "titulo": "Iniciando conversas",
+              "duracao": 2,
+              "referencias": "TESTEMUNHO INFORMAL. (lmd lição 2 ponto 5)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p5_6",
+              "titulo": "Iniciando conversas",
+              "duracao": 4,
+              "referencias": "TESTEMUNHO PÚBLICO. Uma pessoa está olhando o carrinho de publicações. (lmd lição 5 ponto 3)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p5_7",
+              "titulo": "Explicando suas crenças",
+              "duracao": 3,
+              "referencias": "Demonstração. ijwbq artigo 103 — Tema: Quem é Jeová e por que seu nome é importante? (th lição 17)",
+              "tipo": "ministerio",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "p5_8",
+              "titulo": "Jeová é o Protetor das viúvas",
+              "duracao": 15,
+              "referencias": "Consideração. O rei Davi disse que Jeová é “protetor das viúvas”. (Sal. 68:5) A Bíblia dá muitos exemplos que mostram como ele se importa com elas. Usando as ferramentas de pesquisa disponíveis no seu idioma, encontre um",
+              "tipo": "video+consideracao",
+              "designado": null
+            },
+            {
+              "id": "p5_9",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "wcg cap. 11 Comentários finais (3 min) | Cântico 38 e oração",
+              "tipo": "estudo",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "12-18 de outubro 2026",
+      "tema": "JEREMIAS 42-44",
+      "cantico_abertura": "103",
+      "cantico_meio": "47",
+      "cantico_encerramento": "129",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "p6_1",
+              "titulo": "Eles perguntaram o que fazer, mas não obedeceram",
+              "duracao": 10,
+              "referencias": "Antes de fugir para o Egito, Joanã e o povo disseram a Jeremias para orar a Jeová pedindo orientação. (Jer. 42:1-3; it “Joanã” n.º 5) A resposta de Jeová foi clara: fiquem em Judá e não vão para o Egito. (Jer. 42:9, 10, ",
+              "tipo": "consideracao",
+              "designado": null
+            },
+            {
+              "id": "p6_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "referencias": "Jer. 44:18 — Os israelitas disseram que estavam sofrendo porque tinham deixado de “fazer sacrifícios à Rainha do Céu”. Por que eles não podiam dizer isso? (it “Obstinação” § 4) Que joias espirituais você encontrou na lei",
+              "tipo": "participacao",
+              "designado": null
+            },
+            {
+              "id": "p6_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Jer. 43:1-13 (th lição 11)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "p6_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "referencias": "TESTEMUNHO INFORMAL. (lmd lição 1 ponto 5)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p6_5",
+              "titulo": "Cultivando o interesse",
+              "duracao": 4,
+              "referencias": "DE CASA EM CASA. Fale sobre uma das verdades do apêndice A da brochura Ame as Pessoas. (lmd lição 7 ponto 4)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p6_6",
+              "titulo": "O que você diria?",
+              "duracao": 6,
+              "referencias": "Consideração. TESTEMUNHO INFORMAL. Faça um resumo da lmd lição 2 ponto 3 . Mostre a imagem. Depois, pergunte: Um homem está lendo a Bíblia ou outro livro religioso. Como você poderia começar uma conversa com ele? Que per",
+              "tipo": "consideracao",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "p6_7",
+              "titulo": "Necessidades locais",
+              "duracao": 15,
+              "referencias": "",
+              "tipo": "necessidades",
+              "designado": null
+            },
+            {
+              "id": "p6_8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "wcg cap. 12 Comentários finais (3 min) | Cântico 129 e oração",
+              "tipo": "estudo",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "19-25 de outubro 2026",
+      "tema": "JEREMIAS 45-46",
+      "cantico_abertura": "21",
+      "cantico_meio": "87",
+      "cantico_encerramento": "87",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "p7_1",
+              "titulo": "Ter esperança é o segredo para o contentamento",
+              "duracao": 10,
+              "referencias": "Parece que Baruque não estava satisfeito com sua situação na vida. (Jer. 45:3; w25.07 22 §§ 8-9) Sem contentamento, podemos perder nossa alegria e tomar decisões ruins. (w25.07 20 § 2) Jeová ajudou Baruque a mudar o seu ",
+              "tipo": "consideracao",
+              "designado": null
+            },
+            {
+              "id": "p7_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "referencias": "Jer. 46:22 — Em que sentido o som do Egito seria “como o de uma serpente deslizando”? (it “Voz” § 16) Que joias espirituais você encontrou na leitura da Bíblia desta semana?",
+              "tipo": "participacao",
+              "designado": null
+            },
+            {
+              "id": "p7_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Jer. 46:13-24 (th lição 10)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "p7_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "referencias": "TESTEMUNHO INFORMAL. Comece a conversar com alguém que parece estar feliz. (lmd lição 2 ponto 3)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p7_5",
+              "titulo": "Iniciando conversas",
+              "duracao": 2,
+              "referencias": "DE CASA EM CASA. A pessoa está irritada. (lmd lição 4 ponto 5)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p7_6",
+              "titulo": "Iniciando conversas",
+              "duracao": 2,
+              "referencias": "DE CASA EM CASA. Uma pessoa que parece estar triste vem atender. (lmd lição 2 ponto 4)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p7_7",
+              "titulo": "Discurso",
+              "duracao": 4,
+              "referencias": "lmd apêndice A ponto 20 — Tema: Jesus não é o Deus Todo-Poderoso. (th lição 7)",
+              "tipo": "discurso",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "p7_8",
+              "titulo": "‘Partilhe com outros o que você tem’",
+              "duracao": 15,
+              "referencias": "Consideração. Em suas cartas, o apóstolo Paulo muitas vezes falou sobre a importância de dividir com outros o que temos. Os conselhos dele foram muito importantes para os cristãos daquela época, e continuam sendo hoje. —",
+              "tipo": "video+consideracao",
+              "designado": null
+            },
+            {
+              "id": "p7_9",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "wcg cap. 13 Comentários finais (3 min) | Cântico 87 e oração",
+              "tipo": "estudo",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "26 de outubro–1.º de novembro 2026",
+      "tema": "JEREMIAS 47-48",
+      "cantico_abertura": "125",
+      "cantico_meio": "54",
+      "cantico_encerramento": "54",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "p8_1",
+              "titulo": "Jeová é um Juiz justo e misericordioso",
+              "duracao": 10,
+              "referencias": "Jeremias predisse que Jeová puniria Moabe por ter maltratado Judá. (Jer. 48:27, 29, 42; it “Moabe, Moabitas” n.º 2 § 22) Jeová não ficaria feliz em destruir Moabe. (Jer. 48:31, 36) Ele mostraria misericórdia a alguns moa",
+              "tipo": "consideracao",
+              "designado": null
+            },
+            {
+              "id": "p8_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "referencias": "Jer. 48:6 — Em que sentido os moabitas se tornariam “como um junípero no deserto”? (it “Junípero” n.º 2) Que joias espirituais você encontrou na leitura da Bíblia desta semana?",
+              "tipo": "participacao",
+              "designado": null
+            },
+            {
+              "id": "p8_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "referencias": "Jer. 48:1-13 (th lição 11)",
+              "tipo": "leitura",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "p8_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "referencias": "DE CASA EM CASA. (lmd lição 5 ponto 4)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p8_5",
+              "titulo": "Cultivando o interesse",
+              "duracao": 4,
+              "referencias": "TESTEMUNHO INFORMAL. Fale sobre uma das verdades do apêndice A da brochura Ame as Pessoas. (lmd lição 9 ponto 5)",
+              "tipo": "ministerio",
+              "designado": null
+            },
+            {
+              "id": "p8_6",
+              "titulo": "Fazendo discípulos",
+              "duracao": 5,
+              "referencias": "Incentive seu estudante a orar mais vezes. (th lição 8)",
+              "tipo": "ministerio",
+              "designado": null
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "p8_7",
+              "titulo": "Necessidades locais",
+              "duracao": 15,
+              "referencias": "",
+              "tipo": "necessidades",
+              "designado": null
+            },
+            {
+              "id": "p8_8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "referencias": "wcg cap. 14 Comentários finais (3 min) | Cântico 54 e oração",
+              "tipo": "estudo",
+              "designado": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
