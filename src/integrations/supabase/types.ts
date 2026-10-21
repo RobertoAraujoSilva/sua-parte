@@ -455,6 +455,8 @@ export type Database = {
       designacoes: {
         Row: {
           cena: string | null
+          concluido: boolean
+          concluido_em: string | null
           confirmado: boolean | null
           created_at: string | null
           data_designacao: string | null
@@ -471,6 +473,8 @@ export type Database = {
         }
         Insert: {
           cena?: string | null
+          concluido?: boolean
+          concluido_em?: string | null
           confirmado?: boolean | null
           created_at?: string | null
           data_designacao?: string | null
@@ -487,6 +491,8 @@ export type Database = {
         }
         Update: {
           cena?: string | null
+          concluido?: boolean
+          concluido_em?: string | null
           confirmado?: boolean | null
           created_at?: string | null
           data_designacao?: string | null
