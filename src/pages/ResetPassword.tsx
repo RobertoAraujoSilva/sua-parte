@@ -16,21 +16,51 @@ const ResetPassword: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
+  const [linkError, setLinkError] = useState<string | null>(null);
 
   useEffect(() => {
-    // O link de recuperação entrega a sessão via hash (#access_token...&type=recovery)
-    const hash = window.location.hash || "";
-    const isRecovery = hash.includes("type=recovery");
+    // O link pode chegar via hash (#access_token...&type=recovery) ou via ?code= (PKCE)
+    const hash = window.location.hash.replace(/^#/, "");
+    const hashParams = new URLSearchParams(hash);
+    const queryParams = new URLSearchParams(window.location.search);
+    const isRecovery = hashParams.get("type") === "recovery";
+
+    const errDesc =
+      hashParams.get("error_description") || queryParams.get("error_description");
+    const errCode = hashParams.get("error_code") || queryParams.get("error_code");
+    if (errDesc || errCode) {
+      setLinkError(
+        errCode === "otp_expired"
+          ? "Este link de recuperação expirou ou já foi usado. Peça um novo link na tela de login."
+          : `Não foi possível validar o link: ${decodeURIComponent((errDesc || errCode || "").replace(/\+/g, " "))}`
+      );
+    }
 
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY" || session) {
         setReady(true);
+        setLinkError(null);
       }
     });
 
-    supabase.auth.getSession().then(({ data }) => {
+    const code = queryParams.get("code");
+    const init = async () => {
+      if (code) {
+        const { data: existing } = await supabase.auth.getSession();
+        if (!existing.session) {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) {
+            setLinkError(
+              "Este link de recuperação é inválido ou expirou. Peça um novo link na tela de login, usando o mesmo navegador."
+            );
+            return;
+          }
+        }
+      }
+      const { data } = await supabase.auth.getSession();
       if (data.session || isRecovery) setReady(true);
-    });
+    };
+    init();
 
     return () => listener.subscription.unsubscribe();
   }, []);
@@ -94,6 +124,11 @@ const ResetPassword: React.FC = () => {
               ? "Escolha uma nova senha para sua conta."
               : "Abra esta página pelo link enviado no seu e-mail de recuperação."}
           </CardDescription>
+          {linkError && !ready && (
+            <p role="alert" className="text-sm text-destructive mt-2">
+              {linkError}
+            </p>
+          )}
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
