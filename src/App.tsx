@@ -31,6 +31,7 @@ import PortalFamiliar from "./pages/PortalFamiliar";
 import InstrutorDashboard from "./pages/InstrutorDashboard";
 import { EstudantePortal } from "./pages/EstudantePortal";
 import Estudantes from "./pages/Estudantes";
+import Designacoes from "./pages/Designacoes";
 import ConnectHome from "./pages/connect/ConnectHome";
 import ConnectSolicitar from "./pages/connect/ConnectSolicitar";
 import ConnectPerfil from "./pages/connect/ConnectPerfil";
@@ -174,6 +175,14 @@ const App = () => (
                   element={
                     <ProtectedRoute allowedRoles={['instrutor']}>
                       <Estudantes />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/designacoes"
+                  element={
+                    <ProtectedRoute allowedRoles={['instrutor']}>
+                      <Designacoes />
                     </ProtectedRoute>
                   }
                 />
