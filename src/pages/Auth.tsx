@@ -34,6 +34,7 @@ const AuthPage: React.FC = () => {
   const [role, setRole] = useState<'instrutor' | 'estudante' | 'admin'>('instrutor');
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [loading, setLoading] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showSignUpPassword, setShowSignUpPassword] = useState(false);
   const [activeTab, setActiveTab] = useState("login");
@@ -174,20 +175,22 @@ const AuthPage: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (loading) return;
+    setLoginError(null);
     
     if (!email.trim()) {
       toast({
         title: t('forms.error'),
-        description: t('auth.validation.emailRequired'),
+        description: t('auth.emailRequired'),
         variant: "destructive"
       });
       return;
     }
 
-    if (!validateEmail(email)) {
+    if (!validateEmail(email.trim())) {
       toast({
         title: t('forms.error'),
-        description: t('auth.validation.emailInvalid'),
+        description: t('auth.emailInvalid'),
         variant: "destructive"
       });
       return;
@@ -196,7 +199,7 @@ const AuthPage: React.FC = () => {
     if (!password.trim()) {
       toast({
         title: t('forms.error'),
-        description: t('auth.validation.passwordRequired'),
+        description: t('auth.passwordRequired'),
         variant: "destructive"
       });
       return;
@@ -205,22 +208,28 @@ const AuthPage: React.FC = () => {
     setLoading(true);
     
     try {
-      const { error } = await signIn(email, password);
+      const { error } = await signIn(email.trim(), password);
       
       if (error) {
+        const message = error.code === 'invalid_credentials'
+          || error.message.toLowerCase().includes('invalid login credentials')
+          ? t('auth.invalidCredentials')
+          : error.message;
+        setLoginError(message);
         toast({
-          title: t('auth.error'),
-          description: error.message,
+          title: t('auth.loginError'),
+          description: message,
           variant: "destructive"
         });
       } else {
         toast({
-          title: t('auth.success'),
+          title: t('auth.loginSuccess'),
           description: t('auth.loginSuccess'),
         });
         navigate('/dashboard');
       }
     } catch (error) {
+      setLoginError(t('auth.validation.unexpectedError'));
       toast({
         title: t('forms.error'),
         description: 'Erro ao fazer login',
@@ -252,7 +261,7 @@ const AuthPage: React.FC = () => {
     if (!trimmedEmail) {
       toast({
         title: t('forms.error'),
-        description: t('auth.validation.emailRequired'),
+        description: t('auth.emailRequired'),
         variant: "destructive"
       });
       return;
@@ -261,7 +270,7 @@ const AuthPage: React.FC = () => {
     if (!validateEmail(trimmedEmail)) {
       toast({
         title: t('forms.error'),
-        description: t('auth.validation.emailInvalid'),
+        description: t('auth.emailInvalid'),
         variant: "destructive"
       });
       return;
@@ -317,7 +326,7 @@ const AuthPage: React.FC = () => {
         }
       } else {
         toast({
-          title: t('auth.success'),
+          title: t('auth.signupSuccess'),
           description: 'Conta criada com sucesso! Você pode fazer login agora.',
         });
         // Auto-redirect to dashboard if user is logged in
@@ -381,12 +390,12 @@ const AuthPage: React.FC = () => {
         <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="space-y-2 text-center pb-4">
             <CardTitle className="text-2xl font-bold">
-              {activeTab === "login" ? t('auth.login') : t('auth.signup')}
+              {activeTab === "login" ? t('auth.login') : t('auth.signUp')}
             </CardTitle>
             <CardDescription>
               {activeTab === "login" 
-                ? t('auth.loginDescription')
-                : t('auth.signupDescription')
+                ? t('auth.noAccount')
+                : t('auth.hasAccount')
               }
             </CardDescription>
           </CardHeader>
@@ -400,7 +409,7 @@ const AuthPage: React.FC = () => {
                 </TabsTrigger>
                 <TabsTrigger value="signup" className="flex items-center gap-2">
                   <UserPlus className="h-4 w-4" />
-                  {t('auth.signup')}
+                  {t('auth.signUp')}
                 </TabsTrigger>
               </TabsList>
               
@@ -414,7 +423,8 @@ const AuthPage: React.FC = () => {
                       type="email"
                       placeholder="seu-email@exemplo.com"
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={(e) => { setEmail(e.target.value); setLoginError(null); }}
+                      autoComplete="email"
                       required
                       className="transition-all duration-200"
                     />
@@ -428,7 +438,8 @@ const AuthPage: React.FC = () => {
                         type={showPassword ? "text" : "password"}
                         placeholder="••••••••"
                         value={password}
-                        onChange={(e) => setPassword(e.target.value)}
+                        onChange={(e) => { setPassword(e.target.value); setLoginError(null); }}
+                        autoComplete="current-password"
                         required
                         className="pr-10 transition-all duration-200"
                       />
@@ -438,6 +449,7 @@ const AuthPage: React.FC = () => {
                         size="sm"
                         className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                         onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
                       >
                         {showPassword ? (
                           <EyeOff className="h-4 w-4 text-gray-500" />
@@ -471,6 +483,9 @@ const AuthPage: React.FC = () => {
 
 
                   
+                  {loginError && (
+                    <p role="alert" className="text-sm text-destructive">{loginError}</p>
+                  )}
                   <Button 
                     type="submit" 
                     className="w-full" 
@@ -479,7 +494,7 @@ const AuthPage: React.FC = () => {
                     {loading ? (
                       <div className="flex items-center gap-2">
                         <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                        {t('auth.signingIn')}
+                        {t('auth.loggingIn')}
                       </div>
                     ) : (
                       <>
@@ -653,7 +668,7 @@ const AuthPage: React.FC = () => {
                     ) : (
                       <>
                         <UserPlus className="h-4 w-4 mr-2" />
-                        {t('auth.signup')}
+                        {t('auth.signUp')}
                       </>
                     )}
                   </Button>
