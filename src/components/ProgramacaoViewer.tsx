@@ -18,6 +18,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import type { EstudanteWithParent } from '@/types/estudantes';
+import { podeReceberParte } from '@/utils/s38Qualificacoes';
 import { periodoDaSemanaAtual } from '@/utils/programacaoDates';
 
 export interface Parte {
@@ -324,7 +325,7 @@ export function ProgramacaoViewer({
               {secao.partes.map((parte) => {
                 const designacao = designacaoPara(parte.id);
                 const estudante = designacao ? estudantes.find((e) => e.id === designacao.id_estudante) : null;
-                const disponiveis = estudantesDisponiveis(parte.id);
+                const disponiveis = estudantesDisponiveis(parte.id).filter((e) => podeReceberParte(e as any, parte.titulo, secao.secao));
 
                 return (
                   <div key={parte.id} className="border rounded-lg p-4">
