@@ -47,3 +47,28 @@ export function normalizarCargo(v: unknown): typeof CARGOS_VALIDOS[number] {
   const s = String(v ?? '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_');
   return (CARGOS_VALIDOS as readonly string[]).includes(s) ? (s as any) : 'estudante_novo';
 }
+
+const semAcento = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+/** Descobre qual qualificação S-38 uma parte da apostila exige (null = sem regra específica). */
+export function qualificacaoDaParte(titulo: string, secao = ''): QualKey | null {
+  const t = semAcento(titulo); const s = semAcento(secao);
+  if (t.includes('leitura da biblia')) return 'q_reading';
+  if (t.includes('joias')) return 'q_gems';
+  if (t.includes('iniciando')) return 'q_starting';
+  if (t.includes('cultivando')) return 'q_following';
+  if (t.includes('fazendo discipulos')) return 'q_making';
+  if (t.includes('explicando')) return 'q_explaining';
+  if (t.startsWith('discurso')) return 'q_talk';
+  if (s.includes('tesouros')) return 'q_treasures';
+  if (s.includes('vida crista')) return 'q_living';
+  return null;
+}
+
+/** Estudante pode receber a parte: ativo, qualificação marcada e compatível com gênero/cargo. */
+export function podeReceberParte(e: Record<string, any>, titulo: string, secao = ''): boolean {
+  if (e.ativo === false) return false;
+  const q = qualificacaoDaParte(titulo, secao);
+  if (!q) return true;
+  return !!e[q] && qualificacaoPermitida(q, e.genero, e.cargo);
+}
