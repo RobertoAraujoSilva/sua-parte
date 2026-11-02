@@ -22,3 +22,13 @@ describe('S-38 qualificações', () => {
     expect(normalizarCargo('xyz')).toBe('estudante_novo');
   });
 });
+
+import { qualificacaoDaParte, podeReceberParte } from './s38Qualificacoes';
+describe('aplicação nas designações', () => {
+  const irma = { ativo: true, genero: 'feminino', cargo: 'publicador_batizado', q_reading: true, q_starting: true };
+  it('irmã não recebe Leitura da Bíblia mesmo marcada', () => expect(podeReceberParte(irma, 'Leitura da Bíblia')).toBe(false));
+  it('irmã qualificada recebe Iniciando conversas', () => expect(podeReceberParte(irma, 'Iniciando conversas')).toBe(true));
+  it('inativo não recebe parte', () => expect(podeReceberParte({ ...irma, ativo: false }, 'Iniciando conversas')).toBe(false));
+  it('sem qualificação marcada não recebe', () => expect(podeReceberParte({ ...irma, q_following: false }, 'Cultivando o interesse')).toBe(false));
+  it('parte de Tesouros exige q_treasures', () => expect(qualificacaoDaParte('“Farei um novo pacto”', 'Tesouros da Palavra de Deus')).toBe('q_treasures'));
+});
