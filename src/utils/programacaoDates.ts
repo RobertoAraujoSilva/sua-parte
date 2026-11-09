@@ -22,6 +22,7 @@ export const inicioDaSemanaAtual = (date = new Date()): Date =>
 export function inicioDoPeriodo(periodo: string): Date | null {
   const texto = periodo.toLocaleLowerCase('pt-BR').replace(/\s+/g, ' ').trim();
   const inicio = texto.match(/^(\d{1,2})(?:\s*[-–—]\s*\d{1,2})?\s+de\s+([a-zç]+)(?:\s+de)?\s+(\d{4})$/i)
+    ?? texto.match(/^(\d{1,2})\s+de\s+([a-zç]+)\s+de\s+(\d{4})\s*[-–—]/i)
     ?? texto.match(/^(\d{1,2})\s+de\s+([a-zç]+)\s*[-–—].*?(\d{4})$/i);
 
   if (!inicio) return null;
