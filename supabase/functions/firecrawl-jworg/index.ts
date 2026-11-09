@@ -1,3 +1,5 @@
+import { workbookUrl, periodWithYear } from './workbook.ts';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
@@ -28,7 +30,7 @@ const JW_INDEX_URLS: Record<string, string> = {
 
 /** Scrape a URL via Firecrawl and return markdown */
 async function scrapeUrl(url: string, apiKey: string): Promise<string> {
-  const response = await fetch('https://api.firecrawl.dev/v1/scrape', {
+  const response = await fetch('https://api.firecrawl.dev/v2/scrape', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,
@@ -42,10 +44,10 @@ async function scrapeUrl(url: string, apiKey: string): Promise<string> {
     }),
   });
 
-  const data = await response.json();
   if (!response.ok) {
-    throw new Error(`Firecrawl error ${response.status}: ${JSON.stringify(data.error || data)}`);
+    throw new Error(`Firecrawl error ${response.status}: ${await response.text()}`);
   }
+  const data = await response.json();
   return data.data?.markdown || data.markdown || '';
 }
 
@@ -276,7 +278,6 @@ Deno.serve(async (req) => {
 
   try {
     const { language = 'pt' } = await req.json();
-    const indexUrl = JW_INDEX_URLS[language] || JW_INDEX_URLS.pt;
 
     const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
     if (!apiKey) {
@@ -286,25 +287,14 @@ Deno.serve(async (req) => {
       );
     }
 
-    // STEP 1: Scrape index page to find current workbook
-    console.log(`📚 Step 1: Scraping index page: ${indexUrl}`);
-    const indexMarkdown = await scrapeUrl(indexUrl, apiKey);
-    console.log(`📄 Index page: ${indexMarkdown.length} chars`);
-
-    if (!indexMarkdown) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'No content from index page' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
-    const workbookUrl = findCurrentWorkbookUrl(indexMarkdown, language);
-    let weekEntries = extractWeekUrls(indexMarkdown, language);
+    // Select the official workbook for the current date, not a future publication.
+    const selectedWorkbookUrl = workbookUrl(language);
+    let weekEntries: { weekTitle: string; url: string }[] = [];
     
     // If no weeks found on index, try scraping the first workbook link
-    if (weekEntries.length === 0 && workbookUrl) {
-      console.log(`📖 Step 1b: Scraping workbook page: ${workbookUrl}`);
-      const workbookMarkdown = await scrapeUrl(workbookUrl, apiKey);
+    if (weekEntries.length === 0) {
+      console.log(`📖 Step 1b: Scraping workbook page: ${selectedWorkbookUrl}`);
+      const workbookMarkdown = await scrapeUrl(selectedWorkbookUrl, apiKey);
       console.log(`📄 Workbook page: ${workbookMarkdown.length} chars`);
       weekEntries = extractWeekUrls(workbookMarkdown, language);
     }
@@ -317,17 +307,17 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`🗓️ Found ${weekEntries.length} weeks, scraping up to 4...`);
+    console.log(`🗓️ Found ${weekEntries.length} weeks, scraping the complete workbook...`);
 
     // STEP 2: Scrape individual week pages
-    const weeksToScrape = weekEntries.slice(0, 4);
+    const weeksToScrape = weekEntries;
     const weeks: ParsedWeek[] = [];
 
     for (const entry of weeksToScrape) {
       try {
         console.log(`  📄 Scraping: ${entry.weekTitle}`);
         const weekMarkdown = await scrapeUrl(entry.url, apiKey);
-        const parsed = parseWeekPage(weekMarkdown, entry.weekTitle, language);
+        const parsed = parseWeekPage(weekMarkdown, periodWithYear(entry.weekTitle, new Date().getUTCFullYear()), language);
         
         if (parsed.parts.length > 0) {
           weeks.push(parsed);
@@ -337,10 +327,12 @@ Deno.serve(async (req) => {
         }
       } catch (err) {
         console.error(`  ❌ Error scraping ${entry.weekTitle}:`, err);
+        throw err;
       }
     }
 
     console.log(`✅ Total: ${weeks.length} weeks parsed`);
+    if (weeks.length !== weekEntries.length) throw new Error('Importação incompleta: a programação anterior foi preservada.');
 
     return new Response(
       JSON.stringify({
@@ -349,6 +341,7 @@ Deno.serve(async (req) => {
         source: 'firecrawl',
         fetchedAt: new Date().toISOString(),
         totalWeeksAvailable: weekEntries.length,
+        workbookUrl: selectedWorkbookUrl,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

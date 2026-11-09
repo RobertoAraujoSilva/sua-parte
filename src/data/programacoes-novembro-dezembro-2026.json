@@ -1,0 +1,904 @@
+{
+  "fonte": "https://www.jw.org/pt/biblioteca/jw-apostila-do-mes/novembro-dezembro-2026-mwb/",
+  "extraidoEm": "2026-11-09T01:03:04.623Z",
+  "semanas": [
+    {
+      "periodo": "2-8 de novembro 2026",
+      "tema": "Jer. 50:24-40",
+      "cantico_abertura": "1",
+      "cantico_meio": "44",
+      "cantico_encerramento": "33",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "jw_0_1",
+              "titulo": "Ajude outros a se beneficiar da misericórdia de Jeová",
+              "duracao": 10,
+              "tipo": "treasures",
+              "referencias": [
+                "Jer. 50:14,",
+                "29,",
+                "31",
+                "it “Presunção” § 10"
+              ]
+            },
+            {
+              "id": "jw_1_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "gems",
+              "referencias": [
+                "Jer. 50:24",
+                "it “Armadilha” § 3"
+              ]
+            },
+            {
+              "id": "jw_2_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "tipo": "reading",
+              "referencias": [
+                "Jer. 50:24-40",
+                "th lição 11"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "jw_3_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "tipo": "starting",
+              "referencias": [
+                "apêndice A",
+                "lmd lição 1 ponto 5"
+              ]
+            },
+            {
+              "id": "jw_4_5",
+              "titulo": "Cultivando o interesse",
+              "duracao": 4,
+              "tipo": "following",
+              "referencias": [
+                "lmd lição 9 ponto 3"
+              ]
+            },
+            {
+              "id": "jw_5_6",
+              "titulo": "Fazendo discípulos",
+              "duracao": 5,
+              "tipo": "making",
+              "referencias": [
+                "lff lição 20 ponto 4",
+                "lmd lição 11 ponto 4"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "jw_6_7",
+              "titulo": "_Nunca se Esqueça do Que Jeová se Lembra_",
+              "duracao": 15,
+              "tipo": "discussion",
+              "referencias": [
+                "**Mostre o VÍDEO.**"
+              ]
+            },
+            {
+              "id": "jw_7_8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "tipo": "study",
+              "referencias": [
+                "wcg cap. 15"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "9-15 de novembro 2026",
+      "tema": "Jer. 52:6-20",
+      "cantico_abertura": "98",
+      "cantico_meio": "10",
+      "cantico_encerramento": "150",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "jw_0_1",
+              "titulo": "Não siga o exemplo de Zedequias",
+              "duracao": 10,
+              "tipo": "treasures",
+              "referencias": [
+                "Jer. 52:1, 2",
+                "jr 29"
+              ]
+            },
+            {
+              "id": "jw_1_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "gems",
+              "referencias": [
+                "Jer. 51:6, 7,",
+                "36",
+                "jr 165 § 21;",
+                "167 § 25"
+              ]
+            },
+            {
+              "id": "jw_2_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "tipo": "reading",
+              "referencias": [
+                "Jer. 52:6-20",
+                "th lição 5"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "jw_3_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "tipo": "starting",
+              "referencias": [
+                "lmd lição 3 ponto 3"
+              ]
+            },
+            {
+              "id": "jw_4_5",
+              "titulo": "Iniciando conversas",
+              "duracao": 4,
+              "tipo": "starting",
+              "referencias": [
+                "lmd lição 3 ponto 4"
+              ]
+            },
+            {
+              "id": "jw_5_6",
+              "titulo": "Discurso",
+              "duracao": 5,
+              "tipo": "talk",
+              "referencias": [
+                "lmd apêndice A ponto 21",
+                "th lição 7"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "jw_6_7",
+              "titulo": "Nossos donativos dão glória ao belo nome de Jeová",
+              "duracao": 15,
+              "tipo": "discussion",
+              "referencias": []
+            },
+            {
+              "id": "jw_7_8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "tipo": "study",
+              "referencias": [
+                "wcg cap. 16"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "16-22 de novembro 2026",
+      "tema": "Lam. 1:8-18",
+      "cantico_abertura": "28",
+      "cantico_meio": "90",
+      "cantico_encerramento": "75",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "jw_0_1",
+              "titulo": "Uma reação compreensível diante de uma terrível perda",
+              "duracao": 10,
+              "tipo": "treasures",
+              "referencias": [
+                "** [**Mostre o VÍDEO**"
+              ]
+            },
+            {
+              "id": "jw_1_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "gems",
+              "referencias": [
+                "Lam. 2:1",
+                "w07 1/6 9 § 1"
+              ]
+            },
+            {
+              "id": "jw_2_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "tipo": "reading",
+              "referencias": [
+                "Lam. 1:8-18",
+                "th lição 10"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "jw_3_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "tipo": "starting",
+              "referencias": [
+                "lmd lição 2 ponto 4"
+              ]
+            },
+            {
+              "id": "jw_4_5",
+              "titulo": "Cultivando o interesse",
+              "duracao": 4,
+              "tipo": "following",
+              "referencias": [
+                "lmd lição 9 ponto 4"
+              ]
+            },
+            {
+              "id": "jw_5_6",
+              "titulo": "O que você diria?",
+              "duracao": 5,
+              "tipo": "starting",
+              "referencias": [
+                "lmd lição 1 ponto 4b"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "jw_6_7",
+              "titulo": "Não se esqueça de nossos irmãos e irmãs inativos",
+              "duracao": 15,
+              "tipo": "discussion",
+              "referencias": [
+                "Gál. 6:10"
+              ]
+            },
+            {
+              "id": "jw_7_8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "tipo": "study",
+              "referencias": [
+                "wcg cap. 17"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "23-29 de novembro 2026",
+      "tema": "Lam. 3:19-42",
+      "cantico_abertura": "158",
+      "cantico_meio": "109",
+      "cantico_encerramento": "74",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "jw_0_1",
+              "titulo": "Não desista quando passar por provações",
+              "duracao": 10,
+              "tipo": "treasures",
+              "referencias": [
+                "Lam. 3:22",
+                "w24.01 30 § 16"
+              ]
+            },
+            {
+              "id": "jw_1_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "gems",
+              "referencias": [
+                "Lam. 3:27",
+                "w07 1/6 11 § 5"
+              ]
+            },
+            {
+              "id": "jw_2_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "tipo": "reading",
+              "referencias": [
+                "Lam. 3:19-42",
+                "th lição 12"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "jw_3_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "tipo": "starting",
+              "referencias": [
+                "apêndice A",
+                "lmd lição 5 ponto 4"
+              ]
+            },
+            {
+              "id": "jw_4_5",
+              "titulo": "Iniciando conversas",
+              "duracao": 4,
+              "tipo": "starting",
+              "referencias": [
+                "lmd lição 4 ponto 3"
+              ]
+            },
+            {
+              "id": "jw_5_6",
+              "titulo": "Discurso",
+              "duracao": 5,
+              "tipo": "talk",
+              "referencias": [
+                "w25.12 26-30",
+                "th lição 16"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "jw_6_7",
+              "titulo": "Ajude os cuidadores a não desanimar",
+              "duracao": 15,
+              "tipo": "discussion",
+              "referencias": []
+            },
+            {
+              "id": "jw_7_8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "tipo": "study",
+              "referencias": [
+                "wcg cap. 18"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "30 de novembro–6 de dezembro 2026",
+      "tema": "Eze. 2:1-10",
+      "cantico_abertura": "65",
+      "cantico_meio": "63",
+      "cantico_encerramento": "134",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "jw_0_1",
+              "titulo": "Acompanhe o passo do carro celestial de Jeová",
+              "duracao": 10,
+              "tipo": "treasures",
+              "referencias": [
+                "** [**Mostre o VÍDEO**"
+              ]
+            },
+            {
+              "id": "jw_1_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "gems",
+              "referencias": [
+                "Eze. 1:6,",
+                "10",
+                "rr 43 § 5;",
+                "45 § 13;",
+                "48 § 14"
+              ]
+            },
+            {
+              "id": "jw_2_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "tipo": "reading",
+              "referencias": [
+                "Eze. 2:1-10",
+                "th lição 2"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "jw_3_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "tipo": "starting",
+              "referencias": [
+                "lmd lição 3 ponto 3"
+              ]
+            },
+            {
+              "id": "jw_4_5",
+              "titulo": "Fazendo discípulos",
+              "duracao": 5,
+              "tipo": "making",
+              "referencias": [
+                "lmd lição 11 ponto 5"
+              ]
+            },
+            {
+              "id": "jw_5_6",
+              "titulo": "Discurso",
+              "duracao": 4,
+              "tipo": "talk",
+              "referencias": [
+                "lmd apêndice A ponto 22",
+                "th lição 6"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "jw_6_7",
+              "titulo": "Necessidades locais",
+              "duracao": 15,
+              "tipo": "study",
+              "referencias": []
+            },
+            {
+              "id": "jw_7_8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "tipo": "study",
+              "referencias": [
+                "wcg cap. 19"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "7-13 de dezembro 2026",
+      "tema": "Eze. 3:16-27",
+      "cantico_abertura": "71",
+      "cantico_meio": "161",
+      "cantico_encerramento": "7",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "jw_0_1",
+              "titulo": "Por que não temos medo de pregar?",
+              "duracao": 10,
+              "tipo": "treasures",
+              "referencias": [
+                "Eze. 3:8, 9",
+                "w22.11 5 §§ 10-11"
+              ]
+            },
+            {
+              "id": "jw_1_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "gems",
+              "referencias": [
+                "Eze. 4:12-15",
+                "w94 1/8 13 §§ 14-15"
+              ]
+            },
+            {
+              "id": "jw_2_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "tipo": "reading",
+              "referencias": [
+                "Eze. 3:16-27",
+                "th lição 2"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "jw_3_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "tipo": "starting",
+              "referencias": [
+                "apêndice A",
+                "lmd lição 1 ponto 5"
+              ]
+            },
+            {
+              "id": "jw_4_5",
+              "titulo": "Iniciando conversas",
+              "duracao": 4,
+              "tipo": "starting",
+              "referencias": [
+                "lmd lição 4 ponto 4"
+              ]
+            },
+            {
+              "id": "jw_5_6",
+              "titulo": "Fazendo discípulos",
+              "duracao": 5,
+              "tipo": "making",
+              "referencias": [
+                "lmd lição 12 ponto 4"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "jw_6_7",
+              "titulo": "Necessidades locais",
+              "duracao": 15,
+              "tipo": "study",
+              "referencias": []
+            },
+            {
+              "id": "jw_7_8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "tipo": "study",
+              "referencias": [
+                "wcg cap. 20"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "14-20 de dezembro 2026",
+      "tema": "Eze. 6:1-10",
+      "cantico_abertura": "49",
+      "cantico_meio": "153",
+      "cantico_encerramento": "133",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "jw_0_1",
+              "titulo": "Pessoas que adoram ídolos deixam Jeová muito triste",
+              "duracao": 10,
+              "tipo": "treasures",
+              "referencias": [
+                "Eze. 5:11"
+              ]
+            },
+            {
+              "id": "jw_1_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "gems",
+              "referencias": [
+                "Eze. 5:1, 2",
+                "rr 63 § 6"
+              ]
+            },
+            {
+              "id": "jw_2_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "tipo": "reading",
+              "referencias": [
+                "Eze. 6:1-10",
+                "th lição 5"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "jw_3_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "tipo": "starting",
+              "referencias": [
+                "lmd lição 4 ponto 5"
+              ]
+            },
+            {
+              "id": "jw_4_5",
+              "titulo": "Cultivando o interesse",
+              "duracao": 4,
+              "tipo": "following",
+              "referencias": [
+                "lmd lição 9 ponto 4"
+              ]
+            },
+            {
+              "id": "jw_5_6",
+              "titulo": "O que você diria?",
+              "duracao": 5,
+              "tipo": "starting",
+              "referencias": [
+                "lmd lição 1 ponto 4b",
+                "![Uma casa com um jardim muito bem cuidado."
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "jw_6_7",
+              "titulo": "Por que não participamos de cerimônias nacionalistas?",
+              "duracao": 15,
+              "tipo": "discussion",
+              "referencias": [
+                "Mat. 4:10"
+              ]
+            },
+            {
+              "id": "jw_7_8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "tipo": "study",
+              "referencias": [
+                "wcg cap. 21"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "21-27 de dezembro 2026",
+      "tema": "Eze. 8:7-18",
+      "cantico_abertura": "128",
+      "cantico_meio": "139",
+      "cantico_encerramento": "154",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "jw_0_1",
+              "titulo": "O dia de Jeová virá na hora certa",
+              "duracao": 10,
+              "tipo": "treasures",
+              "referencias": [
+                "Eze. 7:3",
+                "rr 66-68 §§ 13-15"
+              ]
+            },
+            {
+              "id": "jw_1_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "gems",
+              "referencias": [
+                "Eze. 7:19",
+                "w24.09 11 § 14"
+              ]
+            },
+            {
+              "id": "jw_2_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "tipo": "reading",
+              "referencias": [
+                "Eze. 8:7-18",
+                "th lição 2"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "jw_3_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "tipo": "starting",
+              "referencias": [
+                "lmd lição 1 ponto 4"
+              ]
+            },
+            {
+              "id": "jw_4_5",
+              "titulo": "Cultivando o interesse",
+              "duracao": 4,
+              "tipo": "following",
+              "referencias": [
+                "lmd lição 9 ponto 3"
+              ]
+            },
+            {
+              "id": "jw_5_6",
+              "titulo": "Fazendo discípulos",
+              "duracao": 5,
+              "tipo": "making",
+              "referencias": [
+                "lmd lição 12 ponto 3"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "jw_6_7",
+              "titulo": "Pense nas consequências",
+              "duracao": 15,
+              "tipo": "discussion",
+              "referencias": [
+                "Eze. 7:4"
+              ]
+            },
+            {
+              "id": "jw_7_8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "tipo": "study",
+              "referencias": [
+                "wcg introdução da seção 2,",
+                "linha do tempo",
+                "cap. 22"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "periodo": "28 de dezembro de 2026–3 de janeiro de 2027",
+      "tema": "Eze. 9:1-11",
+      "cantico_abertura": "119",
+      "cantico_meio": "60",
+      "cantico_encerramento": "135",
+      "programacao": [
+        {
+          "secao": "Tesouros da Palavra de Deus",
+          "partes": [
+            {
+              "id": "jw_0_1",
+              "titulo": "Ajude outros a sobreviver ao Armagedom",
+              "duracao": 10,
+              "tipo": "treasures",
+              "referencias": [
+                "Eze. 9:4",
+                "rr 173 § 6"
+              ]
+            },
+            {
+              "id": "jw_1_2",
+              "titulo": "Joias espirituais",
+              "duracao": 10,
+              "tipo": "gems",
+              "referencias": [
+                "Eze. 9:9",
+                "w07 15/3 9 § 2"
+              ]
+            },
+            {
+              "id": "jw_2_3",
+              "titulo": "Leitura da Bíblia",
+              "duracao": 4,
+              "tipo": "reading",
+              "referencias": [
+                "Eze. 9:1-11",
+                "th lição 5"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Faça Seu Melhor no Ministério",
+          "partes": [
+            {
+              "id": "jw_3_4",
+              "titulo": "Iniciando conversas",
+              "duracao": 3,
+              "tipo": "starting",
+              "referencias": [
+                "lmd lição 3 ponto 5"
+              ]
+            },
+            {
+              "id": "jw_4_5",
+              "titulo": "Cultivando o interesse",
+              "duracao": 4,
+              "tipo": "following",
+              "referencias": [
+                "lmd lição 9 ponto 5"
+              ]
+            },
+            {
+              "id": "jw_5_6",
+              "titulo": "Explicando suas crenças",
+              "duracao": 5,
+              "tipo": "explaining",
+              "referencias": [
+                "Teve um Projeto?",
+                "th lição 2"
+              ]
+            }
+          ]
+        },
+        {
+          "secao": "Nossa Vida Cristã",
+          "partes": [
+            {
+              "id": "jw_6_7",
+              "titulo": "Salve a si mesmo e a quem escuta você",
+              "duracao": 15,
+              "tipo": "discussion",
+              "referencias": [
+                "1 Tim. 4:16"
+              ]
+            },
+            {
+              "id": "jw_7_8",
+              "titulo": "Estudo bíblico de congregação",
+              "duracao": 30,
+              "tipo": "study",
+              "referencias": [
+                "wcg cap. 23"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

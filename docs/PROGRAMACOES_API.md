@@ -1,5 +1,12 @@
 API de Programações e Designações (versão inicial)
 
+## Atualização oficial no dashboard
+- O dashboard inclui as nove semanas da apostila novembro–dezembro de 2026 extraídas via Firecrawl do JW.org.
+- “Atualizar Programação” importa a apostila bimestral correspondente à data atual, não a publicação mais recente do índice. Em janeiro de 2027, passa a consultar janeiro–fevereiro de 2027.
+- A importação percorre todas as semanas; falhas preservam a programação anterior. Semanas importadas ficam neste navegador, e designações continuam salvas na conta.
+- Não há atualização agendada: o instrutor usa o botão quando desejar buscar o período seguinte. Conteúdo ainda não publicado não é inventado.
+- Testes de período: `bun run test -- src/utils/jwWorkbook.test.ts`.
+
 Rotas Admin
 - POST /api/programacoes: cria rascunho da semana, aceita payload com itens (sem nomes)
 - PUT /api/programacoes/:id/publicar: muda status para "publicada"
