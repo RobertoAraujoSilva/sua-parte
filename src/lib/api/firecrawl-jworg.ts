@@ -44,34 +44,13 @@ export async function fetchViaCheerio(language: 'pt' | 'en'): Promise<FirecrawlJ
  * Fetches JW.org content with fallback chain: Firecrawl → Cheerio → null.
  */
 export async function fetchJWorgContent(language: 'pt' | 'en'): Promise<FirecrawlJWorgResponse> {
-  // 1. Try Firecrawl
-  console.log('🔥 Trying Firecrawl...');
   try {
     const firecrawlResult = await fetchViaFirecrawl(language);
     if (firecrawlResult.success && firecrawlResult.weeks && firecrawlResult.weeks.length > 0) {
-      console.log(`✅ Firecrawl returned ${firecrawlResult.weeks.length} weeks`);
       return firecrawlResult;
     }
-    console.warn('⚠️ Firecrawl returned no weeks, falling back...');
+    return { success: false, error: firecrawlResult.error || 'Nenhuma semana extraída da apostila atual.' };
   } catch (err) {
-    console.warn('⚠️ Firecrawl failed:', err);
+    return { success: false, error: err instanceof Error ? err.message : 'Não foi possível importar a apostila atual pelo Firecrawl.' };
   }
-
-  // Never replace a failed official import with an unrelated/latest workbook.
-  return { success: false, error: 'Não foi possível importar a apostila do período atual pelo Firecrawl. Tente novamente mais tarde.' };
-  /* Legacy fallback is intentionally disabled for date-sensitive imports.
-  console.log('📡 Trying Cheerio fallback...');
-  try {
-    const cheerioResult = await fetchViaCheerio(language);
-    if (cheerioResult.success && cheerioResult.weeks && cheerioResult.weeks.length > 0) {
-      console.log(`✅ Cheerio returned ${cheerioResult.weeks.length} weeks`);
-      return { ...cheerioResult, source: 'cheerio' };
-    }
-    console.warn('⚠️ Cheerio returned no weeks');
-  } catch (err) {
-    console.warn('⚠️ Cheerio failed:', err);
-  }
-
-  // 3. No data available
-  return { success: false, error: 'All sources failed (Firecrawl + Cheerio)' }; */
 }

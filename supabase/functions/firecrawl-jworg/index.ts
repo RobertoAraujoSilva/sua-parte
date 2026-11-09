@@ -278,7 +278,6 @@ Deno.serve(async (req) => {
 
   try {
     const { language = 'pt' } = await req.json();
-    const indexUrl = JW_INDEX_URLS[language] || JW_INDEX_URLS.pt;
 
     const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
     if (!apiKey) {
@@ -289,17 +288,6 @@ Deno.serve(async (req) => {
     }
 
     // Select the official workbook for the current date, not a future publication.
-    console.log(`📚 Step 1: Scraping index page: ${indexUrl}`);
-    const indexMarkdown = await scrapeUrl(indexUrl, apiKey);
-    console.log(`📄 Index page: ${indexMarkdown.length} chars`);
-
-    if (!indexMarkdown) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'No content from index page' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
-    }
-
     const selectedWorkbookUrl = workbookUrl(language);
     let weekEntries: { weekTitle: string; url: string }[] = [];
     
@@ -339,10 +327,12 @@ Deno.serve(async (req) => {
         }
       } catch (err) {
         console.error(`  ❌ Error scraping ${entry.weekTitle}:`, err);
+        throw err;
       }
     }
 
     console.log(`✅ Total: ${weeks.length} weeks parsed`);
+    if (weeks.length !== weekEntries.length) throw new Error('Importação incompleta: a programação anterior foi preservada.');
 
     return new Response(
       JSON.stringify({
