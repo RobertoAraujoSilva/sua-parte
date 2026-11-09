@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { FunctionsHttpError } from '@supabase/supabase-js';
 
 export interface FirecrawlJWorgResponse {
   success: boolean;
@@ -17,7 +18,8 @@ export async function fetchViaFirecrawl(language: 'pt' | 'en'): Promise<Firecraw
   });
 
   if (error) {
-    return { success: false, error: error.message };
+    const details = error instanceof FunctionsHttpError ? await error.context.text() : error.message;
+    return { success: false, error: details };
   }
 
   return data as FirecrawlJWorgResponse;
@@ -55,7 +57,9 @@ export async function fetchJWorgContent(language: 'pt' | 'en'): Promise<Firecraw
     console.warn('⚠️ Firecrawl failed:', err);
   }
 
-  // 2. Fallback to Cheerio
+  // Never replace a failed official import with an unrelated/latest workbook.
+  return { success: false, error: 'Não foi possível importar a apostila do período atual pelo Firecrawl. Tente novamente mais tarde.' };
+  /* Legacy fallback is intentionally disabled for date-sensitive imports.
   console.log('📡 Trying Cheerio fallback...');
   try {
     const cheerioResult = await fetchViaCheerio(language);
@@ -69,5 +73,5 @@ export async function fetchJWorgContent(language: 'pt' | 'en'): Promise<Firecraw
   }
 
   // 3. No data available
-  return { success: false, error: 'All sources failed (Firecrawl + Cheerio)' };
+  return { success: false, error: 'All sources failed (Firecrawl + Cheerio)' }; */
 }

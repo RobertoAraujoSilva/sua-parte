@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { fetchJWorgContent } from '@/lib/api/firecrawl-jworg';
 import programacaoData from '@/data/programacoes-completas-2025.json';
 import programacao2026 from '@/data/programacoes-2026.json';
+import programacaoNovembro2026 from '@/data/programacoes-novembro-dezembro-2026.json';
 import { periodoDaSemanaAtual, inicioDoPeriodo } from '@/utils/programacaoDates';
 
 // Monday (ISO date) for each "periodo" string, derived from the period text itself.
@@ -27,6 +28,7 @@ const dataParaSemana = (periodo: string): string => {
 
 // Programação oficial importada do JW.org (2026) + histórico de 2025.
 const SEMANAS_INICIAIS: Semana[] = [
+  ...(programacaoNovembro2026 as { semanas: Semana[] }).semanas,
   ...(programacao2026 as { semanas: Semana[] }).semanas,
   ...(programacaoData as { semanas: Semana[] }).semanas,
 ];
@@ -70,7 +72,13 @@ export default function InstrutorDashboard() {
   const { user } = useAuth();
   const { estudantes, isLoading: estudantesLoading } = useEstudantes();
 
-  const [semanas, setSemanas] = useState<Semana[]>(SEMANAS_INICIAIS);
+  const [semanas, setSemanas] = useState<Semana[]>(() => {
+    try {
+      const cached: Semana[] = JSON.parse(localStorage.getItem('jworg:semanas:pt') || '[]');
+      if (!Array.isArray(cached)) return SEMANAS_INICIAIS;
+      return [...cached, ...SEMANAS_INICIAIS.filter(s => !cached.some(c => dataParaSemana(c.periodo) === dataParaSemana(s.periodo)))];
+    } catch { return SEMANAS_INICIAIS; }
+  });
   const [designacoes, setDesignacoes] = useState<DesignacaoLocal[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -113,13 +121,13 @@ export default function InstrutorDashboard() {
       // We store `parte_id` in the `cena` column and the week period is
       // recovered from `data_designacao` (Monday of the week).
       const semanaPorData = new Map<string, string>();
-      SEMANAS_INICIAIS.forEach((s) => semanaPorData.set(dataParaSemana(s.periodo), s.periodo));
+      semanas.forEach((s) => semanaPorData.set(dataParaSemana(s.periodo), s.periodo));
 
       const enriched = mapped.map((d, i) => {
-        const raw = data![i];
+        const raw = data?.[i];
         return {
           ...d,
-          semana_periodo: raw.data_designacao ? semanaPorData.get(raw.data_designacao) ?? '' : '',
+          semana_periodo: raw?.data_designacao ? semanaPorData.get(raw.data_designacao) ?? '' : '',
         };
       });
 
@@ -134,7 +142,7 @@ export default function InstrutorDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, toast]);
+  }, [user?.id, toast, semanas]);
 
   useEffect(() => {
     carregarDesignacoes();
@@ -216,7 +224,7 @@ export default function InstrutorDashboard() {
       // Map Firecrawl weeks to our Semana shape
       const semanasJWorg: Semana[] = result.weeks.map((w: any, idx: number) => ({
         periodo: w.dateRange || w.week || `Semana ${idx + 1}`,
-        tema: w.week || w.bibleReading || '',
+        tema: w.bibleReading || w.week || '',
         cantico_abertura: String(w.songs?.opening ?? ''),
         cantico_meio: String(w.songs?.middle ?? ''),
         cantico_encerramento: String(w.songs?.closing ?? ''),
@@ -224,9 +232,10 @@ export default function InstrutorDashboard() {
       }));
 
       // Merge: JW.org weeks first, fallback static weeks for the rest
-      const periodosJW = new Set(semanasJWorg.map((s) => s.periodo));
-      const estaticasFiltradas = SEMANAS_INICIAIS.filter((s) => !periodosJW.has(s.periodo));
-      setSemanas([...semanasJWorg, ...estaticasFiltradas]);
+      const datasJW = new Set(semanasJWorg.map(s => dataParaSemana(s.periodo)));
+      const merged = [...semanasJWorg, ...semanas.filter(s => !datasJW.has(dataParaSemana(s.periodo)))];
+      setSemanas(merged);
+      try { localStorage.setItem('jworg:semanas:pt', JSON.stringify(merged)); } catch {}
       const ts = new Date().toLocaleString('pt-BR');
       setLastSync(ts);
       try { localStorage.setItem('jworg:lastSync', ts); } catch {}
